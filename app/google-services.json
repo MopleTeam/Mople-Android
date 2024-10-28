@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "941661823205",
+    "project_id": "groupmanagement-5e5d8",
+    "storage_bucket": "groupmanagement-5e5d8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:941661823205:android:e0b9a04e5b1b214eb1340c",
+        "android_client_info": {
+          "package_name": "com.moim.moimtable"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDzII1qtDfAD0nHeIIlygNvSk01Y10vIs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
