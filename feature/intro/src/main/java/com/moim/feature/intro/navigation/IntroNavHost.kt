@@ -14,10 +14,12 @@ import com.moim.feature.intro.screen.signup.navigateToSignUp
 import com.moim.feature.intro.screen.signup.signUpNavigation
 import com.moim.feature.intro.screen.splash.splashNavigation
 
+
 @Composable
 fun IntroNavHost(
     modifier: Modifier = Modifier,
     startDestination: IntroRoute = IntroRoute.Splash,
+    navigateToMain: () -> Unit
 ) {
     val navController = rememberNavController()
 
@@ -30,16 +32,16 @@ fun IntroNavHost(
     ) {
         splashNavigation(
             navigateToSignIn = navController::navigateToSignIn,
-            navigateToMain = {}
+            navigateToMain = navigateToMain
         )
 
         signInNavigation(
             navigateToSignUp = navController::navigateToSignUp,
-            navigateToMain = {}
+            navigateToMain = navigateToMain
         )
 
         signUpNavigation(
-            navigateToMain = {}
+            navigateToMain = navigateToMain
         )
     }
 }

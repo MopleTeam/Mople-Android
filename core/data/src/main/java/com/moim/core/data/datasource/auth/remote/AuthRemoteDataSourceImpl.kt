@@ -2,6 +2,7 @@ package com.moim.core.data.datasource.auth.remote
 
 import com.moim.core.data.model.TokenResponse
 import com.moim.core.data.service.AuthApi
+import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.converterException
 import javax.inject.Inject
 
@@ -12,7 +13,7 @@ internal class AuthRemoteDataSourceImpl @Inject constructor(
     override suspend fun signUp(socialType: String, token: String): TokenResponse {
         return try {
             authApi.signUp(
-                params = mapOf(
+                params = jsonOf(
                     KEY_SOCIAL_PROVIDER to socialType,
                     KEY_PROVIDER_TOKEN to token,
                     KEY_DEVICE_TYPE to "ANDROID"
@@ -26,19 +27,11 @@ internal class AuthRemoteDataSourceImpl @Inject constructor(
     override suspend fun signIn(socialType: String, token: String): TokenResponse {
         return try {
             authApi.signIn(
-                params = mapOf(
+                params = jsonOf(
                     KEY_SOCIAL_PROVIDER to socialType,
                     KEY_PROVIDER_TOKEN to token,
                 )
             )
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
-    }
-
-    override suspend fun getRefreshToken(token: String): TokenResponse {
-        return try {
-            authApi.getRefreshToken(token)
         } catch (e: Exception) {
             throw converterException(e)
         }

@@ -30,7 +30,7 @@ import com.moim.core.route.IntroRoute
 fun SplashScreen(
     viewModel: SplashViewModel = hiltViewModel(),
     navigateToSignIn: (NavOptions) -> Unit,
-    navigateToMain: (NavOptions) -> Unit,
+    navigateToMain: () -> Unit,
 ) {
     val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val activity = LocalContext.current as Activity
@@ -41,7 +41,7 @@ fun SplashScreen(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is SplashEvent.NavigateToSignIn -> navigateToSignIn(options)
-            is SplashEvent.NavigateToMain -> navigateToMain(options)
+            is SplashEvent.NavigateToMain -> navigateToMain()
         }
     }
 
@@ -79,6 +79,7 @@ private fun Splash(
             title = stringResource(R.string.common_error),
             description = stringResource(R.string.common_error_description),
             isNegative = false,
+            cancelable = false,
             onClickPositive = onClickFinish
         )
     }

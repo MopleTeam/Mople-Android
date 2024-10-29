@@ -1,73 +1,46 @@
 package com.moim.core.data.di
 
 import com.moim.core.data.BuildConfig
-import com.moim.core.data.di.qualifiers.MoimApiOkHttp
+import com.moim.core.data.datastore.PreferenceStorage
+import com.moim.core.data.di.qualifiers.MoimTokenApiOkHttp
 import com.moim.core.data.util.TokenAuthenticator
 import com.moim.core.data.util.TokenInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
 import okhttp3.Call
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import com.moim.core.data.service.TokenApi
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 
 @InstallIn(SingletonComponent::class)
 @Module
-internal object ServiceModule {
+internal object TokenServiceModule {
 
-    @Singleton
-    @Provides
-    fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor()
-            .apply {
-                level = if (BuildConfig.DEBUG) {
-                    HttpLoggingInterceptor.Level.BODY
-                } else {
-                    HttpLoggingInterceptor.Level.NONE
-                }
-            }
-    }
-
-    @Provides
-    fun provideOkHttpClient(
-        httpLoggingInterceptor: HttpLoggingInterceptor,
-    ): OkHttpClient {
-        return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor(httpLoggingInterceptor)
-            .build()
-    }
-
-    @MoimApiOkHttp
+    @MoimTokenApiOkHttp
     @Singleton
     @Provides
     fun provideApiOkHttpCallFactory(
         httpLoggingInterceptor: HttpLoggingInterceptor,
-        tokenInterceptor: TokenInterceptor,
-        tokenAuthenticator: TokenAuthenticator
     ): Call.Factory = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.MINUTES)
         .readTimeout(10, TimeUnit.MINUTES)
         .writeTimeout(10, TimeUnit.MINUTES)
         .addInterceptor(httpLoggingInterceptor)
-        .addInterceptor(tokenInterceptor)
-        .authenticator(tokenAuthenticator)
         .build()
 
     @Singleton
     @Provides
-    fun provideRetrofit(
-        @MoimApiOkHttp okHttpCallFactory: Call.Factory
-    ): Retrofit {
+    fun provideTokenApi(
+        @MoimTokenApiOkHttp okHttpCallFactory: Call.Factory
+    ): TokenApi {
         val format = Json {
             isLenient = true
             coerceInputValues = true
@@ -81,5 +54,19 @@ internal object ServiceModule {
             .addConverterFactory(format.asConverterFactory(contentType))
             .baseUrl(BuildConfig.API_URL)
             .build()
+            .create(TokenApi::class.java)
     }
+
+    @Singleton
+    @Provides
+    fun provideTokenInterceptor(
+        preferenceStorage: PreferenceStorage
+    ): TokenInterceptor = TokenInterceptor(preferenceStorage)
+
+    @Singleton
+    @Provides
+    fun provideTokenAuthenticator(
+        preferenceStorage: PreferenceStorage,
+        tokenApi: TokenApi
+    ): TokenAuthenticator = TokenAuthenticator(preferenceStorage, tokenApi)
 }

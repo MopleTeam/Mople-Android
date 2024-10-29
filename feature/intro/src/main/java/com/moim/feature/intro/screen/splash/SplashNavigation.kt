@@ -8,7 +8,7 @@ import com.moim.core.route.IntroRoute
 
 fun NavGraphBuilder.splashNavigation(
     navigateToSignIn: (NavOptions) -> Unit,
-    navigateToMain: (NavOptions) -> Unit,
+    navigateToMain: () -> Unit,
 ) {
     composable<IntroRoute.Splash> {
         SplashScreen(

@@ -8,7 +8,7 @@ import com.moim.core.route.IntroRoute
 
 fun NavGraphBuilder.signInNavigation(
     navigateToSignUp: (NavOptions) -> Unit,
-    navigateToMain: (NavOptions) -> Unit,
+    navigateToMain: () -> Unit,
 ) {
     composable<IntroRoute.SignIn> {
         SignInScreen(

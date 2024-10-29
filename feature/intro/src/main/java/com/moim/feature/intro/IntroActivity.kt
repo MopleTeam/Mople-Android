@@ -1,5 +1,7 @@
 package com.moim.feature.intro
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,8 +18,18 @@ class IntroActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MoimTheme {
-                IntroNavHost()
+                IntroNavHost {
+                    navigateToMain()
+                }
             }
         }
     }
+}
+
+private fun Activity.navigateToMain() {
+    val mainActivityName = "com.moim.feature.main.MainActivity"
+    val intent = Intent(this, Class.forName(mainActivityName))
+
+    finish()
+    startActivity(intent)
 }

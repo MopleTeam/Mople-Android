@@ -1,18 +1,15 @@
 package com.moim.core.data.service
 
 import com.moim.core.data.model.TokenResponse
+import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.POST
-import retrofit2.http.Query
 
 internal interface AuthApi {
 
     @POST("auth/sign-in")
-    suspend fun signIn(@Body params: Any): TokenResponse
+    suspend fun signIn(@Body params: JsonObject): TokenResponse
 
     @POST("auth/sign-up")
-    suspend fun signUp(@Body params: Any): TokenResponse
-
-    @POST("auth/recreate")
-    suspend fun getRefreshToken(@Query("refreshToken") refreshToken: String): TokenResponse
+    suspend fun signUp(@Body params: JsonObject): TokenResponse
 }

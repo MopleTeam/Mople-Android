@@ -9,7 +9,6 @@ android {
 
 dependencies {
     implementation(projects.core.designsystem)
-    implementation(projects.core.model)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.foundation)

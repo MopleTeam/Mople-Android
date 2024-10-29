@@ -4,6 +4,10 @@ import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.auth.AuthRepositoryImpl
 import com.moim.core.data.datasource.auth.remote.AuthRemoteDataSource
 import com.moim.core.data.datasource.auth.remote.AuthRemoteDataSourceImpl
+import com.moim.core.data.datasource.user.UserRepository
+import com.moim.core.data.datasource.user.UserRepositoryImpl
+import com.moim.core.data.datasource.user.remote.UserRemoteDataSource
+import com.moim.core.data.datasource.user.remote.UserRemoteDataSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,7 +18,7 @@ import javax.inject.Singleton
 @Module
 internal abstract class DataModule {
 
-    //================================ Auth ============================================
+    //================================ Auth ============================================//
     @Singleton
     @Binds
     abstract fun bindAuthRepository(authRepositoryImpl: AuthRepositoryImpl): AuthRepository
@@ -23,4 +27,12 @@ internal abstract class DataModule {
     @Binds
     abstract fun bindAuthRemoteDataSource(authRemoteDataSourceImpl: AuthRemoteDataSourceImpl): AuthRemoteDataSource
 
+    //================================ User ============================================//
+    @Singleton
+    @Binds
+    abstract fun bindUserRepository(userRepositoryImpl: UserRepositoryImpl): UserRepository
+
+    @Singleton
+    @Binds
+    abstract fun bindUserRemoteDataSource(userRemoteDataSourceImpl: UserRemoteDataSourceImpl): UserRemoteDataSource
 }

@@ -15,3 +15,11 @@ fun TokenResponse.asItem(): Token {
         grantType = grantType
     )
 }
+
+fun Token.asInternalModel(): TokenResponse {
+    return TokenResponse(
+        accessToken = accessToken,
+        refreshToken = refreshToken,
+        grantType = grantType
+    )
+}

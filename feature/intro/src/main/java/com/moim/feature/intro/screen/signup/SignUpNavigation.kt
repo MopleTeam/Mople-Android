@@ -7,7 +7,7 @@ import androidx.navigation.compose.composable
 import com.moim.core.route.IntroRoute
 
 fun NavGraphBuilder.signUpNavigation(
-    navigateToMain: (NavOptions) -> Unit
+    navigateToMain: () -> Unit
 ) {
     composable<IntroRoute.SignUp> {
         SignUpScreen(navigateToMain = navigateToMain)

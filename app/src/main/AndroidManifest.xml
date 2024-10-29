@@ -16,5 +16,27 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MoimTable"
         android:usesCleartextTraffic="true"
-        tools:targetApi="31" />
+        tools:targetApi="31">
+
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+
+            <meta-data
+                android:name="com.moim.moimtable.initialize.TimberInitializer"
+                android:value="androidx.startup" />
+
+            <meta-data
+                android:name="com.moim.moimtable.initialize.FirebaseInitializer"
+                android:value="androidx.startup" />
+
+            <meta-data
+                android:name="com.moim.feature.intro.initialize.KakaoInitializer"
+                android:value="androidx.startup" />
+        </provider>
+
+    </application>
 </manifest>

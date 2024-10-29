@@ -113,14 +113,14 @@ internal fun MoimOutlinedTextField(
                         colors = colors,
                         contentPadding = paddingValues,
                         container = {
-                            OutlinedTextFieldDefaults.ContainerBox(
-                                enabled,
-                                isError,
-                                interactionSource,
-                                colors,
-                                shape,
-                                focusedBorderThickness,
-                                unfocusedBorderThickness
+                            OutlinedTextFieldDefaults.Container(
+                                enabled = enabled,
+                                isError = isError,
+                                interactionSource = interactionSource,
+                                colors = colors,
+                                shape = shape,
+                                focusedBorderThickness = focusedBorderThickness,
+                                unfocusedBorderThickness = unfocusedBorderThickness
                             )
                         },
                     )

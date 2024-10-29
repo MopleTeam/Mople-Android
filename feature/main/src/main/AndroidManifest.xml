@@ -5,6 +5,7 @@
         <activity
             android:name="com.moim.feature.main.MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.MoimTable" />
     </application>
 </manifest>

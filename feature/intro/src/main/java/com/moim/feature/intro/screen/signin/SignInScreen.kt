@@ -8,7 +8,7 @@ import androidx.navigation.NavOptions
 fun SignInScreen(
     signInViewModel: SignInViewModel = hiltViewModel(),
     navigateToSignUp: (NavOptions) -> Unit,
-    navigateToMain: (NavOptions) -> Unit,
+    navigateToMain: () -> Unit,
 ) {
 
 }
