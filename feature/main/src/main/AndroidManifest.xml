@@ -6,6 +6,7 @@
             android:name="com.moim.feature.main.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.MoimTable" />
+            android:theme="@style/Theme.MoimTable"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 </manifest>

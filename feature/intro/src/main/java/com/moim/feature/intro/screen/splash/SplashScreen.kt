@@ -27,7 +27,7 @@ import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.core.route.IntroRoute
 
 @Composable
-fun SplashScreen(
+fun SplashRoute(
     viewModel: SplashViewModel = hiltViewModel(),
     navigateToSignIn: (NavOptions) -> Unit,
     navigateToMain: () -> Unit,
@@ -40,15 +40,15 @@ fun SplashScreen(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is SplashEvent.NavigateToSignIn -> navigateToSignIn(options)
-            is SplashEvent.NavigateToMain -> navigateToMain()
+            is SplashUiEvent.NavigateToSignIn -> navigateToSignIn(options)
+            is SplashUiEvent.NavigateToMain -> navigateToMain()
         }
     }
 
     BackHandler {}
 
     when (val uiState = splashUiState) {
-        is SplashState.Splash -> Splash(
+        is SplashUiState.Splash -> SplashScreen(
             uiState = uiState,
             onClickFinish = activity::finish
         )
@@ -56,8 +56,8 @@ fun SplashScreen(
 }
 
 @Composable
-private fun Splash(
-    uiState: SplashState.Splash,
+private fun SplashScreen(
+    uiState: SplashUiState.Splash,
     onClickFinish: () -> Unit
 ) {
     Box(
@@ -69,7 +69,7 @@ private fun Splash(
         Text(
             modifier = Modifier.align(Alignment.Center),
             text = stringResource(R.string.app_name),
-            style = MoimTheme.typography.bold24.copy(fontWeight = FontWeight.W700),
+            style = MoimTheme.typography.heading.bold,
             color = color_3366FF
         )
     }
@@ -87,9 +87,9 @@ private fun Splash(
 
 @Preview
 @Composable
-private fun SplashPreview() {
-    Splash(
-        uiState = SplashState.Splash(isShowErrorDialog = true),
+private fun SplashScreenPreview() {
+    SplashScreen(
+        uiState = SplashUiState.Splash(isShowErrorDialog = true),
         onClickFinish = {}
     )
 }

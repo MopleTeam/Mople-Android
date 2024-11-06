@@ -4,7 +4,7 @@ import com.moim.core.data.model.TokenResponse
 
 internal interface AuthRemoteDataSource {
 
-    suspend fun signUp(socialType: String, token: String) : TokenResponse
+    suspend fun signUp(socialType: String, token: String, email: String, nickname: String, profileUrl: String? = null): TokenResponse
 
-    suspend fun signIn(socialType: String, token: String): TokenResponse
+    suspend fun signIn(socialType: String, token: String, email: String): TokenResponse
 }

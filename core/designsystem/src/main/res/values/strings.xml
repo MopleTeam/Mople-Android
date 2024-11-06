@@ -16,13 +16,36 @@
 
     <!-- signIn -->
     <string name="sign_in_kakao">카카오로 시작하기</string>
+    <string name="sign_in_kakao_fail">카카오 로그인에 실패했습니다.</string>
 
     <!-- signUp -->
     <string name="sign_up_title">자신을 나타낼\n프로필을 설정해주세요</string>
+    <string name="sign_up_profile_edit">프로필 편집</string>
+    <string name="sign_up_profile_default">기본 프로필로 변경</string>
+    <string name="sign_up_profile_photo">앨범에서 사진 선택</string>
     <string name="sign_up_nickname">닉네임</string>
     <string name="sign_up_nickname_hint">닉네임을 입력해주세요</string>
     <string name="sign_up_duplicate_check">중복확인</string>
     <string name="sign_up_duplicate_error">이미 사용중인 닉네임 입니다.</string>
-    <string name="sign_up_duplicate_pass">사용 가능한 닉네입니다.</string>
+    <string name="sign_up_duplicate_pass">사용 가능한 닉네임입니다.</string>
+    <string name="sign_up_regex_error">공백 또는 특수문자는 사용할 수 없습니다.</string>
     <string name="sign_up_start">모임테이블 시작하기</string>
+
+    <!-- Main -->
+    <string name="main_tab_home">홈</string>
+    <string name="main_tab_group">모임</string>
+    <string name="main_tab_calendar">일정관리</string>
+    <string name="main_tab_profile">프로필</string>
+
+    <!-- Home -->
+    <string name="home_new_group_created">새로운\n모임 만들기</string>
+    <string name="home_new_meeting_created">새로운\n일정 만들기</string>
+    <string name="home_meeting_more">더보기</string>
+
+    <!-- Unit -->
+    <string name="unit_participants_count">%d명 참여</string>
+    <string name="unit_weather">%s°C</string>
+
+    <!-- Regex -->
+    <string name="regex_date_full">yyyy.MM.dd E hh시 mm분</string>
 </resources>

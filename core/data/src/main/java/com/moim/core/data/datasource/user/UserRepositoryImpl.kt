@@ -15,4 +15,12 @@ internal class UserRepositoryImpl @Inject constructor(
     override fun getUser(): Flow<UserResponse> = flow {
         emit(remoteDataSource.getUser().also { preferenceStorage.saveUser(it) })
     }
+
+    override fun checkedNickname(nickname: String) = flow {
+        emit(remoteDataSource.checkedNickname(nickname))
+    }
+
+    override suspend fun clearMoimStorage() {
+        preferenceStorage.clearMoimStorage()
+    }
 }

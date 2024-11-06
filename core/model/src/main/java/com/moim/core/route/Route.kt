@@ -2,7 +2,10 @@ package com.moim.core.route
 
 import kotlinx.serialization.Serializable
 
-sealed interface IntroRoute {
+
+sealed interface Route
+
+sealed interface IntroRoute : Route {
 
     @Serializable
     data object Splash : IntroRoute
@@ -11,9 +14,29 @@ sealed interface IntroRoute {
     data object SignIn : IntroRoute
 
     @Serializable
-    data object SignUp : IntroRoute
+    data class SignUp(
+        val email: String,
+        val token: String
+    ) : IntroRoute
 }
 
-sealed interface MainRoute {
+sealed interface MainRoute: Route {
 
+    @Serializable
+    data object Home : MainRoute
+
+    @Serializable
+    data object Meeting : MainRoute
+
+    @Serializable
+    data object Calendar : MainRoute
+
+    @Serializable
+    data object Profile : MainRoute
+}
+
+sealed interface DetailRoute: Route {
+
+    @Serializable
+    data object MeetingDetail : DetailRoute
 }

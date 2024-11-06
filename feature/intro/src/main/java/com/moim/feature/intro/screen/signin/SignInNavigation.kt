@@ -7,11 +7,11 @@ import androidx.navigation.compose.composable
 import com.moim.core.route.IntroRoute
 
 fun NavGraphBuilder.signInNavigation(
-    navigateToSignUp: (NavOptions) -> Unit,
+    navigateToSignUp: (String, String, NavOptions) -> Unit,
     navigateToMain: () -> Unit,
 ) {
     composable<IntroRoute.SignIn> {
-        SignInScreen(
+        SignInRoute(
             navigateToSignUp = navigateToSignUp,
             navigateToMain = navigateToMain
         )

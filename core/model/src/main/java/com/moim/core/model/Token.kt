@@ -5,14 +5,12 @@ import com.moim.core.data.model.TokenResponse
 data class Token(
     val accessToken: String,
     val refreshToken: String,
-    val grantType: String,
 )
 
 fun TokenResponse.asItem(): Token {
     return Token(
         accessToken = accessToken,
         refreshToken = refreshToken,
-        grantType = grantType
     )
 }
 
@@ -20,6 +18,5 @@ fun Token.asInternalModel(): TokenResponse {
     return TokenResponse(
         accessToken = accessToken,
         refreshToken = refreshToken,
-        grantType = grantType
     )
 }

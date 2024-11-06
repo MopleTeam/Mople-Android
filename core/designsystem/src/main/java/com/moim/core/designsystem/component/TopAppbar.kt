@@ -39,7 +39,7 @@ fun MoimTopAppbar(
     thickness: Dp = 0.5.dp,
     dividerColor: Color = color_7A7A7A,
     title: String = "",
-    titleStyle: TextStyle = MoimTheme.typography.bold18,
+    titleStyle: TextStyle = MoimTheme.typography.title02.bold,
     titleColor: Color = color_222222,
     backgroundColor: Color = color_FFFFFF,
     onClickNavigate: () -> Unit = {},

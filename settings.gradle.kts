@@ -34,8 +34,11 @@ include(":app")
 include(":core:designsystem")
 include(":core:model")
 include(":core:data")
+include(":core:common")
 
 include(":feature:intro")
 include(":feature:main")
-
-include(":core:common")
+include(":feature:home")
+include(":feature:meeting")
+include(":feature:profile")
+include(":feature:calendar")

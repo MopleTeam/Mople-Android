@@ -1,6 +1,6 @@
 [versions]
 # Project
-androidGradlePlugin = "8.7.1"
+androidGradlePlugin = "8.7.2"
 playservicesGradlePlugin = "4.4.2"
 firebaseCrashlyticsGradlePlugin = "3.0.2"
 
@@ -119,7 +119,6 @@ kotlin-compose-compiler-extension = { group = "org.jetbrains.kotlin", name = "co
 
 # Firebase
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" } # For platform
-firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
 
 # Coil

@@ -5,4 +5,6 @@ import com.moim.core.data.model.UserResponse
 internal interface UserRemoteDataSource {
 
     suspend fun getUser() : UserResponse
+
+    suspend fun checkedNickname(nickname:String) : Boolean
 }

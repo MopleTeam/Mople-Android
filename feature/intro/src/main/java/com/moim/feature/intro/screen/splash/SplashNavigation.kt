@@ -11,7 +11,7 @@ fun NavGraphBuilder.splashNavigation(
     navigateToMain: () -> Unit,
 ) {
     composable<IntroRoute.Splash> {
-        SplashScreen(
+        SplashRoute(
             navigateToSignIn = navigateToSignIn,
             navigateToMain = navigateToMain
         )

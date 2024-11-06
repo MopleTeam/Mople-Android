@@ -49,7 +49,7 @@ fun MoimTextField(
     modifier: Modifier = Modifier.fillMaxWidth(),
     hintText: String,
     text: String = "",
-    textStyle: TextStyle = MoimTheme.typography.regular14,
+    textStyle: TextStyle = MoimTheme.typography.body01.regular,
     textMaxLength: Int = 100,
     textFieldColors: TextFieldColors = moimTextFieldColors(),
     onTextChanged: (String) -> Unit = {},

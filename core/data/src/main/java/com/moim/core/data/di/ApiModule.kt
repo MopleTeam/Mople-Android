@@ -1,6 +1,10 @@
 package com.moim.core.data.di
 
+import com.moim.core.data.di.qualifiers.MoimApi
+import com.moim.core.data.di.qualifiers.NormalApi
 import com.moim.core.data.service.AuthApi
+import com.moim.core.data.service.ImageApi
+import com.moim.core.data.service.MeetingApi
 import com.moim.core.data.service.UserApi
 import dagger.Module
 import dagger.Provides
@@ -16,12 +20,24 @@ internal object ApiModule {
     @Provides
     @Singleton
     fun provideAuthApi(
-        retrofit: Retrofit
+        @NormalApi retrofit: Retrofit
     ): AuthApi = retrofit.create(AuthApi::class.java)
 
     @Provides
     @Singleton
     fun provideUserApi(
-        retrofit: Retrofit
+        @MoimApi retrofit: Retrofit
     ): UserApi = retrofit.create(UserApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMeetingApi(
+        @MoimApi retrofit: Retrofit
+    ): MeetingApi = retrofit.create(MeetingApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideImageApi(
+        @MoimApi retrofit: Retrofit
+    ): ImageApi = retrofit.create(ImageApi::class.java)
 }

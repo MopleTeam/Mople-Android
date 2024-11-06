@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_3366FF
+import com.moim.core.designsystem.theme.color_888888
 
 
 internal val OutlinedTextFieldTopPadding = 8.dp
@@ -64,7 +65,7 @@ internal fun MoimOutlinedTextField(
 ) {
     val textSelectionColor = TextSelectionColors(
         handleColor = color_3366FF,
-        backgroundColor = color_3366FF
+        backgroundColor = color_888888
     )
 
     CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColor) {
@@ -131,8 +132,8 @@ internal fun MoimOutlinedTextField(
                 Text(
                     modifier = Modifier.padding(start = 4.dp, top = 4.dp),
                     text = supportingText,
-                    style = MoimTheme.typography.regular14,
-                    color = if (isError) colors.errorSupportingTextColor else colors.focusedTextColor
+                    style = MoimTheme.typography.body01.regular,
+                    color = if (isError) colors.errorSupportingTextColor else colors.focusedSupportingTextColor
                 )
             }
         }

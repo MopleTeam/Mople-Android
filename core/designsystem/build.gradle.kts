@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.ui.util)
     implementation(libs.lottie.compose)
+    implementation(libs.bundles.coil)
     implementation(libs.timber)
 
     api(libs.androidx.compose.ui.tooling)

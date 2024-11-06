@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.moim.core.common.consts.MAIN_ACTIVITY_NAME
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.intro.navigation.IntroNavHost
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,8 +28,7 @@ class IntroActivity : ComponentActivity() {
 }
 
 private fun Activity.navigateToMain() {
-    val mainActivityName = "com.moim.feature.main.MainActivity"
-    val intent = Intent(this, Class.forName(mainActivityName))
+    val intent = Intent(this, Class.forName(MAIN_ACTIVITY_NAME))
 
     finish()
     startActivity(intent)

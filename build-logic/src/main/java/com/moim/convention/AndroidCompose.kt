@@ -14,7 +14,7 @@ internal fun Project.configureAndroidCompose(
     commonExtension.apply {
         configure<ComposeCompilerGradlePluginExtension> {
             includeSourceInformation.set(true)
-            // stabilityConfigurationFile.set(project.rootDir.resolve("compose-stability.conf"))
+            stabilityConfigurationFile.set(project.rootDir.resolve("compose-stability.conf"))
         }
 
         dependencies {

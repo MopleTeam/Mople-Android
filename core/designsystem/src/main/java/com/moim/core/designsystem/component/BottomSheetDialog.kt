@@ -1,7 +1,6 @@
 package com.moim.core.designsystem.component
 
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,7 +29,7 @@ fun MoimBottomSheetDialog(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     ModalBottomSheet(
-        modifier = modifier.navigationBarsPadding(),
+        modifier = modifier,
         sheetState = sheetState,
         shape = shapes.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
         containerColor = color_FFFFFF,

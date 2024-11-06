@@ -23,6 +23,10 @@ open class BaseViewModel : ViewModel() {
         emitAll(refreshSignal)
     }
 
+    protected fun onRefresh() = viewModelScope.launch {
+        refreshSignal.emit(Unit)
+    }
+
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
@@ -31,10 +35,6 @@ open class BaseViewModel : ViewModel() {
 
     private val _uiEvent = MutableSharedFlow<UiEvent>()
     val uiEvent: SharedFlow<UiEvent> = _uiEvent
-
-    protected fun onRefresh() = viewModelScope.launch {
-        refreshSignal.emit(Unit)
-    }
 
     protected fun setLoading(isLoading: Boolean) {
         _loading.value = isLoading

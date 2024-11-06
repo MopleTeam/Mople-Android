@@ -25,7 +25,7 @@ internal class TokenAuthenticator @Inject constructor(
                     .also { preferenceStorage.saveUserToken(it) }
 
                 response.request.newBuilder()
-                    .header("Authorization", token.accessToken)
+                    .header("Authorization", token.accessToken.convertToToken())
                     .build()
             } catch (e: Exception) {
                 Timber.e("[TokenAuthenticator Exception]:${e.message}")
@@ -49,10 +49,15 @@ internal class TokenInterceptor @Inject constructor(
             }
         }
 
-        val request: Request = chain.request().newBuilder()
-            .addHeader("Authorization", accessToken)
+        val request: Request = chain.request()
+            .newBuilder()
+            .apply { if (accessToken.isNotEmpty()) addHeader("Authorization", accessToken.convertToToken()) }
             .build()
 
         return chain.proceed(request)
     }
+}
+
+internal fun String?.convertToToken(): String {
+    return "Bearer $this"
 }

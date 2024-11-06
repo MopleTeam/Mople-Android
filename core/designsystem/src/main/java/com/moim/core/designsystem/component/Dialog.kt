@@ -72,7 +72,7 @@ fun MoimAlertDialog(
                 ) {
                     Text(
                         text = title,
-                        style = MoimTheme.typography.bold16,
+                        style = MoimTheme.typography.body01.semiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
@@ -80,7 +80,7 @@ fun MoimAlertDialog(
 
                     Text(
                         text = description,
-                        style = MoimTheme.typography.regular14,
+                        style = MoimTheme.typography.body01.regular,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(32.dp))
@@ -97,7 +97,7 @@ fun MoimAlertDialog(
                                 Text(
                                     text = negativeText,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    style = MoimTheme.typography.bold16,
+                                    style = MoimTheme.typography.body01.semiBold,
                                     modifier = Modifier.align(Alignment.CenterVertically)
                                 )
                             }
@@ -106,7 +106,7 @@ fun MoimAlertDialog(
 
                         MoimPrimaryButton(
                             onClick = onClickPositive,
-                            defaultMinHeight = 40.dp,
+                            verticalPadding = 8.dp,
                             text = positiveText,
                         )
                     }

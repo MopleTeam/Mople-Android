@@ -64,6 +64,10 @@ internal class PreferenceStorage @Inject constructor(
         }
     }
 
+    suspend fun clearMoimStorage() {
+        preference.edit { it.clear() }
+    }
+
     companion object {
         const val PREFS_MOIM = "prefsMoim"
     }

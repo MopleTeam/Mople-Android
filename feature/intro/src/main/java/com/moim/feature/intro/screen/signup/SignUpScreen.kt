@@ -1,13 +1,132 @@
 package com.moim.feature.intro.screen.signup
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.moim.feature.intro.screen.splash.SplashViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.common.view.ObserveAsEvents
+import com.moim.core.common.view.showToast
+import com.moim.core.designsystem.R
+import com.moim.core.designsystem.common.LoadingDialog
+import com.moim.core.designsystem.component.MoimPrimaryButton
+import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.designsystem.theme.color_222222
+import com.moim.core.designsystem.theme.color_FFFFFF
+import com.moim.feature.intro.screen.signup.ui.NicknameTextField
+import com.moim.feature.intro.screen.signup.ui.ProfileImage
+import com.moim.feature.intro.screen.signup.ui.ProfileImageEditDialog
+
+internal typealias OnSignUpUiAction = (SignUpUiAction) -> Unit
+
+@Composable
+fun SignUpRoute(
+    viewModel: SignUpViewModel = hiltViewModel(),
+    navigateToMain: () -> Unit
+) {
+    val context = LocalContext.current
+    val signUpUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isLoading by viewModel.loading.collectAsStateWithLifecycle()
+
+    val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri -> if (uri != null) viewModel.onUiAction(SignUpUiAction.OnChangeProfileUrl(uri.toString())) }
+    )
+
+    ObserveAsEvents(viewModel.uiEvent) { event ->
+        when (event) {
+            is SignUpUiEvent.NavigateToPhotoPicker -> singlePhotoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            is SignUpUiEvent.NavigateToMain -> navigateToMain()
+            is SignUpUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+        }
+    }
+
+    when (val uiState = signUpUiState) {
+        is SignUpUiState.SignUp -> SignUpScreen(
+            uiState = uiState,
+            isLoading = isLoading,
+            onUiAction = viewModel::onUiAction
+        )
+    }
+}
 
 @Composable
 fun SignUpScreen(
-    viewModel: SplashViewModel = hiltViewModel(),
-    navigateToMain: () -> Unit
+    modifier: Modifier = Modifier,
+    uiState: SignUpUiState.SignUp = SignUpUiState.SignUp(),
+    isLoading: Boolean = false,
+    onUiAction: OnSignUpUiAction = {}
 ) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(color_FFFFFF)
+            .verticalScroll(rememberScrollState())
+            .systemBarsPadding()
+            .imePadding()
+            .padding(horizontal = 20.dp, vertical = 28.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.sign_up_title),
+            style = MoimTheme.typography.heading.bold,
+            color = color_222222
+        )
 
+        ProfileImage(
+            profileUrl = uiState.profileUrl,
+            onUiAction = onUiAction
+        )
+
+        NicknameTextField(
+            nickname = uiState.nickname,
+            isDuplicated = uiState.isDuplicatedName,
+            isRegexError = uiState.isRegexError,
+            onUiAction = onUiAction
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        MoimPrimaryButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 28.dp),
+            enable = uiState.enableSignUp,
+            text = stringResource(R.string.sign_up_start),
+            onClick = { onUiAction(SignUpUiAction.OnClickSignUp) },
+        )
+    }
+
+    if (uiState.isShowProfileEditDialog) {
+        ProfileImageEditDialog(onUiAction = onUiAction)
+    }
+
+    LoadingDialog(isLoading)
+}
+
+@Preview
+@Composable
+private fun SignUpScreenPreview() {
+    MoimTheme {
+        SignUpScreen(
+            uiState = SignUpUiState.SignUp(enableSignUp = false)
+        )
+    }
 }

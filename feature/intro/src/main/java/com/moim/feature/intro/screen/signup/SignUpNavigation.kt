@@ -10,10 +10,14 @@ fun NavGraphBuilder.signUpNavigation(
     navigateToMain: () -> Unit
 ) {
     composable<IntroRoute.SignUp> {
-        SignUpScreen(navigateToMain = navigateToMain)
+        SignUpRoute(navigateToMain = navigateToMain)
     }
 }
 
-fun NavController.navigateToSignUp(navOptions: NavOptions? = null) {
-    this.navigate(IntroRoute.SignUp, navOptions)
+fun NavController.navigateToSignUp(
+    email: String,
+    token: String,
+    navOptions: NavOptions? = null
+) {
+    this.navigate(IntroRoute.SignUp(email, token), navOptions)
 }

@@ -1,26 +1,30 @@
 package com.moim.feature.intro.screen.splash
 
 import androidx.lifecycle.viewModelScope
+import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.data.datasource.auth.AuthRepository
+import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import okio.IOException
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
 ) : BaseViewModel() {
 
     init {
-        setUiState(SplashState.Splash())
+        setUiState(SplashUiState.Splash())
         validateUser()
     }
 
@@ -29,17 +33,19 @@ class SplashViewModel @Inject constructor(
             val token = authRepository.getToken().first()?.asItem()
 
             if (token == null) {
-                delay(700)
-                setUiEvent(SplashEvent.NavigateToSignIn)
+                delay(500)
+                setUiEvent(SplashUiEvent.NavigateToSignIn)
             } else {
-                authRepository
-                    .signIn(socialType = "kakao", token.accessToken)
+                userRepository.getUser()
                     .asResult()
                     .collect { result ->
                         when (result) {
                             is Result.Loading -> return@collect
-                            is Result.Success -> {}
-                            is Result.Error -> {}
+                            is Result.Success -> setUiEvent(SplashUiEvent.NavigateToMain)
+                            is Result.Error -> when (result.exception) {
+                                is IOException -> setUiState(SplashUiState.Splash(isShowErrorDialog = true))
+                                is NetworkException -> setUiEvent(SplashUiEvent.NavigateToSignIn).also { userRepository.clearMoimStorage() }
+                            }
                         }
                     }
             }
@@ -47,13 +53,13 @@ class SplashViewModel @Inject constructor(
     }
 }
 
-sealed interface SplashState : UiState {
+sealed interface SplashUiState : UiState {
     data class Splash(
         val isShowErrorDialog: Boolean = false
-    ) : SplashState
+    ) : SplashUiState
 }
 
-sealed interface SplashEvent : UiEvent {
-    data object NavigateToSignIn : SplashEvent
-    data object NavigateToMain : SplashEvent
+sealed interface SplashUiEvent : UiEvent {
+    data object NavigateToSignIn : SplashUiEvent
+    data object NavigateToMain : SplashUiEvent
 }

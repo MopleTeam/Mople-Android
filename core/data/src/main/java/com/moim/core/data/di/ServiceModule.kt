@@ -1,7 +1,10 @@
 package com.moim.core.data.di
 
 import com.moim.core.data.BuildConfig
+import com.moim.core.data.di.qualifiers.MoimApi
 import com.moim.core.data.di.qualifiers.MoimApiOkHttp
+import com.moim.core.data.di.qualifiers.NormalApi
+import com.moim.core.data.di.qualifiers.NormalApiOkHttp
 import com.moim.core.data.util.TokenAuthenticator
 import com.moim.core.data.util.TokenInterceptor
 import dagger.Module
@@ -35,6 +38,7 @@ internal object ServiceModule {
             }
     }
 
+    @Singleton
     @Provides
     fun provideOkHttpClient(
         httpLoggingInterceptor: HttpLoggingInterceptor,
@@ -45,6 +49,17 @@ internal object ServiceModule {
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(httpLoggingInterceptor)
             .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideJson(): Json {
+        return Json {
+            isLenient = true
+            coerceInputValues = true
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+        }
     }
 
     @MoimApiOkHttp
@@ -63,22 +78,48 @@ internal object ServiceModule {
         .authenticator(tokenAuthenticator)
         .build()
 
+    @NormalApiOkHttp
+    @Singleton
+    @Provides
+    fun provideNormalApiOkHttpCallFactory(
+        httpLoggingInterceptor: HttpLoggingInterceptor
+    ): Call.Factory = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.MINUTES)
+        .readTimeout(10, TimeUnit.MINUTES)
+        .writeTimeout(10, TimeUnit.MINUTES)
+        .addInterceptor(httpLoggingInterceptor)
+        .build()
+
+    // header Token이 필요한 API에 사용하는 Retrofit 입니다.
+    @MoimApi
     @Singleton
     @Provides
     fun provideRetrofit(
-        @MoimApiOkHttp okHttpCallFactory: Call.Factory
+        @MoimApiOkHttp okHttpCallFactory: Call.Factory,
+        json: Json,
     ): Retrofit {
-        val format = Json {
-            isLenient = true
-            coerceInputValues = true
-            ignoreUnknownKeys = true
-            encodeDefaults = true
-        }
         val contentType = "application/json".toMediaType()
 
         return Retrofit.Builder()
             .callFactory(okHttpCallFactory)
-            .addConverterFactory(format.asConverterFactory(contentType))
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .baseUrl(BuildConfig.API_URL)
+            .build()
+    }
+
+    // header Token이 필요하지 않은 API에 사용하는 Retrofit 입니다.
+    @NormalApi
+    @Singleton
+    @Provides
+    fun provideRetrofitWithoutHeader(
+        @NormalApiOkHttp okHttpCallFactory: Call.Factory,
+        json: Json,
+    ): Retrofit {
+        val contentType = "application/json".toMediaType()
+
+        return Retrofit.Builder()
+            .callFactory(okHttpCallFactory)
+            .addConverterFactory(json.asConverterFactory(contentType))
             .baseUrl(BuildConfig.API_URL)
             .build()
     }

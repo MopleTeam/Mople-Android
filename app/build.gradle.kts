@@ -13,6 +13,15 @@ android {
 
     namespace = "com.moim.moimtable"
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("moimkey.keystore")
+            storePassword = localProperties["STORE_PASSWORD"].toString()
+            keyAlias = localProperties["KEY_ALIAS"].toString()
+            keyPassword = localProperties["KEY_PASSWORD"].toString()
+        }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
@@ -21,9 +30,10 @@ android {
         }
 
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            // signingConfig = signingConfigs.getByName("release")
+            isDebuggable = false
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -52,4 +62,6 @@ dependencies {
 
     // Log tracker
     implementation(libs.timber)
+
+    implementation(libs.kakao.login)
 }
