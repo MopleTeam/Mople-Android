@@ -33,7 +33,7 @@
 
     <!-- Main -->
     <string name="main_tab_home">홈</string>
-    <string name="main_tab_group">모임</string>
+    <string name="main_tab_meeting">모임</string>
     <string name="main_tab_calendar">일정관리</string>
     <string name="main_tab_profile">프로필</string>
 
@@ -42,8 +42,15 @@
     <string name="home_new_meeting_created">새로운\n일정 만들기</string>
     <string name="home_meeting_more">더보기</string>
 
+    <!-- Meeting -->
+    <string name="meeting_title">모임</string>
+    <string name="meeting_new_meeting">새로운 모임을 추가해주세요</string>
+    <string name="meeting_new_plan">새로운 일정을 추가해보세요</string>
+    <string name="meeting_last_at_count">마지막 약속으로부터 %d일 지났습니다.</string>
+
     <!-- Unit -->
     <string name="unit_participants_count">%d명 참여</string>
+    <string name="unit_participants_count_short">%d명</string>
     <string name="unit_weather">%s°C</string>
 
     <!-- Regex -->

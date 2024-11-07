@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
@@ -36,7 +34,7 @@ import com.moim.core.designsystem.theme.color_FFFFFF
 @Composable
 fun MoimTopAppbar(
     modifier: Modifier = Modifier,
-    thickness: Dp = 0.5.dp,
+    thickness: Dp = 0.dp,
     dividerColor: Color = color_7A7A7A,
     title: String = "",
     titleStyle: TextStyle = MoimTheme.typography.title02.bold,
@@ -57,8 +55,7 @@ fun MoimTopAppbar(
         CenterAlignedTopAppBar(
             modifier = modifier
                 .fillMaxWidth()
-                .background(backgroundColor)
-                .statusBarsPadding(),
+                .background(backgroundColor),
             title = {
                 Text(
                     text = title,

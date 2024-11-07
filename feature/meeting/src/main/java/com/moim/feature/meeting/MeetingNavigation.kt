@@ -8,11 +8,15 @@ import androidx.navigation.compose.composable
 import com.moim.core.route.MainRoute
 
 fun NavGraphBuilder.meetingScreen(
-    padding: PaddingValues
+    padding: PaddingValues,
+    navigateToMeetingWrite: () -> Unit,
+    navigateToMeetingDetail: (String) -> Unit
 ) {
     composable<MainRoute.Meeting> {
         MeetingRoute(
-            padding = padding
+            padding = padding,
+            navigateToMeetingWrite = navigateToMeetingWrite,
+            navigateToMeetingDetail = navigateToMeetingDetail
         )
     }
 }

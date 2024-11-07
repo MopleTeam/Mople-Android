@@ -36,13 +36,15 @@ fun MainScreen(
                 homeScreen(
                     padding = innerPadding,
                     navigateToAlarm = {},
-                    navigateToWriteGroup = {},
                     navigateToWriteMeeting = {},
+                    navigateToWritePlan = {},
                     navigateToCalendar = { navigator.navigate(MainTab.Calendar) },
                     navigateToMeetingDetail = {},
                 )
                 meetingScreen(
-                    padding = innerPadding
+                    padding = innerPadding,
+                    navigateToMeetingWrite = {},
+                    navigateToMeetingDetail = {}
                 )
                 calendarScreen(
                     padding = innerPadding

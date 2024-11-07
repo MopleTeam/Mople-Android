@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Vertical
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -121,10 +120,7 @@ private fun MeetingInfoTopAppbar(
         )
 
         Icon(
-            modifier = Modifier
-                .size(24.dp)
-                .rotate(180f),
-            imageVector = ImageVector.vectorResource(R.drawable.ic_back),
+            imageVector = ImageVector.vectorResource(R.drawable.ic_prev),
             contentDescription = "",
             tint = color_D9D9D9
         )

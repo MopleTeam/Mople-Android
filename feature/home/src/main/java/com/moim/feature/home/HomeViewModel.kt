@@ -49,8 +49,8 @@ class HomeViewModel @Inject constructor(
     fun onUiAction(uiAction: HomeUiAction) {
         when (uiAction) {
             is HomeUiAction.OnClickAlarm -> setUiEvent(HomeUiEvent.NavigateToAlarm)
-            is HomeUiAction.OnClickWriteGroup -> setUiEvent(HomeUiEvent.NavigateToWriteGroup)
             is HomeUiAction.OnClickWriteMeeting -> setUiEvent(HomeUiEvent.NavigateToWriteMeeting)
+            is HomeUiAction.OnClickWritePlan -> setUiEvent(HomeUiEvent.NavigateToWritePlan)
             is HomeUiAction.OnClickMeetingMore -> setUiEvent(HomeUiEvent.NavigateToCalendar)
             is HomeUiAction.OnClickMeeting -> setUiEvent(HomeUiEvent.NavigateToMeetingDetail(uiAction.meetingId))
             is HomeUiAction.OnClickRefresh -> onRefresh()
@@ -70,8 +70,8 @@ sealed interface HomeUiState : UiState {
 
 sealed interface HomeUiAction : UiAction {
     data object OnClickAlarm : HomeUiAction
-    data object OnClickWriteGroup : HomeUiAction
     data object OnClickWriteMeeting : HomeUiAction
+    data object OnClickWritePlan : HomeUiAction
     data object OnClickMeetingMore : HomeUiAction
     data class OnClickMeeting(val meetingId: String) : HomeUiAction
     data object OnClickRefresh : HomeUiAction
@@ -79,8 +79,8 @@ sealed interface HomeUiAction : UiAction {
 
 sealed interface HomeUiEvent : UiEvent {
     data object NavigateToAlarm : HomeUiEvent
-    data object NavigateToWriteGroup : HomeUiEvent
     data object NavigateToWriteMeeting : HomeUiEvent
+    data object NavigateToWritePlan : HomeUiEvent
     data object NavigateToCalendar : HomeUiEvent
     data class NavigateToMeetingDetail(val meetingId: String) : HomeUiEvent
 }
