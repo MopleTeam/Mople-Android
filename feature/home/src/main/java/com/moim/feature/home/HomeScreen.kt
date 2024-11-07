@@ -26,10 +26,10 @@ import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.MeetingInfo
+import com.moim.core.model.MeetingPlan
 import com.moim.core.model.Participant
 import com.moim.feature.home.ui.HomeCreateCards
-import com.moim.feature.home.ui.HomeMeetingCard
+import com.moim.feature.home.ui.HomeMeetingPlanCard
 import com.moim.feature.home.ui.HomeMeetingMoreCard
 import com.moim.feature.home.ui.HomeTopAppbar
 import java.time.ZonedDateTime
@@ -92,7 +92,7 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             HomeMeetingPager(
-                meetings = uiState.meetings,
+                meetingPlans = uiState.meetingPlans,
                 onUiAction = onUiAction
             )
             HomeCreateCards(
@@ -107,14 +107,14 @@ fun HomeScreen(
 @Composable
 fun HomeMeetingPager(
     modifier: Modifier = Modifier,
-    meetings: List<MeetingInfo>,
+    meetingPlans: List<MeetingPlan>,
     onUiAction: OnHomeUiAction = {}
 ) {
-    if (meetings.isEmpty()) return
+    if (meetingPlans.isEmpty()) return
 
     val localDensity = LocalDensity.current
-    val pagerState = rememberPagerState(pageCount = { meetings.size + 1 })
-    var pageHeight by remember(meetings) { mutableStateOf((-1).dp) }
+    val pagerState = rememberPagerState(pageCount = { meetingPlans.size + 1 })
+    var pageHeight by remember(meetingPlans) { mutableStateOf((-1).dp) }
     val heightModifier = if (pageHeight > 0.dp) Modifier.height(pageHeight) else Modifier
 
      HorizontalPager(
@@ -123,10 +123,10 @@ fun HomeMeetingPager(
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 0.dp),
         pageSpacing = 8.dp,
     ) { index ->
-        val meetingInfo = meetings.getOrNull(index)
+        val meetingPlan = meetingPlans.getOrNull(index)
 
-        if (meetingInfo != null) {
-            HomeMeetingCard(
+        if (meetingPlan != null) {
+            HomeMeetingPlanCard(
                 modifier = heightModifier
                     .onGloballyPositioned {
                         with(localDensity) {
@@ -134,7 +134,7 @@ fun HomeMeetingPager(
                             if (pageHeight < contentHeight) pageHeight = contentHeight
                         }
                     },
-                meetingInfo = meetingInfo,
+                meetingPlan = meetingPlan,
                 onUiAction = onUiAction
             )
         } else {
@@ -153,8 +153,8 @@ private fun HomeScreenPreview() {
         HomeScreen(
             modifier = Modifier.containerScreen(),
             uiState = HomeUiState.Success(
-                meetings = listOf(
-                    MeetingInfo(
+                meetingPlans = listOf(
+                    MeetingPlan(
                         meetingId = "1",
                         name = "우리중학교 동창1",
                         meetingName = "술 한잔 하는 날",
@@ -163,7 +163,7 @@ private fun HomeScreenPreview() {
                         detailAddress = "제주특별자치도 제주시",
                         startedAt = ZonedDateTime.now().toString()
                     ),
-                    MeetingInfo(
+                    MeetingPlan(
                         meetingId = "2",
                         name = "우리중학교 동창2",
                         meetingName = "술 한잔 하는 날",

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MeetingResponse(
+data class MeetingPlanResponse(
     @SerialName("id")
     val id: String,
     @SerialName("name")
@@ -29,8 +29,6 @@ data class MeetingResponse(
     val startedAt: String,
     @SerialName("endAt")
     val endedAt: String,
-    @SerialName("activeComments")
-    val activeComments: List<ActiveCommentResponse>,
     @SerialName("temperature")
     val temperature: Float,
     @SerialName("weatherIconUrl")

@@ -2,11 +2,11 @@ package com.moim.core.model
 
 import androidx.compose.runtime.Stable
 import com.moim.core.data.model.ActiveCommentResponse
-import com.moim.core.data.model.MeetingResponse
+import com.moim.core.data.model.MeetingPlanResponse
 import com.moim.core.data.model.ParticipantResponse
 
 @Stable
-data class MeetingInfo(
+data class MeetingPlan(
     val id: String = "",
     val name: String = "",
     val meetingId: String = "",
@@ -19,7 +19,6 @@ data class MeetingInfo(
     val createdAt: String = "",
     val startedAt: String = "",
     val endedAt: String = "",
-    val activeComments: List<ActiveComment> = emptyList(),
     val temperature: Float = 0f,
     val weatherIconUrl: String = ""
 )
@@ -43,8 +42,8 @@ data class ActiveComment(
     val updatedAt: String = ""
 )
 
-fun MeetingResponse.asItem(): MeetingInfo {
-    return MeetingInfo(
+fun MeetingPlanResponse.asItem(): MeetingPlan {
+    return MeetingPlan(
         id = id,
         name = name,
         meetingId = meetingId,
@@ -57,7 +56,6 @@ fun MeetingResponse.asItem(): MeetingInfo {
         createdAt = createdAt,
         startedAt = startedAt,
         endedAt = endedAt,
-        activeComments = activeComments.map(ActiveCommentResponse::asItem),
         temperature = temperature,
         weatherIconUrl = weatherIconUrl
     )

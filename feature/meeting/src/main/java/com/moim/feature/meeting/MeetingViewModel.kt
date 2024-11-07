@@ -1,12 +1,25 @@
 package com.moim.feature.meeting
 
-import androidx.lifecycle.SavedStateHandle
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.UiState
+import com.moim.core.data.datasource.meeting.MeetingRepository
+import com.moim.core.model.MeetingPlan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class MeetingViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle
+    private val meetingRepository: MeetingRepository
 ) : BaseViewModel() {
+
+}
+
+sealed interface MeetingUiState : UiState {
+    data object Loading : MeetingUiState
+
+    data class Success(
+        val meetings: List<MeetingPlan>
+    ) : MeetingUiState
+
+    data object Error : MeetingUiState
 }

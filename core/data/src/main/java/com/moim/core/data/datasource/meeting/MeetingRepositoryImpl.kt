@@ -8,7 +8,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
     private val remoteDataSource: MeetingRemoteDataSource
 ) : MeetingRepository {
 
-    override fun getMeetings(page: Int, yearAndMonth: String, isClosed: Boolean) = flow {
-        emit(remoteDataSource.getMeetings(page, yearAndMonth, isClosed))
+    override fun getMeetingPlans(page: Int, yearAndMonth: String, isClosed: Boolean) = flow {
+        emit(remoteDataSource.getMeetingPlans(page, yearAndMonth, isClosed))
     }
 }

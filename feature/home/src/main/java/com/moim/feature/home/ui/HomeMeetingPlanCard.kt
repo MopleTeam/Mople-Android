@@ -35,21 +35,21 @@ import com.moim.core.designsystem.theme.color_222222
 import com.moim.core.designsystem.theme.color_888888
 import com.moim.core.designsystem.theme.color_D9D9D9
 import com.moim.core.designsystem.theme.color_F6F8FA
-import com.moim.core.model.MeetingInfo
+import com.moim.core.model.MeetingPlan
 import com.moim.core.model.Participant
 import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
 import java.time.ZonedDateTime
 
 @Composable
-fun HomeMeetingCard(
+fun HomeMeetingPlanCard(
     modifier: Modifier = Modifier,
-    meetingInfo: MeetingInfo,
+    meetingPlan: MeetingPlan,
     onUiAction: OnHomeUiAction = {}
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(HomeUiAction.OnClickMeeting(meetingId = meetingInfo.meetingId)) }
+        onClick = { onUiAction(HomeUiAction.OnClickMeeting(meetingId = meetingPlan.meetingId)) }
     ) {
         Column(
             modifier = Modifier
@@ -57,12 +57,12 @@ fun HomeMeetingCard(
                 .padding(16.dp)
         ) {
             MeetingInfoTopAppbar(
-                groupName = meetingInfo.name
+                groupName = meetingPlan.name
             )
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = meetingInfo.meetingName,
+                text = meetingPlan.meetingName,
                 style = MoimTheme.typography.title01.bold,
                 color = color_222222
             )
@@ -70,24 +70,24 @@ fun HomeMeetingCard(
 
             MeetingInfoText(
                 iconRes = R.drawable.ic_group,
-                text = stringResource(R.string.unit_participants_count, meetingInfo.participants.size)
+                text = stringResource(R.string.unit_participants_count, meetingPlan.participants.size)
             )
             MeetingInfoText(
                 modifier = Modifier.padding(vertical = 4.dp),
                 iconRes = R.drawable.ic_clock,
-                text = getDateTimeFormatString(dateTime = meetingInfo.startedAt, pattern = stringResource(R.string.regex_date_full))
+                text = getDateTimeFormatString(dateTime = meetingPlan.startedAt, pattern = stringResource(R.string.regex_date_full))
             )
             MeetingInfoText(
                 iconRes = R.drawable.ic_location,
-                text = meetingInfo.detailAddress,
+                text = meetingPlan.detailAddress,
             )
             Spacer(Modifier.height(16.dp))
 
             MeetingWeatherInfo(
                 modifier = Modifier.align(Alignment.Start),
-                temperature = meetingInfo.temperature,
-                address = meetingInfo.address,
-                weatherUrl = meetingInfo.weatherIconUrl
+                temperature = meetingPlan.temperature,
+                address = meetingPlan.address,
+                weatherUrl = meetingPlan.weatherIconUrl
             )
         }
     }
@@ -204,10 +204,10 @@ private fun MeetingWeatherInfo(
 
 @Preview
 @Composable
-private fun HomeMeetingCardPreview() {
+private fun HomeMeetingPlanCardPreview() {
     MoimTheme {
-        HomeMeetingCard(
-            meetingInfo = MeetingInfo(
+        HomeMeetingPlanCard(
+            meetingPlan = MeetingPlan(
                 name = "우리중학교 동창",
                 meetingName = "술 한잔 하는 날",
                 participants = listOf(Participant(), Participant(), Participant()),

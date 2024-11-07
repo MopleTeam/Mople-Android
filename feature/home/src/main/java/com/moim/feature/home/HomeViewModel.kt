@@ -9,8 +9,8 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.data.datasource.meeting.MeetingRepository
-import com.moim.core.data.model.MeetingResponse
-import com.moim.core.model.MeetingInfo
+import com.moim.core.data.model.MeetingPlanResponse
+import com.moim.core.model.MeetingPlan
 import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,9 +24,9 @@ class HomeViewModel @Inject constructor(
     private val meetingRepository: MeetingRepository,
 ) : BaseViewModel() {
 
-    private val meetingsResult = loadDataSignal
+    private val meetingPlansResult = loadDataSignal
         .flatMapLatest {
-            meetingRepository.getMeetings(
+            meetingRepository.getMeetingPlans(
                 page = 1,
                 yearAndMonth = getDateTimeFormatZoneDate(pattern = "yyyyMM"),
                 isClosed = false
@@ -36,10 +36,10 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            meetingsResult.collect { result ->
+            meetingPlansResult.collect { result ->
                 when (result) {
                     is Result.Loading -> setUiState(HomeUiState.Loading)
-                    is Result.Success -> setUiState(HomeUiState.Success(meetings = result.data.map(MeetingResponse::asItem)))
+                    is Result.Success -> setUiState(HomeUiState.Success(meetingPlans = result.data.map(MeetingPlanResponse::asItem)))
                     is Result.Error -> setUiState(HomeUiState.Error)
                 }
             }
@@ -62,7 +62,7 @@ sealed interface HomeUiState : UiState {
     data object Loading : HomeUiState
 
     data class Success(
-        val meetings: List<MeetingInfo> = emptyList()
+        val meetingPlans: List<MeetingPlan> = emptyList()
     ) : HomeUiState
 
     data object Error : HomeUiState
