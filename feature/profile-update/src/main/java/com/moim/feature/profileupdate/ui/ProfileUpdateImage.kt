@@ -1,4 +1,4 @@
-package com.moim.feature.intro.screen.signup.ui
+package com.moim.feature.profileupdate.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,18 +19,18 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
-import com.moim.feature.intro.screen.signup.OnSignUpUiAction
-import com.moim.feature.intro.screen.signup.SignUpUiAction
+import com.moim.feature.profileupdate.OnProfileUpdateUiAction
+import com.moim.feature.profileupdate.ProfileUpdateUiAction
+
 
 @Composable
-fun ProfileImage(
+fun ProfileUpdateImage(
     modifier: Modifier = Modifier,
     profileUrl: String?,
-    onUiAction: OnSignUpUiAction = {}
+    onUiAction: OnProfileUpdateUiAction = {}
 ) {
     Column(
         modifier = modifier
-            .padding(vertical = 24.dp)
             .fillMaxWidth()
             .padding(vertical = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -41,9 +41,9 @@ fun ProfileImage(
                     .size(80.dp)
                     .clip(RoundedCornerShape(100))
                     .align(Alignment.Center)
-                    .onSingleClick { onUiAction(SignUpUiAction.OnShowProfileEditDialog(true)) },
+                    .onSingleClick { onUiAction(ProfileUpdateUiAction.OnShowProfileEditDialog(true)) },
                 imageUrl = profileUrl,
-                errorImage = painterResource(R.drawable.ic_profile),
+                errorImage =  painterResource(R.drawable.ic_profile),
             )
 
             Icon(

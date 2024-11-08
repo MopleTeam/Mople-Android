@@ -5,11 +5,15 @@ import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
 
-    fun getUser() : Flow<UserResponse>
+    fun getUser(): Flow<UserResponse>
 
-    fun deleteUser() : Flow<Unit>
+    fun fetchUser(): Flow<UserResponse>
 
-    fun checkedNickname(nickname:String) : Flow<Boolean>
+    fun updateUser(profileUrl: String?, nickname: String): Flow<UserResponse>
+
+    fun deleteUser(): Flow<Unit>
+
+    fun checkedNickname(nickname: String): Flow<Boolean>
 
     suspend fun clearMoimStorage()
 }

@@ -39,4 +39,7 @@ sealed interface DetailRoute: Route {
 
     @Serializable
     data object MeetingDetail : DetailRoute
+
+    @Serializable
+    data object ProfileUpdate: DetailRoute
 }

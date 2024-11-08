@@ -36,7 +36,7 @@ class SplashViewModel @Inject constructor(
                 delay(500)
                 setUiEvent(SplashUiEvent.NavigateToSignIn)
             } else {
-                userRepository.getUser()
+                userRepository.fetchUser()
                     .asResult()
                     .collect { result ->
                         when (result) {

@@ -1,19 +1,38 @@
 package com.moim.core.data.datasource.user
 
+import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.datasource.user.remote.UserRemoteDataSource
 import com.moim.core.data.datastore.PreferenceStorage
 import com.moim.core.data.model.UserResponse
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 internal class UserRepositoryImpl @Inject constructor(
     private val remoteDataSource: UserRemoteDataSource,
+    private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource,
     private val preferenceStorage: PreferenceStorage
 ) : UserRepository {
 
-    override fun getUser(): Flow<UserResponse> = flow {
+    override fun getUser(): Flow<UserResponse> {
+        return preferenceStorage.user
+            .onEach { if (it == null) fetchUser() }
+            .filterNotNull()
+    }
+
+    override fun fetchUser(): Flow<UserResponse> = flow {
         emit(remoteDataSource.getUser().also { preferenceStorage.saveUser(it) })
+    }
+
+    override fun updateUser(profileUrl: String?, nickname: String): Flow<UserResponse> = flow {
+        val uploadUrl = if (profileUrl != null && profileUrl.startsWith("http").not()) {
+            imageUploadRemoteDataSource.uploadImage(url = profileUrl, folderName = "profile")
+        } else {
+            profileUrl
+        }
+        emit(remoteDataSource.updateUser(uploadUrl, nickname).also { preferenceStorage.saveUser(it) })
     }
 
     override fun deleteUser() = flow {

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
@@ -53,6 +54,7 @@ fun ProfileImage(
                     .size(80.dp)
                     .clip(RoundedCornerShape(100)),
                 imageUrl = user.profileUrl,
+                errorImage = painterResource(R.drawable.ic_profile),
             )
 
             Spacer(Modifier.height(12.dp))

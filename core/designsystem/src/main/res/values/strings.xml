@@ -13,6 +13,7 @@
     <string name="common_update">수정</string>
     <string name="common_cancel">취소</string>
     <string name="common_confirm">확인</string>
+    <string name="common_save">저장</string>
 
     <!-- signIn -->
     <string name="sign_in_kakao">카카오로 시작하기</string>
@@ -55,6 +56,18 @@
     <string name="profile_version">버전정보</string>
     <string name="profile_logout">로그아웃</string>
     <string name="profile_user_delete">회원탈퇴</string>
+
+    <!-- ProfileUpdate -->
+    <string name="profile_update_title">프로필 편집</string>
+    <string name="profile_update_profile_edit">프로필 편집</string>
+    <string name="profile_update_profile_default">기본 프로필로 변경</string>
+    <string name="profile_update_profile_photo">앨범에서 사진 선택</string>
+    <string name="profile_update_nickname">닉네임</string>
+    <string name="profile_update_duplicate_check">중복확인</string>
+    <string name="profile_update_duplicate_error">이미 사용중인 닉네임 입니다.</string>
+    <string name="profile_update_pass">사용 가능한 닉네임입니다.</string>
+    <string name="profile_update_regex_error">공백 또는 특수문자는 사용할 수 없습니다.</string>
+    <string name="profile_update_hint">닉네임을 입력해주세요</string>
 
     <!-- Unit -->
     <string name="unit_participants_count">%d명 참여</string>

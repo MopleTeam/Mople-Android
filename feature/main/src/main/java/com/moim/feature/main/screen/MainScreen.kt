@@ -17,6 +17,8 @@ import com.moim.feature.main.navigation.rememberMainNavController
 import com.moim.feature.main.screen.ui.MainBottomBar
 import com.moim.feature.meeting.meetingScreen
 import com.moim.feature.profile.profileScreen
+import com.moim.feature.profileupdate.navigateToProfileUpdate
+import com.moim.feature.profileupdate.profileUpdateScreen
 
 @Composable
 fun MainScreen(
@@ -52,10 +54,14 @@ fun MainScreen(
                 )
                 profileScreen(
                     padding = innerPadding,
-                    navigateToProfileUpdate = {},
+                    navigateToProfileUpdate = navigator.navController::navigateToProfileUpdate,
                     navigateToAlarmSetting = {},
                     navigateToPrivacyPolicy = {},
                     navigateToIntro = navigateToIntro
+                )
+                profileUpdateScreen(
+                    padding = innerPadding,
+                    navigateToBack = navigator.navController::popBackStack
                 )
             }
         },
