@@ -8,11 +8,19 @@ import androidx.navigation.compose.composable
 import com.moim.core.route.MainRoute
 
 fun NavGraphBuilder.profileScreen(
-    padding: PaddingValues
+    padding: PaddingValues,
+    navigateToProfileUpdate: () -> Unit,
+    navigateToAlarmSetting: () -> Unit,
+    navigateToPrivacyPolicy: () -> Unit,
+    navigateToIntro: () -> Unit,
 ) {
     composable<MainRoute.Profile> {
         ProfileRoute(
-            padding = padding
+            padding = padding,
+            navigateToProfileUpdate = navigateToProfileUpdate,
+            navigateToAlarmSetting = navigateToAlarmSetting,
+            navigateToPrivacyPolicy = navigateToPrivacyPolicy,
+            navigateToIntro = navigateToIntro
         )
     }
 }

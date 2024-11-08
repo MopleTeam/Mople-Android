@@ -16,6 +16,10 @@ internal class UserRepositoryImpl @Inject constructor(
         emit(remoteDataSource.getUser().also { preferenceStorage.saveUser(it) })
     }
 
+    override fun deleteUser() = flow {
+        emit(remoteDataSource.deleteUser())
+    }
+
     override fun checkedNickname(nickname: String) = flow {
         emit(remoteDataSource.checkedNickname(nickname))
     }

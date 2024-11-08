@@ -21,6 +21,7 @@ import com.moim.feature.profile.profileScreen
 @Composable
 fun MainScreen(
     navigator: MainNavController = rememberMainNavController(),
+    navigateToIntro: () -> Unit,
 ) {
     MoimScaffold(
         content = { innerPadding ->
@@ -50,7 +51,11 @@ fun MainScreen(
                     padding = innerPadding
                 )
                 profileScreen(
-                    padding = innerPadding
+                    padding = innerPadding,
+                    navigateToProfileUpdate = {},
+                    navigateToAlarmSetting = {},
+                    navigateToPrivacyPolicy = {},
+                    navigateToIntro = navigateToIntro
                 )
             }
         },

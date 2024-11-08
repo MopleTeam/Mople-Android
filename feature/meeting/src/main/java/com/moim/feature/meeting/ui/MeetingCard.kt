@@ -54,8 +54,6 @@ fun MeetingCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-
-
                 NetworkImage(
                     modifier = Modifier
                         .size(56.dp)
@@ -113,7 +111,7 @@ fun MeetingCard(
             ) {
                 Text(
                     modifier = Modifier.padding(12.dp),
-                    text = stringResource(R.string.meeting_new_meeting),
+                    text = stringResource(R.string.meeting_new_plan),
                     style = MoimTheme.typography.body01.medium,
                     color = color_888888,
                     maxLines = 1,

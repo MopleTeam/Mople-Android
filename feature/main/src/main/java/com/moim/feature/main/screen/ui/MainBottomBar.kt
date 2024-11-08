@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,19 +19,22 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.designsystem.theme.color_222222
 import com.moim.core.designsystem.theme.color_3E3F40
 import com.moim.core.designsystem.theme.color_999999
+import com.moim.core.designsystem.theme.color_F1F2F3
 import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.feature.main.navigation.MainTab
 
@@ -49,13 +53,14 @@ fun MainBottomBar(
         exit = fadeOut() + slideOut { IntOffset(0, it.height) },
     ) {
         Box(
-            modifier = modifier.background(color = Color.Transparent)
+            modifier = modifier
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .background(color_FFFFFF, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                    .background(color_FFFFFF)
+                    .border(width = 1.dp, color = color_F1F2F3),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 tabs.forEach { tab ->
@@ -79,9 +84,10 @@ fun RowScope.MainBottomBarItem(
     Box(
         modifier = Modifier
             .weight(1f)
+            .clip(RoundedCornerShape(50))
             .selectable(
                 selected = isSelected,
-                indication = null,
+                indication = ripple(bounded = true, color = color_222222),
                 role = null,
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick,

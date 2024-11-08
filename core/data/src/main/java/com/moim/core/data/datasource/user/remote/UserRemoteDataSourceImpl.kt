@@ -17,6 +17,14 @@ internal class UserRemoteDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteUser() {
+        return try {
+            userApi.deleteUser()
+        } catch (e:Exception) {
+            throw converterException(e)
+        }
+    }
+
     override suspend fun checkedNickname(nickname: String): Boolean {
         return try {
             userApi.checkedNickname(nickname)

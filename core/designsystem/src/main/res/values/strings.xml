@@ -48,6 +48,14 @@
     <string name="meeting_new_plan">새로운 일정을 추가해보세요</string>
     <string name="meeting_last_at_count">마지막 약속으로부터 %d일 지났습니다.</string>
 
+    <!-- Profile -->
+    <string name="profile_title">마이페이지</string>
+    <string name="profile_alarm">알람 관리</string>
+    <string name="profile_privacy_policy">개인정보 처리방침</string>
+    <string name="profile_version">버전정보</string>
+    <string name="profile_logout">로그아웃</string>
+    <string name="profile_user_delete">회원탈퇴</string>
+
     <!-- Unit -->
     <string name="unit_participants_count">%d명 참여</string>
     <string name="unit_participants_count_short">%d명</string>

@@ -6,5 +6,7 @@ internal interface UserRemoteDataSource {
 
     suspend fun getUser() : UserResponse
 
+    suspend fun deleteUser()
+
     suspend fun checkedNickname(nickname:String) : Boolean
 }

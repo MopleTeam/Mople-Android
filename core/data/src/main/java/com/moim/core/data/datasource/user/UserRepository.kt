@@ -7,6 +7,8 @@ interface UserRepository {
 
     fun getUser() : Flow<UserResponse>
 
+    fun deleteUser() : Flow<Unit>
+
     fun checkedNickname(nickname:String) : Flow<Boolean>
 
     suspend fun clearMoimStorage()

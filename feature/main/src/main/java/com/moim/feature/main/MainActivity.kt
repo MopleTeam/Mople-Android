@@ -1,9 +1,12 @@
 package com.moim.feature.main
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.moim.core.common.consts.INTRO_ACTIVITY_NAME
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.main.screen.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -16,8 +19,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MoimTheme {
-                MainScreen()
+                MainScreen {
+                    navigateToIntro()
+                }
             }
         }
     }
+}
+
+private fun Activity.navigateToIntro() {
+    val intent = Intent(this, Class.forName(INTRO_ACTIVITY_NAME))
+    finish()
+    startActivity(intent)
 }
