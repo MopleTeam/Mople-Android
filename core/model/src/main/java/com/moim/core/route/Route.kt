@@ -20,7 +20,7 @@ sealed interface IntroRoute : Route {
     ) : IntroRoute
 }
 
-sealed interface MainRoute: Route {
+sealed interface MainRoute : Route {
 
     @Serializable
     data object Home : MainRoute
@@ -35,11 +35,14 @@ sealed interface MainRoute: Route {
     data object Profile : MainRoute
 }
 
-sealed interface DetailRoute: Route {
+sealed interface DetailRoute : Route {
+
+    @Serializable
+    data class MeetingWrite(val meetingId: String? = null) : DetailRoute
 
     @Serializable
     data object MeetingDetail : DetailRoute
 
     @Serializable
-    data object ProfileUpdate: DetailRoute
+    data object ProfileUpdate : DetailRoute
 }

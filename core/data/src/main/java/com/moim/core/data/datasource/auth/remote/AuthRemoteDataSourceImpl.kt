@@ -56,7 +56,7 @@ internal class AuthRemoteDataSourceImpl @Inject constructor(
         private const val KEY_SOCIAL_PROVIDER = "socialProvider"
         private const val KEY_PROVIDER_TOKEN = "providerToken"
         private const val KEY_EMAIL = "email"
-        private const val KEY_NICKNAME = "nickName"
+        private const val KEY_NICKNAME = "nickname"
         private const val KEY_IMAGE = "image"
         private const val KEY_DEVICE_TYPE = "deviceType"
     }

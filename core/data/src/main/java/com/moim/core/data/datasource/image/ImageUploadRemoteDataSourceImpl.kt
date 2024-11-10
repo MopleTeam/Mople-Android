@@ -18,19 +18,24 @@ internal class ImageUploadRemoteDataSourceImpl @Inject constructor(
     private val fileUtil: FileUtil,
 ) : ImageUploadRemoteDataSource {
 
-    override suspend fun uploadImage(url: String, folderName: String): String = withContext(Dispatchers.IO) {
-        val imageFile = fileUtil.from(url).run { compressorUtil.compressFile(this) }
-        return@withContext try {
-            imageApi.uploadImage(
-                folderName = folderName,
-                file = MultipartBody.Part.createFormData(
-                    name = "image",
-                    filename = URLEncoder.encode(imageFile.name, Charsets.UTF_8.displayName()),
-                    body = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
+    override suspend fun uploadImage(url: String?, folderName: String): String? = withContext(Dispatchers.IO) {
+        return@withContext if (url.isNullOrEmpty() || url.startsWith("http")) {
+            url
+        } else {
+            val imageFile = fileUtil.from(url).run { compressorUtil.compressFile(this) }
+
+            try {
+                imageApi.uploadImage(
+                    folderName = folderName,
+                    file = MultipartBody.Part.createFormData(
+                        name = "image",
+                        filename = URLEncoder.encode(imageFile.name, Charsets.UTF_8.displayName()),
+                        body = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
+                    )
                 )
-            )
-        } catch (e: Exception) {
-            throw converterException(e)
+            } catch (e: Exception) {
+                throw converterException(e)
+            }
         }
     }
 }

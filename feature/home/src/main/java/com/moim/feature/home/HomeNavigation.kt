@@ -10,8 +10,8 @@ import com.moim.core.route.MainRoute
 fun NavGraphBuilder.homeScreen(
     padding: PaddingValues,
     navigateToAlarm: () -> Unit = {},
-    navigateToWriteMeeting: () -> Unit = {},
-    navigateToWritePlan: () -> Unit = {},
+    navigateToMeetingWrite: () -> Unit = {},
+    navigateToPlanWrite: () -> Unit = {},
     navigateToCalendar: () -> Unit = {},
     navigateToMeetingDetail: (String) -> Unit = {},
 ) {
@@ -19,8 +19,8 @@ fun NavGraphBuilder.homeScreen(
         HomeRoute(
             padding = padding,
             navigateToAlarm = navigateToAlarm,
-            navigateToWriteMeeting = navigateToWriteMeeting,
-            navigateToWritePlan = navigateToWritePlan,
+            navigateToMeetingWrite = navigateToMeetingWrite,
+            navigateToPlanWrite = navigateToPlanWrite,
             navigateToCalendar = navigateToCalendar,
             navigateToMeetingDetail = navigateToMeetingDetail,
         )

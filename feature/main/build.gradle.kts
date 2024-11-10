@@ -9,6 +9,7 @@ android {
 dependencies {
     implementation(projects.feature.home)
     implementation(projects.feature.meeting)
+    implementation(projects.feature.meetingWrite)
     implementation(projects.feature.calendar)
     implementation(projects.feature.profile)
     implementation(projects.feature.profileUpdate)

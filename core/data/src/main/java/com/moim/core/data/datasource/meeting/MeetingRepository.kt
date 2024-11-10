@@ -6,7 +6,13 @@ import kotlinx.coroutines.flow.Flow
 
 interface MeetingRepository {
 
-    fun getMeeting() : Flow<List<MeetingResponse>>
+    fun getMeetings(): Flow<List<MeetingResponse>>
 
-    fun getMeetingPlans(page: Int, yearAndMonth: String, isClosed: Boolean) : Flow<List<MeetingPlanResponse>>
+    fun getMeeting(meetingId: String): Flow<MeetingResponse>
+
+    fun getMeetingPlans(page: Int, yearAndMonth: String, isClosed: Boolean): Flow<List<MeetingPlanResponse>>
+
+    fun createMeeting(meetingName: String, meetingImageUrl: String?): Flow<MeetingResponse>
+
+    fun updateMeeting(meetingId: String, meetingName: String, meetingImageUrl: String?): Flow<MeetingResponse>
 }

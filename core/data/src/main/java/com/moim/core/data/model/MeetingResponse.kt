@@ -20,7 +20,7 @@ data class MeetingResponse(
     @SerialName("createdAt")
     val createdAt: String,
     @SerialName("latestPlanStartAt")
-    val lastPlanAt: String
+    val lastPlanAt: String = ""
 )
 
 @Serializable

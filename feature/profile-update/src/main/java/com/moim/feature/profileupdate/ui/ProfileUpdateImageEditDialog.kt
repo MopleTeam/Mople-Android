@@ -52,7 +52,7 @@ fun ProfileUpdateImageEditDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.profile_update_profile_edit),
+                text = stringResource(R.string.common_profile_edit),
                 style = MoimTheme.typography.body01.semiBold,
                 color = color_222222
             )
@@ -60,7 +60,7 @@ fun ProfileUpdateImageEditDialog(
 
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.profile_update_profile_default),
+                text = stringResource(R.string.common_default_select),
                 buttonColors = moimButtomColors().copy(containerColor = color_888888),
                 onClick = {
                     onUiAction(dismissAction)
@@ -71,7 +71,7 @@ fun ProfileUpdateImageEditDialog(
 
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.profile_update_profile_photo),
+                text = stringResource(R.string.common_album_select),
                 buttonColors = moimButtomColors().copy(containerColor = color_3E3F40),
                 onClick = {
                     onUiAction(dismissAction)

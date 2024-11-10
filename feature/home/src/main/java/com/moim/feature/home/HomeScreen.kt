@@ -41,8 +41,8 @@ fun HomeRoute(
     viewModel: HomeViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToAlarm: () -> Unit = {},
-    navigateToWriteMeeting: () -> Unit = {},
-    navigateToWritePlan: () -> Unit = {},
+    navigateToMeetingWrite: () -> Unit = {},
+    navigateToPlanWrite: () -> Unit = {},
     navigateToCalendar: () -> Unit = {},
     navigateToMeetingDetail: (String) -> Unit = {},
 ) {
@@ -53,8 +53,8 @@ fun HomeRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is HomeUiEvent.NavigateToAlarm -> navigateToAlarm()
-            is HomeUiEvent.NavigateToWriteMeeting -> navigateToWriteMeeting()
-            is HomeUiEvent.NavigateToWritePlan -> navigateToWritePlan()
+            is HomeUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite()
+            is HomeUiEvent.NavigateToPlanWrite -> navigateToPlanWrite()
             is HomeUiEvent.NavigateToCalendar -> navigateToCalendar()
             is HomeUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
         }

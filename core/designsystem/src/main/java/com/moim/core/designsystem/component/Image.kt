@@ -31,7 +31,7 @@ fun NetworkImage(
     if (LocalInspectionMode.current) {
         Image(
             modifier = modifier,
-            painter = placeholder,
+            painter = errorImage,
             contentDescription = null,
         )
     } else {

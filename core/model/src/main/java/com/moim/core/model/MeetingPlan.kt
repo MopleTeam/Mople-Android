@@ -18,7 +18,6 @@ data class MeetingPlan(
     val latitude: Long = 0,
     val createdAt: String = "",
     val startedAt: String = "",
-    val endedAt: String = "",
     val temperature: Float = 0f,
     val weatherIconUrl: String = ""
 )
@@ -55,7 +54,6 @@ fun MeetingPlanResponse.asItem(): MeetingPlan {
         latitude = latitude,
         createdAt = createdAt,
         startedAt = startedAt,
-        endedAt = endedAt,
         temperature = temperature,
         weatherIconUrl = weatherIconUrl
     )

@@ -27,11 +27,7 @@ internal class UserRepositoryImpl @Inject constructor(
     }
 
     override fun updateUser(profileUrl: String?, nickname: String): Flow<UserResponse> = flow {
-        val uploadUrl = if (profileUrl != null && profileUrl.startsWith("http").not()) {
-            imageUploadRemoteDataSource.uploadImage(url = profileUrl, folderName = "profile")
-        } else {
-            profileUrl
-        }
+        val uploadUrl = imageUploadRemoteDataSource.uploadImage(url = profileUrl, folderName = "profile")
         emit(remoteDataSource.updateUser(uploadUrl, nickname).also { preferenceStorage.saveUser(it) })
     }
 

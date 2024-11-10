@@ -19,7 +19,7 @@ internal class AuthRepositoryImpl @Inject constructor(
     }
 
     override fun signUp(socialType: String, token: String, email: String, nickname: String, profileUrl: String?) = flow {
-        val uploadProfileUrl = if (profileUrl != null) imageUploadRemoteDataSource.uploadImage(url = profileUrl, "profile") else null
+        val uploadProfileUrl = imageUploadRemoteDataSource.uploadImage(url = profileUrl, "profile")
         emit(authRemoteDataSource.signUp(socialType, token, email, nickname, uploadProfileUrl).also { preferenceStorage.saveUserToken(it) })
     }
 

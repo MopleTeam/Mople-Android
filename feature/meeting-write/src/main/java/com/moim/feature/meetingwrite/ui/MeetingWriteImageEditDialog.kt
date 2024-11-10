@@ -1,4 +1,4 @@
-package com.moim.feature.intro.screen.signup.ui
+package com.moim.feature.meetingwrite.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,16 +23,16 @@ import com.moim.core.designsystem.theme.color_222222
 import com.moim.core.designsystem.theme.color_3E3F40
 import com.moim.core.designsystem.theme.color_888888
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.feature.intro.screen.signup.OnSignUpUiAction
-import com.moim.feature.intro.screen.signup.SignUpUiAction
+import com.moim.feature.meetingwrite.MeetingWriteUiAction
+import com.moim.feature.meetingwrite.OnMeetingWriteUiAction
 import kotlinx.coroutines.launch
 
 @Composable
-fun ProfileImageEditDialog(
+fun MeetingWriteImageEditDialog(
     modifier: Modifier = Modifier,
-    onUiAction: OnSignUpUiAction,
+    onUiAction: OnMeetingWriteUiAction
 ) {
-    val dismissAction = SignUpUiAction.OnShowProfileEditDialog(false)
+    val dismissAction = MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -64,7 +64,7 @@ fun ProfileImageEditDialog(
                 buttonColors = moimButtomColors().copy(containerColor = color_888888),
                 onClick = {
                     onUiAction(dismissAction)
-                    onUiAction(SignUpUiAction.OnChangeProfileUrl(null))
+                    onUiAction(MeetingWriteUiAction.OnChangeMeetingPhotoUrl(null))
                 }
             )
             Spacer(Modifier.height(12.dp))
@@ -75,7 +75,7 @@ fun ProfileImageEditDialog(
                 buttonColors = moimButtomColors().copy(containerColor = color_3E3F40),
                 onClick = {
                     onUiAction(dismissAction)
-                    onUiAction(SignUpUiAction.OnNavigatePhotoPicker)
+                    onUiAction(MeetingWriteUiAction.OnNavigatePhotoPicker)
                 }
             )
             Spacer(Modifier.height(12.dp))

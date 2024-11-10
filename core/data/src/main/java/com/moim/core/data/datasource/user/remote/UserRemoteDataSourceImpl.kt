@@ -48,7 +48,7 @@ internal class UserRemoteDataSourceImpl @Inject constructor(
     }
 
     companion object {
-        private const val KEY_NICKNAME = "nickName"
+        private const val KEY_NICKNAME = "nickname"
         private const val KEY_IMAGE = "image"
     }
 }

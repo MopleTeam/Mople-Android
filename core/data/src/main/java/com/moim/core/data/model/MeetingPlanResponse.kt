@@ -27,8 +27,6 @@ data class MeetingPlanResponse(
     val createdAt: String,
     @SerialName("startAt")
     val startedAt: String,
-    @SerialName("endAt")
-    val endedAt: String,
     @SerialName("temperature")
     val temperature: Float,
     @SerialName("weatherIconUrl")
