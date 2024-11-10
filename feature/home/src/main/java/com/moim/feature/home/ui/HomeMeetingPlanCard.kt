@@ -17,8 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Vertical
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,9 +30,6 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
-import com.moim.core.designsystem.theme.color_888888
-import com.moim.core.designsystem.theme.color_D9D9D9
 import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.model.MeetingPlan
 import com.moim.core.model.Participant
@@ -63,7 +60,7 @@ fun HomeMeetingPlanCard(
             Text(
                 text = meetingPlan.meetingName,
                 style = MoimTheme.typography.title01.bold,
-                color = color_222222
+                color = MoimTheme.colors.gray.gray01
             )
             Spacer(Modifier.height(16.dp))
 
@@ -106,6 +103,7 @@ private fun MeetingInfoTopAppbar(
                 .size(28.dp)
                 .clip(RoundedCornerShape(6.dp)),
             imageUrl = "https://plus.unsplash.com/premium_photo-1670333183316-ab697ddd9b13",
+            errorImage = painterResource(R.drawable.ic_meeting_empty)
         )
 
         Text(
@@ -114,7 +112,7 @@ private fun MeetingInfoTopAppbar(
                 .padding(horizontal = 8.dp),
             text = groupName,
             style = MoimTheme.typography.body02.semiBold,
-            color = color_888888,
+            color = MoimTheme.colors.gray.gray04,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -122,7 +120,7 @@ private fun MeetingInfoTopAppbar(
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_prev),
             contentDescription = "",
-            tint = color_D9D9D9
+            tint = MoimTheme.colors.icon
         )
     }
 }
@@ -143,7 +141,7 @@ private fun MeetingInfoText(
             modifier = Modifier.size(18.dp),
             imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = "",
-            tint = Color.Unspecified
+            tint = MoimTheme.colors.icon
         )
 
         Text(
@@ -152,7 +150,7 @@ private fun MeetingInfoText(
                 .padding(start = 4.dp),
             text = text,
             style = MoimTheme.typography.body02.medium,
-            color = color_888888,
+            color = MoimTheme.colors.gray.gray04,
             maxLines = maxLines,
             minLines = maxLines,
             overflow = TextOverflow.Ellipsis
@@ -187,13 +185,13 @@ private fun MeetingWeatherInfo(
                 .padding(horizontal = 12.dp),
             text = stringResource(R.string.unit_weather, temperature.toDecimalString()),
             style = MoimTheme.typography.body01.semiBold,
-            color = color_222222
+            color = MoimTheme.colors.gray.gray01
         )
 
         Text(
             text = address,
             style = MoimTheme.typography.body02.medium,
-            color = color_888888
+            color = MoimTheme.colors.gray.gray04
         )
     }
 }

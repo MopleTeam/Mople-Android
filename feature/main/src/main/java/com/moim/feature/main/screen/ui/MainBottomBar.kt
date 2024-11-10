@@ -28,11 +28,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
-import com.moim.core.designsystem.theme.color_3E3F40
-import com.moim.core.designsystem.theme.color_999999
-import com.moim.core.designsystem.theme.color_F1F2F3
-import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.feature.main.navigation.MainTab
 
 @Composable
@@ -55,8 +50,8 @@ fun MainBottomBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .background(color_FFFFFF)
-                    .border(width = 1.dp, color = color_F1F2F3),
+                    .background(MoimTheme.colors.white)
+                    .border(width = 1.dp, color = MoimTheme.colors.stroke),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 tabs.forEach { tab ->
@@ -83,7 +78,7 @@ fun RowScope.MainBottomBarItem(
             .clip(RoundedCornerShape(50))
             .selectable(
                 selected = isSelected,
-                indication = ripple(bounded = true, color = color_222222),
+                indication = ripple(bounded = true, color = MoimTheme.colors.gray.gray01),
                 role = null,
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick,
@@ -96,14 +91,14 @@ fun RowScope.MainBottomBarItem(
             Icon(
                 imageVector = ImageVector.vectorResource(tab.iconResId),
                 contentDescription = tab.contentDescription,
-                tint = if (isSelected) color_3E3F40 else color_999999,
+                tint = if (isSelected) MoimTheme.colors.secondary else MoimTheme.colors.icon,
             )
             Spacer(modifier = Modifier.height(5.dp))
 
             Text(
                 text = tab.label,
                 style = MoimTheme.typography.body02.regular.copy(fontSize = 10.sp),
-                color = if (isSelected) color_3E3F40 else color_999999,
+                color = if (isSelected) MoimTheme.colors.secondary else MoimTheme.colors.gray.gray05,
             )
         }
     }

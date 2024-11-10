@@ -6,6 +6,7 @@ import com.moim.core.data.datastore.PreferenceStorage
 import com.moim.core.data.model.UserResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -18,7 +19,7 @@ internal class UserRepositoryImpl @Inject constructor(
 
     override fun getUser(): Flow<UserResponse> {
         return preferenceStorage.user
-            .onEach { if (it == null) fetchUser() }
+            .onEach { if (it == null) fetchUser().first() }
             .filterNotNull()
     }
 

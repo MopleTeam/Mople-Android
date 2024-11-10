@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
-import com.moim.core.designsystem.theme.color_F5F5F5
+import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.meetingwrite.MeetingWriteUiAction
 import com.moim.feature.meetingwrite.OnMeetingWriteUiAction
 
@@ -42,7 +42,7 @@ fun MeetingWriteImage(
                     modifier = Modifier
                         .size(80.dp)
                         .clip(RoundedCornerShape(20.dp))
-                        .background(color = color_F5F5F5)
+                        .background(color = MoimTheme.colors.bg.primary)
                         .align(Alignment.Center)
                         .onSingleClick { onUiAction(MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(true)) }
                 ) {
@@ -52,7 +52,7 @@ fun MeetingWriteImage(
                             .align(Alignment.Center),
                         imageVector = ImageVector.vectorResource(R.drawable.ic_empty_image),
                         contentDescription = "",
-                        tint = Color.Unspecified
+                        tint = MoimTheme.colors.icon
                     )
                 }
             } else {

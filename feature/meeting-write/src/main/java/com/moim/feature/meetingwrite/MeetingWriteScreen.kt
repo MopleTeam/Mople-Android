@@ -29,7 +29,7 @@ import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
-import com.moim.core.designsystem.theme.color_FFFFFF
+import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.meetingwrite.ui.MeetingWriteImage
 import com.moim.feature.meetingwrite.ui.MeetingWriteImageEditDialog
 import com.moim.feature.meetingwrite.ui.MeetingWriteNameTextField
@@ -51,7 +51,7 @@ fun MeetingWriteRoute(
     )
 
     val modifier = Modifier.containerScreen(
-        backgroundColor = color_FFFFFF,
+        backgroundColor = MoimTheme.colors.white,
         padding = padding
     )
 

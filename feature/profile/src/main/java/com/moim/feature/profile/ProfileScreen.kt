@@ -23,10 +23,11 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
-import com.moim.core.designsystem.theme.color_F7F7F8
-import com.moim.core.designsystem.theme.color_FFFFFF
+import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.feature.profile.ui.ProfileAuthSettingContainer
 import com.moim.feature.profile.ui.ProfileImage
 import com.moim.feature.profile.ui.ProfileSettingContainer
@@ -61,7 +62,7 @@ fun ProfileRoute(
         is ProfileUiState.Loading -> LoadingScreen(modifier)
 
         is ProfileUiState.Success -> ProfileScreen(
-            modifier = Modifier.containerScreen(backgroundColor = color_FFFFFF, padding = padding),
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding),
             uiState = uiState,
             isLoading = isLoading,
             onUiAction = viewModel::onUiAction
@@ -101,6 +102,34 @@ fun ProfileScreen(
         }
     }
 
+    if (uiState.isShowUserLogoutDialog) {
+        val dismissAction = ProfileUiAction.OnShowUserLogoutDialog(false)
+        MoimAlertDialog(
+            title = stringResource(R.string.profile_logout_title),
+            onClickPositive = {
+                onUiAction(dismissAction)
+                onUiAction(ProfileUiAction.OnClickLogout)
+            },
+            onClickNegative = { onUiAction(dismissAction) },
+            onDismiss = { onUiAction(dismissAction) }
+        )
+    }
+    if (uiState.isShowUserDeleteDialog) {
+        val dismissAction = ProfileUiAction.OnShowUserDeleteDialog(false)
+        MoimAlertDialog(
+            title = stringResource(R.string.profile_user_delete_title),
+            description = stringResource(R.string.profile_user_delete_description),
+            positiveText = stringResource(R.string.profile_user_delete),
+            positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
+            onClickPositive = {
+                onUiAction(dismissAction)
+                onUiAction(ProfileUiAction.OnClickUserDelete)
+            },
+            onClickNegative = { onUiAction(dismissAction) },
+            onDismiss = { onUiAction(dismissAction) }
+        )
+    }
+
     LoadingDialog(isLoading)
 }
 
@@ -110,6 +139,6 @@ fun ProfileDivider() {
         modifier = Modifier
             .fillMaxWidth()
             .height(8.dp)
-            .background(color_F7F7F8)
+            .background(MoimTheme.colors.bg.primary)
     )
 }

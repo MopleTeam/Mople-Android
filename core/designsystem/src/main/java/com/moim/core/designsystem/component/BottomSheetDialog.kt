@@ -13,8 +13,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_333333
-import com.moim.core.designsystem.theme.color_FFFFFF
 
 @Composable
 fun MoimBottomSheetDialog(
@@ -32,8 +30,8 @@ fun MoimBottomSheetDialog(
         modifier = modifier,
         sheetState = sheetState,
         shape = shapes.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
-        containerColor = color_FFFFFF,
-        contentColor = color_333333,
+        containerColor = MoimTheme.colors.white,
+        contentColor = MoimTheme.colors.gray.gray02,
         onDismissRequest = {
             keyboardController?.hide()
             focusManager.clearFocus()

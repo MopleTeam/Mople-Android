@@ -40,11 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
-import com.moim.core.designsystem.theme.color_3366FF
-import com.moim.core.designsystem.theme.color_3E3F40
 import com.moim.core.designsystem.theme.color_FEE500
-import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.core.designsystem.theme.moimButtomColors
 
 @Composable
@@ -139,9 +135,9 @@ fun MoimFloatingActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(100),
-    containerColor: Color = color_3366FF,
-    contentColor: Color = color_FFFFFF,
-    borderStrokeColor: Color = color_3366FF,
+    containerColor: Color = MoimTheme.colors.primary.primary,
+    contentColor: Color = MoimTheme.colors.white,
+    borderStrokeColor: Color = MoimTheme.colors.primary.primary,
     minWidth: Dp = 44.dp,
     minHeight: Dp = 44.dp,
     tonalElevation: Dp = 0.dp,
@@ -180,21 +176,21 @@ private fun MoimPrimaryButtonPreview() {
     MoimTheme {
         Column(
             modifier = Modifier
-                .background(color_FFFFFF)
+                .background(MoimTheme.colors.white)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = "로그인",
-                buttonColors = moimButtomColors().copy(containerColor = color_3E3F40)
+                buttonColors = moimButtomColors()
             )
 
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 buttonColors = moimButtomColors().copy(
                     containerColor = color_FEE500,
-                    contentColor = color_222222
+                    contentColor = MoimTheme.colors.gray.gray01
                 ),
                 onClick = {}
             ) {

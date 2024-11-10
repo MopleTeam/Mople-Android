@@ -25,8 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
-import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
 
@@ -75,7 +73,7 @@ fun HomeCreateCard(
             Text(
                 text = text,
                 style = MoimTheme.typography.title03.semiBold,
-                color = color_222222
+                color = MoimTheme.colors.gray.gray01
             )
             Spacer(Modifier.height(4.dp))
 
@@ -98,7 +96,7 @@ private fun HomeCreateCardPreview() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color_F6F8FA),
+                .background(MoimTheme.colors.bg.primary),
         ) {
             HomeCreateCards()
         }

@@ -15,8 +15,6 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_3366FF
-import com.moim.core.designsystem.theme.color_F5F5F5
 import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
 
@@ -28,14 +26,14 @@ fun HomeTopAppbar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(color_F5F5F5)
+            .background(MoimTheme.colors.bg.primary)
             .padding(horizontal = 20.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = stringResource(R.string.app_name),
             style = MoimTheme.typography.title01.bold,
-            color = color_3366FF
+            color = MoimTheme.colors.primary.primary
         )
 
         Spacer(Modifier.weight(1f))

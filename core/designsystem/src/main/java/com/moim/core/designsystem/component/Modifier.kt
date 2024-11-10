@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,13 +23,14 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.semantics.Role
+import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_222222
-import com.moim.core.designsystem.theme.color_F5F5F5
 import kotlinx.coroutines.delay
 
+@Composable
 fun Modifier.containerScreen(
     padding: PaddingValues = PaddingValues(),
-    backgroundColor: Color = color_F5F5F5
+    backgroundColor: Color = MoimTheme.colors.bg.primary,
 ): Modifier {
     return this
         .fillMaxSize()

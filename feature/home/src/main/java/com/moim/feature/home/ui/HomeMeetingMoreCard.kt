@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_555555
 import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
 
@@ -42,7 +41,7 @@ fun HomeMeetingMoreCard(
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = "",
-                tint = color_555555
+                tint = MoimTheme.colors.gray.gray03
             )
 
             Spacer(Modifier.height(6.dp))
@@ -50,7 +49,7 @@ fun HomeMeetingMoreCard(
             Text(
                 text = stringResource(R.string.home_meeting_more),
                 style = MoimTheme.typography.title03.bold,
-                color = color_555555
+                color = MoimTheme.colors.gray.gray03
             )
         }
     }

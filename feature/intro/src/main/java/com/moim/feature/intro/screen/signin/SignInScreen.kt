@@ -34,9 +34,6 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
-import com.moim.core.designsystem.theme.color_3366FF
-import com.moim.core.designsystem.theme.color_7A7A7A
 import com.moim.core.designsystem.theme.color_FEE500
 import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.core.designsystem.theme.moimButtomColors
@@ -91,7 +88,7 @@ fun SignInScreen(
             Text(
                 text = stringResource(R.string.app_name),
                 style = MoimTheme.typography.heading.bold,
-                color = color_3366FF
+                color = MoimTheme.colors.primary.primary
             )
 
             Spacer(Modifier.height(16.dp))
@@ -99,7 +96,7 @@ fun SignInScreen(
             Text(
                 text = stringResource(R.string.app_description),
                 style = MoimTheme.typography.body01.regular,
-                color = color_7A7A7A
+                color = MoimTheme.colors.gray.gray03
             )
         }
 
@@ -121,7 +118,7 @@ private fun BoxScope.KakaoLoginButton(
             .align(Alignment.BottomCenter),
         buttonColors = moimButtomColors().copy(
             containerColor = color_FEE500,
-            contentColor = color_222222
+            contentColor = MoimTheme.colors.gray.gray01
         ),
         onClick = { onUiAction(SignInUiAction.OnClickKakaoLogin(context)) }
     ) {

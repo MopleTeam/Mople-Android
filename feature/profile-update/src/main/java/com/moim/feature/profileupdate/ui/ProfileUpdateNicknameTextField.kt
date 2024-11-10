@@ -13,9 +13,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
 import com.moim.core.designsystem.theme.color_34C759
-import com.moim.core.designsystem.theme.color_3E3F40
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.designsystem.theme.moimTextFieldColors
 import com.moim.feature.profileupdate.OnProfileUpdateUiAction
@@ -31,7 +29,7 @@ fun ProfileUpdateNicknameTextField(
     Text(
         text = stringResource(R.string.profile_update_nickname),
         style = MoimTheme.typography.title03.semiBold,
-        color = color_222222
+        color = MoimTheme.colors.gray.gray01
     )
 
     Spacer(Modifier.height(8.dp))
@@ -54,7 +52,7 @@ fun ProfileUpdateNicknameTextField(
             ) {
                 MoimPrimaryButton(
                     modifier = Modifier,
-                    buttonColors = moimButtomColors().copy(containerColor = color_3E3F40),
+                    buttonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
                     verticalPadding = 8.dp,
                     text = stringResource(R.string.profile_update_duplicate_check),
                     style = MoimTheme.typography.body01.semiBold,

@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_3E4145
 import com.moim.feature.profile.OnProfileUiAction
 import com.moim.feature.profile.ProfileUiAction
 
@@ -56,7 +55,7 @@ fun ProfileAuthSettingItem(
                 .padding(vertical = 16.dp, horizontal = 20.dp),
             text = text,
             style = MoimTheme.typography.title03.medium,
-            color = color_3E4145
+            color = MoimTheme.colors.gray.gray01
         )
     }
 }

@@ -14,7 +14,6 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
 
 @Composable
 fun ErrorScreen(
@@ -29,14 +28,14 @@ fun ErrorScreen(
         Text(
             text = stringResource(id = R.string.common_error),
             style = MoimTheme.typography.body01.medium,
-            color = color_222222,
+            color = MoimTheme.colors.gray.gray01,
         )
 
         Text(
             text = stringResource(id = R.string.common_error_description),
             textAlign = TextAlign.Center,
             style = MoimTheme.typography.body01.semiBold,
-            color = color_222222,
+            color = MoimTheme.colors.gray.gray01,
         )
 
         MoimPrimaryButton(

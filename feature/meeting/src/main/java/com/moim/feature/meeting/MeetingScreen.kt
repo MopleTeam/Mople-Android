@@ -34,8 +34,6 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_888888
-import com.moim.core.designsystem.theme.color_F5F5F5
-import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.core.model.Meeting
 import com.moim.feature.meeting.ui.MeetingCard
 
@@ -62,7 +60,7 @@ fun MeetingRoute(
         is MeetingUiState.Loading -> LoadingScreen(modifier = modifier)
 
         is MeetingUiState.Success -> MeetingScreen(
-            modifier = Modifier.containerScreen(backgroundColor = color_FFFFFF, padding = padding),
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding),
             uiState = uiState,
             onUiAction = viewModel::onUiAction
         )
@@ -82,7 +80,7 @@ fun MeetingScreen(
 ) {
     MoimScaffold(
         modifier = modifier,
-        backgroundColor = color_F5F5F5,
+        backgroundColor = MoimTheme.colors.bg.primary,
         topBar = {
             MoimTopAppbar(
                 title = stringResource(R.string.meeting_title),
@@ -157,13 +155,13 @@ fun MeetingEmptyScreen(
             modifier = Modifier.size(80.dp),
             imageVector = ImageVector.vectorResource(R.drawable.ic_group),
             contentDescription = "",
-            tint = Color.Unspecified
+            tint = MoimTheme.colors.icon
         )
 
         Text(
             text = stringResource(R.string.meeting_new_meeting),
             style = MoimTheme.typography.body01.medium,
-            color = color_888888
+            color = MoimTheme.colors.gray.gray06
         )
     }
 }

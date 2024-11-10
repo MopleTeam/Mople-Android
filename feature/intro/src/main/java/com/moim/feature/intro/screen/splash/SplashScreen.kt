@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -22,7 +21,6 @@ import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_3366FF
 import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.core.route.IntroRoute
 
@@ -70,7 +68,7 @@ private fun SplashScreen(
             modifier = Modifier.align(Alignment.Center),
             text = stringResource(R.string.app_name),
             style = MoimTheme.typography.heading.bold,
-            color = color_3366FF
+            color = MoimTheme.colors.primary.primary
         )
     }
 
@@ -80,6 +78,7 @@ private fun SplashScreen(
             description = stringResource(R.string.common_error_description),
             isNegative = false,
             cancelable = false,
+            positiveText = stringResource(R.string.common_confirm),
             onClickPositive = onClickFinish
         )
     }

@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.moim.core.designsystem.theme.color_3366FF
+import com.moim.core.designsystem.theme.MoimTheme
 
 @Composable
 fun LoadingScreen(
@@ -27,7 +27,7 @@ fun LoadingScreen(
                 .size(64.dp)
                 .padding(8.dp),
             strokeWidth = 4.dp,
-            color = color_3366FF
+            color = MoimTheme.colors.primary.primary
         )
     }
 }
@@ -50,7 +50,7 @@ fun LoadingDialog(isShow: Boolean) {
                         .size(64.dp)
                         .padding(8.dp),
                     strokeWidth = 4.dp,
-                    color = color_3366FF
+                    color = MoimTheme.colors.primary.primary
                 )
             }
         }

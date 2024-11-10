@@ -27,24 +27,21 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
-import com.moim.core.designsystem.theme.color_7A7A7A
-import com.moim.core.designsystem.theme.color_FFFFFF
 
 @Composable
 fun MoimTopAppbar(
     modifier: Modifier = Modifier,
     thickness: Dp = 0.dp,
-    dividerColor: Color = color_7A7A7A,
+    dividerColor: Color = MoimTheme.colors.stroke,
     title: String = "",
     titleStyle: TextStyle = MoimTheme.typography.title02.bold,
-    titleColor: Color = color_222222,
-    backgroundColor: Color = color_FFFFFF,
+    titleColor: Color = MoimTheme.colors.gray.gray01,
+    backgroundColor: Color = MoimTheme.colors.white,
     onClickNavigate: () -> Unit = {},
     navigationIcon: @Composable () -> Unit = {
         Icon(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
-            contentDescription = "back"
+            contentDescription = "back",
         )
     },
     actions: @Composable RowScope.() -> Unit = {},
@@ -79,9 +76,9 @@ fun MoimTopAppbar(
             windowInsets = WindowInsets(top = 0.dp),
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = Color.Transparent,
-                navigationIconContentColor = titleColor,
+                navigationIconContentColor = MoimTheme.colors.secondary,
                 titleContentColor = titleColor,
-                actionIconContentColor = titleColor
+                actionIconContentColor = MoimTheme.colors.icon
             )
         )
 

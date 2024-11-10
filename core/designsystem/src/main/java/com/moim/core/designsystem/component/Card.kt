@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import com.moim.core.designsystem.theme.color_FFFFFF
+import com.moim.core.designsystem.theme.MoimTheme
 
 @Composable
 fun MoimCard(
@@ -21,7 +21,7 @@ fun MoimCard(
     shape: Shape = RoundedCornerShape(12.dp),
     border: BorderStroke? = null,
     elevation: CardElevation = CardDefaults.cardElevation(),
-    color: Color = color_FFFFFF,
+    color: Color = MoimTheme.colors.white,
     onClick: () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit
 ) {

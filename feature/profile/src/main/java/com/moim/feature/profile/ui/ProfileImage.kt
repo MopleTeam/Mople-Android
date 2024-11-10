@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
@@ -24,7 +23,6 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
 import com.moim.core.model.User
 import com.moim.feature.profile.OnProfileUiAction
 import com.moim.feature.profile.ProfileUiAction
@@ -65,12 +63,12 @@ fun ProfileImage(
                 Text(
                     text = user.nickname,
                     style = MoimTheme.typography.title03.semiBold,
-                    color = color_222222
+                    color = MoimTheme.colors.gray.gray01
                 )
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
                     contentDescription = "",
-                    tint = Color.Unspecified
+                    tint = MoimTheme.colors.icon
                 )
             }
         }

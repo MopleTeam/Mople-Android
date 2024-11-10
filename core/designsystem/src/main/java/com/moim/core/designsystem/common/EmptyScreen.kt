@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.moim.core.designsystem.theme.color_FFFFFF
+import com.moim.core.designsystem.theme.MoimTheme
 
 @Composable
 fun EmptyScreen(
     modifier: Modifier = Modifier,
-    backgroundColor: Color = color_FFFFFF
+    backgroundColor: Color = MoimTheme.colors.white
 ) {
     Box(
         modifier = modifier

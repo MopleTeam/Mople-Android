@@ -31,7 +31,6 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.feature.profileupdate.ui.ProfileUpdateImage
 import com.moim.feature.profileupdate.ui.ProfileUpdateImageEditDialog
 import com.moim.feature.profileupdate.ui.ProfileUpdateNicknameTextField
@@ -51,7 +50,7 @@ fun ProfileUpdateRoute(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> if (uri != null) viewModel.onUiAction(ProfileUpdateUiAction.OnChangeProfileUrl(uri.toString())) }
     )
-    val modifier = Modifier.containerScreen(backgroundColor = color_FFFFFF, padding = padding)
+    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
@@ -137,7 +136,7 @@ fun ProfileUpdateScreen(
 private fun ProfileUpdateScreenPreview() {
     MoimTheme {
         ProfileUpdateScreen(
-            modifier = Modifier.containerScreen(backgroundColor = color_FFFFFF),
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
             uiState = ProfileUpdateUiState.Success(),
             isLoading = false,
             onUiAction = {}

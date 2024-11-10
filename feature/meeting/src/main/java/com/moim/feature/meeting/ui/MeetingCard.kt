@@ -16,8 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,10 +27,6 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
-import com.moim.core.designsystem.theme.color_888888
-import com.moim.core.designsystem.theme.color_F5F5F5
-import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.model.Meeting
 import com.moim.feature.meeting.MeetingUiAction
 import com.moim.feature.meeting.OnMeetingUiAction
@@ -58,7 +54,8 @@ fun MeetingCard(
                     modifier = Modifier
                         .size(56.dp)
                         .clip(RoundedCornerShape(12.dp)),
-                    imageUrl = meeting.imageUrl
+                    imageUrl = meeting.imageUrl,
+                    errorImage = painterResource(R.drawable.ic_meeting_empty)
                 )
 
                 Column(
@@ -67,7 +64,7 @@ fun MeetingCard(
                     Text(
                         text = meeting.name,
                         style = MoimTheme.typography.title03.semiBold,
-                        color = color_222222,
+                        color = MoimTheme.colors.gray.gray01,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -82,13 +79,13 @@ fun MeetingCard(
                             modifier = Modifier.size(20.dp),
                             imageVector = ImageVector.vectorResource(R.drawable.ic_group),
                             contentDescription = "",
-                            tint = Color.Unspecified
+                            tint = MoimTheme.colors.icon
                         )
 
                         Text(
                             text = stringResource(R.string.unit_participants_count_short, meeting.members.size),
                             style = MoimTheme.typography.body02.medium,
-                            color = color_888888
+                            color = MoimTheme.colors.gray.gray04
                         )
                     }
                 }
@@ -96,7 +93,7 @@ fun MeetingCard(
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_prev),
                     contentDescription = "",
-                    tint = Color.Unspecified
+                    tint = MoimTheme.colors.icon
                 )
             }
 
@@ -105,7 +102,7 @@ fun MeetingCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(color = color_F6F8FA, shape = RoundedCornerShape(8.dp)),
+                    .background(color = MoimTheme.colors.bg.input, shape = RoundedCornerShape(8.dp)),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -113,7 +110,7 @@ fun MeetingCard(
                     modifier = Modifier.padding(12.dp),
                     text = stringResource(R.string.meeting_new_plan),
                     style = MoimTheme.typography.body01.medium,
-                    color = color_888888,
+                    color = MoimTheme.colors.gray.gray04,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -129,7 +126,7 @@ private fun MeetingCardPreview() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = color_F5F5F5)
+                .background(color = MoimTheme.colors.bg.primary)
                 .padding(12.dp)
         ) {
             MeetingCard(

@@ -19,9 +19,6 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimBottomSheetDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
-import com.moim.core.designsystem.theme.color_3E3F40
-import com.moim.core.designsystem.theme.color_888888
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.feature.intro.screen.signup.OnSignUpUiAction
 import com.moim.feature.intro.screen.signup.SignUpUiAction
@@ -54,14 +51,14 @@ fun ProfileImageEditDialog(
             Text(
                 text = stringResource(R.string.common_profile_edit),
                 style = MoimTheme.typography.body01.semiBold,
-                color = color_222222
+                color = MoimTheme.colors.gray.gray01
             )
             Spacer(Modifier.height(24.dp))
 
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.common_default_select),
-                buttonColors = moimButtomColors().copy(containerColor = color_888888),
+                buttonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.gray.gray04),
                 onClick = {
                     onUiAction(dismissAction)
                     onUiAction(SignUpUiAction.OnChangeProfileUrl(null))
@@ -72,7 +69,7 @@ fun ProfileImageEditDialog(
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.common_album_select),
-                buttonColors = moimButtomColors().copy(containerColor = color_3E3F40),
+                buttonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
                 onClick = {
                     onUiAction(dismissAction)
                     onUiAction(SignUpUiAction.OnNavigatePhotoPicker)

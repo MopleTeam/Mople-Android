@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -19,8 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_3E4145
-import com.moim.core.designsystem.theme.color_CCCCCC
 import com.moim.feature.profile.BuildConfig
 import com.moim.feature.profile.OnProfileUiAction
 import com.moim.feature.profile.ProfileUiAction
@@ -68,7 +65,7 @@ fun ProfileSettingItem(
             modifier = Modifier.weight(1f),
             text = text,
             style = MoimTheme.typography.title03.medium,
-            color = color_3E4145
+            color = MoimTheme.colors.gray.gray01
         )
 
         Spacer(Modifier.width(4.dp))
@@ -77,13 +74,13 @@ fun ProfileSettingItem(
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_prev),
                 contentDescription = "",
-                tint = Color.Unspecified
+                tint = MoimTheme.colors.icon
             )
         } else {
             Text(
                 text = subText,
                 style = MoimTheme.typography.title03.medium,
-                color = color_CCCCCC
+                color = MoimTheme.colors.gray.gray06
             )
         }
     }

@@ -87,7 +87,7 @@ fun SignUpScreen(
         Text(
             text = stringResource(R.string.sign_up_title),
             style = MoimTheme.typography.heading.bold,
-            color = color_222222
+            color = MoimTheme.colors.gray.gray01
         )
 
         ProfileImage(

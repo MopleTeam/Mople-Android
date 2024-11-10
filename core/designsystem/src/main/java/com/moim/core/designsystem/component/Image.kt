@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.moim.core.designsystem.R
-import com.moim.core.designsystem.theme.color_FFFFFF
+import com.moim.core.designsystem.theme.MoimTheme
 
 @Composable
 fun NetworkImage(
@@ -54,7 +54,7 @@ fun NetworkImage(
 private fun NetworkImagePreview() {
     MaterialTheme {
         Column(
-            modifier = Modifier.background(color_FFFFFF)
+            modifier = Modifier.background(MoimTheme.colors.white)
         ) {
             NetworkImage(
                 modifier = Modifier.size(120.dp),

@@ -1,6 +1,7 @@
 package com.moim.core.designsystem.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,18 +10,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.designsystem.theme.moimButtomColors
 
 @Composable
 fun MoimDialog(
@@ -53,8 +56,9 @@ fun MoimAlertDialog(
     description: String = "",
     isNegative: Boolean = true,
     cancelable: Boolean = true,
-    negativeText: String = stringResource(id = R.string.common_cancel),
-    positiveText: String = stringResource(id = R.string.common_confirm),
+    negativeText: String = stringResource(id = R.string.common_negative),
+    positiveText: String = stringResource(id = R.string.common_positive),
+    positiveButtonColors : ButtonColors = moimButtomColors(),
     onClickNegative: () -> Unit = {},
     onClickPositive: () -> Unit = {},
     onDismiss: () -> Unit = {},
@@ -66,52 +70,71 @@ fun MoimAlertDialog(
             MoimTheme {
                 Column(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
-                        .padding(24.dp)
-                        .fillMaxWidth()
+                        .background(MoimTheme.colors.white, RoundedCornerShape(10.dp))
+                        .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = title,
-                        style = MoimTheme.typography.body01.semiBold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = MoimTheme.typography.title02.semiBold,
+                        color = MoimTheme.colors.gray.gray01
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        text = description,
-                        style = MoimTheme.typography.body01.regular,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    if (description.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = description,
+                            style = MoimTheme.typography.body01.regular,
+                            color = MoimTheme.colors.gray.gray02,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Spacer(modifier = Modifier.weight(1f))
-
                         if (isNegative) {
-                            TextButton(
-                                onClick = onClickNegative
-                            ) {
-                                Text(
-                                    text = negativeText,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    style = MoimTheme.typography.body01.semiBold,
-                                    modifier = Modifier.align(Alignment.CenterVertically)
+                            MoimPrimaryButton(
+                                modifier = Modifier.weight(1f),
+                                onClick = onClickNegative,
+                                verticalPadding = 16.dp,
+                                text = negativeText,
+                                style = MoimTheme.typography.title03.semiBold,
+                                buttonColors = moimButtomColors().copy(
+                                    containerColor = MoimTheme.colors.tertiary,
+                                    contentColor = MoimTheme.colors.gray.gray01
                                 )
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
                         }
 
                         MoimPrimaryButton(
+                            modifier = Modifier.weight(1f),
                             onClick = onClickPositive,
-                            verticalPadding = 8.dp,
+                            verticalPadding = 16.dp,
                             text = positiveText,
+                            buttonColors = positiveButtonColors,
+                            style = MoimTheme.typography.title03.semiBold,
                         )
                     }
                 }
             }
         }
     )
+}
+
+@Preview
+@Composable
+private fun MoimAlertDialogPreview() {
+    Column(
+        modifier = Modifier.containerScreen()
+    ) {
+        MoimAlertDialog(
+            title = "정말 탈퇴하시겠어요?",
+            description = "회원 탈퇴하면 모임과 일정을 복구할 수 없어요"
+        )
+    }
 }

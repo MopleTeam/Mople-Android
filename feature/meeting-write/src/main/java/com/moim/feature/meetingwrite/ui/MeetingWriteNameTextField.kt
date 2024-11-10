@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
 import com.moim.core.designsystem.theme.moimTextFieldColors
 import com.moim.feature.meetingwrite.MeetingWriteUiAction
 import com.moim.feature.meetingwrite.OnMeetingWriteUiAction
@@ -23,7 +22,7 @@ fun MeetingWriteNameTextField(
     Text(
         text = stringResource(R.string.meeting_write_name),
         style = MoimTheme.typography.title03.semiBold,
-        color = color_222222
+        color = MoimTheme.colors.gray.gray01
     )
     Spacer(Modifier.height(8.dp))
     MoimTextField(

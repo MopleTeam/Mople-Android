@@ -8,12 +8,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.moim.core.designsystem.theme.color_FFFFFF
+import com.moim.core.designsystem.theme.MoimTheme
 
 @Composable
 fun MoimScaffold(
     modifier: Modifier = Modifier,
-    backgroundColor: Color = color_FFFFFF,
+    backgroundColor: Color = MoimTheme.colors.white,
     topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
