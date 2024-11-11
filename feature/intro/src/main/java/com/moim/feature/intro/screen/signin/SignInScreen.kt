@@ -1,13 +1,11 @@
 package com.moim.feature.intro.screen.signin
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,9 +31,9 @@ import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
+import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_FEE500
-import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.route.IntroRoute
 
@@ -62,6 +60,7 @@ fun SignInRoute(
     }
 
     SignInScreen(
+        modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
         isLoading = isLoading,
         onUiAction = viewModel::onUiAction
     )
@@ -75,8 +74,6 @@ fun SignInScreen(
 ) {
     Box(
         modifier = modifier
-            .fillMaxSize()
-            .background(color_FFFFFF)
             .systemBarsPadding()
             .padding(horizontal = 20.dp, vertical = 28.dp)
     ) {

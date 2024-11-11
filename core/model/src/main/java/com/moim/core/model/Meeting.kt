@@ -13,7 +13,7 @@ data class Meeting(
     val creatorId: String = "",
     val creatorNickname: String = "",
     val createdAt: String = "",
-    val lastPlanAt: String = ""
+    val lastPlanAt: String? = null
 )
 
 @Stable

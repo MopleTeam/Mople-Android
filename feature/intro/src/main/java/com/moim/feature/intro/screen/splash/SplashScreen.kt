@@ -2,9 +2,7 @@ package com.moim.feature.intro.screen.splash
 
 import android.app.Activity
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,8 +18,8 @@ import androidx.navigation.NavOptions
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimAlertDialog
+import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.core.route.IntroRoute
 
 @Composable
@@ -60,8 +58,7 @@ private fun SplashScreen(
 ) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color_FFFFFF)
+            .containerScreen(backgroundColor = MoimTheme.colors.white)
             .systemBarsPadding()
     ) {
         Text(

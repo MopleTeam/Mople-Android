@@ -49,8 +49,11 @@
     <!-- Meeting -->
     <string name="meeting_title">모임</string>
     <string name="meeting_new_meeting">새로운 모임을 추가해주세요</string>
-    <string name="meeting_new_plan">새로운 일정을 추가해보세요</string>
-    <string name="meeting_last_at_count">마지막 약속으로부터 %d일 지났습니다.</string>
+    <string name="meeting_plan_new">새로운 일정을 추가해보세요</string>
+    <string name="meeting_plan_today_count">오늘</string>
+    <string name="meeting_plan_after_count">D-%d</string>
+    <string name="meeting_plan_comment">약속된 일정이있어요</string>
+    <string name="meeting_plan_before">마지막 약속으로부터 %d일 지났습니다.</string>
 
     <!-- MeetingWrite -->
     <string name="meeting_write_title_for_create">모임 생성하기</string>

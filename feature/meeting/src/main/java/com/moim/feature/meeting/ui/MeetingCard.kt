@@ -20,9 +20,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.util.getDateTimeBetweenDay
+import com.moim.core.common.util.parseZoneDateTime
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.NetworkImage
@@ -30,6 +35,7 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Meeting
 import com.moim.feature.meeting.MeetingUiAction
 import com.moim.feature.meeting.OnMeetingUiAction
+import kotlin.math.absoluteValue
 
 @Composable
 fun MeetingCard(
@@ -37,6 +43,16 @@ fun MeetingCard(
     meeting: Meeting,
     onUiAction: OnMeetingUiAction = {}
 ) {
+    val (count, comment) = meeting.lastPlanAt
+        ?.let { lastDate ->
+            val day = getDateTimeBetweenDay(endDate = lastDate.parseZoneDateTime())
+            when {
+                day == 0 -> stringResource(R.string.meeting_plan_today_count) to stringResource(R.string.meeting_plan_comment)
+                day > 0 -> stringResource(R.string.meeting_plan_after_count, day) to stringResource(R.string.meeting_plan_comment)
+                else -> null to stringResource(R.string.meeting_plan_before, day.absoluteValue)
+            }
+        } ?: run { null to stringResource(R.string.meeting_plan_new) }
+
     MoimCard(
         modifier = modifier,
         onClick = { onUiAction(MeetingUiAction.OnClickMeeting(meetingId = meeting.id)) }
@@ -44,7 +60,6 @@ fun MeetingCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -108,7 +123,12 @@ fun MeetingCard(
             ) {
                 Text(
                     modifier = Modifier.padding(12.dp),
-                    text = stringResource(R.string.meeting_new_plan),
+                    text = buildAnnotatedString {
+                        if (count != null) {
+                            withStyle(style = SpanStyle(color = MoimTheme.colors.primary.primary)) { append(count.plus(" ")) }
+                        }
+                        append(comment)
+                    },
                     style = MoimTheme.typography.body01.medium,
                     color = MoimTheme.colors.gray.gray04,
                     maxLines = 1,

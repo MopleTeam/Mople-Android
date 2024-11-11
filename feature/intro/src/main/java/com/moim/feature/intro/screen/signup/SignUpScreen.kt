@@ -3,10 +3,8 @@ package com.moim.feature.intro.screen.signup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -28,9 +26,8 @@ import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
+import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_222222
-import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.feature.intro.screen.signup.ui.NicknameTextField
 import com.moim.feature.intro.screen.signup.ui.ProfileImage
 import com.moim.feature.intro.screen.signup.ui.ProfileImageEditDialog
@@ -61,6 +58,7 @@ fun SignUpRoute(
 
     when (val uiState = signUpUiState) {
         is SignUpUiState.SignUp -> SignUpScreen(
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
             uiState = uiState,
             isLoading = isLoading,
             onUiAction = viewModel::onUiAction
@@ -77,8 +75,6 @@ fun SignUpScreen(
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .background(color_FFFFFF)
             .verticalScroll(rememberScrollState())
             .systemBarsPadding()
             .imePadding()
