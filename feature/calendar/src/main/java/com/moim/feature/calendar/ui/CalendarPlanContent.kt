@@ -1,30 +1,33 @@
-package com.moim.feature.home.ui
+package com.moim.feature.calendar.ui
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Vertical
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.moim.core.common.util.getDateTimeFormatString
+import com.moim.core.common.util.getDateTimeFormatZoneDate
 import com.moim.core.common.util.toDecimalString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
@@ -32,51 +35,102 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.model.MeetingPlan
-import com.moim.core.model.Participant
-import com.moim.feature.home.HomeUiAction
-import com.moim.feature.home.OnHomeUiAction
+import com.moim.feature.calendar.CalendarUiAction
+import com.moim.feature.calendar.OnCalendarUiAction
 import java.time.ZonedDateTime
 
 @Composable
-fun HomeMeetingPlanCard(
+fun CalendarPlanContent(
+    modifier: Modifier = Modifier,
+    selectDate: ZonedDateTime,
+    meetingPlans: List<MeetingPlan> = emptyList(),
+    onUiAction: OnCalendarUiAction = {}
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MoimTheme.colors.bg.primary),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(vertical = 28.dp, horizontal = 20.dp)
+    ) {
+        item {
+            Column {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = getDateTimeFormatZoneDate(selectDate, stringResource(R.string.regex_date_day)),
+                    textAlign = TextAlign.Center,
+                    style = MoimTheme.typography.body01.medium,
+                    color = MoimTheme.colors.gray.gray05,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+
+        items(
+            items = meetingPlans,
+            key = { plan -> plan.id }
+        ) {
+            CalendarPlanItem(
+                meetingPlan = it,
+                onUiAction = onUiAction
+            )
+        }
+    }
+}
+
+@Composable
+fun CalendarPlanItem(
     modifier: Modifier = Modifier,
     meetingPlan: MeetingPlan,
-    onUiAction: OnHomeUiAction = {}
+    onUiAction: OnCalendarUiAction = {}
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(HomeUiAction.OnClickMeeting(meetingId = meetingPlan.meetingId)) }
+        onClick = { onUiAction(CalendarUiAction.OnClickMeetingPlan(id = meetingPlan.meetingId)) }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(MoimTheme.colors.white)
                 .padding(16.dp)
         ) {
             MeetingInfoTopAppbar(
-                groupName = meetingPlan.name
+                groupName = meetingPlan.meetingName
             )
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = meetingPlan.meetingName,
-                style = MoimTheme.typography.title01.bold,
+                text = meetingPlan.name,
+                style = MoimTheme.typography.title02.bold,
                 color = MoimTheme.colors.gray.gray01
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(4.dp))
 
-            MeetingInfoText(
-                iconRes = R.drawable.ic_group,
-                text = stringResource(R.string.unit_participants_count, meetingPlan.participants.size)
-            )
-            MeetingInfoText(
-                modifier = Modifier.padding(vertical = 4.dp),
-                iconRes = R.drawable.ic_clock,
-                text = getDateTimeFormatString(dateTime = meetingPlan.startedAt, pattern = stringResource(R.string.regex_date_full))
-            )
-            MeetingInfoText(
-                iconRes = R.drawable.ic_location,
-                text = meetingPlan.detailAddress,
-            )
+            Row(
+                modifier = modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    modifier = Modifier.size(18.dp),
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_group),
+                    contentDescription = "",
+                    tint = MoimTheme.colors.icon
+                )
+
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 4.dp),
+                    text = stringResource(R.string.unit_participants_count, meetingPlan.participants.size),
+                    style = MoimTheme.typography.body02.medium,
+                    color = MoimTheme.colors.gray.gray04,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             Spacer(Modifier.height(16.dp))
 
             MeetingWeatherInfo(
@@ -126,39 +180,6 @@ private fun MeetingInfoTopAppbar(
 }
 
 @Composable
-private fun MeetingInfoText(
-    modifier: Modifier = Modifier,
-    verticalGravity: Vertical = Alignment.CenterVertically,
-    maxLines: Int = 1,
-    @DrawableRes iconRes: Int,
-    text: String,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = verticalGravity
-    ) {
-        Icon(
-            modifier = Modifier.size(18.dp),
-            imageVector = ImageVector.vectorResource(iconRes),
-            contentDescription = "",
-            tint = MoimTheme.colors.icon
-        )
-
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 4.dp),
-            text = text,
-            style = MoimTheme.typography.body02.medium,
-            color = MoimTheme.colors.gray.gray04,
-            maxLines = maxLines,
-            minLines = maxLines,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
 private fun MeetingWeatherInfo(
     modifier: Modifier = Modifier,
     temperature: Float,
@@ -192,23 +213,6 @@ private fun MeetingWeatherInfo(
             text = address,
             style = MoimTheme.typography.body02.medium,
             color = MoimTheme.colors.gray.gray04
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun HomeMeetingPlanCardPreview() {
-    MoimTheme {
-        HomeMeetingPlanCard(
-            meetingPlan = MeetingPlan(
-                name = "우리중학교 동창",
-                meetingName = "술 한잔 하는 날",
-                participants = listOf(Participant(), Participant(), Participant()),
-                address = "서울 강남구",
-                detailAddress = "제주특별자치도 제주시 일주서로 95 제주특별자치도 제주시 일주서로 95 제주특별자치도 제주시 일주서로 95",
-                startedAt = ZonedDateTime.now().toString()
-            )
         )
     }
 }

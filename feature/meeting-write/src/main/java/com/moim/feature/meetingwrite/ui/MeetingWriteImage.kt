@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.NetworkImage
@@ -36,7 +37,9 @@ fun MeetingWriteImage(
             .padding(vertical = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box {
+        Box(
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
             if (meetingImageUrl.isNullOrEmpty()) {
                 Box(
                     modifier = Modifier
@@ -68,10 +71,29 @@ fun MeetingWriteImage(
             }
 
             Icon(
-                modifier = Modifier.align(Alignment.BottomEnd),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(start = 65.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.ic_edit),
                 contentDescription = null,
                 tint = Color.Unspecified
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun MeetingWriteImagePreview() {
+    MoimTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MoimTheme.colors.white)
+        ) {
+            MeetingWriteImage(
+                meetingImageUrl = null,
+                onUiAction = {}
             )
         }
     }

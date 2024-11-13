@@ -5,3 +5,7 @@ plugins {
 android {
     namespace = "com.moim.feature.calendar"
 }
+
+dependencies {
+    implementation(libs.calendar.compose)
+}

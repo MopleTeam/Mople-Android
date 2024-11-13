@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -33,7 +32,6 @@ import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_888888
 import com.moim.core.model.Meeting
 import com.moim.feature.meeting.ui.MeetingCard
 
@@ -84,7 +82,7 @@ fun MeetingScreen(
         topBar = {
             MoimTopAppbar(
                 title = stringResource(R.string.meeting_title),
-                navigationIcon = {},
+                isNavigationIconVisible = false
             )
         },
         content = { padding ->

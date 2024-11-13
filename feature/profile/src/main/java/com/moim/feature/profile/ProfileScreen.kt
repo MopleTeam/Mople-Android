@@ -87,7 +87,7 @@ fun ProfileScreen(
     ) {
         MoimTopAppbar(
             title = stringResource(R.string.profile_title),
-            navigationIcon = {}
+            isNavigationIconVisible = false
         )
         Column(
             modifier = Modifier

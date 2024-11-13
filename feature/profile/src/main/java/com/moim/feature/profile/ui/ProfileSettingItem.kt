@@ -72,7 +72,7 @@ fun ProfileSettingItem(
 
         if (subText == null) {
             Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_prev),
+                imageVector = ImageVector.vectorResource(R.drawable.ic_next),
                 contentDescription = "",
                 tint = MoimTheme.colors.icon
             )

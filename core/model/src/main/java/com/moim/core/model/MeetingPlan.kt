@@ -1,7 +1,6 @@
 package com.moim.core.model
 
 import androidx.compose.runtime.Stable
-import com.moim.core.data.model.ActiveCommentResponse
 import com.moim.core.data.model.MeetingPlanResponse
 import com.moim.core.data.model.ParticipantResponse
 
@@ -30,16 +29,6 @@ data class Participant(
     val userProfileUrl: String = "",
 )
 
-@Stable
-data class ActiveComment(
-    val id: String = "",
-    val creatorId: String = "",
-    val creatorNickname: String = "",
-    val creatorProfileUrl: String = "",
-    val contents: String = "",
-    val createdAt: String = "",
-    val updatedAt: String = ""
-)
 
 fun MeetingPlanResponse.asItem(): MeetingPlan {
     return MeetingPlan(
@@ -65,17 +54,5 @@ fun ParticipantResponse.asItem(): Participant {
         userId = userId,
         userNickname = userNickname,
         userProfileUrl = userProfileUrl
-    )
-}
-
-fun ActiveCommentResponse.asItem(): ActiveComment {
-    return ActiveComment(
-        id = id,
-        creatorId = creatorId,
-        creatorNickname = creatorNickname,
-        creatorProfileUrl = creatorProfileUrl,
-        contents = contents,
-        createdAt = createdAt,
-        updatedAt = updatedAt
     )
 }

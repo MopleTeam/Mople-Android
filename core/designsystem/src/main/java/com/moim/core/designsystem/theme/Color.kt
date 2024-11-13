@@ -26,7 +26,6 @@ val color_F2F2F2 = Color(0XFFF2F2F2)
 val color_FFFFFF = Color(0xFFFFFFFF)
 
 val color_FF3B30 = Color(0XFFFF3B30)
-val color_DC5D5D = Color(0XFFDC5D5D)
 val color_34C759 = Color(0XFF34C759)
 val color_FEE500 = Color(0xFFFEE500)
 val color_3366FF = Color(0xFF3366FF)
@@ -84,36 +83,36 @@ data class Gray(
 
 @Composable
 fun moimTextFieldColors() = TextFieldDefaults.colors(
-    focusedContainerColor = color_F6F8FA,
-    unfocusedContainerColor = color_F6F8FA,
-    errorContainerColor = color_F6F8FA,
+    focusedContainerColor = MoimTheme.colors.bg.input,
+    unfocusedContainerColor = MoimTheme.colors.bg.input,
+    errorContainerColor = MoimTheme.colors.bg.input,
 
-    focusedIndicatorColor = color_F6F8FA,
-    unfocusedIndicatorColor = color_F6F8FA,
-    errorIndicatorColor = color_F6F8FA,
+    focusedIndicatorColor = MoimTheme.colors.bg.input,
+    unfocusedIndicatorColor = MoimTheme.colors.bg.input,
+    errorIndicatorColor = MoimTheme.colors.bg.input,
 
-    focusedTextColor = color_222222,
-    unfocusedTextColor = color_222222,
-    errorTextColor = color_222222,
+    focusedTextColor = MoimTheme.colors.gray.gray01,
+    unfocusedTextColor = MoimTheme.colors.gray.gray01,
+    errorTextColor = MoimTheme.colors.gray.gray01,
 
-    focusedSupportingTextColor = color_222222,
-    unfocusedSupportingTextColor = color_222222,
-    errorSupportingTextColor = color_DC5D5D,
+    focusedSupportingTextColor = MoimTheme.colors.gray.gray01,
+    unfocusedSupportingTextColor = MoimTheme.colors.gray.gray01,
+    errorSupportingTextColor = MoimTheme.colors.red,
 
-    focusedLeadingIconColor = color_222222,
-    unfocusedLeadingIconColor = color_222222,
-    errorLeadingIconColor = color_222222,
+    focusedLeadingIconColor = MoimTheme.colors.gray.gray01,
+    unfocusedLeadingIconColor = MoimTheme.colors.gray.gray01,
+    errorLeadingIconColor = MoimTheme.colors.gray.gray01,
 
-    focusedTrailingIconColor = color_222222,
-    unfocusedTrailingIconColor = color_222222,
-    errorTrailingIconColor = color_222222,
+    focusedTrailingIconColor = MoimTheme.colors.gray.gray01,
+    unfocusedTrailingIconColor = MoimTheme.colors.gray.gray01,
+    errorTrailingIconColor = MoimTheme.colors.gray.gray01,
 
-    focusedPlaceholderColor = color_999999,
-    unfocusedPlaceholderColor = color_999999,
-    errorPlaceholderColor = color_999999,
+    focusedPlaceholderColor = MoimTheme.colors.gray.gray05,
+    unfocusedPlaceholderColor = MoimTheme.colors.gray.gray05,
+    errorPlaceholderColor = MoimTheme.colors.gray.gray05,
 
-    cursorColor = color_3366FF,
-    errorCursorColor = color_3366FF,
+    cursorColor = MoimTheme.colors.primary.primary,
+    errorCursorColor = MoimTheme.colors.primary.primary,
 )
 
 @Composable

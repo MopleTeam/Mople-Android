@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.moim.core.designsystem.theme.color_FFFFFF
+import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.route.IntroRoute
 import com.moim.feature.intro.screen.signin.navigateToSignIn
 import com.moim.feature.intro.screen.signin.signInNavigation
@@ -26,7 +26,7 @@ fun IntroNavHost(
     NavHost(
         modifier = modifier
             .fillMaxSize()
-            .background(color_FFFFFF),
+            .background(MoimTheme.colors.white),
         navController = navController,
         startDestination = startDestination,
     ) {

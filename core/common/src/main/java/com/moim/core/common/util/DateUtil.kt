@@ -2,6 +2,7 @@ package com.moim.core.common.util
 
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -37,6 +38,11 @@ fun getDateTimeBetweenDay(startDate: ZonedDateTime? = null, endDate: ZonedDateTi
 
 fun String?.parseZoneDateTime(): ZonedDateTime {
     val zonedDateTime = this?.let { ZonedDateTime.parse(this) } ?: ZonedDateTime.now()
+    return zonedDateTime
+}
+
+fun LocalDate.parseZoneDateTime(): ZonedDateTime {
+    val zonedDateTime = this.atStartOfDay(ZoneId.systemDefault())
     return zonedDateTime
 }
 

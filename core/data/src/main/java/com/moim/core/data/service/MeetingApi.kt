@@ -25,7 +25,7 @@ internal interface MeetingApi {
         @Query("closed") isClosed: Boolean,
     ): List<MeetingPlanResponse>
 
-    @POST("/meeting")
+    @POST("/meeting/create")
     suspend fun createMeeting(
         @Body params: JsonObject
     ): MeetingResponse

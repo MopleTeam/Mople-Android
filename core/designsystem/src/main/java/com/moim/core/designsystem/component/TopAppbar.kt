@@ -37,6 +37,7 @@ fun MoimTopAppbar(
     titleStyle: TextStyle = MoimTheme.typography.title02.bold,
     titleColor: Color = MoimTheme.colors.gray.gray01,
     backgroundColor: Color = MoimTheme.colors.white,
+    isNavigationIconVisible: Boolean = true,
     onClickNavigate: () -> Unit = {},
     navigationIcon: @Composable () -> Unit = {
         Icon(
@@ -62,14 +63,16 @@ fun MoimTopAppbar(
                 )
             },
             navigationIcon = {
-                IconButton(
-                    onClick = {
-                        keyboardController?.hide()
-                        focusManager.clearFocus()
-                        onClickNavigate()
+                if (isNavigationIconVisible) {
+                    IconButton(
+                        onClick = {
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                            onClickNavigate()
+                        }
+                    ) {
+                        navigationIcon()
                     }
-                ) {
-                    navigationIcon()
                 }
             },
             actions = actions,

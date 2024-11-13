@@ -23,12 +23,13 @@ fun MoimCard(
     elevation: CardElevation = CardDefaults.cardElevation(),
     color: Color = MoimTheme.colors.white,
     onClick: () -> Unit = {},
+    enable: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Box(
         modifier = modifier
             .clip(shape)
-            .onSingleClick { onClick() }
+            .onSingleClick(enabled = enable, onClick = onClick)
     ) {
         Card(
             modifier = modifier,

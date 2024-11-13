@@ -9,11 +9,13 @@ import com.moim.core.route.MainRoute
 
 
 fun NavGraphBuilder.calendarScreen(
-    padding: PaddingValues
+    padding: PaddingValues,
+    navigateToPlanDetail: (String) -> Unit,
 ) {
     composable<MainRoute.Calendar> {
         CalendarRoute(
-            padding = padding
+            padding = padding,
+            navigateToPlanDetail = navigateToPlanDetail
         )
     }
 }

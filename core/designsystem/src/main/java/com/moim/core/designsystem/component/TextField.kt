@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.component.internal.MoimOutlinedTextField
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_FFFFFF
 import com.moim.core.designsystem.theme.moimTextFieldColors
 
 @Composable
@@ -140,7 +139,7 @@ private fun MoimTextFieldPreview() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color_FFFFFF)
+                .background(MoimTheme.colors.white)
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {

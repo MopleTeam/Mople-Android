@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.moim.core.designsystem.component.MoimScaffold
-import com.moim.core.designsystem.theme.color_FFFFFF
+import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.calendar.calendarScreen
 import com.moim.feature.home.homeScreen
 import com.moim.feature.main.navigation.MainNavController
@@ -32,7 +32,7 @@ fun MainScreen(
             NavHost(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color_FFFFFF),
+                    .background(MoimTheme.colors.white),
                 enterTransition = { EnterTransition.None },
                 exitTransition = { ExitTransition.None },
                 navController = navigator.navController,
@@ -56,7 +56,8 @@ fun MainScreen(
                     navigateToBack = navigator.navController::popBackStack
                 )
                 calendarScreen(
-                    padding = innerPadding
+                    padding = innerPadding,
+                    navigateToPlanDetail = {}
                 )
                 profileScreen(
                     padding = innerPadding,
