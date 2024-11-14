@@ -51,6 +51,9 @@ compressor = "3.0.1"
 calendarCompose = "2.6.0"
 composeStableMarker = "1.0.5"
 kakaoCore = "2.17.0"
+naverMapCompose = "1.7.1"
+naverMapLocation = "21.0.1"
+tedClusteringNaver = "1.0.2"
 
 [libraries]
 # AndroidX
@@ -137,6 +140,10 @@ lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", versio
 compose-stable-marker = { group = "com.github.skydoves", name = "compose-stable-marker", version.ref = "composeStableMarker" }
 calendar-compose = { group = "com.kizitonwose.calendar", name = "compose", version.ref = "calendarCompose" }
 
+naver-map-compose = { group = "io.github.fornewid", name = "naver-map-compose", version.ref = "naverMapCompose" }
+naver-map-location = { group = "io.github.fornewid", name = "naver-map-location", version.ref = "naverMapLocation" }
+tedclustering-naver = { group = "io.github.ParkSangGwon", name = "tedclustering-naver", version.ref = "tedClusteringNaver" }
+
 leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }
 compressor = { group = "id.zelory", name = "compressor", version.ref = "compressor" }
 kakao-login = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaoCore" }
@@ -151,6 +158,7 @@ androidx-paging = ["androidx-paging-runtime", "androidx-paging-common", "android
 androidx-lifecycle = ["androidx-lifecycle-runtime-compose", "androidx-lifecycle-viewModel-compose", "androidx-lifecycle-savedState"]
 coil = ["coil-kt", "coil-kt-compose", "coil-kt-svg"]
 retrofit = ["retrofit-core", "retrofit-converter-kotlinx-serialization", "okhttp-logging"]
+naver-map-compose = ["naver-map-compose", "naver-map-location", "tedclustering-naver", ]
 
 [plugins]
 # Android Plugin

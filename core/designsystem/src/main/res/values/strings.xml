@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">모임테이블</string>
+    <string name="app_name">모플</string>
     <string name="app_description">모임부터 약속까지 간편한 관리</string>
 
     <!--common -->
@@ -63,6 +63,23 @@
     <string name="meeting_write_name">모임 이름</string>
     <string name="meeting_write_hint">모임 이름을 입력해주세요</string>
 
+    <!-- PlanWrite -->
+    <string name="plan_write_title_for_create">약속 생성하기</string>
+    <string name="plan_write_title_for_update">약속 수정하기</string>
+    <string name="plan_write_meeting_select">모임 선택</string>
+    <string name="plan_write_meeting_select_hint">모임을 선택해주세요</string>
+    <string name="plan_write_meeting_select_error">모임 정보를 불러오지 못했습니다\n잠시 후 다시 시도해주세요</string>
+    <string name="plan_write_name">약속 이름</string>
+    <string name="plan_write_name_hint">일정을 입력해주세요</string>
+    <string name="plan_write_date_select">날짜 선택</string>
+    <string name="plan_write_date_select_hint">날짜를 선택해주세요</string>
+    <string name="plan_write_time_select">시간 선택</string>
+    <string name="plan_write_time_select_hint">시간을 선택해주세요</string>
+    <string name="plan_write_place_select">장소 선택</string>
+    <string name="plan_write_place_select_hint">장소를 선택해주세요</string>
+    <string name="plan_write_create">일정 생성</string>
+    <string name="plan_write_update">일정 수정</string>
+
     <!-- Calendar -->
     <string name="calendar_title">일정관리</string>
     <string name="calendar_empty">새로운 일정을 추가해보세요.</string>
@@ -95,5 +112,7 @@
     <!-- Regex -->
     <string name="regex_date_full">yyyy.MM.dd E hh시 mm분</string>
     <string name="regex_date_month">yyyy년 M월</string>
-    <string name="regex_date_day">yyyy년 M월 d일 E</string>
+    <string name="regex_date_day">yyyy년 M월 d일 EEEE</string>
+    <string name="regex_date_day_short">yyyy년 M월 d일 E</string>
+    <string name="regex_date_time">HH시 mm분</string>
 </resources>

@@ -44,5 +44,8 @@ sealed interface DetailRoute : Route {
     data object MeetingDetail : DetailRoute
 
     @Serializable
+    data class PlanWrite(val planId: String? = null) : DetailRoute
+
+    @Serializable
     data object ProfileUpdate : DetailRoute
 }

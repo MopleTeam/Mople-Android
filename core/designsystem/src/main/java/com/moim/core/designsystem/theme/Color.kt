@@ -83,34 +83,42 @@ data class Gray(
 
 @Composable
 fun moimTextFieldColors() = TextFieldDefaults.colors(
+    // container
     focusedContainerColor = MoimTheme.colors.bg.input,
     unfocusedContainerColor = MoimTheme.colors.bg.input,
     errorContainerColor = MoimTheme.colors.bg.input,
 
+    // indicator
     focusedIndicatorColor = MoimTheme.colors.bg.input,
     unfocusedIndicatorColor = MoimTheme.colors.bg.input,
     errorIndicatorColor = MoimTheme.colors.bg.input,
 
+    // text
     focusedTextColor = MoimTheme.colors.gray.gray01,
     unfocusedTextColor = MoimTheme.colors.gray.gray01,
     errorTextColor = MoimTheme.colors.gray.gray01,
 
+    // supportText
     focusedSupportingTextColor = MoimTheme.colors.gray.gray01,
     unfocusedSupportingTextColor = MoimTheme.colors.gray.gray01,
     errorSupportingTextColor = MoimTheme.colors.red,
 
+    // leftIcon
     focusedLeadingIconColor = MoimTheme.colors.gray.gray01,
     unfocusedLeadingIconColor = MoimTheme.colors.gray.gray01,
     errorLeadingIconColor = MoimTheme.colors.gray.gray01,
 
+    // rightIcon
     focusedTrailingIconColor = MoimTheme.colors.gray.gray01,
     unfocusedTrailingIconColor = MoimTheme.colors.gray.gray01,
     errorTrailingIconColor = MoimTheme.colors.gray.gray01,
 
+    // placeHolder
     focusedPlaceholderColor = MoimTheme.colors.gray.gray05,
     unfocusedPlaceholderColor = MoimTheme.colors.gray.gray05,
     errorPlaceholderColor = MoimTheme.colors.gray.gray05,
 
+    // cursor
     cursorColor = MoimTheme.colors.primary.primary,
     errorCursorColor = MoimTheme.colors.primary.primary,
 )

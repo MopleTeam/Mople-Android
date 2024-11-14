@@ -19,10 +19,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            setUrl("https://jitpack.io")
-            setUrl("https://devrepo.kakao.com/nexus/content/groups/public/")
-        }
+        maven("https://devrepo.kakao.com/nexus/content/groups/public/")
+        maven("https://repository.map.naver.com/archive/maven")
     }
 }
 
@@ -44,3 +42,4 @@ include(":feature:meeting-write")
 include(":feature:calendar")
 include(":feature:profile")
 include(":feature:profile-update")
+include(":feature:plan-write")
