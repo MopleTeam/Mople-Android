@@ -40,14 +40,14 @@ fun HomeCreateCards(
         HomeCreateCard(
             modifier = Modifier.weight(1f),
             iconRes = R.drawable.ic_new_group,
-            text = stringResource(R.string.home_new_group_created),
+            text = stringResource(R.string.home_new_meeting_created),
             onClick = { onUiAction(HomeUiAction.OnClickMeetingWrite) }
         )
 
         HomeCreateCard(
             modifier = Modifier.weight(1f),
             iconRes = R.drawable.ic_new_calendar,
-            text = stringResource(R.string.home_new_meeting_created),
+            text = stringResource(R.string.home_new_plan_created),
             onClick = { onUiAction(HomeUiAction.OnClickPlanWrite) }
         )
     }

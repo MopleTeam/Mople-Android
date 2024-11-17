@@ -92,7 +92,7 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             HomeMeetingPager(
-                meetingPlans = uiState.meetingPlans,
+                meetingPlans = uiState.plans,
                 onUiAction = onUiAction
             )
             HomeCreateCards(
@@ -153,7 +153,7 @@ private fun HomeScreenPreview() {
         HomeScreen(
             modifier = Modifier.containerScreen(),
             uiState = HomeUiState.Success(
-                meetingPlans = listOf(
+                plans = listOf(
                     MeetingPlan(
                         meetingId = "1",
                         name = "우리중학교 동창1",

@@ -14,7 +14,7 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
-import com.moim.core.data.datasource.meeting.MeetingRepository
+import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.model.MeetingPlanResponse
 import com.moim.core.designsystem.R
 import com.moim.core.model.MeetingPlan
@@ -33,13 +33,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
-    private val meetingRepository: MeetingRepository
+    private val planRepository: PlanRepository
 ) : BaseViewModel() {
 
     private val meetingPlanResult = loadDataSignal
         .flatMapLatest {
-            meetingRepository
-                .getMeetingPlans(
+            planRepository
+                .getPlans(
                     page = 1,
                     yearAndMonth = getDateTimeFormatZoneDate(pattern = "yyyyMM"),
                     isClosed = false
@@ -91,8 +91,8 @@ class CalendarViewModel @Inject constructor(
         viewModelScope.launch {
             uiState.checkState<CalendarUiState.Success> {
                 if (loadDates.any { it == date }) return@launch
-                meetingRepository
-                    .getMeetingPlans(
+                planRepository
+                    .getPlans(
                         page = 1,
                         yearAndMonth = getDateTimeFormatZoneDate(dateTime = date, pattern = "yyyyMM"),
                         isClosed = false

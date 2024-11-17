@@ -22,11 +22,16 @@ android {
         }
     }
 
+    defaultConfig {
+        manifestPlaceholders["NAVER_MAP_CLIENT_ID"] = localProperties["NAVER_MAP_CLIENT_ID"].toString()
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
             isShrinkResources = false
             isDebuggable = true
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = false
         }
 
         release {
@@ -34,6 +39,7 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("release")
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

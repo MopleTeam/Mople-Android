@@ -1,15 +1,19 @@
 package com.moim.feature.home
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.getDateTimeFormatZoneDate
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
-import com.moim.core.data.datasource.meeting.MeetingRepository
+import com.moim.core.common.view.checkState
+import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.model.MeetingPlanResponse
+import com.moim.core.data.model.MeetingResponse
+import com.moim.core.designsystem.R
+import com.moim.core.model.Meeting
 import com.moim.core.model.MeetingPlan
 import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,17 +25,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val meetingRepository: MeetingRepository,
+    private val planRepository: PlanRepository,
 ) : BaseViewModel() {
 
     private val meetingPlansResult = loadDataSignal
-        .flatMapLatest {
-            meetingRepository.getMeetingPlans(
-                page = 1,
-                yearAndMonth = getDateTimeFormatZoneDate(pattern = "yyyyMM"),
-                isClosed = false
-            ).asResult()
-        }
+        .flatMapLatest { planRepository.getCurrentPlans().asResult() }
         .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
@@ -39,7 +37,13 @@ class HomeViewModel @Inject constructor(
             meetingPlansResult.collect { result ->
                 when (result) {
                     is Result.Loading -> setUiState(HomeUiState.Loading)
-                    is Result.Success -> setUiState(HomeUiState.Success(meetingPlans = result.data.map(MeetingPlanResponse::asItem)))
+                    is Result.Success -> setUiState(
+                        HomeUiState.Success(
+                            plans = result.data.plans.map(MeetingPlanResponse::asItem),
+                            meetings = result.data.meetings.map(MeetingResponse::asItem)
+                        )
+                    )
+
                     is Result.Error -> setUiState(HomeUiState.Error)
                 }
             }
@@ -50,10 +54,20 @@ class HomeViewModel @Inject constructor(
         when (uiAction) {
             is HomeUiAction.OnClickAlarm -> setUiEvent(HomeUiEvent.NavigateToAlarm)
             is HomeUiAction.OnClickMeetingWrite -> setUiEvent(HomeUiEvent.NavigateToMeetingWrite)
-            is HomeUiAction.OnClickPlanWrite -> setUiEvent(HomeUiEvent.NavigateToPlanWrite)
+            is HomeUiAction.OnClickPlanWrite -> navigateToPlanWrite()
             is HomeUiAction.OnClickMeetingMore -> setUiEvent(HomeUiEvent.NavigateToCalendar)
             is HomeUiAction.OnClickMeeting -> setUiEvent(HomeUiEvent.NavigateToMeetingDetail(uiAction.meetingId))
             is HomeUiAction.OnClickRefresh -> onRefresh()
+        }
+    }
+
+    private fun navigateToPlanWrite() {
+        uiState.checkState<HomeUiState.Success> {
+            if (meetings.isEmpty()) {
+                setUiEvent(HomeUiEvent.ShowToastMessage(R.string.home_new_plan_created_not))
+            } else {
+                setUiEvent(HomeUiEvent.NavigateToPlanWrite)
+            }
         }
     }
 }
@@ -62,7 +76,8 @@ sealed interface HomeUiState : UiState {
     data object Loading : HomeUiState
 
     data class Success(
-        val meetingPlans: List<MeetingPlan> = emptyList()
+        val plans: List<MeetingPlan> = emptyList(),
+        val meetings: List<Meeting> = emptyList(),
     ) : HomeUiState
 
     data object Error : HomeUiState
@@ -83,4 +98,5 @@ sealed interface HomeUiEvent : UiEvent {
     data object NavigateToPlanWrite : HomeUiEvent
     data object NavigateToCalendar : HomeUiEvent
     data class NavigateToMeetingDetail(val meetingId: String) : HomeUiEvent
+    data class ShowToastMessage(@StringRes val messageRes: Int) : HomeUiEvent
 }

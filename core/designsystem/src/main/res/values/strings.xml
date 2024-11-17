@@ -43,8 +43,9 @@
     <string name="main_tab_profile">프로필</string>
 
     <!-- Home -->
-    <string name="home_new_group_created">새로운\n모임 만들기</string>
-    <string name="home_new_meeting_created">새로운\n일정 만들기</string>
+    <string name="home_new_meeting_created">새로운\n모임 만들기</string>
+    <string name="home_new_plan_created">새로운\n일정 만들기</string>
+    <string name="home_new_plan_created_not">현재 모임이 없습니다.\n먼저 모임을 만들어주세요</string>
     <string name="home_meeting_more">더보기</string>
 
     <!-- Meeting -->
