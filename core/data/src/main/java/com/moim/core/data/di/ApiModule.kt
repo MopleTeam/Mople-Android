@@ -4,6 +4,7 @@ import com.moim.core.data.di.qualifiers.MoimApi
 import com.moim.core.data.di.qualifiers.NormalApi
 import com.moim.core.data.service.AuthApi
 import com.moim.core.data.service.ImageApi
+import com.moim.core.data.service.LocationApi
 import com.moim.core.data.service.MeetingApi
 import com.moim.core.data.service.PlanApi
 import com.moim.core.data.service.UserApi
@@ -47,4 +48,10 @@ internal object ApiModule {
     fun provideImageApi(
         @MoimApi retrofit: Retrofit
     ): ImageApi = retrofit.create(ImageApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideLocationAoi(
+        @MoimApi retrofit: Retrofit
+    ): LocationApi = retrofit.create(LocationApi::class.java)
 }

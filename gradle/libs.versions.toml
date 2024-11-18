@@ -18,6 +18,9 @@ androidxRoom = "2.6.1"
 androidxAppcompat = "1.7.0"
 androidxPaging = "3.3.2"
 
+# Android
+androidPlayServicesLocation = "21.0.1"
+
 # Kotlin
 kotlin = "2.0.21"
 kotlinxCoroutines = "1.9.0"
@@ -100,6 +103,9 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-hilt-common = { group = "androidx.hilt", name = "hilt-common", version.ref = "androidxHilt" }
 androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "androidxHilt" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHilt" }
+
+# Android
+android-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "androidPlayServicesLocation" }
 
 # Hilt
 hilt-core = { group = "com.google.dagger", name = "hilt-core", version.ref = "hilt" }

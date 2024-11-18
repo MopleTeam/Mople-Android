@@ -78,6 +78,7 @@
     <string name="plan_write_time_select_hint">시간을 선택해주세요</string>
     <string name="plan_write_place_select">장소 선택</string>
     <string name="plan_write_place_select_hint">장소를 선택해주세요</string>
+    <string name="plan_write_place_search_hint">장소를 검색해주세요</string>
     <string name="plan_write_create">일정 생성</string>
     <string name="plan_write_update">일정 수정</string>
 

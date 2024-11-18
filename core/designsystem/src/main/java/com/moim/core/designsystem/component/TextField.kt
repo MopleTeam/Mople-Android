@@ -86,7 +86,9 @@ fun MoimTextField(
     MoimOutlinedTextField(
         modifier = modifier.onKeyEvent {
             val pressedEnter = (it.key == Key.Enter)
-            if (pressedEnter) onTextTriggered()
+            if (pressedEnter) {
+                onTextTriggered()
+            }
             pressedEnter
         },
         colors = textFieldColors,

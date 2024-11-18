@@ -1,6 +1,7 @@
 package com.moim.core.data.datasource.plan
 
 import com.moim.core.data.datasource.plan.remote.PlanRemoteDataSource
+import com.moim.core.data.model.PlaceResponse
 import com.moim.core.data.model.MeetingPlanContainer
 import com.moim.core.data.model.MeetingPlanResponse
 import kotlinx.coroutines.flow.Flow
@@ -21,5 +22,9 @@ internal class PlanRepositoryImpl @Inject constructor(
 
     override fun getPlans(page: Int, yearAndMonth: String, isClosed: Boolean): Flow<List<MeetingPlanResponse>> = flow {
         emit(remoteDataSource.getPlans(page, yearAndMonth, isClosed))
+    }
+
+    override fun getSearchPlace(keyword: String, xPoint: String, yPoint: String): Flow<List<PlaceResponse>> = flow {
+        emit(remoteDataSource.getSearchPlace(keyword, xPoint, yPoint))
     }
 }

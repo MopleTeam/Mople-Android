@@ -33,6 +33,60 @@ fun MoimTopAppbar(
     modifier: Modifier = Modifier,
     thickness: Dp = 0.dp,
     dividerColor: Color = MoimTheme.colors.stroke,
+    title : @Composable () -> Unit = {},
+    backgroundColor: Color = MoimTheme.colors.white,
+    isNavigationIconVisible: Boolean = true,
+    onClickNavigate: () -> Unit = {},
+    navigationIcon: @Composable () -> Unit = {
+        Icon(
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
+            contentDescription = "back",
+        )
+    },
+    actions: @Composable RowScope.() -> Unit = {},
+) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Column {
+        CenterAlignedTopAppBar(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(backgroundColor),
+            title = title,
+            navigationIcon = {
+                if (isNavigationIconVisible) {
+                    IconButton(
+                        onClick = {
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                            onClickNavigate()
+                        }
+                    ) {
+                        navigationIcon()
+                    }
+                }
+            },
+            actions = actions,
+            windowInsets = WindowInsets(top = 0.dp),
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = Color.Transparent,
+                navigationIconContentColor = MoimTheme.colors.secondary,
+                titleContentColor = MoimTheme.colors.gray.gray01,
+                actionIconContentColor = MoimTheme.colors.icon
+            )
+        )
+
+        if (thickness != 0.dp) {
+            HorizontalDivider(thickness = thickness, color = dividerColor)
+        }
+    }
+}
+
+@Composable
+fun MoimTopAppbar(
+    modifier: Modifier = Modifier,
+    thickness: Dp = 0.dp,
+    dividerColor: Color = MoimTheme.colors.stroke,
     title: String = "",
     titleStyle: TextStyle = MoimTheme.typography.title02.bold,
     titleColor: Color = MoimTheme.colors.gray.gray01,

@@ -1,5 +1,7 @@
 package com.moim.feature.planwrite
 
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,6 +38,7 @@ import com.moim.feature.planwrite.ui.MoimTimePickerDialog
 import com.moim.feature.planwrite.ui.PlanWriteMeetingsDialog
 import com.moim.feature.planwrite.ui.PlanWriteSelectedBox
 import com.moim.feature.planwrite.ui.PlanWriteTextField
+import com.moim.feature.planwrite.ui.place.PlaceContainerScreen
 import java.time.ZonedDateTime
 
 internal typealias OnPlanWriteUiAction = (PlanWriteUiAction) -> Unit
@@ -46,15 +49,20 @@ fun PlanWriteRoute(
     padding: PaddingValues,
     navigateToBack: () -> Unit
 ) {
-    val context = LocalContext.current
+    val activity = LocalContext.current as Activity
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
+
     val planWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
+
+    BackHandler {
+        viewModel.onUiAction(PlanWriteUiAction.OnClickBack)
+    }
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is PlanWriteUiEvent.NavigateToBack -> navigateToBack()
-            is PlanWriteUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is PlanWriteUiEvent.ShowToastMessage -> showToast(activity, event.messageRes)
         }
     }
 
@@ -125,7 +133,7 @@ fun PlanWriteScreen(
                 hintText = stringResource(R.string.plan_write_place_select_hint),
                 valueText = uiState.planPlace,
                 iconRes = R.drawable.ic_location,
-                onClick = { onUiAction(PlanWriteUiAction.OnClickPlanPlace) }
+                onClick = { onUiAction(PlanWriteUiAction.OnShowPlaceMapScreen(true)) }
             )
 
             Spacer(Modifier.weight(1f))
@@ -157,6 +165,14 @@ fun PlanWriteScreen(
             date = uiState.planTime ?: ZonedDateTime.now().withMinute(0),
             onDateSelected = { onUiAction(PlanWriteUiAction.OnClickPlanTime(it)) },
             onDismiss = { onUiAction(PlanWriteUiAction.OnShowTimePickerDialog(false)) }
+        )
+    }
+    if (uiState.isShowMapScreen) {
+        PlaceContainerScreen(
+            onUiAction = onUiAction,
+            searchPlaces = uiState.searchPlaces,
+            selectedPlace = uiState.selectedPlace,
+            isSearchList = uiState.isShowMapSearchScreen
         )
     }
 

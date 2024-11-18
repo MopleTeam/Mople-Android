@@ -44,7 +44,7 @@ class HomeViewModel @Inject constructor(
                         )
                     )
 
-                    is Result.Error -> setUiState(HomeUiState.Error)
+                    is Result.Error -> setUiState(HomeUiState.Success())
                 }
             }
         }
@@ -63,6 +63,8 @@ class HomeViewModel @Inject constructor(
 
     private fun navigateToPlanWrite() {
         uiState.checkState<HomeUiState.Success> {
+            return setUiEvent(HomeUiEvent.NavigateToPlanWrite)
+
             if (meetings.isEmpty()) {
                 setUiEvent(HomeUiEvent.ShowToastMessage(R.string.home_new_plan_created_not))
             } else {
