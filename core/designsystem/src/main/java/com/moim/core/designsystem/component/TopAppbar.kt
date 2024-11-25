@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,7 +52,8 @@ fun MoimTopAppbar(
         CenterAlignedTopAppBar(
             modifier = modifier
                 .fillMaxWidth()
-                .background(backgroundColor),
+                .background(backgroundColor)
+                .padding(horizontal = 12.dp),
             title = title,
             navigationIcon = {
                 if (isNavigationIconVisible) {
@@ -107,7 +109,8 @@ fun MoimTopAppbar(
         CenterAlignedTopAppBar(
             modifier = modifier
                 .fillMaxWidth()
-                .background(backgroundColor),
+                .background(backgroundColor)
+                .padding(horizontal = 12.dp),
             title = {
                 Text(
                     text = title,

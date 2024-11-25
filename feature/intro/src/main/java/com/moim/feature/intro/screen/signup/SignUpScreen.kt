@@ -40,8 +40,8 @@ fun SignUpRoute(
     navigateToMain: () -> Unit
 ) {
     val context = LocalContext.current
-    val signUpUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
+    val signUpUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -122,7 +122,8 @@ fun SignUpScreen(
 private fun SignUpScreenPreview() {
     MoimTheme {
         SignUpScreen(
-            uiState = SignUpUiState.SignUp(enableSignUp = false)
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
+            uiState = SignUpUiState.SignUp(enableSignUp = true)
         )
     }
 }

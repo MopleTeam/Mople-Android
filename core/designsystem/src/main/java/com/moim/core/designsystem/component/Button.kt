@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
@@ -180,6 +182,10 @@ private fun MoimPrimaryButtonPreview() {
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            Text(
+                text = "Primary Button",
+                style = MoimTheme.typography.title03.semiBold
+            )
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = "로그인",
@@ -205,6 +211,28 @@ private fun MoimPrimaryButtonPreview() {
                     Text(
                         text = stringResource(R.string.sign_in_kakao),
                         style = MoimTheme.typography.body01.semiBold
+                    )
+                }
+            }
+
+            Text(
+                text = "Etc Button",
+                style = MoimTheme.typography.title03.semiBold
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                MoimIconButton(
+                    iconRes = R.drawable.ic_alarm
+                )
+
+                MoimFloatingActionButton(
+                    onClick = {}
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = ""
                     )
                 }
             }

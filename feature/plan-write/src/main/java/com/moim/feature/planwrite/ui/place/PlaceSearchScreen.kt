@@ -14,15 +14,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Place
@@ -81,22 +80,18 @@ fun PlaceItem(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
+            MoimText(
                 modifier = Modifier.fillMaxWidth(),
                 text = place.title,
                 style = MoimTheme.typography.title03.medium,
                 color = MoimTheme.colors.gray.gray01,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
             )
             Spacer(Modifier.height(4.dp))
-            Text(
+            MoimText(
                 modifier = Modifier.fillMaxWidth(),
                 text = place.roadAddress,
                 style = MoimTheme.typography.body01.regular,
                 color = MoimTheme.colors.gray.gray05,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
             )
         }
     }

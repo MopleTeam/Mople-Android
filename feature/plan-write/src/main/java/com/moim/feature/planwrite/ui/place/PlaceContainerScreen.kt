@@ -37,7 +37,7 @@ fun PlaceContainerScreen(
     modifier: Modifier = Modifier,
     searchPlaces: List<Place> = emptyList(),
     selectedPlace: Place? = null,
-    isSearchList: Boolean = false,
+    isShowSearchScreen: Boolean = false,
     onUiAction: OnPlanWriteUiAction,
 ) {
     var currentX by remember { mutableDoubleStateOf(0.0) }
@@ -74,7 +74,7 @@ fun PlaceContainerScreen(
                 }
             )
 
-            if (isSearchList) {
+            if (isShowSearchScreen) {
                 PlaceSearchScreen(
                     searchPlaces = searchPlaces,
                     selectedPlace = selectedPlace,

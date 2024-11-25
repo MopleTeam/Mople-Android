@@ -44,13 +44,13 @@ fun ProfileUpdateRoute(
     navigateToBack: () -> Unit,
 ) {
     val context = LocalContext.current
-    val profileUpdateUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
+    val profileUpdateUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> if (uri != null) viewModel.onUiAction(ProfileUpdateUiAction.OnChangeProfileUrl(uri.toString())) }
     )
-    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {

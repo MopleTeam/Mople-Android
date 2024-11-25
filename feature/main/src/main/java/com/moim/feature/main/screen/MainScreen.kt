@@ -16,6 +16,8 @@ import com.moim.feature.main.navigation.MainTab
 import com.moim.feature.main.navigation.rememberMainNavController
 import com.moim.feature.main.screen.ui.MainBottomBar
 import com.moim.feature.meeting.meetingScreen
+import com.moim.feature.meetingdetail.meetingDetailScreen
+import com.moim.feature.meetingdetail.navigateToMeetingDetail
 import com.moim.feature.meetingwrite.meetingWriteScreen
 import com.moim.feature.meetingwrite.navigateToMeetingWrite
 import com.moim.feature.planwrite.navigateToPlanWrite
@@ -46,16 +48,23 @@ fun MainScreen(
                     navigateToMeetingWrite = navigator.navController::navigateToMeetingWrite,
                     navigateToPlanWrite = navigator.navController::navigateToPlanWrite,
                     navigateToCalendar = { navigator.navigate(MainTab.Calendar) },
-                    navigateToMeetingDetail = {},
+                    navigateToMeetingDetail = navigator.navController::navigateToMeetingDetail,
                 )
                 meetingScreen(
                     padding = innerPadding,
                     navigateToMeetingWrite = navigator.navController::navigateToMeetingWrite,
-                    navigateToMeetingDetail = {}
+                    navigateToMeetingDetail = navigator.navController::navigateToMeetingDetail
                 )
                 meetingWriteScreen(
                     padding = innerPadding,
                     navigateToBack = navigator.navController::popBackStack
+                )
+                meetingDetailScreen(
+                    padding = innerPadding,
+                    navigateToBack = navigator.navController::popBackStack,
+                    navigateToPlanWrite = navigator.navController::navigateToPlanWrite,
+                    navigateToPlanDetail = {},
+                    navigateToMeetingSetting = {}
                 )
                 planWriteScreen(
                     padding = innerPadding,

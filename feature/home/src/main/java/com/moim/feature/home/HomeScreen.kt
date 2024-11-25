@@ -15,22 +15,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.common.view.ObserveAsEvents
+import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.MeetingPlan
-import com.moim.core.model.Participant
+import com.moim.core.model.Plan
 import com.moim.feature.home.ui.HomeCreateCards
-import com.moim.feature.home.ui.HomeMeetingPlanCard
 import com.moim.feature.home.ui.HomeMeetingMoreCard
+import com.moim.feature.home.ui.HomeMeetingPlanCard
 import com.moim.feature.home.ui.HomeTopAppbar
 import java.time.ZonedDateTime
 
@@ -46,6 +47,7 @@ fun HomeRoute(
     navigateToCalendar: () -> Unit = {},
     navigateToMeetingDetail: (String) -> Unit = {},
 ) {
+    val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(padding)
@@ -57,6 +59,7 @@ fun HomeRoute(
             is HomeUiEvent.NavigateToPlanWrite -> navigateToPlanWrite()
             is HomeUiEvent.NavigateToCalendar -> navigateToCalendar()
             is HomeUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
+            is HomeUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
         }
     }
 
@@ -92,7 +95,7 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             HomeMeetingPager(
-                meetingPlans = uiState.plans,
+                plans = uiState.plans,
                 onUiAction = onUiAction
             )
             HomeCreateCards(
@@ -107,14 +110,14 @@ fun HomeScreen(
 @Composable
 fun HomeMeetingPager(
     modifier: Modifier = Modifier,
-    meetingPlans: List<MeetingPlan>,
+    plans: List<Plan>,
     onUiAction: OnHomeUiAction = {}
 ) {
-    if (meetingPlans.isEmpty()) return
+    if (plans.isEmpty()) return
 
     val localDensity = LocalDensity.current
-    val pagerState = rememberPagerState(pageCount = { meetingPlans.size + 1 })
-    var pageHeight by remember(meetingPlans) { mutableStateOf((-1).dp) }
+    val pagerState = rememberPagerState(pageCount = { plans.size + 1 })
+    var pageHeight by remember(plans) { mutableStateOf((-1).dp) }
     val heightModifier = if (pageHeight > 0.dp) Modifier.height(pageHeight) else Modifier
 
      HorizontalPager(
@@ -123,7 +126,7 @@ fun HomeMeetingPager(
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 0.dp),
         pageSpacing = 8.dp,
     ) { index ->
-        val meetingPlan = meetingPlans.getOrNull(index)
+        val meetingPlan = plans.getOrNull(index)
 
         if (meetingPlan != null) {
             HomeMeetingPlanCard(
@@ -134,7 +137,7 @@ fun HomeMeetingPager(
                             if (pageHeight < contentHeight) pageHeight = contentHeight
                         }
                     },
-                meetingPlan = meetingPlan,
+                plan = meetingPlan,
                 onUiAction = onUiAction
             )
         } else {
@@ -154,24 +157,22 @@ private fun HomeScreenPreview() {
             modifier = Modifier.containerScreen(),
             uiState = HomeUiState.Success(
                 plans = listOf(
-                    MeetingPlan(
+                    Plan(
                         meetingId = "1",
-                        name = "우리중학교 동창1",
-                        meetingName = "술 한잔 하는 날",
-                        participants = listOf(Participant(), Participant(), Participant()),
-                        address = "서울 강남구",
-                        detailAddress = "제주특별자치도 제주시",
-                        startedAt = ZonedDateTime.now().toString()
+                        meetingName = "우리중학교 동창1",
+                        planName = "술 한잔 하는 날",
+                        planMemberCount = 3,
+                        planAddress = "서울 강남구",
+                        planTime = ZonedDateTime.now().toString()
                     ),
-                    MeetingPlan(
+                    Plan(
                         meetingId = "2",
-                        name = "우리중학교 동창2",
-                        meetingName = "술 한잔 하는 날",
-                        participants = listOf(Participant(), Participant(), Participant()),
-                        address = "서울 강남구",
-                        detailAddress = "제주특별자치도",
-                        startedAt = ZonedDateTime.now().toString()
-                    )
+                        meetingName = "우리중학교 동창2",
+                        planName = "술 한잔 하는 날",
+                        planMemberCount = 3,
+                        planAddress = "서울 강남구",
+                        planTime = ZonedDateTime.now().toString()
+                    ),
                 )
             ),
             isLoading = false,

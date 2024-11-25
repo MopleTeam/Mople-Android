@@ -23,12 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimBottomSheetDialog
 import com.moim.core.designsystem.component.MoimIconButton
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
@@ -150,18 +150,16 @@ fun PlanWriteMeetingInfo(
                 .size(22.dp)
                 .clip(RoundedCornerShape(6.dp)),
             imageUrl = meeting.imageUrl,
-            errorImage = painterResource(R.drawable.ic_meeting_empty)
+            errorImage = painterResource(R.drawable.ic_empty_meeting)
         )
 
         Spacer(Modifier.width(8.dp))
 
-        Text(
+        MoimText(
             modifier = Modifier.fillMaxWidth(),
             text = meeting.name,
             style = MoimTheme.typography.body01.medium,
             color = MoimTheme.colors.gray.gray02,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
         )
     }
 }

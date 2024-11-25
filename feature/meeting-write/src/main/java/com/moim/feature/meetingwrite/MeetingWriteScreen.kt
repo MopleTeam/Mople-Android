@@ -23,9 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
-import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
-import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
@@ -43,8 +41,8 @@ fun MeetingWriteRoute(
     navigateToBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val meetingWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
+    val meetingWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> if (uri != null) viewModel.onUiAction(MeetingWriteUiAction.OnChangeMeetingPhotoUrl(uri.toString())) }
@@ -64,18 +62,11 @@ fun MeetingWriteRoute(
     }
 
     when (val uiState = meetingWriteUiState) {
-        is MeetingWriteUiState.Loading -> LoadingScreen(modifier)
-
-        is MeetingWriteUiState.Success -> MeetingWriteScreen(
+        is MeetingWriteUiState.MeetingWrite -> MeetingWriteScreen(
             modifier = modifier,
             uiState = uiState,
             isLoading = isLoading,
             onUiAction = viewModel::onUiAction
-        )
-
-        is MeetingWriteUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(MeetingWriteUiAction.OnClickRefresh) }
         )
     }
 }
@@ -83,7 +74,7 @@ fun MeetingWriteRoute(
 @Composable
 fun MeetingWriteScreen(
     modifier: Modifier = Modifier,
-    uiState: MeetingWriteUiState.Success,
+    uiState: MeetingWriteUiState.MeetingWrite,
     isLoading: Boolean,
     onUiAction: OnMeetingWriteUiAction,
 ) {
@@ -91,7 +82,7 @@ fun MeetingWriteScreen(
         modifier = modifier
     ) {
         MoimTopAppbar(
-            title = stringResource(if (uiState.meetingId == null) R.string.meeting_write_title_for_create else R.string.meeting_write_title_for_update),
+            title = stringResource(if (uiState.meetingId.isNullOrEmpty()) R.string.meeting_write_title_for_create else R.string.meeting_write_title_for_update),
             onClickNavigate = { onUiAction(MeetingWriteUiAction.OnClickBack) }
         )
         Column(
@@ -119,7 +110,7 @@ fun MeetingWriteScreen(
                     .fillMaxWidth()
                     .padding(top = 28.dp),
                 enable = uiState.enableMeetingWrite,
-                text = stringResource(if (uiState.meetingId == null) R.string.meeting_write_create else R.string.common_save),
+                text = stringResource(if (uiState.meetingId.isNullOrEmpty()) R.string.meeting_write_create else R.string.common_save),
                 onClick = { onUiAction(MeetingWriteUiAction.OnClickMeetingWrite) },
             )
         }

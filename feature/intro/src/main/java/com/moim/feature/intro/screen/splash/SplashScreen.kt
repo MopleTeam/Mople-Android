@@ -4,13 +4,16 @@ import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,11 +64,11 @@ private fun SplashScreen(
             .containerScreen(backgroundColor = MoimTheme.colors.white)
             .systemBarsPadding()
     ) {
-        Text(
+        Icon(
             modifier = Modifier.align(Alignment.Center),
-            text = stringResource(R.string.app_name),
-            style = MoimTheme.typography.heading.bold,
-            color = MoimTheme.colors.primary.primary
+            imageVector = ImageVector.vectorResource(R.drawable.ic_logo_full),
+            contentDescription = "",
+            tint = Color.Unspecified
         )
     }
 
@@ -85,7 +88,7 @@ private fun SplashScreen(
 @Composable
 private fun SplashScreenPreview() {
     SplashScreen(
-        uiState = SplashUiState.Splash(isShowErrorDialog = true),
+        uiState = SplashUiState.Splash(isShowErrorDialog = false),
         onClickFinish = {}
     )
 }

@@ -1,27 +1,20 @@
 package com.moim.core.model
 
+import android.os.Bundle
 import androidx.compose.runtime.Stable
+import androidx.navigation.NavType
 import com.moim.core.data.model.MeetingResponse
-import com.moim.core.data.model.MemberResponse
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 @Stable
+@Serializable
 data class Meeting(
     val id: String = "",
     val name: String = "",
     val imageUrl: String = "",
-    val members: List<Member> = emptyList(),
-    val creatorId: String = "",
-    val creatorNickname: String = "",
-    val createdAt: String = "",
+    val memberCount: Int = 1,
     val lastPlanAt: String? = null
-)
-
-@Stable
-data class Member(
-    val id: String = "",
-    val userId: String = "",
-    val userNickname: String = "",
-    val joinedAt: String = ""
 )
 
 fun MeetingResponse.asItem(): Meeting {
@@ -29,19 +22,25 @@ fun MeetingResponse.asItem(): Meeting {
         id = id,
         name = name,
         imageUrl = imageUrl,
-        members = members.map(MemberResponse::asItem),
-        creatorId = creatorId,
-        creatorNickname = creatorNickname,
-        createdAt = createdAt,
+        memberCount = memberCount,
         lastPlanAt = lastPlanAt
     )
 }
 
-fun MemberResponse.asItem(): Member {
-    return Member(
-        id = id,
-        userId = userId,
-        userNickname = userNickname,
-        joinedAt = joinedAt
-    )
+val MeetingType = object : NavType<Meeting?>(isNullableAllowed = true) {
+    override fun get(bundle: Bundle, key: String): Meeting? {
+        return bundle.getString(key)?.let { Json.decodeFromString(it) }
+    }
+
+    override fun parseValue(value: String): Meeting? {
+        return Json.decodeFromString(value)
+    }
+
+    override fun put(bundle: Bundle, key: String, value: Meeting?) {
+        if (value != null) bundle.putString(key, Json.encodeToString(Meeting.serializer(), value))
+    }
+
+    override fun serializeAsValue(value: Meeting?): String {
+        return if (value == null) "" else Json.encodeToString(Meeting.serializer(), value)
+    }
 }

@@ -13,10 +13,3 @@ fun TokenResponse.asItem(): Token {
         refreshToken = refreshToken,
     )
 }
-
-fun Token.asInternalModel(): TokenResponse {
-    return TokenResponse(
-        accessToken = accessToken,
-        refreshToken = refreshToken,
-    )
-}

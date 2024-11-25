@@ -21,18 +21,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.util.getDateTimeFormatString
 import com.moim.core.common.util.toDecimalString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_F6F8FA
-import com.moim.core.model.MeetingPlan
-import com.moim.core.model.Participant
+import com.moim.core.model.Plan
 import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
 import java.time.ZonedDateTime
@@ -40,12 +39,12 @@ import java.time.ZonedDateTime
 @Composable
 fun HomeMeetingPlanCard(
     modifier: Modifier = Modifier,
-    meetingPlan: MeetingPlan,
+    plan: Plan,
     onUiAction: OnHomeUiAction = {}
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(HomeUiAction.OnClickMeeting(meetingId = meetingPlan.meetingId)) }
+        onClick = { onUiAction(HomeUiAction.OnClickMeeting(meetingId = plan.meetingId)) }
     ) {
         Column(
             modifier = Modifier
@@ -53,37 +52,37 @@ fun HomeMeetingPlanCard(
                 .padding(16.dp)
         ) {
             MeetingInfoTopAppbar(
-                groupName = meetingPlan.name
+                groupName = plan.meetingName
             )
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = meetingPlan.meetingName,
+                text = plan.planName,
                 style = MoimTheme.typography.title01.bold,
                 color = MoimTheme.colors.gray.gray01
             )
             Spacer(Modifier.height(16.dp))
 
             MeetingInfoText(
-                iconRes = R.drawable.ic_group,
-                text = stringResource(R.string.unit_participants_count, meetingPlan.participants.size)
+                iconRes = R.drawable.ic_meeting,
+                text = stringResource(R.string.unit_participants_count, plan.planMemberCount)
             )
             MeetingInfoText(
                 modifier = Modifier.padding(vertical = 4.dp),
                 iconRes = R.drawable.ic_clock,
-                text = getDateTimeFormatString(dateTime = meetingPlan.startedAt, pattern = stringResource(R.string.regex_date_full))
+                text = getDateTimeFormatString(dateTime = plan.planTime, pattern = stringResource(R.string.regex_date_full))
             )
             MeetingInfoText(
                 iconRes = R.drawable.ic_location,
-                text = meetingPlan.detailAddress,
+                text = plan.planAddress,
             )
             Spacer(Modifier.height(16.dp))
 
             MeetingWeatherInfo(
                 modifier = Modifier.align(Alignment.Start),
-                temperature = meetingPlan.temperature,
-                address = meetingPlan.address,
-                weatherUrl = meetingPlan.weatherIconUrl
+                temperature = plan.temperature,
+                address = plan.planAddress,
+                weatherUrl = plan.weatherIconUrl
             )
         }
     }
@@ -103,18 +102,16 @@ private fun MeetingInfoTopAppbar(
                 .size(28.dp)
                 .clip(RoundedCornerShape(6.dp)),
             imageUrl = "https://plus.unsplash.com/premium_photo-1670333183316-ab697ddd9b13",
-            errorImage = painterResource(R.drawable.ic_meeting_empty)
+            errorImage = painterResource(R.drawable.ic_empty_meeting)
         )
 
-        Text(
+        MoimText(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),
             text = groupName,
             style = MoimTheme.typography.body02.semiBold,
             color = MoimTheme.colors.gray.gray04,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
         )
 
         Icon(
@@ -144,16 +141,15 @@ private fun MeetingInfoText(
             tint = MoimTheme.colors.icon
         )
 
-        Text(
+        MoimText(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 4.dp),
             text = text,
             style = MoimTheme.typography.body02.medium,
             color = MoimTheme.colors.gray.gray04,
-            maxLines = maxLines,
-            minLines = maxLines,
-            overflow = TextOverflow.Ellipsis
+            maxLine = maxLines,
+            minLine = maxLines,
         )
     }
 }
@@ -201,14 +197,14 @@ private fun MeetingWeatherInfo(
 private fun HomeMeetingPlanCardPreview() {
     MoimTheme {
         HomeMeetingPlanCard(
-            meetingPlan = MeetingPlan(
-                name = "우리중학교 동창",
-                meetingName = "술 한잔 하는 날",
-                participants = listOf(Participant(), Participant(), Participant()),
-                address = "서울 강남구",
-                detailAddress = "제주특별자치도 제주시 일주서로 95 제주특별자치도 제주시 일주서로 95 제주특별자치도 제주시 일주서로 95",
-                startedAt = ZonedDateTime.now().toString()
-            )
+            plan = Plan(
+                meetingId = "1",
+                meetingName = "우리중학교 동창1",
+                planName = "술 한잔 하는 날",
+                planMemberCount = 3,
+                planAddress = "서울 강남구",
+                planTime = ZonedDateTime.now().toString()
+            ),
         )
     }
 }

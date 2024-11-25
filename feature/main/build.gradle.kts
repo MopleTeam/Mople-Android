@@ -10,6 +10,7 @@ dependencies {
     implementation(projects.feature.home)
     implementation(projects.feature.meeting)
     implementation(projects.feature.meetingWrite)
+    implementation(projects.feature.meetingDetail)
     implementation(projects.feature.planWrite)
     implementation(projects.feature.calendar)
     implementation(projects.feature.profile)

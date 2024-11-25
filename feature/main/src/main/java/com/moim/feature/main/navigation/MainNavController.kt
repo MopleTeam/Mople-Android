@@ -46,10 +46,6 @@ class MainNavController(
     fun shouldShowBottomBar() = MainTab.contains {
         currentDestination?.hasRoute(it::class) == true
     }
-
-    private fun popBackStack() {
-        navController.popBackStack()
-    }
 }
 
 @Composable

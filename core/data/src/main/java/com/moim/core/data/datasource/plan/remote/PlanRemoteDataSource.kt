@@ -2,19 +2,21 @@ package com.moim.core.data.datasource.plan.remote
 
 import com.moim.core.data.model.PlaceResponse
 import com.moim.core.data.model.MeetingPlanContainer
-import com.moim.core.data.model.MeetingPlanResponse
+import com.moim.core.data.model.PlanResponse
 
 internal interface PlanRemoteDataSource {
 
-    suspend fun getPlan(planId: String): MeetingPlanResponse
+    suspend fun getPlans(meetingId: String): List<PlanResponse>
+
+    suspend fun getPlan(planId: String): PlanResponse
 
     suspend fun getCurrentPlan(): MeetingPlanContainer
 
-    suspend fun getPlans(
+    suspend fun getPlansForCalendar(
         page: Int,
         yearAndMonth: String,
         isClosed: Boolean
-    ): List<MeetingPlanResponse>
+    ): List<PlanResponse>
 
     suspend fun getSearchPlace(
         keyword: String,

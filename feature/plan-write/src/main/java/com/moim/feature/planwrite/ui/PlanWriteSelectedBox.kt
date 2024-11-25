@@ -19,10 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 
@@ -33,6 +33,7 @@ fun PlanWriteSelectedBox(
     hintText: String,
     valueText: String? = null,
     @DrawableRes iconRes: Int? = null,
+    enable: Boolean = true,
     onClick: () -> Unit
 ) {
     Column(
@@ -50,7 +51,10 @@ fun PlanWriteSelectedBox(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
                 .background(MoimTheme.colors.bg.input)
-                .onSingleClick { onClick() }
+                .onSingleClick(
+                    onClick = onClick,
+                    enabled = enable
+                )
                 .padding(horizontal = 16.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -64,13 +68,11 @@ fun PlanWriteSelectedBox(
                 Spacer(Modifier.width(16.dp))
             }
 
-            Text(
+            MoimText(
                 modifier = Modifier.fillMaxWidth(),
-                text = valueText ?: hintText,
-                maxLines = 1,
+                text = if (valueText.isNullOrEmpty()) hintText else valueText,
                 style = MoimTheme.typography.body01.regular,
-                color = if (valueText == null) MoimTheme.colors.gray.gray05 else MoimTheme.colors.gray.gray01,
-                overflow = TextOverflow.Ellipsis,
+                color = if (valueText.isNullOrEmpty()) MoimTheme.colors.gray.gray05 else MoimTheme.colors.gray.gray01,
             )
         }
     }

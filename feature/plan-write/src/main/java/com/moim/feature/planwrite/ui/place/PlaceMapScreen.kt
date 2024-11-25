@@ -13,7 +13,6 @@ import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
-import timber.log.Timber
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
@@ -24,7 +23,6 @@ fun PlaceMapScreen(
     onLocationChange: (Location) -> Unit,
 ) {
     val cameraPositionState = rememberCameraPositionState {
-        Timber.e("cameraPositionState $x, $y")
         if (x != 0.0 && y != 0.0) position = CameraPosition(LatLng(x, y), 15.2)
     }
 

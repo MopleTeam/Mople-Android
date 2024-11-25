@@ -15,10 +15,9 @@ import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.data.model.MeetingPlanResponse
+import com.moim.core.data.model.PlanResponse
 import com.moim.core.designsystem.R
-import com.moim.core.model.MeetingPlan
-import com.moim.core.model.Participant
+import com.moim.core.model.Plan
 import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,7 +38,7 @@ class CalendarViewModel @Inject constructor(
     private val meetingPlanResult = loadDataSignal
         .flatMapLatest {
             planRepository
-                .getPlans(
+                .getPlansForCalendar(
                     page = 1,
                     yearAndMonth = getDateTimeFormatZoneDate(pattern = "yyyyMM"),
                     isClosed = false
@@ -53,7 +52,7 @@ class CalendarViewModel @Inject constructor(
             meetingPlanResult.collect { result ->
                 when (result) {
                     is Result.Loading -> setUiState(CalendarUiState.Loading)
-                    is Result.Success -> setUiState(CalendarUiState.Success(plans = result.data.map(MeetingPlanResponse::asItem) + sample))
+                    is Result.Success -> setUiState(CalendarUiState.Success(plans = result.data.map(PlanResponse::asItem)))
                     is Result.Error -> setUiState(CalendarUiState.Error)
                 }
             }
@@ -92,7 +91,7 @@ class CalendarViewModel @Inject constructor(
             uiState.checkState<CalendarUiState.Success> {
                 if (loadDates.any { it == date }) return@launch
                 planRepository
-                    .getPlans(
+                    .getPlansForCalendar(
                         page = 1,
                         yearAndMonth = getDateTimeFormatZoneDate(dateTime = date, pattern = "yyyyMM"),
                         isClosed = false
@@ -104,7 +103,7 @@ class CalendarViewModel @Inject constructor(
                             is Result.Loading -> return@collect
                             is Result.Success -> setUiState(
                                 copy(
-                                    plans = plans + result.data.map(MeetingPlanResponse::asItem),
+                                    plans = plans + result.data.map(PlanResponse::asItem),
                                     loadDates = loadDates.toMutableList().apply { add(date) }
                                 )
                             )
@@ -118,42 +117,13 @@ class CalendarViewModel @Inject constructor(
             }
         }
     }
-
-    companion object {
-        private val sample = listOf(
-            MeetingPlan(
-                id = "1",
-                name = "술 한 잔 하는 날",
-                meetingName = "우리중학교동창",
-                temperature = 16.2f,
-                participants = listOf(Participant(), Participant(), Participant()),
-                startedAt = ZonedDateTime.now().toString()
-            ),
-            MeetingPlan(
-                id = "2",
-                name = "술 한 잔 하는 날",
-                meetingName = "우리중학교동창",
-                temperature = 12.0f,
-                participants = listOf(Participant(), Participant(), Participant()),
-                startedAt = ZonedDateTime.now().plusDays(1).toString()
-            ),
-            MeetingPlan(
-                id = "3",
-                name = "술 한 잔 하는 날",
-                meetingName = "우리중학교동창",
-                temperature = 15.2f,
-                participants = listOf(Participant(), Participant(), Participant()),
-                startedAt = ZonedDateTime.now().plusDays(2).toString()
-            ),
-        )
-    }
 }
 
 sealed interface CalendarUiState : UiState {
     data object Loading : CalendarUiState
 
     data class Success(
-        val plans: List<MeetingPlan>,
+        val plans: List<Plan>,
         val selectDayOfMonth: ZonedDateTime = getZonedDateTimeDefault().default().withDayOfMonth(1),
         val selectDay: ZonedDateTime? = null,
         val loadDates: List<ZonedDateTime> = listOf(selectDayOfMonth),

@@ -17,11 +17,3 @@ fun UserResponse.asItem(): User {
         badgeCount = badgeCount,
     )
 }
-
-fun User.asInternalModel(): UserResponse {
-    return UserResponse(
-        nickname = nickname,
-        profileUrl = profileUrl,
-        badgeCount = badgeCount,
-    )
-}

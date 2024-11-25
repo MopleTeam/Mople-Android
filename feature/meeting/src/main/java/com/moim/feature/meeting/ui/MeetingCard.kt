@@ -22,7 +22,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +29,7 @@ import com.moim.core.common.util.getDateTimeBetweenDay
 import com.moim.core.common.util.parseZoneDateTime
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Meeting
@@ -70,18 +70,16 @@ fun MeetingCard(
                         .size(56.dp)
                         .clip(RoundedCornerShape(12.dp)),
                     imageUrl = meeting.imageUrl,
-                    errorImage = painterResource(R.drawable.ic_meeting_empty)
+                    errorImage = painterResource(R.drawable.ic_empty_meeting)
                 )
 
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(
+                    MoimText(
                         text = meeting.name,
                         style = MoimTheme.typography.title03.semiBold,
                         color = MoimTheme.colors.gray.gray01,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
                     )
 
                     Spacer(Modifier.height(4.dp))
@@ -92,13 +90,13 @@ fun MeetingCard(
                     ) {
                         Icon(
                             modifier = Modifier.size(20.dp),
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_group),
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_meeting),
                             contentDescription = "",
                             tint = MoimTheme.colors.icon
                         )
 
                         Text(
-                            text = stringResource(R.string.unit_participants_count_short, meeting.members.size),
+                            text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
                             style = MoimTheme.typography.body02.medium,
                             color = MoimTheme.colors.gray.gray04
                         )
@@ -131,8 +129,6 @@ fun MeetingCard(
                     },
                     style = MoimTheme.typography.body01.medium,
                     color = MoimTheme.colors.gray.gray04,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

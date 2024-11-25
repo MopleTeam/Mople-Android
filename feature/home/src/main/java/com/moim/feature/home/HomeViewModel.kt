@@ -10,11 +10,11 @@ import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.data.model.MeetingPlanResponse
+import com.moim.core.data.model.PlanResponse
 import com.moim.core.data.model.MeetingResponse
 import com.moim.core.designsystem.R
 import com.moim.core.model.Meeting
-import com.moim.core.model.MeetingPlan
+import com.moim.core.model.Plan
 import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,12 +39,12 @@ class HomeViewModel @Inject constructor(
                     is Result.Loading -> setUiState(HomeUiState.Loading)
                     is Result.Success -> setUiState(
                         HomeUiState.Success(
-                            plans = result.data.plans.map(MeetingPlanResponse::asItem),
+                            plans = result.data.plans.map(PlanResponse::asItem),
                             meetings = result.data.meetings.map(MeetingResponse::asItem)
                         )
                     )
 
-                    is Result.Error -> setUiState(HomeUiState.Success())
+                    is Result.Error -> setUiState(HomeUiState.Error)
                 }
             }
         }
@@ -63,8 +63,6 @@ class HomeViewModel @Inject constructor(
 
     private fun navigateToPlanWrite() {
         uiState.checkState<HomeUiState.Success> {
-            return setUiEvent(HomeUiEvent.NavigateToPlanWrite)
-
             if (meetings.isEmpty()) {
                 setUiEvent(HomeUiEvent.ShowToastMessage(R.string.home_new_plan_created_not))
             } else {
@@ -78,7 +76,7 @@ sealed interface HomeUiState : UiState {
     data object Loading : HomeUiState
 
     data class Success(
-        val plans: List<MeetingPlan> = emptyList(),
+        val plans: List<Plan> = emptyList(),
         val meetings: List<Meeting> = emptyList(),
     ) : HomeUiState
 

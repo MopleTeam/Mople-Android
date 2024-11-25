@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.moim.core.model.Meeting
 import com.moim.core.route.DetailRoute
 
 fun NavGraphBuilder.meetingWriteScreen(
@@ -15,6 +16,7 @@ fun NavGraphBuilder.meetingWriteScreen(
     navigateToBack: () -> Unit,
 ) {
     composable<DetailRoute.MeetingWrite>(
+        typeMap = DetailRoute.MeetingWrite.typeMap,
         enterTransition = { fadeIn(animationSpec = tween(500)) },
         exitTransition = { fadeOut(animationSpec = tween(500)) }
     ) {
@@ -26,8 +28,8 @@ fun NavGraphBuilder.meetingWriteScreen(
 }
 
 fun NavController.navigateToMeetingWrite(
-    writeId: String? = null,
+    meeting: Meeting? = null,
     navOptions: NavOptions? = null
 ) {
-    this.navigate(DetailRoute.MeetingWrite(writeId), navOptions)
+    this.navigate(DetailRoute.MeetingWrite(meeting), navOptions)
 }

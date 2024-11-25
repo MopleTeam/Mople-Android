@@ -151,7 +151,7 @@ fun MeetingEmptyScreen(
     ) {
         Icon(
             modifier = Modifier.size(80.dp),
-            imageVector = ImageVector.vectorResource(R.drawable.ic_group),
+            imageVector = ImageVector.vectorResource(R.drawable.ic_meeting),
             contentDescription = "",
             tint = MoimTheme.colors.icon
         )

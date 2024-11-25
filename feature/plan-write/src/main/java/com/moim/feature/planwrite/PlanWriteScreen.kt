@@ -26,9 +26,7 @@ import com.moim.core.common.util.getDateTimeFormatZoneDate
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
-import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
-import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
@@ -50,10 +48,9 @@ fun PlanWriteRoute(
     navigateToBack: () -> Unit
 ) {
     val activity = LocalContext.current as Activity
-    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
-
-    val planWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
+    val planWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
 
     BackHandler {
         viewModel.onUiAction(PlanWriteUiAction.OnClickBack)
@@ -67,17 +64,11 @@ fun PlanWriteRoute(
     }
 
     when (val uiState = planWriteUiState) {
-        is PlanWriteUiState.Loading -> LoadingScreen(modifier)
-        is PlanWriteUiState.Success -> PlanWriteScreen(
+        is PlanWriteUiState.PlanWrite -> PlanWriteScreen(
             modifier = modifier,
             uiState = uiState,
             isLoading = isLoading,
             onUiAction = viewModel::onUiAction
-        )
-
-        is PlanWriteUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(PlanWriteUiAction.OnClickRefresh) }
         )
     }
 }
@@ -85,7 +76,7 @@ fun PlanWriteRoute(
 @Composable
 fun PlanWriteScreen(
     modifier: Modifier = Modifier,
-    uiState: PlanWriteUiState.Success,
+    uiState: PlanWriteUiState.PlanWrite,
     isLoading: Boolean = false,
     onUiAction: OnPlanWriteUiAction = {}
 ) {
@@ -93,7 +84,7 @@ fun PlanWriteScreen(
         modifier = modifier
     ) {
         MoimTopAppbar(
-            title = stringResource(if (uiState.planId == null) R.string.plan_write_title_for_create else R.string.plan_write_title_for_update),
+            title = stringResource(if (uiState.planId.isNullOrEmpty()) R.string.plan_write_title_for_create else R.string.plan_write_title_for_update),
             onClickNavigate = { onUiAction(PlanWriteUiAction.OnClickBack) }
         )
         Column(
@@ -108,6 +99,7 @@ fun PlanWriteScreen(
                 titleText = stringResource(R.string.plan_write_meeting_select),
                 hintText = stringResource(R.string.plan_write_meeting_select_hint),
                 valueText = uiState.selectMeetingName,
+                enable = uiState.enableMeetingSelected,
                 onClick = { onUiAction(PlanWriteUiAction.OnShowMeetingsDialog(true)) }
             )
             PlanWriteTextField(
@@ -140,8 +132,8 @@ fun PlanWriteScreen(
 
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(if (uiState.planId == null) R.string.plan_write_create else R.string.plan_write_update),
-                enable = uiState.enabled,
+                text = stringResource(if (uiState.planId.isNullOrEmpty()) R.string.plan_write_create else R.string.plan_write_update),
+                enable = uiState.enabledSubmit,
                 onClick = { onUiAction(PlanWriteUiAction.OnClickPlanWrite) }
             )
         }
@@ -172,7 +164,7 @@ fun PlanWriteScreen(
             onUiAction = onUiAction,
             searchPlaces = uiState.searchPlaces,
             selectedPlace = uiState.selectedPlace,
-            isSearchList = uiState.isShowMapSearchScreen
+            isShowSearchScreen = uiState.isShowMapSearchScreen
         )
     }
 
@@ -185,7 +177,7 @@ private fun PlanWriteScreenPreview() {
     MoimTheme {
         PlanWriteScreen(
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
-            uiState = PlanWriteUiState.Success()
+            uiState = PlanWriteUiState.PlanWrite()
         )
     }
 }

@@ -44,8 +44,8 @@ fun ProfileRoute(
     navigateToIntro: () -> Unit,
 ) {
     val context = LocalContext.current
-    val profileUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
+    val profileUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(padding)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->

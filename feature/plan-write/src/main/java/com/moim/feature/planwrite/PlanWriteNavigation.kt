@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.moim.core.model.Plan
 import com.moim.core.route.DetailRoute
 
 fun NavGraphBuilder.planWriteScreen(
@@ -15,6 +16,7 @@ fun NavGraphBuilder.planWriteScreen(
     navigateToBack: () -> Unit,
 ) {
     composable<DetailRoute.PlanWrite>(
+        typeMap = DetailRoute.PlanWrite.typeMap,
         enterTransition = { fadeIn(animationSpec = tween(500)) },
         exitTransition = { fadeOut(animationSpec = tween(500)) }
     ) {
@@ -26,8 +28,8 @@ fun NavGraphBuilder.planWriteScreen(
 }
 
 fun NavController.navigateToPlanWrite(
-    planId: String? = null,
+    plan : Plan? = null,
     navOptions: NavOptions? = null
 ) {
-    this.navigate(DetailRoute.PlanWrite(planId), navOptions)
+    navigate(DetailRoute.PlanWrite(plan), navOptions)
 }

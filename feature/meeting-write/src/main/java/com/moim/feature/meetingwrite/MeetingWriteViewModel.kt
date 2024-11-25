@@ -3,6 +3,7 @@ package com.moim.feature.meetingwrite
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
@@ -12,15 +13,9 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.designsystem.R
-import com.moim.core.model.asItem
+import com.moim.core.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,39 +25,21 @@ class MeetingWriteViewModel @Inject constructor(
     private val meetingRepository: MeetingRepository
 ) : BaseViewModel() {
 
-    private val meetingId
-        get() = savedStateHandle.get<String?>(KEY_MEETING_ID)
-
-    private val meetingResult = combine(loadDataSignal, flowOf(meetingId), ::Pair)
-        .filter { (_, id) -> id != null }
-        .flatMapLatest { (_, meetingId) -> meetingRepository.getMeeting(meetingId!!).asResult() }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val meeting
+        get() = savedStateHandle.toRoute<DetailRoute.MeetingWrite>(DetailRoute.MeetingWrite.typeMap).meeting
 
     init {
         viewModelScope.launch {
-            if (meetingId == null) {
-                setUiState(MeetingWriteUiState.Success())
-            } else {
-                meetingResult.collect { result ->
-                    when (result) {
-                        is Result.Loading -> setUiState(MeetingWriteUiState.Loading)
-                        is Result.Success -> {
-                            val meeting = result.data.asItem()
-
-                            setUiState(
-                                MeetingWriteUiState.Success(
-                                    meetingId = meeting.id,
-                                    meetingUrl = meeting.imageUrl,
-                                    meetingName = meeting.name,
-                                    enableMeetingWrite = true
-                                )
-                            )
-                        }
-
-                        is Result.Error -> setUiState(MeetingWriteUiState.Error)
-                    }
-                }
-            }
+            meeting?.let {
+                setUiState(
+                    MeetingWriteUiState.MeetingWrite(
+                        meetingId = it.id,
+                        meetingUrl = it.imageUrl,
+                        meetingName = it.name,
+                        enableMeetingWrite = true
+                    )
+                )
+            } ?: run { setUiState(MeetingWriteUiState.MeetingWrite()) }
         }
     }
 
@@ -70,7 +47,6 @@ class MeetingWriteViewModel @Inject constructor(
         when (uiAction) {
             is MeetingWriteUiAction.OnClickMeetingWrite -> setMeeting()
             is MeetingWriteUiAction.OnClickBack -> setUiEvent(MeetingWriteUiEvent.NavigateToBack)
-            is MeetingWriteUiAction.OnClickRefresh -> onRefresh()
             is MeetingWriteUiAction.OnChangeMeetingPhotoUrl -> setMeetingPhotoUrl(uiAction.meetingPhotoUrl)
             is MeetingWriteUiAction.OnChangeMeetingName -> setMeetingName(uiAction.name)
             is MeetingWriteUiAction.OnShowMeetingPhotoEditDialog -> showMeetingPhotoEditDialog(uiAction.isShow)
@@ -79,19 +55,19 @@ class MeetingWriteViewModel @Inject constructor(
     }
 
     private fun showMeetingPhotoEditDialog(isShow: Boolean) {
-        uiState.checkState<MeetingWriteUiState.Success> {
+        uiState.checkState<MeetingWriteUiState.MeetingWrite> {
             setUiState(copy(isShowPhotoEditDialog = isShow))
         }
     }
 
     private fun setMeetingPhotoUrl(imageUrl: String?) {
-        uiState.checkState<MeetingWriteUiState.Success> {
+        uiState.checkState<MeetingWriteUiState.MeetingWrite> {
             setUiState(copy(meetingUrl = imageUrl))
         }
     }
 
     private fun setMeetingName(name: String) {
-        uiState.checkState<MeetingWriteUiState.Success> {
+        uiState.checkState<MeetingWriteUiState.MeetingWrite> {
             val trimName = name.trim()
             val enableMeetingWrite = trimName.length >= 2
             setUiState(copy(meetingName = trimName, enableMeetingWrite = enableMeetingWrite))
@@ -100,8 +76,8 @@ class MeetingWriteViewModel @Inject constructor(
 
     private fun setMeeting() {
         viewModelScope.launch {
-            uiState.checkState<MeetingWriteUiState.Success> {
-                if (meetingId == null) {
+            uiState.checkState<MeetingWriteUiState.MeetingWrite> {
+                if (meetingId.isNullOrEmpty()) {
                     meetingRepository.createMeeting(
                         meetingName = meetingName,
                         meetingImageUrl = meetingUrl
@@ -122,30 +98,21 @@ class MeetingWriteViewModel @Inject constructor(
             }
         }
     }
-
-    companion object {
-        private const val KEY_MEETING_ID = "meetingId"
-    }
 }
 
 sealed interface MeetingWriteUiState : UiState {
-    data object Loading : MeetingWriteUiState
-
-    data class Success(
+    data class MeetingWrite(
         val meetingId: String? = null,
         val meetingUrl: String? = null,
         val meetingName: String = "",
         val enableMeetingWrite: Boolean = false,
         val isShowPhotoEditDialog: Boolean = false
     ) : MeetingWriteUiState
-
-    data object Error : MeetingWriteUiState
 }
 
 sealed interface MeetingWriteUiAction : UiAction {
     data object OnClickMeetingWrite : MeetingWriteUiAction
     data object OnClickBack : MeetingWriteUiAction
-    data object OnClickRefresh : MeetingWriteUiAction
     data class OnChangeMeetingPhotoUrl(val meetingPhotoUrl: String?) : MeetingWriteUiAction
     data class OnChangeMeetingName(val name: String) : MeetingWriteUiAction
     data class OnShowMeetingPhotoEditDialog(val isShow: Boolean) : MeetingWriteUiAction

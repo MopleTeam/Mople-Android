@@ -1,7 +1,7 @@
 package com.moim.core.data.datasource.plan.remote
 
 import com.moim.core.data.model.MeetingPlanContainer
-import com.moim.core.data.model.MeetingPlanResponse
+import com.moim.core.data.model.PlanResponse
 import com.moim.core.data.model.PlaceResponse
 import com.moim.core.data.service.LocationApi
 import com.moim.core.data.service.PlanApi
@@ -14,7 +14,15 @@ internal class PlanRemoteDataSourceImpl @Inject constructor(
     private val locationApi: LocationApi
 ) : PlanRemoteDataSource {
 
-    override suspend fun getPlan(planId: String): MeetingPlanResponse {
+    override suspend fun getPlans(meetingId: String): List<PlanResponse> {
+        return try {
+            planApi.getPlans(meetingId)
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+    }
+
+    override suspend fun getPlan(planId: String): PlanResponse {
         return try {
             planApi.getPlan(planId)
         } catch (e: Exception) {
@@ -30,13 +38,13 @@ internal class PlanRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getPlans(
+    override suspend fun getPlansForCalendar(
         page: Int,
         yearAndMonth: String,
         isClosed: Boolean
-    ): List<MeetingPlanResponse> {
+    ): List<PlanResponse> {
         return try {
-            planApi.getPlans(page = page, yearMonth = yearAndMonth, isClosed = isClosed)
+            planApi.getPlansForCalendar(page = page, yearMonth = yearAndMonth, isClosed = isClosed)
         } catch (e: Exception) {
             throw converterException(e)
         }

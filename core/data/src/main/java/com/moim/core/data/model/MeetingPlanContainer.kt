@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MeetingPlanContainer(
     @SerialName("plans")
-    val plans: List<MeetingPlanResponse>,
+    val plans: List<PlanResponse>,
     @SerialName("meets")
     val meetings: List<MeetingResponse>
 )

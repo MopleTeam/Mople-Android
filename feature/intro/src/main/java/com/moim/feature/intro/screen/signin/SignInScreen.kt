@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -82,12 +83,11 @@ fun SignInScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MoimTheme.typography.heading.bold,
-                color = MoimTheme.colors.primary.primary
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_logo_full),
+                contentDescription = "",
+                tint = Color.Unspecified
             )
-
             Spacer(Modifier.height(16.dp))
 
             Text(
@@ -139,6 +139,9 @@ private fun BoxScope.KakaoLoginButton(
 @Composable
 private fun SignInScreenPreview() {
     MoimTheme {
-        SignInScreen { }
+        SignInScreen(
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
+            onUiAction = {}
+        )
     }
 }

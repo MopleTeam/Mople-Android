@@ -14,6 +14,10 @@ import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.plan.PlanRepositoryImpl
 import com.moim.core.data.datasource.plan.remote.PlanRemoteDataSource
 import com.moim.core.data.datasource.plan.remote.PlanRemoteDataSourceImpl
+import com.moim.core.data.datasource.review.ReviewRepository
+import com.moim.core.data.datasource.review.ReviewRepositoryImpl
+import com.moim.core.data.datasource.review.remote.ReviewRemoteDataSource
+import com.moim.core.data.datasource.review.remote.ReviewRemoteDataSourceImpl
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.data.datasource.user.UserRepositoryImpl
 import com.moim.core.data.datasource.user.remote.UserRemoteDataSource
@@ -63,6 +67,15 @@ internal abstract class DataModule {
     @Singleton
     @Binds
     abstract fun bindPlanRemoteDataSource(planRemoteDataSourceImpl: PlanRemoteDataSourceImpl): PlanRemoteDataSource
+
+    //================================ Review ============================================//
+    @Singleton
+    @Binds
+    abstract fun bindReviewRepository(reviewRepositoryImpl: ReviewRepositoryImpl): ReviewRepository
+
+    @Singleton
+    @Binds
+    abstract fun bindReviewRemoteDataSource(reviewRemoteDataSourceImpl: ReviewRemoteDataSourceImpl): ReviewRemoteDataSource
 
     //================================ Image ============================================//
     @Singleton

@@ -57,6 +57,13 @@
     <string name="meeting_plan_comment">약속된 일정이있어요</string>
     <string name="meeting_plan_before">마지막 약속으로부터 %d일 지났습니다.</string>
 
+    <!-- MeetingDetail -->
+    <string name="meeting_detail_future_plan">예정된 약속</string>
+    <string name="meeting_detail_past_plan">지난 약속</string>
+    <string name="meeting_detail_plan_apply">약속 참여하기</string>
+    <string name="meeting_detail_plan_not_apply">약속 불참</string>
+    <string name="meeting_detail_plan_empty">새로운 일정을 추가해주세요</string>
+
     <!-- MeetingWrite -->
     <string name="meeting_write_title_for_create">모임 생성하기</string>
     <string name="meeting_write_title_for_update">모임 정보 수정</string>
@@ -110,6 +117,7 @@
     <string name="unit_participants_count">%d명 참여</string>
     <string name="unit_participants_count_short">%d명</string>
     <string name="unit_weather">%s°C</string>
+    <string name="unit_count">%d개</string>
 
     <!-- Regex -->
     <string name="regex_date_full">yyyy.MM.dd E hh시 mm분</string>

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,6 +43,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.calendar.ui.CalendarDay
@@ -66,8 +65,8 @@ fun CalendarRoute(
     navigateToPlanDetail: (String) -> Unit
 ) {
     val context = LocalContext.current
-    val calendarUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
+    val calendarUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
@@ -190,7 +189,7 @@ fun CalendarMonth(
             state = monthState,
             dayContent = { day ->
                 val dayForZonedDateTime = day.date.parseZoneDateTime().default()
-                val enabled = uiState.plans.find { it.startedAt.parseZoneDateTime().default() == dayForZonedDateTime } != null
+                val enabled = uiState.plans.find { it.planTime.parseZoneDateTime().default() == dayForZonedDateTime } != null
 
                 CalendarDay(
                     day = dayForZonedDateTime,
@@ -212,7 +211,7 @@ fun CalendarWeek(
     onUiAction: OnCalendarUiAction
 ) {
     val selectedDatePlans = uiState.plans.filter {
-        it.startedAt.parseZoneDateTime().dayOfMonth == (uiState.selectDay ?: ZonedDateTime.now()).dayOfMonth
+        it.planTime.parseZoneDateTime().dayOfMonth == (uiState.selectDay ?: ZonedDateTime.now()).dayOfMonth
     }
 
     Column(
@@ -226,7 +225,7 @@ fun CalendarWeek(
             state = weekState,
             dayContent = { day ->
                 val dayForZonedDateTime = day.date.parseZoneDateTime().default()
-                val enabled = uiState.plans.find { it.startedAt.parseZoneDateTime().default() == dayForZonedDateTime } != null
+                val enabled = uiState.plans.find { it.planTime.parseZoneDateTime().default() == dayForZonedDateTime } != null
 
                 CalendarDay(
                     day = dayForZonedDateTime,
@@ -241,7 +240,7 @@ fun CalendarWeek(
         if (selectedDatePlans.isNotEmpty()) {
             CalendarPlanContent(
                 selectDate = uiState.selectDay ?: ZonedDateTime.now().default(),
-                meetingPlans = selectedDatePlans,
+                plans = selectedDatePlans,
                 onUiAction = onUiAction
             )
         } else {
@@ -258,13 +257,11 @@ fun CalendarWeek(
                     tint = MoimTheme.colors.icon
                 )
 
-                Text(
+                MoimText(
                     text = stringResource(R.string.calendar_empty),
                     textAlign = TextAlign.Center,
                     style = MoimTheme.typography.title03.medium,
                     color = MoimTheme.colors.gray.gray06,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
