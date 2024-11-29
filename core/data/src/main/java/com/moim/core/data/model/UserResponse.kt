@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserResponse(
+    @SerialName("userId")
+    val userId: String = "",
     @SerialName("nickname")
     val nickname: String = "",
     @SerialName("image")

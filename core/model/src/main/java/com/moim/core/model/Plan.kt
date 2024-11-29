@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavType
 import com.moim.core.data.model.PlanResponse
+import com.moim.core.model.util.encoding
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -57,6 +58,16 @@ val PlanType = object : NavType<Plan?>(isNullableAllowed = true) {
     }
 
     override fun serializeAsValue(value: Plan?): String {
-        return if (value == null) "" else Json.encodeToString(Plan.serializer(), value)
+        return value
+            ?.let {
+                Json.encodeToString(
+                    serializer = Plan.serializer(),
+                    value = it.copy(
+                        meetingImage = it.meetingImage.encoding(),
+                        weatherIconUrl = it.weatherIconUrl.encoding()
+                    )
+                )
+            }
+            ?: ""
     }
 }

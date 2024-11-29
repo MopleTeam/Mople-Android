@@ -29,4 +29,8 @@ internal class MeetingRepositoryImpl @Inject constructor(
         val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meeting")
         emit(remoteDataSource.updateMeeting(meetingId, meetingName, uploadImageUrl))
     }
+
+    override fun deleteMeeting(meetingId: String): Flow<Unit> = flow {
+        emit(remoteDataSource.deleteMeeting(meetingId))
+    }
 }

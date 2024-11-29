@@ -11,4 +11,6 @@ internal interface MeetingRemoteDataSource {
     suspend fun createMeeting(meetingName: String, meetingImageUrl: String?): MeetingResponse
 
     suspend fun updateMeeting(meetingId: String, meetingName: String, meetingImageUrl: String?): MeetingResponse
+
+    suspend fun deleteMeeting(meetingId: String)
 }

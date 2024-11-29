@@ -12,5 +12,7 @@ interface ReviewRepository {
 
     fun getReviewParticipant(reviewId: String): Flow<List<MemberResponse>>
 
+    fun submitReviewFeedReport(reviewId: String, reason: String) : Flow<Unit>
+
     fun deleteReviewImage(reviewId: String, images: List<String>) : Flow<Unit>
 }

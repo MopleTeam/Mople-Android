@@ -12,4 +12,6 @@ interface MeetingRepository {
     fun createMeeting(meetingName: String, meetingImageUrl: String?): Flow<MeetingResponse>
 
     fun updateMeeting(meetingId: String, meetingName: String, meetingImageUrl: String?): Flow<MeetingResponse>
+
+    fun deleteMeeting(meetingId: String) : Flow<Unit>
 }

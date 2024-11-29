@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavType
 import com.moim.core.data.model.MeetingResponse
+import com.moim.core.model.util.encoding
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -11,18 +12,22 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class Meeting(
     val id: String = "",
+    val creatorId: String = "",
     val name: String = "",
     val imageUrl: String = "",
     val memberCount: Int = 1,
+    val meetStartDate: Int = 0,
     val lastPlanAt: String? = null
 )
 
 fun MeetingResponse.asItem(): Meeting {
     return Meeting(
         id = id,
+        creatorId = creatorId,
         name = name,
         imageUrl = imageUrl,
         memberCount = memberCount,
+        meetStartDate = meetStartDate,
         lastPlanAt = lastPlanAt
     )
 }
@@ -41,6 +46,13 @@ val MeetingType = object : NavType<Meeting?>(isNullableAllowed = true) {
     }
 
     override fun serializeAsValue(value: Meeting?): String {
-        return if (value == null) "" else Json.encodeToString(Meeting.serializer(), value)
+        return value
+            ?.let {
+                Json.encodeToString(
+                    serializer = Meeting.serializer(),
+                    value = it.copy(imageUrl = it.imageUrl.encoding())
+                )
+            }
+            ?: ""
     }
 }

@@ -16,6 +16,15 @@ data object None : UiState
 
 open class BaseViewModel : ViewModel() {
 
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
+
+    private val _uiState = MutableStateFlow<UiState>(None)
+    val uiState: StateFlow<UiState> = _uiState
+
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent: SharedFlow<UiEvent> = _uiEvent
+
     private val refreshSignal = MutableSharedFlow<Unit>()
 
     protected val loadDataSignal: Flow<Unit> = flow {
@@ -26,15 +35,6 @@ open class BaseViewModel : ViewModel() {
     protected fun onRefresh() = viewModelScope.launch {
         refreshSignal.emit(Unit)
     }
-
-    private val _loading = MutableStateFlow(false)
-    val loading: StateFlow<Boolean> = _loading
-
-    private val _uiState = MutableStateFlow<UiState>(None)
-    val uiState: StateFlow<UiState> = _uiState
-
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent
 
     protected fun setLoading(isLoading: Boolean) {
         _loading.value = isLoading

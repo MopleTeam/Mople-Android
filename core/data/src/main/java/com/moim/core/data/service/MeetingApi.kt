@@ -3,6 +3,7 @@ package com.moim.core.data.service
 import com.moim.core.data.model.MeetingResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -26,4 +27,7 @@ internal interface MeetingApi {
         @Path("meetId") id: String,
         @Body params: JsonObject
     ): MeetingResponse
+
+    @DELETE("/meet/{meetId}")
+    suspend fun deleteMeeting(@Path("meetId") id: String)
 }

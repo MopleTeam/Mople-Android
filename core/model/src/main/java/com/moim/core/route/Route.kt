@@ -42,6 +42,9 @@ sealed interface MainRoute : Route {
 sealed interface DetailRoute : Route {
 
     @Serializable
+    data class MeetingDetail(val meetingId: String) : DetailRoute
+
+    @Serializable
     data class MeetingWrite(val meeting: Meeting? = null) : DetailRoute {
         companion object {
             val typeMap = mapOf(typeOf<Meeting?>() to MeetingType)
@@ -49,7 +52,14 @@ sealed interface DetailRoute : Route {
     }
 
     @Serializable
-    data class MeetingDetail(val meetingId: String) : DetailRoute
+    data class MeetingSetting(val meeting: Meeting) : DetailRoute {
+        companion object {
+            val typeMap = mapOf(typeOf<Meeting>() to MeetingType)
+        }
+    }
+
+    @Serializable
+    data class PlanDetail(val planId: String) : DetailRoute
 
     @Serializable
     data class PlanWrite(val plan: Plan? = null) : DetailRoute {

@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.sp
 import com.moim.core.designsystem.R
 
 private val PretendardFontFamily = FontFamily(
-    Font(R.font.pretendard_bold, FontWeight.W600),
+    Font(R.font.pretendard_bold, FontWeight.W700),
     Font(R.font.pretendard_semi_bold, FontWeight.W700),
     Font(R.font.pretendard_medium, FontWeight.W700),
     Font(R.font.pretendard_regular, FontWeight.Normal)

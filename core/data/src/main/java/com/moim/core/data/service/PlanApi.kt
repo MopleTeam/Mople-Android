@@ -2,7 +2,10 @@ package com.moim.core.data.service
 
 import com.moim.core.data.model.MeetingPlanContainer
 import com.moim.core.data.model.PlanResponse
+import kotlinx.serialization.json.JsonObject
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -21,6 +24,9 @@ internal interface PlanApi {
         @Query("closed") isClosed: Boolean,
     ): List<PlanResponse>
 
-    @GET("/meeting/plan/{id}")
-    suspend fun getPlan(@Path("id") planId: String): PlanResponse
+    @GET("/plan/detail/{planId}")
+    suspend fun getPlan(@Path("planId") planId: String): PlanResponse
+
+    @POST("/plan/create")
+    suspend fun createPlan(@Body params: JsonObject): PlanResponse
 }

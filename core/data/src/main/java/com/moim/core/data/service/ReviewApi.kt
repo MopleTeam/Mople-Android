@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 
 internal interface ReviewApi {
@@ -18,6 +19,9 @@ internal interface ReviewApi {
 
     @GET("/review/participant/{reviewId}")
     suspend fun getReviewParticipant(@Path("reviewId") id: String): List<MemberResponse>
+
+    @POST("review/report")
+    suspend fun submitReviewFeedReport(@Body params: JsonObject)
 
     @DELETE("/review/images/{reviewId}")
     suspend fun deleteReviewImage(@Path("reviewId") id: String, @Body params: JsonObject)

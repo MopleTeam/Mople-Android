@@ -12,6 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimPrimaryButton
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 
@@ -25,7 +26,7 @@ fun ErrorScreen(
         verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
+        MoimText(
             text = stringResource(id = R.string.common_error),
             style = MoimTheme.typography.body01.medium,
             color = MoimTheme.colors.gray.gray01,

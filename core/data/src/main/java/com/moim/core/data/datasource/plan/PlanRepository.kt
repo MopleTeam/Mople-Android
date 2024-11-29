@@ -24,4 +24,13 @@ interface PlanRepository {
         xPoint: String,
         yPoint: String
     ): Flow<List<PlaceResponse>>
+
+    fun createPlan(
+        meetingId: String,
+        planName: String,
+        planTime: String,
+        planAddress: String,
+        longitude: Double,
+        latitude: Double,
+    ): Flow<PlanResponse>
 }

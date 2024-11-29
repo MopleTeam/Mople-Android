@@ -56,7 +56,7 @@ fun HomeMeetingPlanCard(
             )
             Spacer(Modifier.height(16.dp))
 
-            Text(
+            MoimText(
                 text = plan.planName,
                 style = MoimTheme.typography.title01.bold,
                 color = MoimTheme.colors.gray.gray01
@@ -175,7 +175,7 @@ private fun MeetingWeatherInfo(
             imageUrl = weatherUrl,
         )
 
-        Text(
+        MoimText(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 12.dp),
@@ -184,7 +184,7 @@ private fun MeetingWeatherInfo(
             color = MoimTheme.colors.gray.gray01
         )
 
-        Text(
+        MoimText(
             text = address,
             style = MoimTheme.typography.body02.medium,
             color = MoimTheme.colors.gray.gray04

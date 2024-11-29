@@ -11,5 +11,7 @@ internal interface ReviewRemoteDataSource {
 
     suspend fun getReviewParticipant(reviewId: String): List<MemberResponse>
 
+    suspend fun submitReviewFeedReport(reviewId: String, reason: String)
+
     suspend fun deleteReviewImage(reviewId: String, images: List<String>)
 }

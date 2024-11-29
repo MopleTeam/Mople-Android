@@ -46,9 +46,8 @@ class MeetingDetailViewModel @Inject constructor(
                 planRepository.getPlans(meetingId),
                 reviewRepository.getReviews(meetingId),
                 ::Triple
-            )
+            ).asResult()
         }
-        .asResult()
         .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {

@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.util.parseDateString
 import com.moim.core.common.util.parseZoneDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
@@ -55,7 +56,7 @@ class PlanWriteViewModel @Inject constructor(
                         planLatitude = plan.planLatitude,
                         selectMeetingId = plan.meetingId,
                         selectMeetingName = plan.meetingName,
-                        enableMeetingSelected = false
+                        enableMeetingSelected = true
                     )
                 )
             } ?: run { setUiState(PlanWriteUiState.PlanWrite()) }
@@ -70,7 +71,7 @@ class PlanWriteViewModel @Inject constructor(
             is PlanWriteUiAction.OnClickPlanTime -> setPlanTime(uiAction.date)
             is PlanWriteUiAction.OnClickPlanPlaceSearch -> getSearchPlace(uiAction.keyword, uiAction.xPoint, uiAction.yPoint)
             is PlanWriteUiAction.OnClickPlanPlace -> setPlaceMarker(uiAction.place)
-            is PlanWriteUiAction.OnClickPlanWrite -> {}
+            is PlanWriteUiAction.OnClickPlanWrite -> createPlan()
             is PlanWriteUiAction.OnClickRefresh -> onRefresh()
             is PlanWriteUiAction.OnShowDatePickerDialog -> showDatePickerDialog(uiAction.isShow)
             is PlanWriteUiAction.OnShowTimePickerDialog -> showTimePickerDialog(uiAction.isShow)
@@ -84,29 +85,35 @@ class PlanWriteViewModel @Inject constructor(
         uiState.checkState<PlanWriteUiState.PlanWrite> {
             setUiState(
                 copy(
-                    planPlace = place.title,
+                    planPlace = place.roadAddress,
                     selectedPlace = place,
+                    planLongitude = place.xPoint.toDouble(),
+                    planLatitude = place.yPoint.toDouble(),
                     isShowMapSearchScreen = false
                 )
             )
+            setPlanCreateEnabled()
         }
     }
 
     private fun setPlanName(name: String) {
         uiState.checkState<PlanWriteUiState.PlanWrite> {
             setUiState(copy(planName = name))
+            setPlanCreateEnabled()
         }
     }
 
     private fun setPlanDate(date: ZonedDateTime) {
         uiState.checkState<PlanWriteUiState.PlanWrite> {
             setUiState(copy(planDate = date))
+            setPlanCreateEnabled()
         }
     }
 
     private fun setPlanTime(date: ZonedDateTime) {
         uiState.checkState<PlanWriteUiState.PlanWrite> {
             setUiState(copy(planTime = date))
+            setPlanCreateEnabled()
         }
     }
 
@@ -118,13 +125,20 @@ class PlanWriteViewModel @Inject constructor(
                 meetingDialogUiState
             }
 
-            setUiState(
-                copy(
-                    selectMeetingId = meeting.id,
-                    selectMeetingName = meeting.name,
-                    meetingDialogUiState = dialogState
-                )
-            )
+            setUiState(copy(selectMeetingId = meeting.id, selectMeetingName = meeting.name, meetingDialogUiState = dialogState))
+            setPlanCreateEnabled()
+        }
+    }
+
+    private fun setPlanCreateEnabled() {
+        uiState.checkState<PlanWriteUiState.PlanWrite> {
+            val enable = planName.isNullOrEmpty().not()
+                    && planPlace.isNullOrEmpty().not()
+                    && selectMeetingId.isNullOrEmpty().not()
+                    && planDate != null
+                    && planTime != null
+
+            setUiState(copy(enabledSubmit = enable))
         }
     }
 
@@ -155,6 +169,31 @@ class PlanWriteViewModel @Inject constructor(
                                 is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(R.string.common_error_disconnection))
                                 is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(R.string.common_error_disconnection))
                             }
+                        }
+                    }
+            }
+        }
+    }
+
+    private fun createPlan() {
+        viewModelScope.launch {
+            uiState.checkState<PlanWriteUiState.PlanWrite> {
+                planRepository
+                    .createPlan(
+                        meetingId = selectMeetingId!!,
+                        planName = planName!!,
+                        planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute).parseDateString(),
+                        planAddress = planPlace!!,
+                        longitude = planLongitude,
+                        latitude = planLatitude,
+                    )
+                    .asResult()
+                    .onEach { setLoading(it is Result.Loading) }
+                    .collect { result ->
+                        when (result) {
+                            is Result.Loading -> return@collect
+                            is Result.Success -> setUiEvent(PlanWriteUiEvent.NavigateToBack)
+                            is Result.Error -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(R.string.common_error_disconnection))
                         }
                     }
             }
@@ -274,7 +313,6 @@ sealed interface PlanWriteUiAction : UiAction {
     data class OnClickPlanMeeting(val meeting: Meeting) : PlanWriteUiAction
     data class OnClickPlanDate(val date: ZonedDateTime) : PlanWriteUiAction
     data class OnClickPlanTime(val date: ZonedDateTime) : PlanWriteUiAction
-
     data class OnShowMeetingsDialog(val isShow: Boolean) : PlanWriteUiAction
     data class OnShowDatePickerDialog(val isShow: Boolean) : PlanWriteUiAction
     data class OnShowTimePickerDialog(val isShow: Boolean) : PlanWriteUiAction

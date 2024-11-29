@@ -29,7 +29,7 @@ fun MeetingDetailPlanEmpty(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.ic_calendar_empty),
+            imageVector = ImageVector.vectorResource(R.drawable.ic_empty_calendar),
             contentDescription = "",
             tint = MoimTheme.colors.icon
         )

@@ -60,6 +60,14 @@ internal class MeetingRemoteDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteMeeting(meetingId: String) {
+        return try {
+            meetingApi.deleteMeeting(meetingId)
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+    }
+
     companion object {
         private const val KEY_NAME = "name"
         private const val KEY_IMAGE = "image"

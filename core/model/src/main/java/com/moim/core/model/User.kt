@@ -5,6 +5,7 @@ import com.moim.core.data.model.UserResponse
 
 @Stable
 data class User(
+    val userId: String,
     val nickname: String = "",
     val profileUrl: String = "",
     val badgeCount: Int = 0,
@@ -12,6 +13,7 @@ data class User(
 
 fun UserResponse.asItem(): User {
     return User(
+        userId = userId,
         nickname = nickname,
         profileUrl = profileUrl,
         badgeCount = badgeCount,

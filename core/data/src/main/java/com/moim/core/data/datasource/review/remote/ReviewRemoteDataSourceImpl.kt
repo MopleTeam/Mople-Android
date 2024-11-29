@@ -35,6 +35,19 @@ internal class ReviewRemoteDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun submitReviewFeedReport(reviewId: String, reason: String) {
+        return try {
+            reviewApi.submitReviewFeedReport(
+                jsonOf(
+                    KEY_REVIEW_ID to reviewId,
+                    KEY_REASON to reason
+                )
+            )
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+    }
+
     override suspend fun deleteReviewImage(reviewId: String, images: List<String>) {
         return try {
             reviewApi.deleteReviewImage(reviewId, jsonOf(KEY_REVIEW_IMAGES to images))
@@ -45,5 +58,7 @@ internal class ReviewRemoteDataSourceImpl @Inject constructor(
 
     companion object {
         private const val KEY_REVIEW_IMAGES = "reviewImages"
+        private const val KEY_REVIEW_ID = "reviewId"
+        private const val KEY_REASON = "reason"
     }
 }

@@ -32,6 +32,7 @@ import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_FEE500
@@ -127,7 +128,7 @@ private fun BoxScope.KakaoLoginButton(
                 contentDescription = ""
             )
             Spacer(Modifier.width(8.dp))
-            Text(
+            MoimText(
                 text = stringResource(R.string.sign_in_kakao),
                 style = MoimTheme.typography.body01.semiBold
             )

@@ -68,9 +68,41 @@ internal class PlanRemoteDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun createPlan(
+        meetingId: String,
+        planName: String,
+        planTime: String,
+        planAddress: String,
+        longitude: Double,
+        latitude: Double
+    ): PlanResponse {
+        return try {
+            planApi.createPlan(
+                jsonOf(
+                    KEY_MEETING_ID to meetingId,
+                    KEY_NAME to planName,
+                    KEY_PLAN_TIME to planTime,
+                    KEY_PLAN_ADDRESS to planAddress,
+                    KEY_LOT to longitude,
+                    KEY_LAT to latitude,
+                    KEY_WEATHER_ADDRESS to planAddress
+                )
+            )
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+    }
+
     companion object {
         private const val KEY_QUERY = "query"
+        private const val KEY_MEETING_ID = "meetId"
+        private const val KEY_PLAN_TIME = "planTime"
+        private const val KEY_PLAN_ADDRESS = "planAddress"
+        private const val KEY_WEATHER_ADDRESS = "weatherAddress"
+        private const val KEY_NAME = "name"
         private const val KEY_X_POINT = "x"
         private const val KEY_Y_POINT = "y"
+        private const val KEY_LOT = "lot"
+        private const val KEY_LAT = "lat"
     }
 }

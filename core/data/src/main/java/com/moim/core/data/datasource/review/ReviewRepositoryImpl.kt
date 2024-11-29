@@ -23,6 +23,10 @@ internal class ReviewRepositoryImpl @Inject constructor(
         emit(remoteDataSource.getReviewParticipant(reviewId))
     }
 
+    override fun submitReviewFeedReport(reviewId: String, reason: String): Flow<Unit> = flow {
+        emit(remoteDataSource.submitReviewFeedReport(reviewId, reason))
+    }
+
     override fun deleteReviewImage(reviewId: String, images: List<String>): Flow<Unit> = flow {
         emit(remoteDataSource.deleteReviewImage(reviewId, images))
     }

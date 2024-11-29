@@ -16,9 +16,10 @@ internal class PlanRepositoryImpl @Inject constructor(
         emit(remoteDataSource.getCurrentPlan())
     }
 
-    override fun getPlans(meetingId: String): Flow<List<PlanResponse>> = flow{
+    override fun getPlans(meetingId: String): Flow<List<PlanResponse>> = flow {
         emit(remoteDataSource.getPlans(meetingId))
     }
+
     override fun getPlan(planId: String): Flow<PlanResponse> = flow {
         emit(remoteDataSource.getPlan(planId))
     }
@@ -29,5 +30,16 @@ internal class PlanRepositoryImpl @Inject constructor(
 
     override fun getSearchPlace(keyword: String, xPoint: String, yPoint: String): Flow<List<PlaceResponse>> = flow {
         emit(remoteDataSource.getSearchPlace(keyword, xPoint, yPoint))
+    }
+
+    override fun createPlan(
+        meetingId: String,
+        planName: String,
+        planTime: String,
+        planAddress: String,
+        longitude: Double,
+        latitude: Double
+    ): Flow<PlanResponse> = flow {
+        emit(remoteDataSource.createPlan(meetingId, planName, planTime, planAddress, longitude, latitude))
     }
 }

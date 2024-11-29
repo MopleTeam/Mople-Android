@@ -23,4 +23,13 @@ internal interface PlanRemoteDataSource {
         xPoint: String,
         yPoint: String
     ): List<PlaceResponse>
+
+    suspend fun createPlan(
+        meetingId: String,
+        planName: String,
+        planTime: String,
+        planAddress: String,
+        longitude: Double,
+        latitude: Double,
+    ): PlanResponse
 }

@@ -46,7 +46,7 @@ fun ProfileRoute(
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val profileUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(padding)
+    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
@@ -62,7 +62,7 @@ fun ProfileRoute(
         is ProfileUiState.Loading -> LoadingScreen(modifier)
 
         is ProfileUiState.Success -> ProfileScreen(
-            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding),
+            modifier = modifier,
             uiState = uiState,
             isLoading = isLoading,
             onUiAction = viewModel::onUiAction

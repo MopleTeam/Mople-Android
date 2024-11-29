@@ -7,20 +7,16 @@ import kotlinx.serialization.Serializable
 data class MeetingResponse(
     @SerialName("meetId")
     val id: String,
+    @SerialName("creatorId")
+    val creatorId: String = "",
     @SerialName("meetName")
     val name: String,
     @SerialName("meetImage")
     val imageUrl: String = "",
     @SerialName("members")
     val memberCount: Int = 1,
+    @SerialName("meetStartDate")
+    val meetStartDate: Int = 0,
     @SerialName("lastPlanDays")
     val lastPlanAt: String? = null
-)
-
-@Serializable
-data class MemberResponse(
-    @SerialName("nickname")
-    val userNickname: String,
-    @SerialName("profileImg")
-    val imageUrl: String? = null,
 )
