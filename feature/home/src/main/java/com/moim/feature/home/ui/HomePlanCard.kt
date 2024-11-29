@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Vertical
@@ -37,7 +36,7 @@ import com.moim.feature.home.OnHomeUiAction
 import java.time.ZonedDateTime
 
 @Composable
-fun HomeMeetingPlanCard(
+fun HomePlanCard(
     modifier: Modifier = Modifier,
     plan: Plan,
     onUiAction: OnHomeUiAction = {}
@@ -196,7 +195,7 @@ private fun MeetingWeatherInfo(
 @Composable
 private fun HomeMeetingPlanCardPreview() {
     MoimTheme {
-        HomeMeetingPlanCard(
+        HomePlanCard(
             plan = Plan(
                 meetingId = "1",
                 meetingName = "우리중학교 동창1",

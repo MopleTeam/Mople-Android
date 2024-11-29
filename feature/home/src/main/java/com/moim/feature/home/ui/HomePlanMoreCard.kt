@@ -23,7 +23,7 @@ import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
 
 @Composable
-fun HomeMeetingMoreCard(
+fun HomePlanMoreCard(
     modifier: Modifier = Modifier,
     onUiAction: OnHomeUiAction
 ) {
@@ -59,7 +59,7 @@ fun HomeMeetingMoreCard(
 @Composable
 private fun HomeMeetingMoreCardPreview() {
     MoimTheme {
-        HomeMeetingMoreCard(
+        HomePlanMoreCard(
             modifier = Modifier.height(240.dp),
             onUiAction = {}
         )
