@@ -51,7 +51,9 @@ fun MeetingDetailPlanContent(
     onUiAction: OnMeetingDetailUiAction
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(vertical = 28.dp)
@@ -204,7 +206,7 @@ private fun MeetingDetailPlanHeader(
     ) {
         MoimText(
             modifier = modifier.weight(1f),
-            text = getDateTimeFormatString(time, stringResource(R.string.regex_date_day_short)),
+            text = getDateTimeFormatString(time, pattern = stringResource(R.string.regex_date_day_short)),
             style = MoimTheme.typography.body02.semiBold,
             color = MoimTheme.colors.gray.gray04,
         )
@@ -286,8 +288,7 @@ private fun MeetingDetailPlanContentPreview() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MoimTheme.colors.bg.primary)
-                .padding(horizontal = 20.dp),
+                .background(MoimTheme.colors.bg.primary),
         ) {
             MeetingDetailPlanContent(
                 plans = listOf(
@@ -295,14 +296,14 @@ private fun MeetingDetailPlanContentPreview() {
                         planId = "1",
                         planName = "술 한 잔 하는 날1",
                         planMemberCount = 6,
-                        planTime = ZonedDateTime.now().plusDays(2).toString(),
+                        planTime = "2023-12-12 09:00:00",
                         planAddress = "서울시 강남구"
                     ),
                     Plan(
                         planId = "2",
                         planName = "술 한 잔 하는 날2",
                         planMemberCount = 6,
-                        planTime = ZonedDateTime.now().plusDays(2).toString(),
+                        planTime = "2023-12-14 09:00:00",
                         planAddress = "서울시 강남구",
                         isParticipant = true
                     ),
@@ -310,7 +311,7 @@ private fun MeetingDetailPlanContentPreview() {
                         planId = "3",
                         planName = "술 한 잔 하는 날3",
                         planMemberCount = 6,
-                        planTime = ZonedDateTime.now().plusDays(2).toString(),
+                        planTime = "2023-12-15 09:00:00",
                         planAddress = "서울시 강남구"
                     )
                 ),

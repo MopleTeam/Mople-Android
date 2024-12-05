@@ -26,7 +26,9 @@ class MeetingWriteViewModel @Inject constructor(
 ) : BaseViewModel() {
 
     private val meeting
-        get() = savedStateHandle.toRoute<DetailRoute.MeetingWrite>(DetailRoute.MeetingWrite.typeMap).meeting
+        get() = savedStateHandle
+            .toRoute<DetailRoute.MeetingWrite>(DetailRoute.MeetingWrite.typeMap)
+            .meeting
 
     init {
         viewModelScope.launch {

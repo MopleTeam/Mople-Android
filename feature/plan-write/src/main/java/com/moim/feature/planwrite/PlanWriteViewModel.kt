@@ -38,7 +38,9 @@ class PlanWriteViewModel @Inject constructor(
 ) : BaseViewModel() {
 
     private val plan
-        get() = savedStateHandle.toRoute<DetailRoute.PlanWrite>(DetailRoute.PlanWrite.typeMap).plan
+        get() = savedStateHandle
+            .toRoute<DetailRoute.PlanWrite>(DetailRoute.PlanWrite.typeMap)
+            .plan
 
     init {
         viewModelScope.launch {

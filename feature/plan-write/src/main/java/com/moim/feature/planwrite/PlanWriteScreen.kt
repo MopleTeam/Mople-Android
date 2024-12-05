@@ -1,6 +1,5 @@
 package com.moim.feature.planwrite
 
-import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -47,7 +46,7 @@ fun PlanWriteRoute(
     padding: PaddingValues,
     navigateToBack: () -> Unit
 ) {
-    val activity = LocalContext.current as Activity
+    val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val planWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
@@ -59,7 +58,7 @@ fun PlanWriteRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is PlanWriteUiEvent.NavigateToBack -> navigateToBack()
-            is PlanWriteUiEvent.ShowToastMessage -> showToast(activity, event.messageRes)
+            is PlanWriteUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
         }
     }
 

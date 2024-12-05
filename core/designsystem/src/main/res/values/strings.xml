@@ -3,7 +3,7 @@
     <string name="app_name">모플</string>
     <string name="app_description">모임부터 약속까지 간편한 관리</string>
 
-    <!--common -->
+    <!--Common -->
     <string name="common_error">연결 실패</string>
     <string name="common_error_description">서버와의 연결이 불안정합니다.\n잠시 후 다시 시도해주세요</string>
     <string name="common_error_disconnection">서버와의 연결에 실패했습니다.</string>
@@ -20,11 +20,11 @@
     <string name="common_default_select">기본 프로필로 변경</string>
     <string name="common_album_select">앨범에서 사진 선택</string>
 
-    <!-- signIn -->
+    <!-- SignIn -->
     <string name="sign_in_kakao">카카오로 시작하기</string>
     <string name="sign_in_kakao_fail">카카오 로그인에 실패했습니다.</string>
 
-    <!-- signUp -->
+    <!-- SignUp -->
     <string name="sign_up_title">자신을 나타낼\n프로필을 설정해주세요</string>
     <string name="sign_up_nickname">닉네임</string>
     <string name="sign_up_nickname_hint">닉네임을 입력해주세요</string>

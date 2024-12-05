@@ -7,9 +7,18 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-fun getDateTimeFormatString(dateTime: String?, pattern: String): String {
-    val zonedDateTime = dateTime?.let { ZonedDateTime.parse(dateTime) } ?: ZonedDateTime.now()
-    return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault())?.format(DateTimeFormatter.ofPattern(pattern)) ?: ""
+fun getDateTimeFormatString(
+    dateTime: String?,
+    datePattern: String = "yyyy-MM-dd HH:mm:ssXXX",
+    pattern: String
+): String {
+    return try {
+        val formatterWithTimezone = DateTimeFormatter.ofPattern(datePattern)
+        val zonedDateTimeWithTimezone = ZonedDateTime.parse("$dateTime+09:00", formatterWithTimezone)
+        zonedDateTimeWithTimezone.format(DateTimeFormatter.ofPattern(pattern)) ?: ""
+    } catch (e: Exception) {
+        dateTime ?: ""
+    }
 }
 
 fun getDateTimeFormatZoneDate(dateTime: ZonedDateTime? = null, pattern: String): String {
@@ -46,9 +55,9 @@ fun String?.parseZoneDateTime(): ZonedDateTime {
     return zonedDateTime
 }
 
-fun ZonedDateTime?.parseDateString() : String {
+fun ZonedDateTime?.parseDateString(): String {
     val zonedDateTime = this ?: ZonedDateTime.now()
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     return zonedDateTime.format(formatter)
 }
