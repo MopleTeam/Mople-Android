@@ -13,7 +13,7 @@ import com.moim.core.route.DetailRoute
 
 fun NavGraphBuilder.meetingSettingScreen(
     padding: PaddingValues,
-    navigateToBack: () -> Unit,
+    navigateToBack: (Boolean) -> Unit,
     navigateToMeetingWrite: (Meeting) -> Unit,
 ) {
     composable<DetailRoute.MeetingSetting>(

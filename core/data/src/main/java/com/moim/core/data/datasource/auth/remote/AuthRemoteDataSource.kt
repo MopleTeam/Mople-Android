@@ -1,6 +1,6 @@
 package com.moim.core.data.datasource.auth.remote
 
-import com.moim.core.data.model.TokenResponse
+import com.moim.core.datamodel.TokenResponse
 
 internal interface AuthRemoteDataSource {
 

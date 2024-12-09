@@ -36,7 +36,7 @@ import com.kizitonwose.calendar.core.WeekDayPosition
 import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
 import com.moim.core.common.util.default
-import com.moim.core.common.util.parseZoneDateTime
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -120,11 +120,11 @@ fun CalendarScreen(
     val currentDate = rememberFirstMostVisibleMonth(state = monthState, viewportPercent = 90f)
         .yearMonth
         .atStartOfMonth()
-        .parseZoneDateTime()
+        .parseZonedDateTime()
 
     LaunchedEffect(currentDateForWeek) {
         val weekDate = currentDateForWeek.days.first().date
-            .parseZoneDateTime()
+            .parseZonedDateTime()
             .default()
             .withDayOfMonth(1)
 
@@ -188,8 +188,8 @@ fun CalendarMonth(
             modifier = Modifier.fillMaxSize(),
             state = monthState,
             dayContent = { day ->
-                val dayForZonedDateTime = day.date.parseZoneDateTime().default()
-                val enabled = uiState.plans.find { it.planTime.parseZoneDateTime().default() == dayForZonedDateTime } != null
+                val dayForZonedDateTime = day.date.parseZonedDateTime().default()
+                val enabled = uiState.plans.find { it.planTime.parseZonedDateTime().default() == dayForZonedDateTime } != null
 
                 CalendarDay(
                     day = dayForZonedDateTime,
@@ -211,7 +211,7 @@ fun CalendarWeek(
     onUiAction: OnCalendarUiAction
 ) {
     val selectedDatePlans = uiState.plans.filter {
-        it.planTime.parseZoneDateTime().dayOfMonth == (uiState.selectDay ?: ZonedDateTime.now()).dayOfMonth
+        it.planTime.parseZonedDateTime().dayOfMonth == (uiState.selectDay ?: ZonedDateTime.now()).dayOfMonth
     }
 
     Column(
@@ -224,8 +224,8 @@ fun CalendarWeek(
         WeekCalendar(
             state = weekState,
             dayContent = { day ->
-                val dayForZonedDateTime = day.date.parseZoneDateTime().default()
-                val enabled = uiState.plans.find { it.planTime.parseZoneDateTime().default() == dayForZonedDateTime } != null
+                val dayForZonedDateTime = day.date.parseZonedDateTime().default()
+                val enabled = uiState.plans.find { it.planTime.parseZonedDateTime().default() == dayForZonedDateTime } != null
 
                 CalendarDay(
                     day = dayForZonedDateTime,

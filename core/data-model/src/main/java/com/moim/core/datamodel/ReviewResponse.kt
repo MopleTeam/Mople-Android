@@ -1,4 +1,4 @@
-package com.moim.core.data.model
+package com.moim.core.datamodel
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -6,13 +6,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ReviewResponse(
     @SerialName("meetId")
-    val meetingId: String,
+    val meetingId: String = "",
     @SerialName("reviewId")
     val reviewId: String,
     @SerialName("reviewName")
     val reviewName: String,
     @SerialName("address")
-    val address: String,
+    val address: String = "",
     @SerialName("lat")
     val latitude: Double = 0.0, // x
     @SerialName("lot")

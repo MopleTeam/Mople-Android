@@ -1,6 +1,6 @@
 package com.moim.core.data.service
 
-import com.moim.core.data.model.TokenResponse
+import com.moim.core.datamodel.TokenResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.POST

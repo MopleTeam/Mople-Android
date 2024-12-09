@@ -3,7 +3,7 @@ package com.moim.core.data.datasource.user
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.datasource.user.remote.UserRemoteDataSource
 import com.moim.core.data.datastore.PreferenceStorage
-import com.moim.core.data.model.UserResponse
+import com.moim.core.datamodel.UserResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first

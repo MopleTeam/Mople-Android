@@ -1,9 +1,9 @@
 package com.moim.core.data.datasource.user.remote
 
-import com.moim.core.data.model.UserResponse
 import com.moim.core.data.service.UserApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.converterException
+import com.moim.core.datamodel.UserResponse
 import javax.inject.Inject
 
 internal class UserRemoteDataSourceImpl @Inject constructor(

@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
@@ -13,17 +14,20 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.designsystem.R
+import com.moim.core.model.asItem
 import com.moim.core.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class MeetingWriteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val meetingRepository: MeetingRepository
-) : BaseViewModel() {
+    private val meetingRepository: MeetingRepository,
+    private val meetingViewModelDelegate: MeetingViewModelDelegate
+) : BaseViewModel(), MeetingViewModelDelegate by meetingViewModelDelegate {
 
     private val meeting
         get() = savedStateHandle
@@ -93,7 +97,15 @@ class MeetingWriteViewModel @Inject constructor(
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                     when (result) {
                         is Result.Loading -> return@collect
-                        is Result.Success -> setUiEvent(MeetingWriteUiEvent.NavigateToBack)
+                        is Result.Success -> {
+                            if (meetingId.isNullOrEmpty()) {
+                                createMeeting(ZonedDateTime.now(), result.data.asItem())
+                            } else {
+                                updateMeeting(ZonedDateTime.now(), result.data.asItem())
+                            }
+                            setUiEvent(MeetingWriteUiEvent.NavigateToBack)
+                        }
+
                         is Result.Error -> setUiEvent(MeetingWriteUiEvent.ShowToastMessage(R.string.common_error_disconnection))
                     }
                 }

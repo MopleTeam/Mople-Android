@@ -1,6 +1,6 @@
 package com.moim.core.data.datasource.user
 
-import com.moim.core.data.model.UserResponse
+import com.moim.core.datamodel.UserResponse
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {

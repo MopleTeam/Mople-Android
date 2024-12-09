@@ -1,7 +1,7 @@
 package com.moim.core.data.datasource.review
 
-import com.moim.core.data.model.MemberResponse
-import com.moim.core.data.model.ReviewResponse
+import com.moim.core.datamodel.MemberResponse
+import com.moim.core.datamodel.ReviewResponse
 import kotlinx.coroutines.flow.Flow
 
 interface ReviewRepository {

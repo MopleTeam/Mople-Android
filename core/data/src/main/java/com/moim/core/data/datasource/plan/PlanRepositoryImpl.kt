@@ -1,9 +1,9 @@
 package com.moim.core.data.datasource.plan
 
 import com.moim.core.data.datasource.plan.remote.PlanRemoteDataSource
-import com.moim.core.data.model.PlaceResponse
-import com.moim.core.data.model.MeetingPlanContainer
-import com.moim.core.data.model.PlanResponse
+import com.moim.core.datamodel.MeetingPlanContainer
+import com.moim.core.datamodel.PlaceResponse
+import com.moim.core.datamodel.PlanResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -41,5 +41,16 @@ internal class PlanRepositoryImpl @Inject constructor(
         latitude: Double
     ): Flow<PlanResponse> = flow {
         emit(remoteDataSource.createPlan(meetingId, planName, planTime, planAddress, longitude, latitude))
+    }
+
+    override fun updatePlan(
+        planId: String,
+        planName: String,
+        planTime: String,
+        planAddress: String,
+        longitude: Double,
+        latitude: Double
+    ): Flow<PlanResponse> = flow {
+        emit(remoteDataSource.updatePlan(planId, planName, planTime, planAddress, longitude, latitude))
     }
 }

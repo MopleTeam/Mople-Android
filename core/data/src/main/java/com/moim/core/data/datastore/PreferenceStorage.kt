@@ -6,10 +6,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.moim.core.data.datastore.PreferenceStorage.PreferenceKeys.PREF_USER
 import com.moim.core.data.datastore.PreferenceStorage.PreferenceKeys.PREF_USER_TOKEN
-import com.moim.core.data.model.TokenResponse
-import com.moim.core.data.model.UserResponse
 import com.moim.core.data.util.JsonUtil.toJson
 import com.moim.core.data.util.JsonUtil.toObject
+import com.moim.core.datamodel.TokenResponse
+import com.moim.core.datamodel.UserResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber

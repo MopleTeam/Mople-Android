@@ -1,6 +1,6 @@
 package com.moim.core.model
 
-import com.moim.core.data.model.TokenResponse
+import com.moim.core.datamodel.TokenResponse
 
 data class Token(
     val accessToken: String,

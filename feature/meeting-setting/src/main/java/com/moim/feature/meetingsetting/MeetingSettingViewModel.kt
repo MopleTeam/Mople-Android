@@ -4,6 +4,9 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.moim.core.common.delegate.MeetingAction
+import com.moim.core.common.delegate.MeetingViewModelDelegate
+import com.moim.core.common.delegate.PlanViewModelDelegate
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
@@ -18,9 +21,12 @@ import com.moim.core.model.Meeting
 import com.moim.core.model.asItem
 import com.moim.core.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,23 +34,42 @@ class MeetingSettingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val meetingRepository: MeetingRepository,
     userRepository: UserRepository,
-) : BaseViewModel() {
+    meetingViewModelDelegate: MeetingViewModelDelegate,
+    planViewModelDelegate: PlanViewModelDelegate
+) : BaseViewModel(),
+    MeetingViewModelDelegate by meetingViewModelDelegate,
+    PlanViewModelDelegate by planViewModelDelegate {
 
     private val meeting
         get() = savedStateHandle
             .toRoute<DetailRoute.MeetingSetting>(DetailRoute.MeetingSetting.typeMap)
             .meeting
 
+    private val meetingActionReceiver = meetingAction
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MeetingAction.None)
+
     init {
         viewModelScope.launch {
-            val user = userRepository.getUser().first().asItem()
+            launch {
+                val user = userRepository.getUser().first().asItem()
 
-            setUiState(
-                MeetingSettingUiState.MeetingSetting(
-                    meeting = meeting,
-                    isHostUser = meeting.creatorId == user.userId
+                setUiState(
+                    MeetingSettingUiState.MeetingSetting(
+                        meeting = meeting,
+                        isHostUser = meeting.creatorId == user.userId
+                    )
                 )
-            )
+            }
+
+            launch {
+                meetingActionReceiver.collect { action ->
+                    uiState.checkState<MeetingSettingUiState.MeetingSetting> {
+                        if (action is MeetingAction.MeetingUpdate) {
+                            setUiState(copy(meeting = action.meeting))
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -81,7 +106,12 @@ class MeetingSettingViewModel @Inject constructor(
                     .collect { result ->
                         when (result) {
                             is Result.Loading -> return@collect
-                            is Result.Success -> setUiEvent(MeetingSettingUiEvent.NavigateToBack)
+                            is Result.Success -> {
+                                deleteMeeting(ZonedDateTime.now(), meeting.id)
+                                invalidatePlan(ZonedDateTime.now())
+                                setUiEvent(MeetingSettingUiEvent.NavigateToBackForDelete)
+                            }
+
                             is Result.Error -> setUiEvent(MeetingSettingUiEvent.OnShowToastMessage(R.string.common_error_disconnection))
                         }
                     }
@@ -111,6 +141,7 @@ sealed interface MeetingSettingUiAction : UiAction {
 
 sealed interface MeetingSettingUiEvent : UiEvent {
     data object NavigateToBack : MeetingSettingUiEvent
+    data object NavigateToBackForDelete : MeetingSettingUiEvent
     data class NavigateToMeetingWrite(val meeting: Meeting) : MeetingSettingUiEvent
     data class NavigateToMeetingParticipants(val meetingId: String) : MeetingSettingUiEvent
     data class OnShowToastMessage(@StringRes val messageRes: Int) : MeetingSettingUiEvent

@@ -1,10 +1,11 @@
 package com.moim.core.data.service
 
-import com.moim.core.data.model.MeetingPlanContainer
-import com.moim.core.data.model.PlanResponse
+import com.moim.core.datamodel.MeetingPlanContainer
+import com.moim.core.datamodel.PlanResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -29,4 +30,7 @@ internal interface PlanApi {
 
     @POST("/plan/create")
     suspend fun createPlan(@Body params: JsonObject): PlanResponse
+
+    @PATCH("/plan/update")
+    suspend fun updatePlan(@Body params: JsonObject): PlanResponse
 }

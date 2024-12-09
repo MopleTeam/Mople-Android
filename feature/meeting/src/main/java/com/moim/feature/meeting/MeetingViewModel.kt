@@ -1,14 +1,17 @@
 package com.moim.feature.meeting
 
 import androidx.lifecycle.viewModelScope
+import com.moim.core.common.delegate.MeetingAction
+import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
+import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
-import com.moim.core.data.model.MeetingResponse
+import com.moim.core.datamodel.MeetingResponse
 import com.moim.core.model.Meeting
 import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,8 +23,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MeetingViewModel @Inject constructor(
-    private val meetingRepository: MeetingRepository
-) : BaseViewModel() {
+    private val meetingRepository: MeetingRepository,
+    private val meetingViewModelDelegate: MeetingViewModelDelegate
+) : BaseViewModel(), MeetingViewModelDelegate by meetingViewModelDelegate {
+
+    private val meetingActionReceiver = meetingAction
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MeetingAction.None)
 
     private val meetingsResult = loadDataSignal
         .flatMapLatest { meetingRepository.getMeetings().asResult() }
@@ -29,11 +36,52 @@ class MeetingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            meetingsResult.collect { result ->
-                when (result) {
-                    is Result.Loading -> setUiState(MeetingUiState.Loading)
-                    is Result.Success -> setUiState(MeetingUiState.Success(result.data.map(MeetingResponse::asItem)))
-                    is Result.Error -> setUiState(MeetingUiState.Error)
+            launch {
+                meetingsResult.collect { result ->
+                    when (result) {
+                        is Result.Loading -> setUiState(MeetingUiState.Loading)
+                        is Result.Success -> setUiState(MeetingUiState.Success(result.data.map(MeetingResponse::asItem)))
+                        is Result.Error -> setUiState(MeetingUiState.Error)
+                    }
+                }
+            }
+
+            launch {
+                meetingActionReceiver.collect { action ->
+                    uiState.checkState<MeetingUiState.Success> {
+                        when (action) {
+                            is MeetingAction.MeetingCreate -> {
+                                val meeting = meetings.toMutableList().apply { add(0, action.meeting) }
+                                setUiState(copy(meetings = meeting))
+                            }
+
+                            is MeetingAction.MeetingUpdate -> {
+                                val meeting = meetings.toMutableList().apply {
+                                    withIndex()
+                                        .firstOrNull { action.meeting.id == it.value.id }
+                                        ?.index
+                                        ?.let { index -> set(index, action.meeting) }
+                                }
+
+                                setUiState(copy(meetings = meeting))
+                            }
+
+                            is MeetingAction.MeetingDelete -> {
+                                val meeting = meetings.toMutableList().apply {
+                                    withIndex()
+                                        .firstOrNull { action.meetId == it.value.id }
+                                        ?.index
+                                        ?.let { index -> removeAt(index) }
+                                }
+
+                                setUiState(copy(meetings = meeting))
+                            }
+
+                            is MeetingAction.MeetingInvalidate -> onRefresh()
+
+                            else -> return@collect
+                        }
+                    }
                 }
             }
         }

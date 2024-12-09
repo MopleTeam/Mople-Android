@@ -1,8 +1,8 @@
 package com.moim.core.data.datasource.plan.remote
 
-import com.moim.core.data.model.PlaceResponse
-import com.moim.core.data.model.MeetingPlanContainer
-import com.moim.core.data.model.PlanResponse
+import com.moim.core.datamodel.MeetingPlanContainer
+import com.moim.core.datamodel.PlaceResponse
+import com.moim.core.datamodel.PlanResponse
 
 internal interface PlanRemoteDataSource {
 
@@ -26,6 +26,15 @@ internal interface PlanRemoteDataSource {
 
     suspend fun createPlan(
         meetingId: String,
+        planName: String,
+        planTime: String,
+        planAddress: String,
+        longitude: Double,
+        latitude: Double,
+    ): PlanResponse
+
+    suspend fun updatePlan(
+        planId: String,
         planName: String,
         planTime: String,
         planAddress: String,

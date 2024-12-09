@@ -1,6 +1,7 @@
 package com.moim.core.data.datasource.meeting.remote
 
-import com.moim.core.data.model.MeetingResponse
+import com.moim.core.datamodel.MeetingResponse
+
 
 internal interface MeetingRemoteDataSource {
 

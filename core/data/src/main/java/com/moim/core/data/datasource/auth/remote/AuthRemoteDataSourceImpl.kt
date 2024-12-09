@@ -1,7 +1,7 @@
 package com.moim.core.data.datasource.auth.remote
 
 import com.moim.core.common.consts.DEVICE_TYPE_ANDROID
-import com.moim.core.data.model.TokenResponse
+import com.moim.core.datamodel.TokenResponse
 import com.moim.core.data.service.AuthApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.converterException

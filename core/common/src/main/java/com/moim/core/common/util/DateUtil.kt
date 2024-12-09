@@ -21,7 +21,7 @@ fun getDateTimeFormatString(
     }
 }
 
-fun getDateTimeFormatZoneDate(dateTime: ZonedDateTime? = null, pattern: String): String {
+fun getDateTimeFormatZonedDate(dateTime: ZonedDateTime? = null, pattern: String): String {
     val zonedDateTime = dateTime ?: ZonedDateTime.now()
     return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault())?.format(DateTimeFormatter.ofPattern(pattern)) ?: ""
 }
@@ -50,7 +50,7 @@ fun getDateTimeBetweenDay(startDate: ZonedDateTime? = null, endDate: ZonedDateTi
     return Duration.between(startDateTime, endDateTime).toDays().toInt()
 }
 
-fun String?.parseZoneDateTime(): ZonedDateTime {
+fun String?.parseZonedDateTime(): ZonedDateTime {
     val zonedDateTime = this?.let { ZonedDateTime.parse(this) } ?: ZonedDateTime.now()
     return zonedDateTime
 }
@@ -62,7 +62,16 @@ fun ZonedDateTime?.parseDateString(): String {
     return zonedDateTime.format(formatter)
 }
 
-fun LocalDate.parseZoneDateTime(): ZonedDateTime {
+fun String?.parseZonedDateTimeForDateString() : ZonedDateTime {
+    return try {
+        val formatterWithTimezone = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssXXX")
+        ZonedDateTime.parse("$this+09:00", formatterWithTimezone)
+    } catch (e: Exception) {
+        ZonedDateTime.now()
+    }
+}
+
+fun LocalDate.parseZonedDateTime(): ZonedDateTime {
     val zonedDateTime = this.atStartOfDay(ZoneId.systemDefault())
     return zonedDateTime
 }

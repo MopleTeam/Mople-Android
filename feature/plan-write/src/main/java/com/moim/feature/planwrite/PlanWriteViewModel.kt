@@ -4,11 +4,12 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.moim.core.common.delegate.PlanViewModelDelegate
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseDateString
-import com.moim.core.common.util.parseZoneDateTime
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
@@ -16,8 +17,8 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.data.model.MeetingResponse
-import com.moim.core.data.model.PlaceResponse
+import com.moim.core.datamodel.MeetingResponse
+import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.designsystem.R
 import com.moim.core.model.Meeting
 import com.moim.core.model.Place
@@ -35,7 +36,8 @@ class PlanWriteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val planRepository: PlanRepository,
     private val meetingRepository: MeetingRepository,
-) : BaseViewModel() {
+    planViewModelDelegate: PlanViewModelDelegate
+) : BaseViewModel(), PlanViewModelDelegate by planViewModelDelegate {
 
     private val plan
         get() = savedStateHandle
@@ -45,7 +47,7 @@ class PlanWriteViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             plan?.let { plan ->
-                val planDate = plan.planTime.parseZoneDateTime()
+                val planDate = plan.planTime.parseZonedDateTime()
 
                 setUiState(
                     PlanWriteUiState.PlanWrite(
@@ -73,7 +75,7 @@ class PlanWriteViewModel @Inject constructor(
             is PlanWriteUiAction.OnClickPlanTime -> setPlanTime(uiAction.date)
             is PlanWriteUiAction.OnClickPlanPlaceSearch -> getSearchPlace(uiAction.keyword, uiAction.xPoint, uiAction.yPoint)
             is PlanWriteUiAction.OnClickPlanPlace -> setPlaceMarker(uiAction.place)
-            is PlanWriteUiAction.OnClickPlanWrite -> createPlan()
+            is PlanWriteUiAction.OnClickPlanWrite -> setPlan()
             is PlanWriteUiAction.OnClickRefresh -> onRefresh()
             is PlanWriteUiAction.OnShowDatePickerDialog -> showDatePickerDialog(uiAction.isShow)
             is PlanWriteUiAction.OnShowTimePickerDialog -> showTimePickerDialog(uiAction.isShow)
@@ -177,27 +179,40 @@ class PlanWriteViewModel @Inject constructor(
         }
     }
 
-    private fun createPlan() {
+    private fun setPlan() {
         viewModelScope.launch {
             uiState.checkState<PlanWriteUiState.PlanWrite> {
-                planRepository
-                    .createPlan(
-                        meetingId = selectMeetingId!!,
-                        planName = planName!!,
-                        planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute).parseDateString(),
-                        planAddress = planPlace!!,
-                        longitude = planLongitude,
-                        latitude = planLatitude,
-                    )
-                    .asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> return@collect
-                            is Result.Success -> setUiEvent(PlanWriteUiEvent.NavigateToBack)
-                            is Result.Error -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                if (plan?.planId.isNullOrEmpty()) {
+                    planRepository
+                        .createPlan(
+                            meetingId = selectMeetingId!!,
+                            planName = planName!!,
+                            planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute).parseDateString(),
+                            planAddress = planPlace!!,
+                            longitude = planLongitude,
+                            latitude = planLatitude,
+                        )
+                } else {
+                    planRepository
+                        .updatePlan(
+                            planId = planId!!,
+                            planName = planName!!,
+                            planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute).parseDateString(),
+                            planAddress = planPlace!!,
+                            longitude = planLongitude,
+                            latitude = planLatitude,
+                        )
+                }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
+                    when (result) {
+                        is Result.Loading -> return@collect
+                        is Result.Success -> {
+                            createPlan(ZonedDateTime.now(), plan = result.data.asItem())
+                            setUiEvent(PlanWriteUiEvent.NavigateToBack)
                         }
+
+                        is Result.Error -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(R.string.common_error_disconnection))
                     }
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.moim.core.model
 
 import androidx.compose.runtime.Stable
-import com.moim.core.data.model.PlaceResponse
+import com.moim.core.datamodel.PlaceResponse
 
 @Stable
 data class Place(

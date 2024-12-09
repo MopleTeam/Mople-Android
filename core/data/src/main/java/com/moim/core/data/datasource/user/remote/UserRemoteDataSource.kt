@@ -1,6 +1,6 @@
 package com.moim.core.data.datasource.user.remote
 
-import com.moim.core.data.model.UserResponse
+import com.moim.core.datamodel.UserResponse
 
 internal interface UserRemoteDataSource {
 

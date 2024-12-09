@@ -1,7 +1,7 @@
 package com.moim.core.model
 
 import androidx.compose.runtime.Stable
-import com.moim.core.data.model.ActiveCommentResponse
+import com.moim.core.datamodel.ActiveCommentResponse
 
 @Stable
 data class ActiveComment(

@@ -3,6 +3,8 @@ package com.moim.feature.meetingdetail
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.moim.core.common.delegate.MeetingAction
+import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
@@ -13,8 +15,8 @@ import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
-import com.moim.core.data.model.PlanResponse
-import com.moim.core.data.model.ReviewResponse
+import com.moim.core.datamodel.PlanResponse
+import com.moim.core.datamodel.ReviewResponse
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
 import com.moim.core.model.Review
@@ -34,10 +36,14 @@ class MeetingDetailViewModel @Inject constructor(
     meetingRepository: MeetingRepository,
     planRepository: PlanRepository,
     reviewRepository: ReviewRepository,
-) : BaseViewModel() {
+    meetingViewModelDelegate: MeetingViewModelDelegate
+) : BaseViewModel(), MeetingViewModelDelegate by meetingViewModelDelegate {
 
     private val meetingId
         get() = savedStateHandle.get<String>(KEY_MEETING_ID) ?: ""
+
+    private val meetingActionReceiver = meetingAction
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MeetingAction.None)
 
     private val meetingDetailResult = loadDataSignal
         .flatMapLatest {
@@ -52,22 +58,36 @@ class MeetingDetailViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            meetingDetailResult.collect { result ->
-                when (result) {
-                    is Result.Loading -> setUiState(MeetingDetailUiState.Loading)
-                    is Result.Success -> {
-                        val (meeting, plans, reviews) = result.data
+            launch {
+                meetingDetailResult.collect { result ->
+                    when (result) {
+                        is Result.Loading -> setUiState(MeetingDetailUiState.Loading)
+                        is Result.Success -> {
+                            val (meeting, plans, reviews) = result.data
 
-                        setUiState(
-                            MeetingDetailUiState.Success(
-                                meeting = meeting.asItem(),
-                                plans = plans.map(PlanResponse::asItem),
-                                reviews = reviews.map(ReviewResponse::asItem)
+                            setUiState(
+                                MeetingDetailUiState.Success(
+                                    meeting = meeting.asItem(),
+                                    plans = plans.map(PlanResponse::asItem),
+                                    reviews = reviews.map(ReviewResponse::asItem)
+                                )
                             )
-                        )
-                    }
+                        }
 
-                    is Result.Error -> setUiState(MeetingDetailUiState.Error)
+                        is Result.Error -> setUiState(MeetingDetailUiState.Error)
+                    }
+                }
+            }
+
+            launch {
+                meetingActionReceiver.collect { action ->
+                    uiState.checkState<MeetingDetailUiState.Success> {
+                        when (action) {
+                            is MeetingAction.MeetingUpdate -> setUiState(copy(meeting = action.meeting))
+                            is MeetingAction.MeetingInvalidate -> onRefresh()
+                            else -> return@collect
+                        }
+                    }
                 }
             }
         }

@@ -2,7 +2,7 @@ package com.moim.core.data.datasource.meeting
 
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.datasource.meeting.remote.MeetingRemoteDataSource
-import com.moim.core.data.model.MeetingResponse
+import com.moim.core.datamodel.MeetingResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject

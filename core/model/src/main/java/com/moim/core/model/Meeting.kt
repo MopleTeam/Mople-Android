@@ -3,7 +3,7 @@ package com.moim.core.model
 import android.os.Bundle
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavType
-import com.moim.core.data.model.MeetingResponse
+import com.moim.core.datamodel.MeetingResponse
 import com.moim.core.model.util.encoding
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json

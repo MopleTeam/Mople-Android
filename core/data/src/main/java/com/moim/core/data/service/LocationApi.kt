@@ -1,6 +1,6 @@
 package com.moim.core.data.service
 
-import com.moim.core.data.model.PlaceResponseContainer
+import com.moim.core.datamodel.PlaceResponseContainer
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.POST

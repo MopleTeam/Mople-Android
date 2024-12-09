@@ -2,16 +2,21 @@ package com.moim.feature.home
 
 import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
+import com.moim.core.common.delegate.MeetingAction
+import com.moim.core.common.delegate.MeetingViewModelDelegate
+import com.moim.core.common.delegate.PlanAction
+import com.moim.core.common.delegate.PlanViewModelDelegate
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.util.parseZonedDateTimeForDateString
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.data.model.PlanResponse
-import com.moim.core.data.model.MeetingResponse
+import com.moim.core.datamodel.MeetingResponse
+import com.moim.core.datamodel.PlanResponse
 import com.moim.core.designsystem.R
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
@@ -26,7 +31,17 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val planRepository: PlanRepository,
-) : BaseViewModel() {
+    meetingViewModelDelegate: MeetingViewModelDelegate,
+    planViewModelDelegate: PlanViewModelDelegate
+) : BaseViewModel(),
+    MeetingViewModelDelegate by meetingViewModelDelegate,
+    PlanViewModelDelegate by planViewModelDelegate {
+
+    private val meetingActionReceiver = meetingAction
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed((5000)), MeetingAction.None)
+
+    private val planActionReceiver = planAction
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed((5000)), PlanAction.None)
 
     private val meetingPlansResult = loadDataSignal
         .flatMapLatest { planRepository.getCurrentPlans().asResult() }
@@ -34,17 +49,95 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            meetingPlansResult.collect { result ->
-                when (result) {
-                    is Result.Loading -> setUiState(HomeUiState.Loading)
-                    is Result.Success -> setUiState(
-                        HomeUiState.Success(
-                            plans = result.data.plans.map(PlanResponse::asItem),
-                            meetings = result.data.meetings.map(MeetingResponse::asItem)
+            launch {
+                meetingPlansResult.collect { result ->
+                    when (result) {
+                        is Result.Loading -> setUiState(HomeUiState.Loading)
+                        is Result.Success -> setUiState(
+                            HomeUiState.Success(
+                                plans = result.data.plans.map(PlanResponse::asItem),
+                                meetings = result.data.meetings.map(MeetingResponse::asItem)
+                            )
                         )
-                    )
 
-                    is Result.Error -> setUiState(HomeUiState.Error)
+                        is Result.Error -> setUiState(HomeUiState.Error)
+                    }
+                }
+            }
+
+            launch {
+                meetingActionReceiver.collect { action ->
+                    uiState.checkState<HomeUiState.Success> {
+                        when (action) {
+                            is MeetingAction.MeetingCreate -> {
+                                val meetings = meetings.toMutableList().apply { add(action.meeting) }
+                                setUiState(copy(meetings = meetings))
+                            }
+
+                            is MeetingAction.MeetingDelete -> {
+                                val meetings = meetings.toMutableList().apply {
+                                    withIndex()
+                                        .firstOrNull { action.meetId == it.value.id }
+                                        ?.index
+                                        ?.let { index -> removeAt(index) }
+                                }
+
+                                setUiState(copy(meetings = meetings))
+                            }
+
+                            else -> return@collect
+                        }
+                    }
+                }
+            }
+
+            launch {
+                planActionReceiver.collect { action ->
+                    uiState.checkState<HomeUiState.Success> {
+                        when (action) {
+                            is PlanAction.PlanCreate -> {
+                                val plans = plans.toMutableList()
+                                    .apply {
+                                        withIndex()
+                                            .firstOrNull {
+                                                val newPlanTime = action.plan.planTime.parseZonedDateTimeForDateString()
+                                                val currentPlanTime = it.value.planTime.parseZonedDateTimeForDateString()
+                                                newPlanTime.isBefore(currentPlanTime)
+                                            }
+                                            ?.let { add(it.index, action.plan) }
+                                            ?: run { add(action.plan) }
+                                    }.take(5)
+
+                                setUiState(copy(plans = plans))
+                            }
+
+                            is PlanAction.PlanUpdate -> {
+                                val plans = plans.toMutableList().apply {
+                                    withIndex()
+                                        .firstOrNull { action.plan.planId == it.value.planId }
+                                        ?.index
+                                        ?.let { index -> set(index, action.plan) }
+                                }
+
+                                setUiState(copy(plans = plans))
+                            }
+
+                            is PlanAction.PlanDelete -> {
+                                val plans = plans.toMutableList().apply {
+                                    withIndex()
+                                        .firstOrNull { action.planId == it.value.planId }
+                                        ?.index
+                                        ?.let { index -> removeAt(index) }
+                                }
+
+                                setUiState(copy(plans = plans))
+                            }
+
+                            is PlanAction.PlanInvalidate -> onRefresh()
+
+                            else -> return@collect
+                        }
+                    }
                 }
             }
         }

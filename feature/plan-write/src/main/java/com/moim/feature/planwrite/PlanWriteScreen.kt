@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.common.util.getDateFormatLongTime
-import com.moim.core.common.util.getDateTimeFormatZoneDate
+import com.moim.core.common.util.getDateTimeFormatZonedDate
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -108,14 +108,14 @@ fun PlanWriteScreen(
             PlanWriteSelectedBox(
                 titleText = stringResource(R.string.plan_write_date_select),
                 hintText = stringResource(R.string.plan_write_date_select_hint),
-                valueText = if (uiState.planDate == null) null else getDateTimeFormatZoneDate(uiState.planDate, stringResource(R.string.regex_date_day)),
+                valueText = if (uiState.planDate == null) null else getDateTimeFormatZonedDate(uiState.planDate, stringResource(R.string.regex_date_day)),
                 iconRes = R.drawable.ic_calendar,
                 onClick = { onUiAction(PlanWriteUiAction.OnShowDatePickerDialog(true)) }
             )
             PlanWriteSelectedBox(
                 titleText = stringResource(R.string.plan_write_time_select),
                 hintText = stringResource(R.string.plan_write_time_select_hint),
-                valueText = if (uiState.planTime == null) null else getDateTimeFormatZoneDate(uiState.planTime, stringResource(R.string.regex_date_time)),
+                valueText = if (uiState.planTime == null) null else getDateTimeFormatZonedDate(uiState.planTime, stringResource(R.string.regex_date_time)),
                 iconRes = R.drawable.ic_clock,
                 onClick = { onUiAction(PlanWriteUiAction.OnShowTimePickerDialog(true)) }
             )

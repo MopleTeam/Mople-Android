@@ -1,6 +1,6 @@
 package com.moim.core.model
 
-import com.moim.core.data.model.ReviewResponse
+import com.moim.core.datamodel.ReviewResponse
 import kotlinx.serialization.Serializable
 
 @Serializable

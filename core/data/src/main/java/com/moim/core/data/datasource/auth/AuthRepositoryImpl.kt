@@ -3,7 +3,7 @@ package com.moim.core.data.datasource.auth
 import com.moim.core.data.datasource.auth.remote.AuthRemoteDataSource
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.datastore.PreferenceStorage
-import com.moim.core.data.model.TokenResponse
+import com.moim.core.datamodel.TokenResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject

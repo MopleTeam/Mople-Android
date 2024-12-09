@@ -1,9 +1,9 @@
 package com.moim.core.data.datasource.meeting.remote
 
-import com.moim.core.data.model.MeetingResponse
 import com.moim.core.data.service.MeetingApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.converterException
+import com.moim.core.datamodel.MeetingResponse
 import javax.inject.Inject
 
 internal class MeetingRemoteDataSourceImpl @Inject constructor(

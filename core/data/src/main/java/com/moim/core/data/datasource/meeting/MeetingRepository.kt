@@ -1,6 +1,6 @@
 package com.moim.core.data.datasource.meeting
 
-import com.moim.core.data.model.MeetingResponse
+import com.moim.core.datamodel.MeetingResponse
 import kotlinx.coroutines.flow.Flow
 
 interface MeetingRepository {

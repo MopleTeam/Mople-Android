@@ -7,7 +7,7 @@ import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.default
-import com.moim.core.common.util.getDateTimeFormatZoneDate
+import com.moim.core.common.util.getDateTimeFormatZonedDate
 import com.moim.core.common.util.getZonedDateTimeDefault
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
@@ -15,7 +15,7 @@ import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.data.model.PlanResponse
+import com.moim.core.datamodel.PlanResponse
 import com.moim.core.designsystem.R
 import com.moim.core.model.Plan
 import com.moim.core.model.asItem
@@ -40,7 +40,7 @@ class CalendarViewModel @Inject constructor(
             planRepository
                 .getPlansForCalendar(
                     page = 1,
-                    yearAndMonth = getDateTimeFormatZoneDate(pattern = "yyyyMM"),
+                    yearAndMonth = getDateTimeFormatZonedDate(pattern = "yyyyMM"),
                     isClosed = false
                 )
                 .asResult()
@@ -93,7 +93,7 @@ class CalendarViewModel @Inject constructor(
                 planRepository
                     .getPlansForCalendar(
                         page = 1,
-                        yearAndMonth = getDateTimeFormatZoneDate(dateTime = date, pattern = "yyyyMM"),
+                        yearAndMonth = getDateTimeFormatZonedDate(dateTime = date, pattern = "yyyyMM"),
                         isClosed = false
                     )
                     .asResult()

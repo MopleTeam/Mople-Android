@@ -1,9 +1,8 @@
 package com.moim.core.data.service
 
-import com.moim.core.data.model.TokenResponse
+import com.moim.core.datamodel.TokenResponse
 import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.Query
 
 internal interface TokenApi {
 

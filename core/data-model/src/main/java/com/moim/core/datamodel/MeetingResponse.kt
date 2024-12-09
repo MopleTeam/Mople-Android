@@ -1,4 +1,4 @@
-package com.moim.core.data.model
+package com.moim.core.datamodel
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

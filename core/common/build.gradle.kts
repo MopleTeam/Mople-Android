@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.moim.android.library)
     alias(libs.plugins.moim.android.library.compose)
+    alias(libs.plugins.moim.android.hilt)
 }
 
 android {
@@ -8,6 +9,8 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.model)
+
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.foundation.layout)

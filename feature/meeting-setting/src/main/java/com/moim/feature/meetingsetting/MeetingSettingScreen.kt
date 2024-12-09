@@ -42,7 +42,7 @@ internal typealias OnMeetingSettingUiAction = (MeetingSettingUiAction) -> Unit
 fun MeetingSettingRoute(
     viewModel: MeetingSettingViewModel = hiltViewModel(),
     padding: PaddingValues,
-    navigateToBack: () -> Unit,
+    navigateToBack: (Boolean) -> Unit,
     navigateToMeetingWrite: (Meeting) -> Unit,
 ) {
     val context = LocalContext.current
@@ -51,13 +51,13 @@ fun MeetingSettingRoute(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is MeetingSettingUiEvent.NavigateToBack -> navigateToBack()
+            is MeetingSettingUiEvent.NavigateToBack -> navigateToBack(false)
+            is MeetingSettingUiEvent.NavigateToBackForDelete -> navigateToBack(true)
             is MeetingSettingUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite(event.meeting)
             is MeetingSettingUiEvent.NavigateToMeetingParticipants -> {}
             is MeetingSettingUiEvent.OnShowToastMessage -> showToast(context, event.messageRes)
         }
     }
-
 
     when (val uiState = meetingUiState) {
         is MeetingSettingUiState.MeetingSetting -> MeetingSettingScreen(

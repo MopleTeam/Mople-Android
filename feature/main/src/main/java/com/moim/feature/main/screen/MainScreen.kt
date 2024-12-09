@@ -70,7 +70,10 @@ fun MainScreen(
                 )
                 meetingSettingScreen(
                     padding = innerPadding,
-                    navigateToBack = navigator.navController::popBackStack,
+                    navigateToBack = {
+                        if (it) navigator.navController.popBackStack()
+                        navigator.navController.popBackStack()
+                    },
                     navigateToMeetingWrite = navigator.navController::navigateToMeetingWrite
                 )
                 planWriteScreen(

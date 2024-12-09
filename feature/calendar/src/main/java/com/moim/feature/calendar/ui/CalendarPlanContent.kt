@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.moim.core.common.util.getDateTimeFormatZoneDate
+import com.moim.core.common.util.getDateTimeFormatZonedDate
 import com.moim.core.common.util.toDecimalString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
@@ -58,7 +58,7 @@ fun CalendarPlanContent(
             Column {
                 MoimText(
                     modifier = Modifier.fillMaxWidth(),
-                    text = getDateTimeFormatZoneDate(selectDate, stringResource(R.string.regex_date_day)),
+                    text = getDateTimeFormatZonedDate(selectDate, stringResource(R.string.regex_date_day)),
                     textAlign = TextAlign.Center,
                     style = MoimTheme.typography.body01.medium,
                     color = MoimTheme.colors.gray.gray05,

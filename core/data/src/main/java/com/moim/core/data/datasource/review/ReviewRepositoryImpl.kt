@@ -1,8 +1,8 @@
 package com.moim.core.data.datasource.review
 
 import com.moim.core.data.datasource.review.remote.ReviewRemoteDataSource
-import com.moim.core.data.model.MemberResponse
-import com.moim.core.data.model.ReviewResponse
+import com.moim.core.datamodel.MemberResponse
+import com.moim.core.datamodel.ReviewResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
