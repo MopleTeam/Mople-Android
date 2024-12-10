@@ -129,6 +129,7 @@ kotlin-compose-compiler-extension = { group = "org.jetbrains.kotlin", name = "co
 
 # Firebase
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" } # For platform
+firebase-messageing = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
 
 # Coil

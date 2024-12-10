@@ -16,7 +16,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
-import com.moim.core.data.service.TokenApi
+import com.moim.core.data.service.AuthTokenApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 
@@ -40,7 +40,7 @@ internal object TokenServiceModule {
     @Provides
     fun provideTokenApi(
         @MoimTokenApiOkHttp okHttpCallFactory: Call.Factory
-    ): TokenApi {
+    ): AuthTokenApi {
         val format = Json {
             isLenient = true
             coerceInputValues = true
@@ -54,7 +54,7 @@ internal object TokenServiceModule {
             .addConverterFactory(format.asConverterFactory(contentType))
             .baseUrl(BuildConfig.API_URL)
             .build()
-            .create(TokenApi::class.java)
+            .create(AuthTokenApi::class.java)
     }
 
     @Singleton
@@ -67,6 +67,6 @@ internal object TokenServiceModule {
     @Provides
     fun provideTokenAuthenticator(
         preferenceStorage: PreferenceStorage,
-        tokenApi: TokenApi
-    ): TokenAuthenticator = TokenAuthenticator(preferenceStorage, tokenApi)
+        authTokenApi: AuthTokenApi
+    ): TokenAuthenticator = TokenAuthenticator(preferenceStorage, authTokenApi)
 }

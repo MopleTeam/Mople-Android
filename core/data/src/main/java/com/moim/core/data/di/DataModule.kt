@@ -18,6 +18,10 @@ import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.review.ReviewRepositoryImpl
 import com.moim.core.data.datasource.review.remote.ReviewRemoteDataSource
 import com.moim.core.data.datasource.review.remote.ReviewRemoteDataSourceImpl
+import com.moim.core.data.datasource.token.TokenRepository
+import com.moim.core.data.datasource.token.TokenRepositoryImpl
+import com.moim.core.data.datasource.token.remote.TokenRemoteDataSource
+import com.moim.core.data.datasource.token.remote.TokenRemoteDataSourceImpl
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.data.datasource.user.UserRepositoryImpl
 import com.moim.core.data.datasource.user.remote.UserRemoteDataSource
@@ -40,6 +44,15 @@ internal abstract class DataModule {
     @Singleton
     @Binds
     abstract fun bindAuthRemoteDataSource(authRemoteDataSourceImpl: AuthRemoteDataSourceImpl): AuthRemoteDataSource
+
+    //================================ Token ============================================//
+    @Singleton
+    @Binds
+    abstract fun bindTokenRepository(tokenRepositoryImpl: TokenRepositoryImpl): TokenRepository
+
+    @Singleton
+    @Binds
+    abstract fun bindTokenRemoteDataSource(tokenRemoteDataSourceImpl: TokenRemoteDataSourceImpl): TokenRemoteDataSource
 
     //================================ User ============================================//
     @Singleton

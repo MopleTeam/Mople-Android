@@ -8,6 +8,7 @@ import com.moim.core.data.service.LocationApi
 import com.moim.core.data.service.MeetingApi
 import com.moim.core.data.service.PlanApi
 import com.moim.core.data.service.ReviewApi
+import com.moim.core.data.service.TokenApi
 import com.moim.core.data.service.UserApi
 import dagger.Module
 import dagger.Provides
@@ -55,6 +56,12 @@ internal object ApiModule {
     fun provideImageApi(
         @MoimApi retrofit: Retrofit
     ): ImageApi = retrofit.create(ImageApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideTokenApi(
+        @MoimApi retrofit: Retrofit
+    ): TokenApi = retrofit.create(TokenApi::class.java)
 
     @Provides
     @Singleton

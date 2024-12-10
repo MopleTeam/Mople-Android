@@ -1,7 +1,7 @@
 package com.moim.core.data.util
 
 import com.moim.core.data.datastore.PreferenceStorage
-import com.moim.core.data.service.TokenApi
+import com.moim.core.data.service.AuthTokenApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
@@ -14,14 +14,14 @@ import javax.inject.Inject
 
 internal class TokenAuthenticator @Inject constructor(
     private val preferenceStorage: PreferenceStorage,
-    private val tokenApi: TokenApi
+    private val authTokenApi: AuthTokenApi
 ) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
         return runBlocking {
             val refreshToken = preferenceStorage.token.first()?.refreshToken ?: ""
             try {
-                val token = tokenApi.getRefreshToken(refreshToken)
+                val token = authTokenApi.getRefreshToken(refreshToken)
                     .also { preferenceStorage.saveUserToken(it) }
 
                 response.request.newBuilder()

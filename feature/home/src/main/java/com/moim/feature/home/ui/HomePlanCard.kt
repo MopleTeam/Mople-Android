@@ -51,7 +51,8 @@ fun HomePlanCard(
                 .padding(16.dp)
         ) {
             MeetingInfoTopAppbar(
-                groupName = plan.meetingName
+                groupName = plan.meetingName,
+                meetingProfile = plan.meetingImage
             )
             Spacer(Modifier.height(16.dp))
 
@@ -91,6 +92,7 @@ fun HomePlanCard(
 private fun MeetingInfoTopAppbar(
     modifier: Modifier = Modifier,
     groupName: String,
+    meetingProfile :String,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -100,7 +102,7 @@ private fun MeetingInfoTopAppbar(
             modifier = Modifier
                 .size(28.dp)
                 .clip(RoundedCornerShape(6.dp)),
-            imageUrl = "https://plus.unsplash.com/premium_photo-1670333183316-ab697ddd9b13",
+            imageUrl = meetingProfile,
             errorImage = painterResource(R.drawable.ic_empty_meeting)
         )
 
@@ -172,6 +174,7 @@ private fun MeetingWeatherInfo(
                 .size(32.dp)
                 .clip(RoundedCornerShape(8.dp)),
             imageUrl = weatherUrl,
+            errorImage = painterResource(R.drawable.ic_empty_image)
         )
 
         MoimText(
