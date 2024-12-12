@@ -1,17 +1,17 @@
 package com.moim.core.data.datasource.review.remote
 
-import com.moim.core.datamodel.MemberResponse
-import com.moim.core.datamodel.ReviewResponse
 import com.moim.core.data.service.ReviewApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.converterException
+import com.moim.core.datamodel.MemberResponse
+import com.moim.core.datamodel.ReviewResponse
 import javax.inject.Inject
 
 internal class ReviewRemoteDataSourceImpl @Inject constructor(
     private val reviewApi: ReviewApi
 ) : ReviewRemoteDataSource {
 
-    override suspend fun getReviews(meetingId: String): List<com.moim.core.datamodel.ReviewResponse> {
+    override suspend fun getReviews(meetingId: String): List<ReviewResponse> {
         return try {
             reviewApi.getReviews(meetingId)
         } catch (e: Exception) {
@@ -19,7 +19,7 @@ internal class ReviewRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getReview(reviewId: String): com.moim.core.datamodel.ReviewResponse {
+    override suspend fun getReview(reviewId: String): ReviewResponse {
         return try {
             reviewApi.getReviewDetail(reviewId)
         } catch (e: Exception) {
@@ -27,7 +27,7 @@ internal class ReviewRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getReviewParticipant(reviewId: String): List<com.moim.core.datamodel.MemberResponse> {
+    override suspend fun getReviewParticipant(reviewId: String): List<MemberResponse> {
         return try {
             reviewApi.getReviewParticipant(reviewId)
         } catch (e: Exception) {

@@ -2,6 +2,7 @@ package com.moim.feature.home.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,8 +21,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.util.getDateTimeFormatString
 import com.moim.core.common.util.toDecimalString
 import com.moim.core.designsystem.R
@@ -92,7 +95,7 @@ fun HomePlanCard(
 private fun MeetingInfoTopAppbar(
     modifier: Modifier = Modifier,
     groupName: String,
-    meetingProfile :String,
+    meetingProfile: String,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -169,28 +172,43 @@ private fun MeetingWeatherInfo(
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NetworkImage(
+        Box(
             modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
                 .size(32.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            imageUrl = weatherUrl,
-            errorImage = painterResource(R.drawable.ic_empty_image)
-        )
+                .background(MoimTheme.colors.white)
+                .padding(4.dp)
+        ) {
+            NetworkImage(
+                imageUrl = WEATHER_ICON_URL.format(weatherUrl),
+                errorImage = painterResource(R.drawable.ic_empty_weather)
+            )
+        }
 
-        MoimText(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 12.dp),
-            text = stringResource(R.string.unit_weather, temperature.toDecimalString()),
-            style = MoimTheme.typography.body01.semiBold,
-            color = MoimTheme.colors.gray.gray01
-        )
+        if (weatherUrl.isEmpty()) {
+            MoimText(
+                modifier = Modifier.fillMaxWidth().padding(end = 32.dp),
+                text = stringResource(R.string.common_weather_not_found),
+                textAlign = TextAlign.Center,
+                style = MoimTheme.typography.body02.medium,
+                color = MoimTheme.colors.gray.gray04
+            )
+        } else {
+            MoimText(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
+                text = stringResource(R.string.unit_weather, temperature.toDecimalString()),
+                style = MoimTheme.typography.body01.semiBold,
+                color = MoimTheme.colors.gray.gray01
+            )
 
-        MoimText(
-            text = address,
-            style = MoimTheme.typography.body02.medium,
-            color = MoimTheme.colors.gray.gray04
-        )
+            MoimText(
+                text = address,
+                style = MoimTheme.typography.body02.medium,
+                color = MoimTheme.colors.gray.gray04
+            )
+        }
     }
 }
 
@@ -205,7 +223,7 @@ private fun HomeMeetingPlanCardPreview() {
                 planName = "술 한잔 하는 날",
                 planMemberCount = 3,
                 planAddress = "서울 강남구",
-                planTime = ZonedDateTime.now().toString()
+                planTime = "2024-12-14 09:00:00",
             ),
         )
     }

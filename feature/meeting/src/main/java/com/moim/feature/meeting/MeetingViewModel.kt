@@ -3,8 +3,11 @@ package com.moim.feature.meeting
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
+import com.moim.core.common.delegate.PlanAction
+import com.moim.core.common.delegate.PlanViewModelDelegate
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.util.parseZonedDateTimeForDateString
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
@@ -24,11 +27,17 @@ import javax.inject.Inject
 @HiltViewModel
 class MeetingViewModel @Inject constructor(
     private val meetingRepository: MeetingRepository,
-    private val meetingViewModelDelegate: MeetingViewModelDelegate
-) : BaseViewModel(), MeetingViewModelDelegate by meetingViewModelDelegate {
+    private val meetingViewModelDelegate: MeetingViewModelDelegate,
+    private val planViewModelDelegate: PlanViewModelDelegate
+) : BaseViewModel(),
+    MeetingViewModelDelegate by meetingViewModelDelegate,
+    PlanViewModelDelegate by planViewModelDelegate {
 
     private val meetingActionReceiver = meetingAction
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MeetingAction.None)
+
+    private val planActionReceiver = planAction
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PlanAction.None)
 
     private val meetingsResult = loadDataSignal
         .flatMapLatest { meetingRepository.getMeetings().asResult() }
@@ -80,6 +89,49 @@ class MeetingViewModel @Inject constructor(
                             is MeetingAction.MeetingInvalidate -> onRefresh()
 
                             else -> return@collect
+                        }
+                    }
+                }
+            }
+
+            launch {
+                planActionReceiver.collect { action ->
+                    uiState.checkState<MeetingUiState.Success> {
+                        when (action) {
+                            is PlanAction.PlanCreate -> {
+                                val meeting = meetings.withIndex().find { it.value.id == action.plan.meetingId } ?: return@collect
+                                val currentLastAt = meeting.value.lastPlanAt.parseZonedDateTimeForDateString()
+                                val newLastAt = action.plan.planTime.parseZonedDateTimeForDateString()
+
+                                if (currentLastAt.isBefore(newLastAt)) return@collect
+
+                                setUiState(
+                                    copy(
+                                        meetings = meetings
+                                            .toMutableList()
+                                            .apply { set(meeting.index, meeting.value.copy(lastPlanAt = action.plan.planTime)) }
+                                    )
+                                )
+                            }
+
+                            is PlanAction.PlanUpdate -> {
+                                val meeting = meetings.withIndex().find { it.value.id == action.plan.meetingId } ?: return@collect
+                                val currentLastAt = meeting.value.lastPlanAt.parseZonedDateTimeForDateString()
+                                val newLastAt = action.plan.planTime.parseZonedDateTimeForDateString()
+
+                                if (currentLastAt.isBefore(newLastAt)) return@collect
+
+                                setUiState(
+                                    copy(
+                                        meetings = meetings
+                                            .toMutableList()
+                                            .apply { set(meeting.index, meeting.value.copy(lastPlanAt = action.plan.planTime)) }
+                                    )
+                                )
+                            }
+
+                            is PlanAction.PlanDelete, is PlanAction.PlanInvalidate -> onRefresh()
+                            is PlanAction.None -> return@collect
                         }
                     }
                 }

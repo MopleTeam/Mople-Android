@@ -26,7 +26,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.util.getDateTimeBetweenDay
-import com.moim.core.common.util.parseZonedDateTime
+import com.moim.core.common.util.parseZonedDateTimeForDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
@@ -45,7 +45,7 @@ fun MeetingCard(
 ) {
     val (count, comment) = meeting.lastPlanAt
         ?.let { lastDate ->
-            val day = getDateTimeBetweenDay(endDate = lastDate.parseZonedDateTime())
+            val day = getDateTimeBetweenDay(endDate = lastDate.parseZonedDateTimeForDateString())
             when {
                 day == 0 -> stringResource(R.string.meeting_plan_today_count) to stringResource(R.string.meeting_plan_comment)
                 day > 0 -> stringResource(R.string.meeting_plan_after_count, day) to stringResource(R.string.meeting_plan_comment)

@@ -1,5 +1,10 @@
 package com.moim.feature.home
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +39,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.common.view.ObserveAsEvents
@@ -48,6 +55,7 @@ import com.moim.feature.home.ui.HomeCreateCards
 import com.moim.feature.home.ui.HomePlanCard
 import com.moim.feature.home.ui.HomePlanMoreCard
 import com.moim.feature.home.ui.HomeTopAppbar
+import kotlinx.coroutines.delay
 
 internal typealias OnHomeUiAction = (HomeUiAction) -> Unit
 
@@ -66,6 +74,17 @@ fun HomeRoute(
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(padding)
 
+    var isPostNotificationPermission by remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            mutableStateOf(ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+        } else {
+            mutableStateOf(true)
+        }
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
+        isPostNotificationPermission = result
+    }
+
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is HomeUiEvent.NavigateToAlarm -> navigateToAlarm()
@@ -74,6 +93,13 @@ fun HomeRoute(
             is HomeUiEvent.NavigateToCalendar -> navigateToCalendar()
             is HomeUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
             is HomeUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (isPostNotificationPermission.not() && Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
+            delay(2000)
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 

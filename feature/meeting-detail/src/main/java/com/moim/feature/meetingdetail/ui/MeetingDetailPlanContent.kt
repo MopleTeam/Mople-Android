@@ -2,6 +2,7 @@ package com.moim.feature.meetingdetail.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,10 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.util.getDateTimeFormatString
 import com.moim.core.common.util.toDecimalString
 import com.moim.core.designsystem.R
@@ -40,7 +44,6 @@ import com.moim.core.model.Plan
 import com.moim.core.model.Review
 import com.moim.feature.meetingdetail.MeetingDetailUiAction
 import com.moim.feature.meetingdetail.OnMeetingDetailUiAction
-import java.time.ZonedDateTime
 
 @Composable
 fun MeetingDetailPlanContent(
@@ -137,7 +140,7 @@ fun MeetingDetailPlanItem(
             MeetingWeatherInfo(
                 temperature = plan.temperature,
                 address = plan.planAddress,
-                weatherUrl = plan.weatherIconUrl
+                weatherIconUrl = plan.weatherIconUrl
             )
             Spacer(Modifier.height(16.dp))
 
@@ -248,7 +251,7 @@ private fun MeetingWeatherInfo(
     modifier: Modifier = Modifier,
     temperature: Float,
     address: String,
-    weatherUrl: String,
+    weatherIconUrl: String,
 ) {
     Row(
         modifier = modifier
@@ -257,27 +260,46 @@ private fun MeetingWeatherInfo(
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NetworkImage(
+
+        Box(
             modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
                 .size(32.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            imageUrl = weatherUrl,
-        )
+                .background(MoimTheme.colors.white)
+                .padding(4.dp)
+        ) {
+            NetworkImage(
+                imageUrl = WEATHER_ICON_URL.format(weatherIconUrl),
+                errorImage = painterResource(R.drawable.ic_empty_weather)
+            )
+        }
 
-        Text(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 12.dp),
-            text = stringResource(R.string.unit_weather, temperature.toDecimalString()),
-            style = MoimTheme.typography.body01.semiBold,
-            color = MoimTheme.colors.gray.gray01
-        )
+        if (weatherIconUrl.isEmpty()) {
+            MoimText(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 32.dp),
+                text = stringResource(R.string.common_weather_not_found),
+                textAlign = TextAlign.Center,
+                style = MoimTheme.typography.body02.medium,
+                color = MoimTheme.colors.gray.gray04
+            )
+        } else {
+            Text(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
+                text = stringResource(R.string.unit_weather, temperature.toDecimalString()),
+                style = MoimTheme.typography.body01.semiBold,
+                color = MoimTheme.colors.gray.gray01
+            )
 
-        Text(
-            text = address,
-            style = MoimTheme.typography.body02.medium,
-            color = MoimTheme.colors.gray.gray04
-        )
+            Text(
+                text = address,
+                style = MoimTheme.typography.body02.medium,
+                color = MoimTheme.colors.gray.gray04
+            )
+        }
     }
 }
 
