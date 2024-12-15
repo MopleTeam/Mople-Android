@@ -182,7 +182,7 @@ class PlanWriteViewModel @Inject constructor(
     private fun setPlan() {
         viewModelScope.launch {
             uiState.checkState<PlanWriteUiState.PlanWrite> {
-                if (plan?.planId.isNullOrEmpty()) {
+                if (planId.isNullOrEmpty()) {
                     planRepository
                         .createPlan(
                             meetingId = selectMeetingId!!,
@@ -195,7 +195,7 @@ class PlanWriteViewModel @Inject constructor(
                 } else {
                     planRepository
                         .updatePlan(
-                            planId = planId!!,
+                            planId = planId,
                             planName = planName!!,
                             planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute).parseDateString(),
                             planAddress = planPlace!!,
@@ -206,7 +206,11 @@ class PlanWriteViewModel @Inject constructor(
                     when (result) {
                         is Result.Loading -> return@collect
                         is Result.Success -> {
-                            createPlan(ZonedDateTime.now(), plan = result.data.asItem())
+                            if (planId.isNullOrEmpty()) {
+                                createPlan(ZonedDateTime.now(), plan = result.data.asItem())
+                            } else {
+                                updatePlan(ZonedDateTime.now(), plan = result.data.asItem())
+                            }
                             setUiEvent(PlanWriteUiEvent.NavigateToBack)
                         }
 
