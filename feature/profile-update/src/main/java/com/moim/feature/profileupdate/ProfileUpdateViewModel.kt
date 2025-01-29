@@ -60,10 +60,8 @@ class ProfileUpdateViewModel @Inject constructor(
             is ProfileUpdateUiAction.OnClickProfileUpdate -> updateUser()
             is ProfileUpdateUiAction.OnClickDuplicatedCheck -> validateDuplicateNickname()
             is ProfileUpdateUiAction.OnClickRefresh -> onRefresh()
-
             is ProfileUpdateUiAction.OnChangeProfileUrl -> setProfileUrl(uiAction.profileUrl)
             is ProfileUpdateUiAction.OnChangeNickname -> setNickname(uiAction.nickname)
-
             is ProfileUpdateUiAction.OnShowProfileEditDialog -> showProfileEditDialog(uiAction.isShow)
             is ProfileUpdateUiAction.OnNavigatePhotoPicker -> setUiEvent(ProfileUpdateUiEvent.NavigateToPhotoPicker)
         }

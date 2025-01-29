@@ -11,9 +11,10 @@ import kotlinx.serialization.json.Json
 @Stable
 @Serializable
 data class Plan(
+    val userId: String = "",
     val meetingId: String = "",
     val meetingName: String = "",
-    val meetingImage: String = "",
+    val meetingImageUrl: String = "",
     val planId: String = "",
     val planName: String = "",
     val planMemberCount: Int = 0,
@@ -28,9 +29,10 @@ data class Plan(
 
 fun PlanResponse.asItem(): Plan {
     return Plan(
+        userId = userId,
         meetingId = meetingId,
         meetingName = meetingName,
-        meetingImage = meetingImage,
+        meetingImageUrl = meetingImage,
         planId = planId,
         planName = planName,
         planMemberCount = planMemberCount,
@@ -63,7 +65,7 @@ val PlanType = object : NavType<Plan?>(isNullableAllowed = true) {
                 Json.encodeToString(
                     serializer = Plan.serializer(),
                     value = it.copy(
-                        meetingImage = it.meetingImage.encoding(),
+                        meetingImageUrl = it.meetingImageUrl.encoding(),
                         weatherIconUrl = it.weatherIconUrl.encoding()
                     )
                 )

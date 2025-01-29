@@ -44,7 +44,7 @@ fun MeetingDetailRoute(
     viewModel: MeetingDetailViewModel = hiltViewModel(),
     navigateToBack: () -> Unit,
     navigateToPlanWrite: (Plan) -> Unit,
-    navigateToPlanDetail: (String) -> Unit,
+    navigateToPlanDetail: (String, Boolean) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit
 ) {
     val context = LocalContext.current
@@ -56,7 +56,7 @@ fun MeetingDetailRoute(
         when (event) {
             is MeetingDetailUiEvent.NavigateToBack -> navigateToBack()
             is MeetingDetailUiEvent.NavigateToMeetingSetting -> navigateToMeetingSetting(event.meeting)
-            is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.planId)
+            is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
             is MeetingDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan)
             is MeetingDetailUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
         }

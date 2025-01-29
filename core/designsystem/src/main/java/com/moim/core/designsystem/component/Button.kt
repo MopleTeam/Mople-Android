@@ -114,8 +114,8 @@ fun MoimIconButton(
     Box(
         modifier = modifier
             .defaultMinSize(minHeight = 40.dp, minWidth = 40.dp)
-            .background(backgroundColor)
             .clip(shape)
+            .background(backgroundColor)
             .onSingleClick(
                 enabled = enable,
                 onClick = onClick,

@@ -184,7 +184,6 @@ playServices = { id = "com.google.gms.google-services", version.ref = "playservi
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsGradlePlugin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
-
 # Plugins defined by this project
 moim-android-application = { id = "moim.android.application", version = "unspecified" }
 moim-android-application-compose = { id = "moim.android.application.compose", version = "unspecified" }

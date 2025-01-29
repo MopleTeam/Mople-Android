@@ -20,7 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +47,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Plan
@@ -167,9 +167,10 @@ fun HomePlanEmpty(modifier: Modifier = Modifier) {
             contentDescription = "",
             tint = Color.Unspecified
         )
-        Text(
+        MoimText(
             text = stringResource(R.string.home_empty_plan),
             textAlign = TextAlign.Center,
+            singleLine = false,
             style = MoimTheme.typography.body01.medium,
             color = MoimTheme.colors.gray.gray06
         )

@@ -36,7 +36,6 @@ import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.model.Plan
 import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
-import java.time.ZonedDateTime
 
 @Composable
 fun HomePlanCard(
@@ -55,7 +54,7 @@ fun HomePlanCard(
         ) {
             MeetingInfoTopAppbar(
                 groupName = plan.meetingName,
-                meetingProfile = plan.meetingImage
+                meetingProfile = plan.meetingImageUrl
             )
             Spacer(Modifier.height(16.dp))
 

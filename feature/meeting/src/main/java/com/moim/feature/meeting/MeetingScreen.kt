@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,6 +28,7 @@ import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimFloatingActionButton
 import com.moim.core.designsystem.component.MoimScaffold
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
@@ -156,8 +156,9 @@ fun MeetingEmptyScreen(
             tint = MoimTheme.colors.icon
         )
 
-        Text(
+        MoimText(
             text = stringResource(R.string.meeting_new_meeting),
+            singleLine = false,
             style = MoimTheme.typography.body01.medium,
             color = MoimTheme.colors.gray.gray06
         )

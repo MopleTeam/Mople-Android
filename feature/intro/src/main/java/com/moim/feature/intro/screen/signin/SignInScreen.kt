@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -91,8 +90,9 @@ fun SignInScreen(
             )
             Spacer(Modifier.height(16.dp))
 
-            Text(
+            MoimText(
                 text = stringResource(R.string.app_description),
+                singleLine = false,
                 style = MoimTheme.typography.body01.regular,
                 color = MoimTheme.colors.gray.gray03
             )

@@ -2,7 +2,6 @@ package com.moim.core.designsystem.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,10 +31,11 @@ fun ErrorScreen(
             color = MoimTheme.colors.gray.gray01,
         )
 
-        Text(
+        MoimText(
             text = stringResource(id = R.string.common_error_description),
             textAlign = TextAlign.Center,
             style = MoimTheme.typography.body01.semiBold,
+            singleLine = false,
             color = MoimTheme.colors.gray.gray01,
         )
 

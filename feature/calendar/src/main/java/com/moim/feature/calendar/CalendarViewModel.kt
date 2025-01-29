@@ -63,7 +63,7 @@ class CalendarViewModel @Inject constructor(
         when (uiAction) {
             is CalendarUiAction.OnClickDateDay -> setSelectDay(uiAction.date)
             is CalendarUiAction.OnClickExpandable -> setExpandable(uiAction.date)
-            is CalendarUiAction.OnClickMeetingPlan -> setUiEvent(CalendarUiEvent.NavigateToPlanDetail(uiAction.id))
+            is CalendarUiAction.OnClickMeetingPlan -> setUiEvent(CalendarUiEvent.NavigateToPlanDetail(uiAction.postId, uiAction.isPlan))
             is CalendarUiAction.OnClickRefresh -> onRefresh()
             is CalendarUiAction.OnChangeDate -> getSelectDatePlan(uiAction.date)
         }
@@ -138,12 +138,12 @@ sealed interface CalendarUiState : UiState {
 sealed interface CalendarUiAction : UiAction {
     data class OnClickDateDay(val date: ZonedDateTime) : CalendarUiAction
     data class OnClickExpandable(val date: ZonedDateTime) : CalendarUiAction
-    data class OnClickMeetingPlan(val id: String) : CalendarUiAction
+    data class OnClickMeetingPlan(val postId: String, val isPlan: Boolean = true) : CalendarUiAction
     data object OnClickRefresh : CalendarUiAction
     data class OnChangeDate(val date: ZonedDateTime) : CalendarUiAction
 }
 
 sealed interface CalendarUiEvent : UiEvent {
-    data class NavigateToPlanDetail(val planId: String) : CalendarUiEvent
+    data class NavigateToPlanDetail(val postId: String, val isPlan: Boolean = true) : CalendarUiEvent
     data class ShowToastMessage(@StringRes val messageRes: Int) : CalendarUiEvent
 }

@@ -4,6 +4,10 @@ import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.auth.AuthRepositoryImpl
 import com.moim.core.data.datasource.auth.remote.AuthRemoteDataSource
 import com.moim.core.data.datasource.auth.remote.AuthRemoteDataSourceImpl
+import com.moim.core.data.datasource.comment.CommentRepository
+import com.moim.core.data.datasource.comment.CommentRepositoryImpl
+import com.moim.core.data.datasource.comment.remote.CommentRemoteDataSource
+import com.moim.core.data.datasource.comment.remote.CommentRemoteDataSourceImpl
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSourceImpl
 import com.moim.core.data.datasource.meeting.MeetingRepository
@@ -89,6 +93,15 @@ internal abstract class DataModule {
     @Singleton
     @Binds
     abstract fun bindReviewRemoteDataSource(reviewRemoteDataSourceImpl: ReviewRemoteDataSourceImpl): ReviewRemoteDataSource
+
+    //================================ Comment ============================================//
+    @Singleton
+    @Binds
+    abstract fun bindCommentRepository(commentRepositoryImpl: CommentRepositoryImpl): CommentRepository
+
+    @Singleton
+    @Binds
+    abstract fun bindCommentRemoteDataSource(commentRemoteDataSourceImpl: CommentRemoteDataSourceImpl): CommentRemoteDataSource
 
     //================================ Image ============================================//
     @Singleton

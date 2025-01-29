@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -86,7 +85,7 @@ fun PlanWriteMeetingsTopAppbar(
             .padding(start = 20.dp, end = 12.dp, top = 22.dp, bottom = 18.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
+        MoimText(
             modifier = Modifier.weight(1f),
             text = stringResource(R.string.plan_write_meeting_select),
             style = MoimTheme.typography.title02.semiBold,

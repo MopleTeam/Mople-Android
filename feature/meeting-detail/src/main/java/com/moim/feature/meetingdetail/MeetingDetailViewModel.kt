@@ -165,7 +165,7 @@ class MeetingDetailViewModel @Inject constructor(
             is MeetingDetailUiAction.OnClickMeetingSetting -> navigateToMeetingSetting()
             is MeetingDetailUiAction.OnClickPlanTab -> setPlanTab(uiAction.isBefore)
             is MeetingDetailUiAction.OnClickPlanApply -> {}
-            is MeetingDetailUiAction.OnClickPlanDetail -> setUiEvent(MeetingDetailUiEvent.NavigateToPlanDetail(uiAction.planId))
+            is MeetingDetailUiAction.OnClickPlanDetail -> setUiEvent(MeetingDetailUiEvent.NavigateToPlanDetail(uiAction.postId, uiAction.isPlan))
         }
     }
 
@@ -183,7 +183,7 @@ class MeetingDetailViewModel @Inject constructor(
                     Plan(
                         meetingId = meeting.id,
                         meetingName = meeting.name,
-                        meetingImage = meeting.imageUrl,
+                        meetingImageUrl = meeting.imageUrl,
                         planTime = ZonedDateTime.now().toString()
                     )
                 )
@@ -223,13 +223,13 @@ sealed interface MeetingDetailUiAction : UiAction {
     data object OnClickMeetingSetting : MeetingDetailUiAction
     data class OnClickPlanTab(val isBefore: Boolean) : MeetingDetailUiAction
     data class OnClickPlanApply(val planId: String, val isApply: Boolean) : MeetingDetailUiAction
-    data class OnClickPlanDetail(val planId: String) : MeetingDetailUiAction
+    data class OnClickPlanDetail(val postId: String, val isPlan: Boolean) : MeetingDetailUiAction
 }
 
 sealed interface MeetingDetailUiEvent : UiEvent {
     data object NavigateToBack : MeetingDetailUiEvent
     data class NavigateToPlanWrite(val plan: Plan) : MeetingDetailUiEvent
     data class NavigateToMeetingSetting(val meeting: Meeting) : MeetingDetailUiEvent
-    data class NavigateToPlanDetail(val planId: String) : MeetingDetailUiEvent
+    data class NavigateToPlanDetail(val postId: String, val isPlan: Boolean) : MeetingDetailUiEvent
     data class ShowToastMessage(@StringRes val messageRes: Int) : MeetingDetailUiEvent
 }

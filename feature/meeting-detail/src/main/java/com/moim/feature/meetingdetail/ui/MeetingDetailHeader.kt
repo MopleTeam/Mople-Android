@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +23,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimPrimaryButton
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
@@ -99,9 +99,10 @@ private fun MeetingDetailInfo(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
+            MoimText(
                 modifier = Modifier.fillMaxWidth(),
                 text = meeting.name,
+                singleLine = false,
                 style = MoimTheme.typography.title02.semiBold,
                 color = MoimTheme.colors.gray.gray01
             )
@@ -117,7 +118,7 @@ private fun MeetingDetailInfo(
                     tint = MoimTheme.colors.icon
                 )
                 Spacer(Modifier.width(4.dp))
-                Text(
+                MoimText(
                     text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
                     style = MoimTheme.typography.body02.semiBold,
                     color = MoimTheme.colors.gray.gray04

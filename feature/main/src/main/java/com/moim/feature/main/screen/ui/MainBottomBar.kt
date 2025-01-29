@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -27,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.main.navigation.MainTab
 
@@ -95,7 +95,7 @@ fun RowScope.MainBottomBarItem(
             )
             Spacer(modifier = Modifier.height(5.dp))
 
-            Text(
+            MoimText(
                 text = tab.label,
                 style = MoimTheme.typography.body02.regular.copy(fontSize = 10.sp),
                 color = if (isSelected) MoimTheme.colors.secondary else MoimTheme.colors.gray.gray05,

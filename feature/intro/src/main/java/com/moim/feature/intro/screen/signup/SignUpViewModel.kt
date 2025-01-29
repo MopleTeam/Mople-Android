@@ -144,10 +144,8 @@ sealed interface SignUpUiState : UiState {
 sealed interface SignUpUiAction : UiAction {
     data object OnClickSignUp : SignUpUiAction
     data object OnClickDuplicatedCheck : SignUpUiAction
-
     data class OnChangeProfileUrl(val profileUrl: String?) : SignUpUiAction
     data class OnChangeNickname(val nickname: String) : SignUpUiAction
-
     data class OnShowProfileEditDialog(val isShow: Boolean) : SignUpUiAction
     data object OnNavigatePhotoPicker : SignUpUiAction
 }

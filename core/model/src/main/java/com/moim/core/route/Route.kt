@@ -59,7 +59,10 @@ sealed interface DetailRoute : Route {
     }
 
     @Serializable
-    data class PlanDetail(val planId: String) : DetailRoute
+    data class PlanDetail(
+        val postId: String,
+        val isPlan: Boolean
+    ) : DetailRoute
 
     @Serializable
     data class PlanWrite(val plan: Plan? = null) : DetailRoute {

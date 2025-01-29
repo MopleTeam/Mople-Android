@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.theme.MoimTheme
@@ -126,7 +126,7 @@ fun MapTopAppbar(
                         onClickSearch(searchText)
                     }
                 ) {
-                    Text(
+                    MoimText(
                         text = stringResource(R.string.common_confirm),
                         style = MoimTheme.typography.body01.semiBold,
                         color = MoimTheme.colors.gray.gray01

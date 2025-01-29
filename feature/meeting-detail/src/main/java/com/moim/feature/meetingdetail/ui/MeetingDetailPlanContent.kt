@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -116,7 +115,7 @@ fun MeetingDetailPlanItem(
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(plan.planId)) }
+        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(plan.planId, true)) }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -173,10 +172,12 @@ fun MeetingDetailReviewItem(
     onUiAction: OnMeetingDetailUiAction
 ) {
     MoimCard(
-        modifier = modifier.padding(16.dp),
-        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(review.reviewId)) }
+        modifier = modifier,
+        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(review.reviewId, false)) }
     ) {
-        Column {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             MeetingDetailPlanHeader(time = review.reviewAt)
             Spacer(Modifier.height(16.dp))
 
@@ -209,7 +210,7 @@ private fun MeetingDetailPlanHeader(
     ) {
         MoimText(
             modifier = modifier.weight(1f),
-            text = getDateTimeFormatString(time, pattern = stringResource(R.string.regex_date_day_short)),
+            text = getDateTimeFormatString(time, pattern = stringResource(R.string.regex_date_year_month_day_short)),
             style = MoimTheme.typography.body02.semiBold,
             color = MoimTheme.colors.gray.gray04,
         )
@@ -285,7 +286,7 @@ private fun MeetingWeatherInfo(
                 color = MoimTheme.colors.gray.gray04
             )
         } else {
-            Text(
+            MoimText(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 12.dp),
@@ -294,7 +295,7 @@ private fun MeetingWeatherInfo(
                 color = MoimTheme.colors.gray.gray01
             )
 
-            Text(
+            MoimText(
                 text = address,
                 style = MoimTheme.typography.body02.medium,
                 color = MoimTheme.colors.gray.gray04

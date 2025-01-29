@@ -7,10 +7,9 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.moim.core.route.MainRoute
 
-
 fun NavGraphBuilder.calendarScreen(
     padding: PaddingValues,
-    navigateToPlanDetail: (String) -> Unit,
+    navigateToPlanDetail: (String, Boolean) -> Unit,
 ) {
     composable<MainRoute.Calendar> {
         CalendarRoute(

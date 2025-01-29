@@ -16,7 +16,7 @@ fun NavGraphBuilder.meetingDetailScreen(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
     navigateToPlanWrite: (Plan) -> Unit,
-    navigateToPlanDetail: (String) -> Unit,
+    navigateToPlanDetail: (String, Boolean) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit
 ) {
     composable<DetailRoute.MeetingDetail>(

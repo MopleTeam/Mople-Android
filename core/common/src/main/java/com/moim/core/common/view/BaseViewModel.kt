@@ -2,13 +2,14 @@ package com.moim.core.common.view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -22,8 +23,8 @@ open class BaseViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(None)
     val uiState: StateFlow<UiState> = _uiState
 
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent
+    private val _uiEvent = Channel<UiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
 
     private val refreshSignal = MutableSharedFlow<Unit>()
 
@@ -32,12 +33,8 @@ open class BaseViewModel : ViewModel() {
         emitAll(refreshSignal)
     }
 
-    protected fun onRefresh() = viewModelScope.launch {
-        refreshSignal.emit(Unit)
-    }
-
     protected fun setLoading(isLoading: Boolean) {
-        _loading.value = isLoading
+        _loading.update { isLoading }
     }
 
     protected fun setUiState(uiState: UiState) {
@@ -46,7 +43,13 @@ open class BaseViewModel : ViewModel() {
 
     protected fun setUiEvent(uiEvent: UiEvent) {
         viewModelScope.launch {
-            _uiEvent.emit(uiEvent)
+            _uiEvent.send(uiEvent)
+        }
+    }
+
+    protected fun onRefresh() {
+        viewModelScope.launch {
+            refreshSignal.emit(Unit)
         }
     }
 }

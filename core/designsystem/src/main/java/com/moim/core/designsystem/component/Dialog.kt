@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,16 +75,18 @@ fun MoimAlertDialog(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
+                    MoimText(
                         text = title,
+                        singleLine = false,
                         style = MoimTheme.typography.title02.semiBold,
                         color = MoimTheme.colors.gray.gray01
                     )
 
                     if (description.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
+                        MoimText(
                             text = description,
+                            singleLine = false,
                             style = MoimTheme.typography.body01.regular,
                             color = MoimTheme.colors.gray.gray02,
                             textAlign = TextAlign.Center

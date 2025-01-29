@@ -22,7 +22,7 @@ internal interface MeetingApi {
         @Body params: JsonObject
     ): MeetingResponse
 
-    @PATCH("/meet/{meetId}")
+    @PATCH("/meet/update/{meetId}")
     suspend fun updateMeeting(
         @Path("meetId") id: String,
         @Body params: JsonObject

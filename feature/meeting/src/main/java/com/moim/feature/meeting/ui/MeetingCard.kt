@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,7 +94,7 @@ fun MeetingCard(
                             tint = MoimTheme.colors.icon
                         )
 
-                        Text(
+                        MoimText(
                             text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
                             style = MoimTheme.typography.body02.medium,
                             color = MoimTheme.colors.gray.gray04
@@ -119,7 +118,7 @@ fun MeetingCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(
+                MoimText(
                     modifier = Modifier.padding(12.dp),
                     text = buildAnnotatedString {
                         if (count != null) {

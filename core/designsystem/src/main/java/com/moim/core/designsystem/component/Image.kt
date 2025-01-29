@@ -26,7 +26,7 @@ fun NetworkImage(
     contentDescription: String = "",
     placeholder: Painter = painterResource(R.drawable.ic_loading),
     errorImage: Painter = painterResource(R.drawable.ic_loading),
-    contentScale: ContentScale = ContentScale.Crop,
+    contentScale: ContentScale = ContentScale.Fit,
 ) {
     if (LocalInspectionMode.current) {
         Image(

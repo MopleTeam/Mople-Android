@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
@@ -70,8 +70,9 @@ fun HomeCreateCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text(
+            MoimText(
                 text = text,
+                singleLine = false,
                 style = MoimTheme.typography.title03.semiBold,
                 color = MoimTheme.colors.gray.gray01
             )

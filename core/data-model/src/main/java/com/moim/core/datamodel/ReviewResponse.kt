@@ -5,10 +5,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ReviewResponse(
+    @SerialName("creatorId")
+    val userId: String = "",
     @SerialName("meetId")
     val meetingId: String = "",
+    @SerialName("meetName")
+    val meetingName: String = "",
+    @SerialName("meetImage")
+    val meetingImageUrl: String = "",
     @SerialName("reviewId")
     val reviewId: String,
+    @SerialName("postId")
+    val postId: String = "",
     @SerialName("reviewName")
     val reviewName: String,
     @SerialName("address")

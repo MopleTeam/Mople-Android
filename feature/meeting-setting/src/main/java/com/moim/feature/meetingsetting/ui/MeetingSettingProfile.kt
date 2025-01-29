@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,14 +90,13 @@ fun MeetingSettingProfile(
                 .background(MoimTheme.colors.bg.input, shape = RoundedCornerShape(8.dp)),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
+            MoimText(
                 modifier = Modifier.padding(12.dp),
                 text = buildAnnotatedString {
                     append(stringResource(R.string.meeting_setting_date_01))
                     withStyle(style = SpanStyle(color = MoimTheme.colors.primary.primary)) { append(" ${meeting.meetStartDate} ") }
                     append(stringResource(R.string.meeting_setting_date_02))
                 },
-                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MoimTheme.typography.body01.medium,
                 color = MoimTheme.colors.gray.gray04,

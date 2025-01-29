@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PlanResponse(
+    @SerialName("creatorId")
+    val userId: String = "",
     @SerialName("planId")
     val planId: String = "",
     @SerialName("meetId")

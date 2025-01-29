@@ -62,7 +62,7 @@ internal typealias OnCalendarUiAction = (CalendarUiAction) -> Unit
 fun CalendarRoute(
     viewModel: CalendarViewModel = hiltViewModel(),
     padding: PaddingValues,
-    navigateToPlanDetail: (String) -> Unit
+    navigateToPlanDetail: (String, Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -71,7 +71,7 @@ fun CalendarRoute(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is CalendarUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.planId)
+            is CalendarUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
             is CalendarUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
         }
     }

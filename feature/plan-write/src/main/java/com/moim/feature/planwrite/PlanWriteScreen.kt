@@ -108,7 +108,7 @@ fun PlanWriteScreen(
             PlanWriteSelectedBox(
                 titleText = stringResource(R.string.plan_write_date_select),
                 hintText = stringResource(R.string.plan_write_date_select_hint),
-                valueText = if (uiState.planDate == null) null else getDateTimeFormatZonedDate(uiState.planDate, stringResource(R.string.regex_date_day)),
+                valueText = if (uiState.planDate == null) null else getDateTimeFormatZonedDate(uiState.planDate, stringResource(R.string.regex_date_year_month_day)),
                 iconRes = R.drawable.ic_calendar,
                 onClick = { onUiAction(PlanWriteUiAction.OnShowDatePickerDialog(true)) }
             )

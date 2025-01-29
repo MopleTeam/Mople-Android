@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -26,6 +25,7 @@ import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.intro.screen.signup.ui.NicknameTextField
@@ -80,8 +80,9 @@ fun SignUpScreen(
             .imePadding()
             .padding(horizontal = 20.dp, vertical = 28.dp),
     ) {
-        Text(
+        MoimText(
             text = stringResource(R.string.sign_up_title),
+            singleLine = false,
             style = MoimTheme.typography.heading.bold,
             color = MoimTheme.colors.gray.gray01
         )

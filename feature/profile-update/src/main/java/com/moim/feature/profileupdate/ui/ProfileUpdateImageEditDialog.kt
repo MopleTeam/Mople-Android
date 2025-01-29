@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -18,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimBottomSheetDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
+import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.feature.profileupdate.OnProfileUpdateUiAction
@@ -48,8 +48,9 @@ fun ProfileUpdateImageEditDialog(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
+            MoimText(
                 text = stringResource(R.string.common_profile_edit),
+                singleLine = false,
                 style = MoimTheme.typography.body01.semiBold,
                 color = MoimTheme.colors.gray.gray01
             )

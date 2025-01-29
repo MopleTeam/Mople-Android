@@ -22,6 +22,8 @@ import com.moim.feature.meetingsetting.meetingSettingScreen
 import com.moim.feature.meetingsetting.navigateToMeetingSetting
 import com.moim.feature.meetingwrite.meetingWriteScreen
 import com.moim.feature.meetingwrite.navigateToMeetingWrite
+import com.moim.feature.plandetail.navigateToPlanDetail
+import com.moim.feature.plandetail.planDetailScreen
 import com.moim.feature.planwrite.navigateToPlanWrite
 import com.moim.feature.planwrite.planWriteScreen
 import com.moim.feature.profile.profileScreen
@@ -65,7 +67,7 @@ fun MainScreen(
                     padding = innerPadding,
                     navigateToBack = navigator.navController::popBackStack,
                     navigateToPlanWrite = navigator.navController::navigateToPlanWrite,
-                    navigateToPlanDetail = {},
+                    navigateToPlanDetail = navigator.navController::navigateToPlanDetail,
                     navigateToMeetingSetting = navigator.navController::navigateToMeetingSetting
                 )
                 meetingSettingScreen(
@@ -80,9 +82,14 @@ fun MainScreen(
                     padding = innerPadding,
                     navigateToBack = navigator.navController::popBackStack
                 )
+                planDetailScreen(
+                    padding = innerPadding,
+                    navigateToBack = navigator.navController::popBackStack,
+                    navigateToPlanWrite = navigator.navController::navigateToPlanWrite
+                )
                 calendarScreen(
                     padding = innerPadding,
-                    navigateToPlanDetail = {}
+                    navigateToPlanDetail = navigator.navController::navigateToPlanDetail
                 )
                 profileScreen(
                     padding = innerPadding,

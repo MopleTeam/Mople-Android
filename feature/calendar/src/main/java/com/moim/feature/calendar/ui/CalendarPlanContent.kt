@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,7 +59,7 @@ fun CalendarPlanContent(
             Column {
                 MoimText(
                     modifier = Modifier.fillMaxWidth(),
-                    text = getDateTimeFormatZonedDate(selectDate, stringResource(R.string.regex_date_day)),
+                    text = getDateTimeFormatZonedDate(selectDate, stringResource(R.string.regex_date_year_month_day)),
                     textAlign = TextAlign.Center,
                     style = MoimTheme.typography.body01.medium,
                     color = MoimTheme.colors.gray.gray05,
@@ -89,7 +88,7 @@ fun CalendarPlanItem(
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(CalendarUiAction.OnClickMeetingPlan(id = plan.meetingId)) }
+        onClick = { onUiAction(CalendarUiAction.OnClickMeetingPlan(postId = plan.meetingId)) }
     ) {
         Column(
             modifier = Modifier
@@ -102,8 +101,9 @@ fun CalendarPlanItem(
             )
             Spacer(Modifier.height(16.dp))
 
-            Text(
+            MoimText(
                 text = plan.planName,
+                singleLine = false,
                 style = MoimTheme.typography.title02.bold,
                 color = MoimTheme.colors.gray.gray01
             )
@@ -213,17 +213,19 @@ private fun MeetingWeatherInfo(
                 color = MoimTheme.colors.gray.gray04
             )
         } else {
-            Text(
+            MoimText(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 12.dp),
                 text = stringResource(R.string.unit_weather, temperature.toDecimalString()),
+                singleLine = false,
                 style = MoimTheme.typography.body01.semiBold,
                 color = MoimTheme.colors.gray.gray01
             )
 
-            Text(
+            MoimText(
                 text = address,
+                singleLine = false,
                 style = MoimTheme.typography.body02.medium,
                 color = MoimTheme.colors.gray.gray04
             )
