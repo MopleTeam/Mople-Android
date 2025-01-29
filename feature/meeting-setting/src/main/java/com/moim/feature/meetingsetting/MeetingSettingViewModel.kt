@@ -18,7 +18,6 @@ import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.designsystem.R
 import com.moim.core.model.Meeting
-import com.moim.core.model.asItem
 import com.moim.core.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -51,7 +50,7 @@ class MeetingSettingViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             launch {
-                val user = userRepository.getUser().first().asItem()
+                val user = userRepository.getUser().first()
 
                 setUiState(
                     MeetingSettingUiState.MeetingSetting(

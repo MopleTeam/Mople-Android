@@ -1,6 +1,6 @@
 package com.moim.core.data.service
 
-import com.moim.core.datamodel.MeetingPlanContainer
+import com.moim.core.datamodel.MeetingPlanContainerResponse
 import com.moim.core.datamodel.PlanResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
@@ -13,7 +13,7 @@ import retrofit2.http.Query
 internal interface PlanApi {
 
     @GET("/plan/view")
-    suspend fun getCurrentPlan(): MeetingPlanContainer
+    suspend fun getCurrentPlan(): MeetingPlanContainerResponse
 
     @GET("/plan/list/{meetId}")
     suspend fun getPlans(@Path("meetId") id: String): List<PlanResponse>

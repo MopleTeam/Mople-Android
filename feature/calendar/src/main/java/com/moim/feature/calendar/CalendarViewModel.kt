@@ -15,10 +15,8 @@ import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.datamodel.PlanResponse
 import com.moim.core.designsystem.R
 import com.moim.core.model.Plan
-import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
@@ -52,7 +50,7 @@ class CalendarViewModel @Inject constructor(
             meetingPlanResult.collect { result ->
                 when (result) {
                     is Result.Loading -> setUiState(CalendarUiState.Loading)
-                    is Result.Success -> setUiState(CalendarUiState.Success(plans = result.data.map(PlanResponse::asItem)))
+                    is Result.Success -> setUiState(CalendarUiState.Success(plans = result.data))
                     is Result.Error -> setUiState(CalendarUiState.Error)
                 }
             }
@@ -103,7 +101,7 @@ class CalendarViewModel @Inject constructor(
                             is Result.Loading -> return@collect
                             is Result.Success -> setUiState(
                                 copy(
-                                    plans = plans + result.data.map(PlanResponse::asItem),
+                                    plans = plans + result.data,
                                     loadDates = loadDates.toMutableList().apply { add(date) }
                                 )
                             )

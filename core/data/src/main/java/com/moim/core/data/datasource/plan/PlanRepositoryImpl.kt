@@ -1,10 +1,9 @@
 package com.moim.core.data.datasource.plan
 
 import com.moim.core.data.datasource.plan.remote.PlanRemoteDataSource
-import com.moim.core.datamodel.MeetingPlanContainer
 import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.datamodel.PlanResponse
-import kotlinx.coroutines.flow.Flow
+import com.moim.core.model.asItem
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
@@ -12,24 +11,24 @@ internal class PlanRepositoryImpl @Inject constructor(
     private val remoteDataSource: PlanRemoteDataSource
 ) : PlanRepository {
 
-    override fun getCurrentPlans(): Flow<MeetingPlanContainer> = flow {
-        emit(remoteDataSource.getCurrentPlan())
+    override fun getCurrentPlans() = flow {
+        emit(remoteDataSource.getCurrentPlan().asItem())
     }
 
-    override fun getPlans(meetingId: String): Flow<List<PlanResponse>> = flow {
-        emit(remoteDataSource.getPlans(meetingId))
+    override fun getPlans(meetingId: String) = flow {
+        emit(remoteDataSource.getPlans(meetingId).map(PlanResponse::asItem))
     }
 
-    override fun getPlan(planId: String): Flow<PlanResponse> = flow {
-        emit(remoteDataSource.getPlan(planId))
+    override fun getPlan(planId: String) = flow {
+        emit(remoteDataSource.getPlan(planId).asItem())
     }
 
-    override fun getPlansForCalendar(page: Int, yearAndMonth: String, isClosed: Boolean): Flow<List<PlanResponse>> = flow {
-        emit(remoteDataSource.getPlansForCalendar(page, yearAndMonth, isClosed))
+    override fun getPlansForCalendar(page: Int, yearAndMonth: String, isClosed: Boolean) = flow {
+        emit(remoteDataSource.getPlansForCalendar(page, yearAndMonth, isClosed).map(PlanResponse::asItem))
     }
 
-    override fun getSearchPlace(keyword: String, xPoint: String, yPoint: String): Flow<List<PlaceResponse>> = flow {
-        emit(remoteDataSource.getSearchPlace(keyword, xPoint, yPoint))
+    override fun getSearchPlace(keyword: String, xPoint: String, yPoint: String) = flow {
+        emit(remoteDataSource.getSearchPlace(keyword, xPoint, yPoint).map(PlaceResponse::asItem))
     }
 
     override fun createPlan(
@@ -39,8 +38,8 @@ internal class PlanRepositoryImpl @Inject constructor(
         planAddress: String,
         longitude: Double,
         latitude: Double
-    ): Flow<PlanResponse> = flow {
-        emit(remoteDataSource.createPlan(meetingId, planName, planTime, planAddress, longitude, latitude))
+    ) = flow {
+        emit(remoteDataSource.createPlan(meetingId, planName, planTime, planAddress, longitude, latitude).asItem())
     }
 
     override fun updatePlan(
@@ -50,7 +49,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         planAddress: String,
         longitude: Double,
         latitude: Double
-    ): Flow<PlanResponse> = flow {
-        emit(remoteDataSource.updatePlan(planId, planName, planTime, planAddress, longitude, latitude))
+    ) = flow {
+        emit(remoteDataSource.updatePlan(planId, planName, planTime, planAddress, longitude, latitude).asItem())
     }
 }

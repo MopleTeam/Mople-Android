@@ -17,12 +17,9 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.datamodel.MeetingResponse
-import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.designsystem.R
 import com.moim.core.model.Meeting
 import com.moim.core.model.Place
-import com.moim.core.model.asItem
 import com.moim.core.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.onEach
@@ -163,9 +160,7 @@ class PlanWriteViewModel @Inject constructor(
                                 copy(
                                     searchKeyword = trimKeyword,
                                     isShowMapSearchScreen = true,
-                                    searchPlaces = result.data
-                                        .map(PlaceResponse::asItem)
-                                        .distinctBy { it.roadAddress }
+                                    searchPlaces = result.data.distinctBy { it.roadAddress }
                                 )
                             )
 
@@ -207,9 +202,9 @@ class PlanWriteViewModel @Inject constructor(
                         is Result.Loading -> return@collect
                         is Result.Success -> {
                             if (planId.isNullOrEmpty()) {
-                                createPlan(ZonedDateTime.now(), plan = result.data.asItem())
+                                createPlan(ZonedDateTime.now(), plan = result.data)
                             } else {
-                                updatePlan(ZonedDateTime.now(), plan = result.data.asItem())
+                                updatePlan(ZonedDateTime.now(), plan = result.data)
                             }
                             setUiEvent(PlanWriteUiEvent.NavigateToBack)
                         }
@@ -249,7 +244,7 @@ class PlanWriteViewModel @Inject constructor(
                             when (result) {
                                 is Result.Loading -> setUiState(copy(isShowMeetingDialog = true, meetingDialogUiState = PlanWriteDialogUiState.Loading))
                                 is Result.Success -> {
-                                    val meetings = result.data.map(MeetingResponse::asItem)
+                                    val meetings = result.data
 
                                     setUiState(
                                         copy(

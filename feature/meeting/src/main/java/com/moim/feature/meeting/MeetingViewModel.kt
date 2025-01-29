@@ -14,9 +14,7 @@ import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
-import com.moim.core.datamodel.MeetingResponse
 import com.moim.core.model.Meeting
-import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
@@ -49,7 +47,7 @@ class MeetingViewModel @Inject constructor(
                 meetingsResult.collect { result ->
                     when (result) {
                         is Result.Loading -> setUiState(MeetingUiState.Loading)
-                        is Result.Success -> setUiState(MeetingUiState.Success(result.data.map(MeetingResponse::asItem)))
+                        is Result.Success -> setUiState(MeetingUiState.Success(result.data))
                         is Result.Error -> setUiState(MeetingUiState.Error)
                     }
                 }

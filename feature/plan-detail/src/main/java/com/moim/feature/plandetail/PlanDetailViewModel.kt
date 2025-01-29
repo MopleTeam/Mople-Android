@@ -14,14 +14,11 @@ import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.datamodel.CommentResponse
-import com.moim.core.datamodel.PlanResponse
-import com.moim.core.datamodel.ReviewResponse
 import com.moim.core.designsystem.R
 import com.moim.core.model.Comment
 import com.moim.core.model.Plan
+import com.moim.core.model.Review
 import com.moim.core.model.User
-import com.moim.core.model.asItem
 import com.moim.feature.plandetail.model.PlanDetailUiModel
 import com.moim.feature.plandetail.model.createDetailUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -76,8 +73,8 @@ class PlanDetailViewModel @Inject constructor(
                             val (user, post) = result.data
 
                             val uiState = when (post) {
-                                is PlanResponse -> PlanDetailUiState.Success(user.asItem(), post.asItem().createDetailUiModel())
-                                is ReviewResponse -> PlanDetailUiState.Success(user.asItem(), post.asItem().createDetailUiModel())
+                                is Plan -> PlanDetailUiState.Success(user, post.createDetailUiModel())
+                                is Review -> PlanDetailUiState.Success(user, post.createDetailUiModel())
                                 else -> PlanDetailUiState.Error
                             }
 
@@ -98,7 +95,7 @@ class PlanDetailViewModel @Inject constructor(
                     uiState.checkState<PlanDetailUiState.Success> {
                         when (result) {
                             is Result.Loading -> return@collect
-                            is Result.Success -> setUiState(copy(comments = result.data.map(CommentResponse::asItem)))
+                            is Result.Success -> setUiState(copy(comments = result.data))
                             else -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(R.string.plan_detail_comment_error))
                         }
                     }
@@ -146,7 +143,7 @@ class PlanDetailViewModel @Inject constructor(
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                     when (result) {
                         is Result.Loading -> return@collect
-                        is Result.Success -> setUiState(copy(comments = result.data.map(CommentResponse::asItem)))
+                        is Result.Success -> setUiState(copy(comments = result.data))
                         is Result.Error -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(R.string.common_error_disconnection))
                     }
                 }

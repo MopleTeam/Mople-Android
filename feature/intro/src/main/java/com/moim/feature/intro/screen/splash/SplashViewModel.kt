@@ -9,7 +9,6 @@ import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -30,7 +29,7 @@ class SplashViewModel @Inject constructor(
 
     private fun validateUser() {
         viewModelScope.launch {
-            val token = authRepository.getToken().first()?.asItem()
+            val token = authRepository.getToken().first()
 
             if (token == null) {
                 delay(500)

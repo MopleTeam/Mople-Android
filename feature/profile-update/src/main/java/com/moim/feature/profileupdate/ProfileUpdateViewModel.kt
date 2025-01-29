@@ -12,7 +12,6 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.designsystem.R
-import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
@@ -37,7 +36,7 @@ class ProfileUpdateViewModel @Inject constructor(
                 when (result) {
                     is Result.Loading -> setUiState(ProfileUpdateUiState.Loading)
                     is Result.Success -> {
-                        val user = result.data.asItem()
+                        val user = result.data
 
                         setUiState(
                             ProfileUpdateUiState.Success(

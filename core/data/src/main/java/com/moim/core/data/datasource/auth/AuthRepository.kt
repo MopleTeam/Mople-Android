@@ -1,13 +1,13 @@
 package com.moim.core.data.datasource.auth
 
-import com.moim.core.datamodel.TokenResponse
+import com.moim.core.model.Token
 import kotlinx.coroutines.flow.Flow
 
 interface AuthRepository {
 
-    fun getToken(): Flow<TokenResponse?>
+    fun getToken(): Flow<Token?>
 
-    fun signUp(socialType: String, token: String, email: String, nickname: String, profileUrl: String? = null): Flow<TokenResponse>
+    fun signUp(socialType: String, token: String, email: String, nickname: String, profileUrl: String? = null): Flow<Token>
 
-    fun signIn(socialType: String, token: String, email: String,): Flow<TokenResponse>
+    fun signIn(socialType: String, token: String, email: String,): Flow<Token>
 }

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MeetingPlanContainer(
+data class MeetingPlanContainerResponse(
     @SerialName("plans")
     val plans: List<PlanResponse>,
     @SerialName("meets")

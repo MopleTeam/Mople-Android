@@ -18,12 +18,9 @@ import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
-import com.moim.core.datamodel.PlanResponse
-import com.moim.core.datamodel.ReviewResponse
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
 import com.moim.core.model.Review
-import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -76,9 +73,9 @@ class MeetingDetailViewModel @Inject constructor(
 
                             setUiState(
                                 MeetingDetailUiState.Success(
-                                    meeting = meeting.asItem(),
-                                    plans = plans.map(PlanResponse::asItem),
-                                    reviews = reviews.map(ReviewResponse::asItem)
+                                    meeting = meeting,
+                                    plans = plans,
+                                    reviews = reviews,
                                 )
                             )
                         }

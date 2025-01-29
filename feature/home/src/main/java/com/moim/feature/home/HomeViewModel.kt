@@ -15,12 +15,9 @@ import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.datamodel.MeetingResponse
-import com.moim.core.datamodel.PlanResponse
 import com.moim.core.designsystem.R
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
-import com.moim.core.model.asItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
@@ -55,8 +52,8 @@ class HomeViewModel @Inject constructor(
                         is Result.Loading -> setUiState(HomeUiState.Loading)
                         is Result.Success -> setUiState(
                             HomeUiState.Success(
-                                plans = result.data.plans.map(PlanResponse::asItem),
-                                meetings = result.data.meetings.map(MeetingResponse::asItem)
+                                plans = result.data.plans,
+                                meetings = result.data.meetings,
                             )
                         )
 

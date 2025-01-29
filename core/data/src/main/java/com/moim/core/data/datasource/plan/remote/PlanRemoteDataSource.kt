@@ -1,6 +1,6 @@
 package com.moim.core.data.datasource.plan.remote
 
-import com.moim.core.datamodel.MeetingPlanContainer
+import com.moim.core.datamodel.MeetingPlanContainerResponse
 import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.datamodel.PlanResponse
 
@@ -10,7 +10,7 @@ internal interface PlanRemoteDataSource {
 
     suspend fun getPlan(planId: String): PlanResponse
 
-    suspend fun getCurrentPlan(): MeetingPlanContainer
+    suspend fun getCurrentPlan(): MeetingPlanContainerResponse
 
     suspend fun getPlansForCalendar(
         page: Int,

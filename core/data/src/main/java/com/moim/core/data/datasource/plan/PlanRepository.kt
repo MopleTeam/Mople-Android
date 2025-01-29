@@ -1,29 +1,29 @@
 package com.moim.core.data.datasource.plan
 
-import com.moim.core.datamodel.MeetingPlanContainer
-import com.moim.core.datamodel.PlaceResponse
-import com.moim.core.datamodel.PlanResponse
+import com.moim.core.model.MeetingPlanContainer
+import com.moim.core.model.Place
+import com.moim.core.model.Plan
 import kotlinx.coroutines.flow.Flow
 
 interface PlanRepository {
 
-    fun getCurrentPlans() : Flow<MeetingPlanContainer>
+    fun getCurrentPlans(): Flow<MeetingPlanContainer>
 
-    fun getPlan(planId: String) : Flow<PlanResponse>
+    fun getPlan(planId: String): Flow<Plan>
 
-    fun getPlans(meetingId: String) : Flow<List<PlanResponse>>
+    fun getPlans(meetingId: String): Flow<List<Plan>>
 
     fun getPlansForCalendar(
         page: Int,
         yearAndMonth: String,
         isClosed: Boolean
-    ): Flow<List<PlanResponse>>
+    ): Flow<List<Plan>>
 
     fun getSearchPlace(
         keyword: String,
         xPoint: String,
         yPoint: String
-    ): Flow<List<PlaceResponse>>
+    ): Flow<List<Place>>
 
     fun createPlan(
         meetingId: String,
@@ -32,7 +32,7 @@ interface PlanRepository {
         planAddress: String,
         longitude: Double,
         latitude: Double,
-    ): Flow<PlanResponse>
+    ): Flow<Plan>
 
     fun updatePlan(
         planId: String,
@@ -41,5 +41,5 @@ interface PlanRepository {
         planAddress: String,
         longitude: Double,
         latitude: Double,
-    ): Flow<PlanResponse>
+    ): Flow<Plan>
 }

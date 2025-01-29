@@ -1,15 +1,15 @@
 package com.moim.core.data.datasource.user
 
-import com.moim.core.datamodel.UserResponse
+import com.moim.core.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
 
-    fun getUser(): Flow<UserResponse>
+    fun getUser(): Flow<User>
 
-    fun fetchUser(): Flow<UserResponse>
+    fun fetchUser(): Flow<User>
 
-    fun updateUser(profileUrl: String?, nickname: String): Flow<UserResponse>
+    fun updateUser(profileUrl: String?, nickname: String): Flow<User>
 
     fun deleteUser(): Flow<Unit>
 

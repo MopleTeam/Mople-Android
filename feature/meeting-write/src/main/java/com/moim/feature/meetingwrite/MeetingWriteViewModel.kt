@@ -14,7 +14,6 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.designsystem.R
-import com.moim.core.model.asItem
 import com.moim.core.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.onEach
@@ -99,9 +98,9 @@ class MeetingWriteViewModel @Inject constructor(
                         is Result.Loading -> return@collect
                         is Result.Success -> {
                             if (meetingId.isNullOrEmpty()) {
-                                createMeeting(ZonedDateTime.now(), result.data.asItem())
+                                createMeeting(ZonedDateTime.now(), result.data)
                             } else {
-                                updateMeeting(ZonedDateTime.now(), result.data.asItem())
+                                updateMeeting(ZonedDateTime.now(), result.data)
                             }
                             setUiEvent(MeetingWriteUiEvent.NavigateToBack)
                         }
