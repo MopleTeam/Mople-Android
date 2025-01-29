@@ -66,17 +66,19 @@ class PlanWriteViewModel @Inject constructor(
     fun onUiAction(uiAction: PlanWriteUiAction) {
         when (uiAction) {
             is PlanWriteUiAction.OnClickBack -> navigateToBack()
+            is PlanWriteUiAction.OnClickRefresh -> onRefresh()
             is PlanWriteUiAction.OnClickPlanMeeting -> setPlanMeeting(uiAction.meeting)
             is PlanWriteUiAction.OnClickPlanDate -> setPlanDate(uiAction.date)
             is PlanWriteUiAction.OnClickPlanTime -> setPlanTime(uiAction.date)
             is PlanWriteUiAction.OnClickPlanPlaceSearch -> getSearchPlace(uiAction.keyword, uiAction.xPoint, uiAction.yPoint)
-            is PlanWriteUiAction.OnClickPlanPlace -> setPlaceMarker(uiAction.place)
+            is PlanWriteUiAction.OnClickSearchPlace -> setPlaceMarker(uiAction.place)
+            is PlanWriteUiAction.OnClickPlanPlace -> setPlanPlace(uiAction.place)
             is PlanWriteUiAction.OnClickPlanWrite -> setPlan()
-            is PlanWriteUiAction.OnClickRefresh -> onRefresh()
             is PlanWriteUiAction.OnShowDatePickerDialog -> showDatePickerDialog(uiAction.isShow)
             is PlanWriteUiAction.OnShowTimePickerDialog -> showTimePickerDialog(uiAction.isShow)
             is PlanWriteUiAction.OnShowMeetingsDialog -> showMeetingsDialog(uiAction.isShow)
             is PlanWriteUiAction.OnShowPlaceMapScreen -> showPlaceMapScreen(uiAction.isShow)
+            is PlanWriteUiAction.OnShowPlaceInfoDialog -> showPlaceInfoDialog(uiAction.isShow)
             is PlanWriteUiAction.OnChangePlanName -> setPlanName(uiAction.name)
         }
     }
@@ -85,11 +87,26 @@ class PlanWriteViewModel @Inject constructor(
         uiState.checkState<PlanWriteUiState.PlanWrite> {
             setUiState(
                 copy(
-                    planPlace = place.roadAddress,
                     selectedPlace = place,
                     planLongitude = place.xPoint.toDouble(),
                     planLatitude = place.yPoint.toDouble(),
+                    isShowPlaceInfoDialog = true,
                     isShowMapSearchScreen = false
+                )
+            )
+            setPlanCreateEnabled()
+        }
+    }
+
+    private fun setPlanPlace(place: Place) {
+        uiState.checkState<PlanWriteUiState.PlanWrite> {
+            setUiState(
+                copy(
+                    planPlace = place.roadAddress,
+                    planLongitude = place.xPoint.toDouble(),
+                    planLatitude = place.yPoint.toDouble(),
+                    selectedPlace = null,
+                    isShowMapScreen = false
                 )
             )
             setPlanCreateEnabled()
@@ -230,9 +247,23 @@ class PlanWriteViewModel @Inject constructor(
         }
     }
 
+    private fun showPlaceInfoDialog(isShow: Boolean) {
+        uiState.checkState<PlanWriteUiState.PlanWrite> {
+            setUiState(copy(isShowPlaceInfoDialog = isShow))
+        }
+    }
+
     private fun showPlaceMapScreen(isShow: Boolean) {
         uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(copy(isShowMapScreen = isShow))
+            setUiState(
+                copy(
+                    isShowMapScreen = isShow,
+                    isShowMapSearchScreen = isShow,
+                    searchKeyword = null,
+                    selectedPlace = null,
+                    searchPlaces = emptyList()
+                )
+            )
         }
     }
 
@@ -281,10 +312,8 @@ class PlanWriteViewModel @Inject constructor(
         }
 
         uiState.checkState<PlanWriteUiState.PlanWrite> {
-            if (isShowMapSearchScreen) {
-                setUiState(copy(isShowMapSearchScreen = false))
-            } else if (isShowMapScreen) {
-                setUiState(copy(isShowMapScreen = false, searchPlaces = emptyList(), searchKeyword = null))
+            if (isShowMapScreen) {
+                showPlaceMapScreen(false)
             } else {
                 setUiEvent(PlanWriteUiEvent.NavigateToBack)
             }
@@ -310,8 +339,9 @@ sealed interface PlanWriteUiState : UiState {
         val isShowDatePickerDialog: Boolean = false,
         val isShowTimePickerDialog: Boolean = false,
         val isShowMeetingDialog: Boolean = false,
+        val isShowPlaceInfoDialog: Boolean = true,
         val isShowMapScreen: Boolean = false,
-        val isShowMapSearchScreen: Boolean = false,
+        val isShowMapSearchScreen: Boolean = true,
         val enableMeetingSelected: Boolean = true,
         val enabledSubmit: Boolean = false,
     ) : PlanWriteUiState
@@ -330,6 +360,7 @@ sealed interface PlanWriteUiAction : UiAction {
     data object OnClickPlanWrite : PlanWriteUiAction
     data object OnClickRefresh : PlanWriteUiAction
     data class OnClickPlanPlaceSearch(val keyword: String, val xPoint: String, val yPoint: String) : PlanWriteUiAction
+    data class OnClickSearchPlace(val place: Place) : PlanWriteUiAction
     data class OnClickPlanPlace(val place: Place) : PlanWriteUiAction
     data class OnClickPlanMeeting(val meeting: Meeting) : PlanWriteUiAction
     data class OnClickPlanDate(val date: ZonedDateTime) : PlanWriteUiAction
@@ -337,6 +368,7 @@ sealed interface PlanWriteUiAction : UiAction {
     data class OnShowMeetingsDialog(val isShow: Boolean) : PlanWriteUiAction
     data class OnShowDatePickerDialog(val isShow: Boolean) : PlanWriteUiAction
     data class OnShowTimePickerDialog(val isShow: Boolean) : PlanWriteUiAction
+    data class OnShowPlaceInfoDialog(val isShow: Boolean) : PlanWriteUiAction
     data class OnShowPlaceMapScreen(val isShow: Boolean) : PlanWriteUiAction
     data class OnChangePlanName(val name: String) : PlanWriteUiAction
 }

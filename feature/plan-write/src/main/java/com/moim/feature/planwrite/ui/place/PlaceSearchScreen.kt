@@ -1,11 +1,11 @@
 package com.moim.feature.planwrite.ui.place
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,8 +15,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,24 +33,44 @@ import com.moim.feature.planwrite.PlanWriteUiAction
 @Composable
 fun PlaceSearchScreen(
     modifier: Modifier = Modifier,
+    isSearchResult: Boolean = false,
     searchPlaces: List<Place>,
     selectedPlace: Place? = null,
     onUiAction: OnPlanWriteUiAction = {}
 ) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MoimTheme.colors.white),
-        contentPadding = PaddingValues(bottom = 24.dp)
-    ) {
-        items(
-            items = searchPlaces,
-            key = { it.roadAddress }
+    if (searchPlaces.isNotEmpty()) {
+        LazyColumn(
+            modifier = modifier,
+            contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            PlaceItem(
-                place = it,
-                selectedPlace = selectedPlace,
-                onUiAction = onUiAction
+            items(
+                items = searchPlaces,
+                key = { it.roadAddress }
+            ) {
+                PlaceItem(
+                    place = it,
+                    selectedPlace = selectedPlace,
+                    onUiAction = onUiAction
+                )
+            }
+        }
+    } else {
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_location_search),
+                contentDescription = "",
+                tint = MoimTheme.colors.icon
+            )
+
+            MoimText(
+                text = stringResource(if (isSearchResult) R.string.plan_write_place_search_empty else R.string.plan_write_place_search_hint),
+                singleLine = false,
+                style = MoimTheme.typography.body01.medium,
+                color = MoimTheme.colors.gray.gray06
             )
         }
     }
@@ -65,7 +87,7 @@ fun PlaceItem(
         modifier = modifier
             .fillMaxWidth()
             .background(if (selectedPlace?.roadAddress == place.roadAddress) MoimTheme.colors.bg.primary else MoimTheme.colors.white)
-            .onSingleClick { onUiAction(PlanWriteUiAction.OnClickPlanPlace(place)) }
+            .onSingleClick { onUiAction(PlanWriteUiAction.OnClickSearchPlace(place)) }
             .padding(20.dp)
     ) {
         Icon(

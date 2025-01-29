@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -79,6 +81,9 @@ fun PlanWriteScreen(
     isLoading: Boolean = false,
     onUiAction: OnPlanWriteUiAction = {}
 ) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(
         modifier = modifier
     ) {
@@ -124,7 +129,11 @@ fun PlanWriteScreen(
                 hintText = stringResource(R.string.plan_write_place_select_hint),
                 valueText = uiState.planPlace,
                 iconRes = R.drawable.ic_location,
-                onClick = { onUiAction(PlanWriteUiAction.OnShowPlaceMapScreen(true)) }
+                onClick = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    onUiAction(PlanWriteUiAction.OnShowPlaceMapScreen(true))
+                }
             )
 
             Spacer(Modifier.weight(1f))
@@ -161,9 +170,13 @@ fun PlanWriteScreen(
     if (uiState.isShowMapScreen) {
         PlaceContainerScreen(
             onUiAction = onUiAction,
+            searchKeyword = uiState.searchKeyword,
             searchPlaces = uiState.searchPlaces,
             selectedPlace = uiState.selectedPlace,
-            isShowSearchScreen = uiState.isShowMapSearchScreen
+            planLongitude = uiState.planLongitude,
+            planLatitude = uiState.planLatitude,
+            isShowSearchScreen = uiState.isShowMapSearchScreen,
+            isShowPlaceInfoDialog = uiState.isShowPlaceInfoDialog,
         )
     }
 

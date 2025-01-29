@@ -62,7 +62,7 @@ fun ZonedDateTime?.parseDateString(): String {
     return zonedDateTime.format(formatter)
 }
 
-fun String?.parseZonedDateTimeForDateString() : ZonedDateTime {
+fun String?.parseZonedDateTimeForDateString(): ZonedDateTime {
     return try {
         val formatterWithTimezone = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssXXX")
         ZonedDateTime.parse("$this+09:00", formatterWithTimezone)

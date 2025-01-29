@@ -14,6 +14,7 @@
     <string name="common_update">수정</string>
     <string name="common_save">저장</string>
     <string name="common_confirm">확인</string>
+    <string name="common_search">검색</string>
     <string name="common_done">완료</string>
     <string name="common_profile_edit">프로필 편집</string>
     <string name="common_default_select">기본 프로필로 변경</string>
@@ -94,7 +95,8 @@
     <string name="plan_write_time_select_hint">시간을 선택해주세요</string>
     <string name="plan_write_place_select">장소 선택</string>
     <string name="plan_write_place_select_hint">장소를 선택해주세요</string>
-    <string name="plan_write_place_search_hint">장소를 검색해주세요</string>
+    <string name="plan_write_place_search_hint">약속 장소를 검색해주세요</string>
+    <string name="plan_write_place_search_empty">검색 결과가 없어요</string>
     <string name="plan_write_create">일정 생성</string>
     <string name="plan_write_update">일정 수정</string>
 

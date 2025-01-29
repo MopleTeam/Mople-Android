@@ -23,9 +23,9 @@ data class PlanResponse(
     val planTime: String = "",
     @SerialName("planAddress")
     val planAddress: String = "",
-    @SerialName("planLongitude")
+    @SerialName("lot")
     val planLongitude: Double = 0.0,
-    @SerialName("planLatitude")
+    @SerialName("lat")
     val planLatitude: Double = 0.0,
     @SerialName("weatherIcon")
     val weatherIconUrl: String = "",

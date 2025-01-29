@@ -92,9 +92,12 @@ fun PlanDetailContent(
             text = planDetail.address
         )
 
-        if (planDetail.lat > 0.0 && planDetail.lng > 0.0) {
+        if (planDetail.lat != 0.0 && planDetail.lng != 0.0) {
             Spacer(Modifier.height(16.dp))
-            MoimText(text = "모임 지도 표기 TODO")
+            PlanDetailMapContent(
+                latitude = planDetail.lat,
+                longitude = planDetail.lng
+            )
         }
 
         Spacer(Modifier.height(28.dp))

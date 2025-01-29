@@ -18,7 +18,7 @@ fun NavGraphBuilder.planDetailScreen(
 ) {
     composable<DetailRoute.PlanDetail>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },
-        exitTransition = { fadeOut(animationSpec = tween(500)) }
+        exitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
         PlanDetailRoute(
             padding = padding,
