@@ -55,7 +55,7 @@ fun MeetingSettingRoute(
             is MeetingSettingUiEvent.NavigateToBackForDelete -> navigateToBack(true)
             is MeetingSettingUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite(event.meeting)
             is MeetingSettingUiEvent.NavigateToMeetingParticipants -> {}
-            is MeetingSettingUiEvent.OnShowToastMessage -> showToast(context, event.messageRes)
+            is MeetingSettingUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

@@ -32,7 +32,7 @@ fun ErrorScreen(
         )
 
         MoimText(
-            text = stringResource(id = R.string.common_error_description),
+            text = stringResource(id = R.string.common_error_disconnection),
             textAlign = TextAlign.Center,
             style = MoimTheme.typography.body01.semiBold,
             singleLine = false,

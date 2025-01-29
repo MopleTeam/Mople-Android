@@ -1,6 +1,5 @@
 package com.moim.feature.home
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
@@ -10,12 +9,12 @@ import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseZonedDateTimeForDateString
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.designsystem.R
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -154,7 +153,7 @@ class HomeViewModel @Inject constructor(
     private fun navigateToPlanWrite() {
         uiState.checkState<HomeUiState.Success> {
             if (meetings.isEmpty()) {
-                setUiEvent(HomeUiEvent.ShowToastMessage(R.string.home_new_plan_created_not))
+                setUiEvent(HomeUiEvent.ShowToastMessage(ToastMessage.EmptyPlanErrorMessage))
             } else {
                 setUiEvent(HomeUiEvent.NavigateToPlanWrite)
             }
@@ -188,5 +187,5 @@ sealed interface HomeUiEvent : UiEvent {
     data object NavigateToPlanWrite : HomeUiEvent
     data object NavigateToCalendar : HomeUiEvent
     data class NavigateToMeetingDetail(val meetingId: String) : HomeUiEvent
-    data class ShowToastMessage(@StringRes val messageRes: Int) : HomeUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : HomeUiEvent
 }

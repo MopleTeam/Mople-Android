@@ -1,6 +1,5 @@
 package com.moim.feature.planwrite
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -11,13 +10,13 @@ import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseDateString
 import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.designsystem.R
 import com.moim.core.model.Meeting
 import com.moim.core.model.Place
 import com.moim.core.route.DetailRoute
@@ -165,8 +164,8 @@ class PlanWriteViewModel @Inject constructor(
                             )
 
                             is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(R.string.common_error_disconnection))
-                                is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                                is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
                             }
                         }
                     }
@@ -209,7 +208,10 @@ class PlanWriteViewModel @Inject constructor(
                             setUiEvent(PlanWriteUiEvent.NavigateToBack)
                         }
 
-                        is Result.Error -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                        is Result.Error -> when (result.exception) {
+                            is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                            is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                        }
                     }
                 }
             }
@@ -259,7 +261,10 @@ class PlanWriteViewModel @Inject constructor(
 
                                 is Result.Error -> {
                                     setUiState(copy(isShowMeetingDialog = false))
-                                    setUiEvent(PlanWriteUiEvent.ShowToastMessage(R.string.plan_write_meeting_select_error))
+                                    when (result.exception) {
+                                        is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                        is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                                    }
                                 }
                             }
                         }
@@ -338,5 +343,5 @@ sealed interface PlanWriteUiAction : UiAction {
 
 sealed interface PlanWriteUiEvent : UiEvent {
     data object NavigateToBack : PlanWriteUiEvent
-    data class ShowToastMessage(@StringRes val messageRes: Int) : PlanWriteUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : PlanWriteUiEvent
 }

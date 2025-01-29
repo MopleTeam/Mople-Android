@@ -56,7 +56,7 @@ fun ProfileUpdateRoute(
         when (event) {
             is ProfileUpdateUiEvent.NavigateToBack -> navigateToBack()
             is ProfileUpdateUiEvent.NavigateToPhotoPicker -> singlePhotoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            is ProfileUpdateUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is ProfileUpdateUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

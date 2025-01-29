@@ -1,11 +1,12 @@
 package com.moim.feature.plandetail
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
@@ -14,7 +15,6 @@ import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.designsystem.R
 import com.moim.core.model.Comment
 import com.moim.core.model.Plan
 import com.moim.core.model.Review
@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -96,7 +97,7 @@ class PlanDetailViewModel @Inject constructor(
                         when (result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> setUiState(copy(comments = result.data))
-                            else -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(R.string.plan_detail_comment_error))
+                            else -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.CommentErrorMessage))
                         }
                     }
                 }
@@ -144,7 +145,10 @@ class PlanDetailViewModel @Inject constructor(
                     when (result) {
                         is Result.Loading -> return@collect
                         is Result.Success -> setUiState(copy(comments = result.data))
-                        is Result.Error -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                        is Result.Error -> when (result.exception) {
+                            is IOException -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                            is NetworkException -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                        }
                     }
                 }
             }
@@ -229,5 +233,5 @@ sealed interface PlanDetailUiEvent : UiEvent {
     data object NavigateToBack : PlanDetailUiEvent
     data class NavigateToParticipants(val postId: String) : PlanDetailUiEvent
     data class NavigateToPlanWrite(val plan: Plan) : PlanDetailUiEvent
-    data class ShowToastMessage(@StringRes val messageRes: Int) : PlanDetailUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : PlanDetailUiEvent
 }

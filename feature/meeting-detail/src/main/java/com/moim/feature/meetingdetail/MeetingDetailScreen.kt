@@ -58,7 +58,7 @@ fun MeetingDetailRoute(
             is MeetingDetailUiEvent.NavigateToMeetingSetting -> navigateToMeetingSetting(event.meeting)
             is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
             is MeetingDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan)
-            is MeetingDetailUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is MeetingDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

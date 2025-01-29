@@ -1,6 +1,5 @@
 package com.moim.feature.intro.screen.signup
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.consts.PATTERN_NICKNAME
@@ -9,6 +8,7 @@ import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.FirebaseUtil
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
@@ -16,11 +16,11 @@ import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.token.TokenRepository
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.designsystem.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import okio.IOException
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -92,7 +92,10 @@ class SignUpViewModel @Inject constructor(
                         when (result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> setUiState(copy(isDuplicatedName = result.data, enableSignUp = result.data.not()))
-                            is Result.Error -> setUiEvent(SignUpUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                            is Result.Error -> when(result.exception) {
+                                is IOException -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                else -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
                         }
                     }
             }
@@ -117,7 +120,10 @@ class SignUpViewModel @Inject constructor(
                         when (result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> setUiEvent(SignUpUiEvent.NavigateToMain)
-                            is Result.Error -> setUiEvent(SignUpUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                            is Result.Error -> when(result.exception) {
+                                is IOException -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                else -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
                         }
                     }
             }
@@ -153,5 +159,5 @@ sealed interface SignUpUiAction : UiAction {
 sealed interface SignUpUiEvent : UiEvent {
     data object NavigateToPhotoPicker : SignUpUiEvent
     data object NavigateToMain : SignUpUiEvent
-    data class ShowToastMessage(@StringRes val messageRes: Int) : SignUpUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : SignUpUiEvent
 }

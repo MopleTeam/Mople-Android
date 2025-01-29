@@ -92,7 +92,7 @@ fun HomeRoute(
             is HomeUiEvent.NavigateToPlanWrite -> navigateToPlanWrite()
             is HomeUiEvent.NavigateToCalendar -> navigateToCalendar()
             is HomeUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
-            is HomeUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is HomeUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

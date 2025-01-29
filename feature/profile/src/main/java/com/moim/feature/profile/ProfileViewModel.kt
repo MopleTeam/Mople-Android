@@ -1,16 +1,15 @@
 package com.moim.feature.profile
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.designsystem.R
 import com.moim.core.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,6 +17,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -83,7 +83,10 @@ class ProfileViewModel @Inject constructor(
                         when(result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> logout()
-                            is Result.Error -> setUiEvent(ProfileUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                            is Result.Error -> when(result.exception) {
+                                is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
                         }
                     }
             }
@@ -119,5 +122,5 @@ sealed interface ProfileUiEvent : UiEvent {
     data object NavigateToAlarmSetting : ProfileUiEvent
     data object NavigateToPrivacyPolicy : ProfileUiEvent
     data object NavigateToIntro : ProfileUiEvent
-    data class ShowToastMessage(@StringRes val messageRes: Int) : ProfileUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : ProfileUiEvent
 }

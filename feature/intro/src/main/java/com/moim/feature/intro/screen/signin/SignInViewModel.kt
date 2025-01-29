@@ -1,7 +1,6 @@
 package com.moim.feature.intro.screen.signin
 
 import android.content.Context
-import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
@@ -12,11 +11,11 @@ import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.FirebaseUtil
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.token.TokenRepository
-import com.moim.core.designsystem.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
@@ -52,14 +51,14 @@ class SignInViewModel @Inject constructor(
 
     private fun checkedKakaoToken(token: OAuthToken?, exception: Throwable?) {
         when {
-            exception != null -> setUiEvent(SignInUiEvent.ShowToastMessage(R.string.sign_in_kakao_fail))
+            exception != null -> setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.SocialLoginErrorMessage))
 
             token != null -> UserApiClient.instance.me { user, _ ->
-                if (user == null) return@me setUiEvent(SignInUiEvent.ShowToastMessage(R.string.sign_in_kakao_fail))
+                if (user == null) return@me setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.SocialLoginErrorMessage))
                 signIn(token.idToken.toString(), user.kakaoAccount?.email.toString())
             }
 
-            else -> setUiEvent(SignInUiEvent.ShowToastMessage(R.string.sign_in_kakao_fail))
+            else -> setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.SocialLoginErrorMessage))
         }
     }
 
@@ -74,10 +73,10 @@ class SignInViewModel @Inject constructor(
                         is Result.Loading -> return@collect
                         is Result.Success -> setUiEvent(SignInUiEvent.NavigateToMain)
                         is Result.Error -> when (result.exception) {
-                            is IOException -> setUiEvent(SignInUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                            is IOException -> setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
                             is NetworkException -> when (result.exception) {
                                 is NotFoundException -> setUiEvent(SignInUiEvent.NavigateToSignUp(email = email, token = accessToken))
-                                else -> setUiEvent(SignInUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                                else -> setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
                             }
                         }
                     }
@@ -93,5 +92,5 @@ sealed interface SignInUiAction : UiAction {
 sealed interface SignInUiEvent : UiEvent {
     data class NavigateToSignUp(val email: String, val token: String) : SignInUiEvent
     data object NavigateToMain : SignInUiEvent
-    data class ShowToastMessage(@StringRes val messageRes: Int) : SignInUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : SignInUiEvent
 }

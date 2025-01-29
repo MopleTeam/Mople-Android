@@ -56,7 +56,7 @@ fun SignInRoute(
         when (event) {
             is SignInUiEvent.NavigateToSignUp -> navigateToSignUp(event.email, event.token, options)
             is SignInUiEvent.NavigateToMain -> navigateToMain()
-            is SignInUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is SignInUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

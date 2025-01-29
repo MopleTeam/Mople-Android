@@ -58,7 +58,7 @@ fun PlanWriteRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is PlanWriteUiEvent.NavigateToBack -> navigateToBack()
-            is PlanWriteUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is PlanWriteUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

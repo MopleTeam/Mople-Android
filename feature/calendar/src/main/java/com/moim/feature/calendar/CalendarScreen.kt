@@ -72,7 +72,7 @@ fun CalendarRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is CalendarUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
-            is CalendarUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is CalendarUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

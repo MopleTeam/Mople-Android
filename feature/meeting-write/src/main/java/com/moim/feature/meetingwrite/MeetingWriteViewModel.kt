@@ -1,6 +1,5 @@
 package com.moim.feature.meetingwrite
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -8,16 +7,17 @@ import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
-import com.moim.core.designsystem.R
 import com.moim.core.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.time.ZonedDateTime
 import javax.inject.Inject
 
@@ -105,7 +105,10 @@ class MeetingWriteViewModel @Inject constructor(
                             setUiEvent(MeetingWriteUiEvent.NavigateToBack)
                         }
 
-                        is Result.Error -> setUiEvent(MeetingWriteUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                        is Result.Error -> when(result.exception) {
+                            is IOException -> setUiEvent(MeetingWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                            else -> setUiEvent(MeetingWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                        }
                     }
                 }
             }
@@ -135,5 +138,5 @@ sealed interface MeetingWriteUiAction : UiAction {
 sealed interface MeetingWriteUiEvent : UiEvent {
     data object NavigateToBack : MeetingWriteUiEvent
     data object NavigateToPhotoPicker : MeetingWriteUiEvent
-    data class ShowToastMessage(@StringRes val messageRes: Int) : MeetingWriteUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : MeetingWriteUiEvent
 }

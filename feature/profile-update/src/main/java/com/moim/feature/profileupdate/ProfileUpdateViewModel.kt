@@ -1,23 +1,24 @@
 package com.moim.feature.profileupdate
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.consts.PATTERN_NICKNAME
+import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.designsystem.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import okio.IOException
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -106,7 +107,10 @@ class ProfileUpdateViewModel @Inject constructor(
                         when (result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> setUiState(copy(isDuplicatedName = result.data, enableProfileUpdate = result.data.not()))
-                            is Result.Error -> setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                            is Result.Error -> when (result.exception) {
+                                is IOException -> setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                is NetworkException -> setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
                         }
                     }
             }
@@ -123,7 +127,10 @@ class ProfileUpdateViewModel @Inject constructor(
                         when (result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> setUiEvent(ProfileUpdateUiEvent.NavigateToBack)
-                            is Result.Error -> setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(R.string.common_error_disconnection))
+                            is Result.Error -> when (result.exception) {
+                                is IOException -> setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                is NetworkException -> setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
                         }
                     }
             }
@@ -161,5 +168,5 @@ sealed interface ProfileUpdateUiAction : UiAction {
 sealed interface ProfileUpdateUiEvent : UiEvent {
     data object NavigateToBack : ProfileUpdateUiEvent
     data object NavigateToPhotoPicker : ProfileUpdateUiEvent
-    data class ShowToastMessage(@StringRes val messageRes: Int) : ProfileUpdateUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : ProfileUpdateUiEvent
 }

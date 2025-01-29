@@ -57,7 +57,7 @@ fun MeetingWriteRoute(
         when (event) {
             is MeetingWriteUiEvent.NavigateToBack -> navigateToBack()
             is MeetingWriteUiEvent.NavigateToPhotoPicker -> singlePhotoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            is MeetingWriteUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is MeetingWriteUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

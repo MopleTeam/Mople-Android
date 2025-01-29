@@ -75,7 +75,7 @@ private fun SplashScreen(
     if (uiState.isShowErrorDialog) {
         MoimAlertDialog(
             title = stringResource(R.string.common_error),
-            description = stringResource(R.string.common_error_description),
+            description = stringResource(R.string.common_error_disconnection),
             isNegative = false,
             cancelable = false,
             positiveText = stringResource(R.string.common_confirm),

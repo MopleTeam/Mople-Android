@@ -52,7 +52,7 @@ fun SignUpRoute(
         when (event) {
             is SignUpUiEvent.NavigateToPhotoPicker -> singlePhotoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             is SignUpUiEvent.NavigateToMain -> navigateToMain()
-            is SignUpUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is SignUpUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

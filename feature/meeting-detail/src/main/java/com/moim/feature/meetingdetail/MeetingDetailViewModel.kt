@@ -1,6 +1,5 @@
 package com.moim.feature.meetingdetail
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.delegate.MeetingAction
@@ -11,6 +10,7 @@ import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseZonedDateTimeForDateString
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
@@ -228,5 +228,5 @@ sealed interface MeetingDetailUiEvent : UiEvent {
     data class NavigateToPlanWrite(val plan: Plan) : MeetingDetailUiEvent
     data class NavigateToMeetingSetting(val meeting: Meeting) : MeetingDetailUiEvent
     data class NavigateToPlanDetail(val postId: String, val isPlan: Boolean) : MeetingDetailUiEvent
-    data class ShowToastMessage(@StringRes val messageRes: Int) : MeetingDetailUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : MeetingDetailUiEvent
 }

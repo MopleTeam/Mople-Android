@@ -54,7 +54,7 @@ fun ProfileRoute(
             is ProfileUiEvent.NavigateToAlarmSetting -> navigateToAlarmSetting()
             is ProfileUiEvent.NavigateToPrivacyPolicy -> navigateToPrivacyPolicy()
             is ProfileUiEvent.NavigateToIntro -> navigateToIntro()
-            is ProfileUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is ProfileUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

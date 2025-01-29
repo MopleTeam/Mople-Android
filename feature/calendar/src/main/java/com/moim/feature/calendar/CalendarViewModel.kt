@@ -1,6 +1,5 @@
 package com.moim.feature.calendar
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.moim.core.common.exception.NetworkException
@@ -10,12 +9,12 @@ import com.moim.core.common.util.default
 import com.moim.core.common.util.getDateTimeFormatZonedDate
 import com.moim.core.common.util.getZonedDateTimeDefault
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.designsystem.R
 import com.moim.core.model.Plan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -107,8 +106,8 @@ class CalendarViewModel @Inject constructor(
                             )
 
                             is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(CalendarUiEvent.ShowToastMessage(R.string.common_error))
-                                is NetworkException -> setUiEvent(CalendarUiEvent.ShowToastMessage(R.string.common_error))
+                                is IOException -> setUiEvent(CalendarUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                is NetworkException -> setUiEvent(CalendarUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
                             }
                         }
                     }
@@ -143,5 +142,5 @@ sealed interface CalendarUiAction : UiAction {
 
 sealed interface CalendarUiEvent : UiEvent {
     data class NavigateToPlanDetail(val postId: String, val isPlan: Boolean = true) : CalendarUiEvent
-    data class ShowToastMessage(@StringRes val messageRes: Int) : CalendarUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : CalendarUiEvent
 }

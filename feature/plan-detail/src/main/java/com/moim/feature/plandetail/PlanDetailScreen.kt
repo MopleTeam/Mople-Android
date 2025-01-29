@@ -57,7 +57,7 @@ fun PlanDetailRoute(
             is PlanDetailUiEvent.NavigateToBack -> navigateToBack()
             is PlanDetailUiEvent.NavigateToParticipants -> {}
             is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan)
-            is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.messageRes)
+            is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 

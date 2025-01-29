@@ -1,22 +1,22 @@
 package com.moim.feature.meetingsetting
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.PlanViewModelDelegate
+import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.designsystem.R
 import com.moim.core.model.Meeting
 import com.moim.core.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.time.ZonedDateTime
 import javax.inject.Inject
 
@@ -111,7 +112,10 @@ class MeetingSettingViewModel @Inject constructor(
                                 setUiEvent(MeetingSettingUiEvent.NavigateToBackForDelete)
                             }
 
-                            is Result.Error -> setUiEvent(MeetingSettingUiEvent.OnShowToastMessage(R.string.common_error_disconnection))
+                            is Result.Error -> when (result.exception) {
+                                is IOException -> setUiEvent(MeetingSettingUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                is NetworkException -> setUiEvent(MeetingSettingUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
                         }
                     }
             }
@@ -143,5 +147,5 @@ sealed interface MeetingSettingUiEvent : UiEvent {
     data object NavigateToBackForDelete : MeetingSettingUiEvent
     data class NavigateToMeetingWrite(val meeting: Meeting) : MeetingSettingUiEvent
     data class NavigateToMeetingParticipants(val meetingId: String) : MeetingSettingUiEvent
-    data class OnShowToastMessage(@StringRes val messageRes: Int) : MeetingSettingUiEvent
+    data class ShowToastMessage(val message: ToastMessage) : MeetingSettingUiEvent
 }
