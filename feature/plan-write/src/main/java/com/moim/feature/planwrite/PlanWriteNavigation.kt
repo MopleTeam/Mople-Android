@@ -9,6 +9,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.moim.core.model.Plan
+import com.moim.core.model.item.PlanItem
 import com.moim.core.route.DetailRoute
 
 fun NavGraphBuilder.planWriteScreen(
@@ -28,8 +29,8 @@ fun NavGraphBuilder.planWriteScreen(
 }
 
 fun NavController.navigateToPlanWrite(
-    plan : Plan? = null,
+    planItem: PlanItem? = null,
     navOptions: NavOptions? = null
 ) {
-    navigate(DetailRoute.PlanWrite(plan), navOptions)
+    navigate(DetailRoute.PlanWrite(planItem), navOptions)
 }

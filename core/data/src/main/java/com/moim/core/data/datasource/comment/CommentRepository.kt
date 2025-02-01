@@ -19,5 +19,5 @@ interface CommentRepository {
 
     fun deleteComment(commentId: String): Flow<Unit>
 
-    fun reportComment(commentId: String, reason: String): Flow<Unit>
+    fun reportComment(commentId: String): Flow<Unit>
 }

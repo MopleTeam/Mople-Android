@@ -4,11 +4,18 @@ import com.moim.core.common.di.ApplicationScope
 import com.moim.core.model.Plan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.ZonedDateTime
 import javax.inject.Inject
+
+fun Flow<PlanAction>.planStateIn(
+    coroutineScope: CoroutineScope
+) = stateIn(coroutineScope, SharingStarted.WhileSubscribed(5000), PlanAction.None)
 
 interface PlanViewModelDelegate {
 

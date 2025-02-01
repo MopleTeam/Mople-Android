@@ -8,7 +8,7 @@ import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseDateString
-import com.moim.core.common.util.parseZonedDateTime
+import com.moim.core.common.util.parseZonedDateTimeForDateString
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -43,20 +43,21 @@ class PlanWriteViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             plan?.let { plan ->
-                val planDate = plan.planTime.parseZonedDateTime()
+                val planDate = plan.planAt.parseZonedDateTimeForDateString()
 
                 setUiState(
                     PlanWriteUiState.PlanWrite(
-                        planId = plan.planId,
+                        planId = plan.postId,
                         planName = plan.planName,
                         planDate = planDate,
                         planTime = planDate,
-                        planPlace = plan.planAddress,
-                        planLongitude = plan.planLongitude,
-                        planLatitude = plan.planLatitude,
+                        planPlace = plan.address,
+                        planLongitude = plan.longitude,
+                        planLatitude = plan.latitude,
                         selectMeetingId = plan.meetingId,
                         selectMeetingName = plan.meetingName,
-                        enableMeetingSelected = true
+                        enableMeetingSelected = false,
+                        enabledSubmit = true
                     )
                 )
             } ?: run { setUiState(PlanWriteUiState.PlanWrite()) }

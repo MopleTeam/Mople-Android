@@ -26,14 +26,14 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.model.item.PlanItem
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
-import com.moim.feature.plandetail.model.PlanDetailUiModel
 
 @Composable
 fun PlanDetailContent(
     modifier: Modifier = Modifier,
-    planDetail: PlanDetailUiModel,
+    planItem: PlanItem,
     onUiAction: OnPlanDetailUiAction = {}
 ) {
     Column(
@@ -51,14 +51,14 @@ fun PlanDetailContent(
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
                     .size(20.dp),
-                imageUrl = planDetail.meetingImageUrl,
+                imageUrl = planItem.meetingImageUrl,
                 errorImage = painterResource(R.drawable.ic_empty_meeting)
             )
 
             Spacer(Modifier.width(8.dp))
 
             MoimText(
-                text = planDetail.meetingName,
+                text = planItem.meetingName,
                 style = MoimTheme.typography.body02.semiBold,
                 color = MoimTheme.colors.gray.gray04
             )
@@ -67,7 +67,7 @@ fun PlanDetailContent(
         Spacer(Modifier.height(12.dp))
 
         MoimText(
-            text = planDetail.planName,
+            text = planItem.planName,
             style = MoimTheme.typography.heading.bold,
             color = MoimTheme.colors.gray.gray01,
             maxLine = 2,
@@ -79,24 +79,24 @@ fun PlanDetailContent(
             startIconRes = R.drawable.ic_meeting,
             endIconRes = R.drawable.ic_next,
             enable = true,
-            text = stringResource(R.string.unit_participants_count, planDetail.participantsCount),
+            text = stringResource(R.string.unit_participants_count, planItem.participantsCount),
             onClick = { onUiAction(PlanDetailUiAction.OnClickParticipants) }
         )
         PlanInfoItem(
             modifier = Modifier.padding(vertical = 4.dp),
             startIconRes = R.drawable.ic_clock,
-            text = getDateTimeFormatString(dateTime = planDetail.planAt, pattern = stringResource(R.string.regex_date_full))
+            text = getDateTimeFormatString(dateTime = planItem.planAt, pattern = stringResource(R.string.regex_date_full))
         )
         PlanInfoItem(
             startIconRes = R.drawable.ic_location,
-            text = planDetail.address
+            text = planItem.address
         )
 
-        if (planDetail.lat != 0.0 && planDetail.lng != 0.0) {
+        if (planItem.latitude != 0.0 && planItem.longitude != 0.0) {
             Spacer(Modifier.height(16.dp))
             PlanDetailMapContent(
-                latitude = planDetail.lat,
-                longitude = planDetail.lng
+                latitude = planItem.latitude,
+                longitude = planItem.longitude
             )
         }
 

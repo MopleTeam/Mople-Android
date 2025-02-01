@@ -118,6 +118,27 @@ internal class PlanRemoteDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun deletePlan(planId: String) {
+        return try {
+            planApi.deletePlan(planId)
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+    }
+
+    override suspend fun reportPlan(planId: String) {
+        return try {
+            planApi.reportPlan(
+                jsonOf(
+                    KEY_PLAN_ID to planId,
+                    KEY_REASON to "",
+                )
+            )
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+    }
+
     companion object {
         private const val KEY_QUERY = "query"
         private const val KEY_MEETING_ID = "meetId"
@@ -130,5 +151,6 @@ internal class PlanRemoteDataSourceImpl @Inject constructor(
         private const val KEY_Y_POINT = "y"
         private const val KEY_LOT = "lot"
         private const val KEY_LAT = "lat"
+        private const val KEY_REASON = "reason"
     }
 }

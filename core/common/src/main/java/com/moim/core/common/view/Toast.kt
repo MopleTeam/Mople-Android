@@ -12,6 +12,8 @@ enum class ToastMessage(@StringRes val messageRes: Int) {
     CommentErrorMessage(R.string.plan_detail_comment_error),
     EmptyPlanErrorMessage(R.string.home_new_plan_created_not),
     SocialLoginErrorMessage(R.string.sign_in_kakao_fail),
+
+    ReportCompletedMessage(R.string.plan_detail_report_completed)
 }
 
 fun showToast(context: Context, message: ToastMessage) {

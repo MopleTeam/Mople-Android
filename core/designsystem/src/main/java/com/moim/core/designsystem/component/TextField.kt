@@ -55,6 +55,7 @@ fun MoimTextField(
     supportText: String? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     imeAction: ImeAction = ImeAction.Done,
     keyboardType: KeyboardType = KeyboardType.Text,
@@ -93,6 +94,7 @@ fun MoimTextField(
         },
         colors = textFieldColors,
         value = dummyText,
+        enabled = enabled,
         onValueChange = {
             dummyText = it.take(textMaxLength)
             onTextChanged(dummyText)
@@ -157,6 +159,7 @@ private fun MoimTextFieldPreview() {
             MoimTextField(
                 hintText = "아이디",
                 text = "Test-User",
+                enabled = false,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Person,

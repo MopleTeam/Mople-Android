@@ -35,22 +35,30 @@ internal class ReviewRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun submitReviewFeedReport(reviewId: String, reason: String) {
+    override suspend fun deleteReviewImage(reviewId: String, images: List<String>) {
         return try {
-            reviewApi.submitReviewFeedReport(
-                jsonOf(
-                    KEY_REVIEW_ID to reviewId,
-                    KEY_REASON to reason
-                )
-            )
+            reviewApi.deleteReviewImage(reviewId, jsonOf(KEY_REVIEW_IMAGES to images))
         } catch (e: Exception) {
             throw converterException(e)
         }
     }
 
-    override suspend fun deleteReviewImage(reviewId: String, images: List<String>) {
+    override suspend fun deleteReview(reviewId: String) {
         return try {
-            reviewApi.deleteReviewImage(reviewId, jsonOf(KEY_REVIEW_IMAGES to images))
+            reviewApi.deleteReview(reviewId)
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+    }
+
+    override suspend fun reportReview(reviewId: String) {
+        return try {
+            reviewApi.reportReview(
+                jsonOf(
+                    KEY_REVIEW_ID to reviewId,
+                    KEY_REASON to ""
+                )
+            )
         } catch (e: Exception) {
             throw converterException(e)
         }

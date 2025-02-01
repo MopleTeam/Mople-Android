@@ -189,7 +189,7 @@ private fun PlanWriteScreenPreview() {
     MoimTheme {
         PlanWriteScreen(
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
-            uiState = PlanWriteUiState.PlanWrite()
+            uiState = PlanWriteUiState.PlanWrite(),
         )
     }
 }

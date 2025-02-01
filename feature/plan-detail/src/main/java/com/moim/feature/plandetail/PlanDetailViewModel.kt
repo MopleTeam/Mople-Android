@@ -2,6 +2,9 @@ package com.moim.feature.plandetail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.moim.core.common.delegate.PlanAction
+import com.moim.core.common.delegate.PlanViewModelDelegate
+import com.moim.core.common.delegate.planStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
@@ -15,21 +18,21 @@ import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
+import com.moim.core.domain.usecase.GetPlanItemUseCase
 import com.moim.core.model.Comment
-import com.moim.core.model.Plan
-import com.moim.core.model.Review
 import com.moim.core.model.User
-import com.moim.feature.plandetail.model.PlanDetailUiModel
-import com.moim.feature.plandetail.model.createDetailUiModel
+import com.moim.core.model.item.PlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,8 +41,10 @@ class PlanDetailViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val planRepository: PlanRepository,
     private val reviewRepository: ReviewRepository,
-    private val commentRepository: CommentRepository
-) : BaseViewModel() {
+    private val commentRepository: CommentRepository,
+    private val getPlanItemUseCase: GetPlanItemUseCase,
+    planViewModelDelegate: PlanViewModelDelegate
+) : BaseViewModel(), PlanViewModelDelegate by planViewModelDelegate {
 
     private val postId
         get() = savedStateHandle.get<String>(KEY_POST_ID) ?: ""
@@ -49,15 +54,16 @@ class PlanDetailViewModel @Inject constructor(
 
     private val planId = savedStateHandle.getStateFlow<String?>(KEY_PLAN_ID, null)
 
-    private val planResult = loadDataSignal
-        .flatMapLatest {
+    private val planReceiver = planAction.planStateIn(viewModelScope)
+
+    private val planResult =
+        loadDataSignal.flatMapLatest {
             combine(
                 userRepository.getUser(),
-                (if (isPlan) planRepository.getPlan(postId) else reviewRepository.getReview(postId)),
+                getPlanItemUseCase(GetPlanItemUseCase.Params(postId, isPlan)),
                 ::Pair
             ).asResult()
-        }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+        }.stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     private val commentResult = planId
         .filterNotNull()
@@ -72,18 +78,9 @@ class PlanDetailViewModel @Inject constructor(
                         is Result.Loading -> setUiState(PlanDetailUiState.Loading)
                         is Result.Success -> {
                             val (user, post) = result.data
-
-                            val uiState = when (post) {
-                                is Plan -> PlanDetailUiState.Success(user, post.createDetailUiModel())
-                                is Review -> PlanDetailUiState.Success(user, post.createDetailUiModel())
-                                else -> PlanDetailUiState.Error
-                            }
-
+                            val uiState = PlanDetailUiState.Success(user, post)
                             setUiState(uiState)
-
-                            if (uiState is PlanDetailUiState.Success) {
-                                savedStateHandle[KEY_PLAN_ID] = uiState.planDetail.postId
-                            }
+                            savedStateHandle[KEY_PLAN_ID] = uiState.planItem.postId
                         }
 
                         is Result.Error -> setUiState(PlanDetailUiState.Error)
@@ -102,6 +99,12 @@ class PlanDetailViewModel @Inject constructor(
                     }
                 }
             }
+
+            launch {
+                planReceiver.filterIsInstance<PlanAction.PlanUpdate>().collect {
+                    onRefresh()
+                }
+            }
         }
     }
 
@@ -109,19 +112,59 @@ class PlanDetailViewModel @Inject constructor(
         when (uiAction) {
             is PlanDetailUiAction.OnClickBack -> setUiEvent(PlanDetailUiEvent.NavigateToBack)
             is PlanDetailUiAction.OnClickRefresh -> onRefresh()
-            is PlanDetailUiAction.OnClickParticipants -> {}
-            is PlanDetailUiAction.OnClickPlanDelete -> {}
-            is PlanDetailUiAction.OnClickPlanUpdate -> {}
-            is PlanDetailUiAction.OnClickPlanReport -> {}
+            is PlanDetailUiAction.OnClickParticipants -> navigateToParticipants()
+            is PlanDetailUiAction.OnClickPlanUpdate -> navigateToPlanWrite()
+            is PlanDetailUiAction.OnClickPlanDelete -> deletePlan()
+            is PlanDetailUiAction.OnClickPlanReport -> reportPlan()
             is PlanDetailUiAction.OnClickCommentUpload -> uploadComment(uiAction.commentText, uiAction.updateComment)
-            is PlanDetailUiAction.OnClickCommentReport -> {}
+            is PlanDetailUiAction.OnClickCommentReport -> reportComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentUpdate -> {}
-            is PlanDetailUiAction.OnClickCommentDelete -> {}
+            is PlanDetailUiAction.OnClickCommentDelete -> deleteComment(uiAction.comment)
             is PlanDetailUiAction.OnShowReviewImageCropDialog -> showPlanDetailImageCropDialog(uiAction.isShow, uiAction.selectedImageIndex)
             is PlanDetailUiAction.OnShowPlanEditDialog -> showPlanEditDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanReportDialog -> showPlanReportDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowCommentEditDialog -> showCommentEditDialog(uiAction.isShow, uiAction.comment)
             is PlanDetailUiAction.OnShowCommentReportDialog -> showCommentReportDialog(uiAction.isShow, uiAction.comment)
+        }
+    }
+
+    private fun reportPlan() {
+        viewModelScope.launch {
+            uiState.checkState<PlanDetailUiState.Success> {
+                if (planItem.isPlanAtBefore) {
+                    planRepository.reportPlan(planId = planItem.postId)
+                } else {
+                    reviewRepository.reportReview(reviewId = planItem.postId)
+                }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
+                    when (result) {
+                        is Result.Loading -> return@collect
+                        is Result.Success -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.ReportCompletedMessage))
+                        is Result.Error -> showErrorToast(result.exception)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun deletePlan() {
+        viewModelScope.launch {
+            uiState.checkState<PlanDetailUiState.Success> {
+                if (planItem.isPlanAtBefore) {
+                    planRepository.deletePlan(planId = planItem.postId)
+                } else {
+                    reviewRepository.deleteReview(reviewId = planItem.postId)
+                }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
+                    when (result) {
+                        is Result.Loading -> return@collect
+                        is Result.Success -> {
+                            deletePlan(ZonedDateTime.now(), planItem.postId)
+                            setUiEvent(PlanDetailUiEvent.NavigateToBack)
+                        }
+
+                        is Result.Error -> showErrorToast(result.exception)
+                    }
+                }
+            }
         }
     }
 
@@ -138,20 +181,53 @@ class PlanDetailViewModel @Inject constructor(
                     )
                 } else {
                     commentRepository.createComment(
-                        postId = postId,
+                        postId = planItem.postId,
                         content = content.trim()
                     )
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                     when (result) {
                         is Result.Loading -> return@collect
                         is Result.Success -> setUiState(copy(comments = result.data))
-                        is Result.Error -> when (result.exception) {
-                            is IOException -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                            is NetworkException -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                        }
+                        is Result.Error -> showErrorToast(result.exception)
                     }
                 }
             }
+        }
+    }
+
+    private fun deleteComment(comment: Comment) {
+        viewModelScope.launch {
+            commentRepository
+                .deleteComment(comment.commentId)
+                .asResult()
+                .onEach { setLoading(it is Result.Loading) }
+                .collect { result ->
+                    uiState.checkState<PlanDetailUiState.Success> {
+                        when (result) {
+                            is Result.Loading -> return@collect
+                            is Result.Success -> setUiState(copy(comments = comments.toMutableList().apply { remove(comment) }))
+                            is Result.Error -> showErrorToast(result.exception)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun reportComment(comment: Comment) {
+        viewModelScope.launch {
+            commentRepository
+                .reportComment(commentId = comment.commentId)
+                .asResult()
+                .onEach { setLoading(it is Result.Loading) }
+                .collect { result ->
+                    uiState.checkState<PlanDetailUiState.Success> {
+                        when (result) {
+                            is Result.Loading -> return@collect
+                            is Result.Success -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.ReportCompletedMessage))
+                            is Result.Error -> showErrorToast(result.exception)
+                        }
+                    }
+                }
         }
     }
 
@@ -185,6 +261,25 @@ class PlanDetailViewModel @Inject constructor(
         }
     }
 
+    private fun showErrorToast(exception: Throwable) {
+        when (exception) {
+            is IOException -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+            is NetworkException -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+        }
+    }
+
+    private fun navigateToPlanWrite() {
+        uiState.checkState<PlanDetailUiState.Success> {
+            setUiEvent(PlanDetailUiEvent.NavigateToPlanWrite(planItem))
+        }
+    }
+
+    private fun navigateToParticipants() {
+        uiState.checkState<PlanDetailUiState.Success> {
+            setUiEvent(PlanDetailUiEvent.NavigateToParticipants(planItem.postId, planItem.isPlanAtBefore))
+        }
+    }
+
     companion object {
         private const val KEY_PLAN_ID = "planId"
         private const val KEY_POST_ID = "postId"
@@ -197,7 +292,7 @@ sealed interface PlanDetailUiState : UiState {
 
     data class Success(
         val user: User,
-        val planDetail: PlanDetailUiModel,
+        val planItem: PlanItem,
         val comments: List<Comment> = emptyList(),
         val selectedImageIndex: Int = 0,
         val selectedComment: Comment? = null,
@@ -231,7 +326,7 @@ sealed interface PlanDetailUiAction : UiAction {
 
 sealed interface PlanDetailUiEvent : UiEvent {
     data object NavigateToBack : PlanDetailUiEvent
-    data class NavigateToParticipants(val postId: String) : PlanDetailUiEvent
-    data class NavigateToPlanWrite(val plan: Plan) : PlanDetailUiEvent
+    data class NavigateToParticipants(val postId: String, val isPlan: Boolean) : PlanDetailUiEvent
+    data class NavigateToPlanWrite(val planItem: PlanItem) : PlanDetailUiEvent
     data class ShowToastMessage(val message: ToastMessage) : PlanDetailUiEvent
 }

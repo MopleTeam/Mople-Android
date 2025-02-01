@@ -10,12 +10,13 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
+import com.moim.core.model.item.PlanItem
 import com.moim.core.route.DetailRoute
 
 fun NavGraphBuilder.meetingDetailScreen(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToPlanWrite: (Plan) -> Unit,
+    navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToPlanDetail: (String, Boolean) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit
 ) {

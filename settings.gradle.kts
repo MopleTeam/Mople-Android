@@ -34,6 +34,7 @@ include(":core:data")
 include(":core:data-model")
 include(":core:model")
 include(":core:common")
+include(":core:domain")
 
 include(":feature:intro")
 include(":feature:main")

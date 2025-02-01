@@ -32,6 +32,8 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
+import com.moim.core.model.item.PlanItem
+import com.moim.core.model.item.asPlanItem
 import com.moim.feature.meetingdetail.ui.MeetingDetailHeader
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanContent
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanEmpty
@@ -43,7 +45,7 @@ fun MeetingDetailRoute(
     padding: PaddingValues,
     viewModel: MeetingDetailViewModel = hiltViewModel(),
     navigateToBack: () -> Unit,
-    navigateToPlanWrite: (Plan) -> Unit,
+    navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToPlanDetail: (String, Boolean) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit
 ) {
@@ -57,7 +59,7 @@ fun MeetingDetailRoute(
             is MeetingDetailUiEvent.NavigateToBack -> navigateToBack()
             is MeetingDetailUiEvent.NavigateToMeetingSetting -> navigateToMeetingSetting(event.meeting)
             is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
-            is MeetingDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan)
+            is MeetingDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan.asPlanItem())
             is MeetingDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }

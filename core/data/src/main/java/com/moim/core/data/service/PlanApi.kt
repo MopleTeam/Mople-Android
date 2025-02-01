@@ -4,6 +4,7 @@ import com.moim.core.datamodel.MeetingPlanContainerResponse
 import com.moim.core.datamodel.PlanResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -33,4 +34,10 @@ internal interface PlanApi {
 
     @PATCH("/plan/update")
     suspend fun updatePlan(@Body params: JsonObject): PlanResponse
+
+    @POST("/plan/report")
+    suspend fun reportPlan(@Body params: JsonObject)
+
+    @DELETE("plan/{planId}")
+    suspend fun deletePlan(@Path("planId") id: String)
 }

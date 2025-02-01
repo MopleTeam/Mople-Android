@@ -12,7 +12,7 @@ internal class ReviewRepositoryImpl @Inject constructor(
     private val remoteDataSource: ReviewRemoteDataSource
 ) : ReviewRepository {
 
-    override fun getReviews(meetingId: String)= flow {
+    override fun getReviews(meetingId: String) = flow {
         emit(remoteDataSource.getReviews(meetingId).map(ReviewResponse::asItem))
     }
 
@@ -20,15 +20,19 @@ internal class ReviewRepositoryImpl @Inject constructor(
         emit(remoteDataSource.getReview(reviewId).asItem())
     }
 
-    override fun getReviewParticipant(reviewId: String)= flow {
+    override fun getReviewParticipant(reviewId: String) = flow {
         emit(remoteDataSource.getReviewParticipant(reviewId).map(MemberResponse::asItem))
-    }
-
-    override fun submitReviewFeedReport(reviewId: String, reason: String): Flow<Unit> = flow {
-        emit(remoteDataSource.submitReviewFeedReport(reviewId, reason))
     }
 
     override fun deleteReviewImage(reviewId: String, images: List<String>): Flow<Unit> = flow {
         emit(remoteDataSource.deleteReviewImage(reviewId, images))
+    }
+
+    override fun deleteReview(reviewId: String) = flow {
+        emit(remoteDataSource.deleteReview(reviewId))
+    }
+
+    override fun reportReview(reviewId: String) = flow {
+        emit(remoteDataSource.reportReview(reviewId))
     }
 }

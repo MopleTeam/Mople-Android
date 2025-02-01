@@ -28,7 +28,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         emit(remoteDataSource.deleteComment(commentId))
     }
 
-    override fun reportComment(commentId: String, reason: String): Flow<Unit> = flow {
-        emit(remoteDataSource.reportComment(commentId, reason))
+    override fun reportComment(commentId: String): Flow<Unit> = flow {
+        emit(remoteDataSource.reportComment(commentId))
     }
 }

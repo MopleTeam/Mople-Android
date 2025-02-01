@@ -20,10 +20,12 @@ internal interface ReviewApi {
     @GET("/review/participant/{reviewId}")
     suspend fun getReviewParticipant(@Path("reviewId") id: String): List<MemberResponse>
 
-    @POST("review/report")
-    suspend fun submitReviewFeedReport(@Body params: JsonObject)
-
     @DELETE("/review/images/{reviewId}")
     suspend fun deleteReviewImage(@Path("reviewId") id: String, @Body params: JsonObject)
 
+    @DELETE("review/{reviewId}")
+    suspend fun deleteReview(@Path("reviewId") id: String)
+
+    @POST("review/report")
+    suspend fun reportReview(@Body params: JsonObject)
 }

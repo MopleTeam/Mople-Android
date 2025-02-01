@@ -50,12 +50,10 @@ fun MeetingWriteImage(
                         .onSingleClick { onUiAction(MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(true)) }
                 ) {
                     Icon(
-                        modifier = Modifier
-                            .padding(20.dp)
-                            .align(Alignment.Center),
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_empty_image),
+                        modifier = Modifier.align(Alignment.Center),
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_empty_meeting),
                         contentDescription = "",
-                        tint = MoimTheme.colors.icon
+                        tint = Color.Unspecified
                     )
                 }
             } else {

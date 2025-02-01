@@ -48,12 +48,12 @@ internal class CommentRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun reportComment(commentId: String, reason: String) {
+    override suspend fun reportComment(commentId: String) {
         return try {
             commentApi.reportComment(
                 params = jsonOf(
                     KEY_COMMENT_ID to commentId,
-                    KEY_REASON to reason
+                    KEY_REASON to ""
                 )
             )
         } catch (e: Exception) {

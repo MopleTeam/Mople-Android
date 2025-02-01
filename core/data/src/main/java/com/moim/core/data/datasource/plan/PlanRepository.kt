@@ -42,4 +42,12 @@ interface PlanRepository {
         longitude: Double,
         latitude: Double,
     ): Flow<Plan>
+
+    fun deletePlan(
+        planId: String
+    ) : Flow<Unit>
+
+    fun reportPlan(
+        planId: String
+    ) : Flow<Unit>
 }

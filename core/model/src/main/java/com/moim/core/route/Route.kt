@@ -2,8 +2,8 @@ package com.moim.core.route
 
 import com.moim.core.model.Meeting
 import com.moim.core.model.MeetingType
-import com.moim.core.model.Plan
-import com.moim.core.model.PlanType
+import com.moim.core.model.item.PlanItem
+import com.moim.core.model.item.PlanItemType
 import kotlinx.serialization.Serializable
 import kotlin.reflect.typeOf
 
@@ -65,9 +65,9 @@ sealed interface DetailRoute : Route {
     ) : DetailRoute
 
     @Serializable
-    data class PlanWrite(val plan: Plan? = null) : DetailRoute {
+    data class PlanWrite(val plan: PlanItem? = null) : DetailRoute {
         companion object {
-            val typeMap = mapOf(typeOf<Plan?>() to PlanType)
+            val typeMap = mapOf(typeOf<PlanItem?>() to PlanItemType)
         }
     }
 

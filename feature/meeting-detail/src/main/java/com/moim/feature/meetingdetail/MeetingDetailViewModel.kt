@@ -6,6 +6,8 @@ import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.PlanAction
 import com.moim.core.common.delegate.PlanViewModelDelegate
+import com.moim.core.common.delegate.meetingStateIn
+import com.moim.core.common.delegate.planStateIn
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseZonedDateTimeForDateString
@@ -45,11 +47,8 @@ class MeetingDetailViewModel @Inject constructor(
     private val meetingId
         get() = savedStateHandle.get<String>(KEY_MEETING_ID) ?: ""
 
-    private val meetingActionReceiver = meetingAction
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MeetingAction.None)
-
-    private val planActionReceiver = planAction
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PlanAction.None)
+    private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
+    private val planActionReceiver = planAction.planStateIn(viewModelScope)
 
     private val meetingDetailResult = loadDataSignal
         .flatMapLatest {

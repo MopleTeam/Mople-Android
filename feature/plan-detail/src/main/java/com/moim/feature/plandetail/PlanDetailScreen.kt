@@ -25,7 +25,7 @@ import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.Plan
+import com.moim.core.model.item.PlanItem
 import com.moim.feature.plandetail.ui.PlanDetailBottomBar
 import com.moim.feature.plandetail.ui.PlanDetailCommentEditDialog
 import com.moim.feature.plandetail.ui.PlanDetailCommentHeader
@@ -45,7 +45,7 @@ fun PlanDetailRoute(
     viewModel: PlanDetailViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToPlanWrite: (Plan) -> Unit
+    navigateToPlanWrite: (PlanItem) -> Unit
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -56,7 +56,7 @@ fun PlanDetailRoute(
         when (event) {
             is PlanDetailUiEvent.NavigateToBack -> navigateToBack()
             is PlanDetailUiEvent.NavigateToParticipants -> {}
-            is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan)
+            is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.planItem)
             is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
@@ -91,7 +91,7 @@ fun PlanDetailScreen(
             .imePadding(),
         topBar = {
             PlanDetailTopAppbar(
-                isMyPlan = uiState.user.userId == uiState.planDetail.userId,
+                isMyPlan = uiState.user.userId == uiState.planItem.userId,
                 onUiAction = onUiAction
             )
         },
@@ -103,7 +103,7 @@ fun PlanDetailScreen(
             ) {
                 item {
                     PlanDetailContent(
-                        planDetail = uiState.planDetail,
+                        planItem = uiState.planItem,
                         onUiAction = onUiAction
                     )
                 }
@@ -114,7 +114,7 @@ fun PlanDetailScreen(
 
                 item {
                     PlanDetailReviewImages(
-                        images = uiState.planDetail.images,
+                        images = uiState.planItem.images,
                         onUiAction = onUiAction
                     )
                 }
@@ -151,7 +151,7 @@ fun PlanDetailScreen(
 
     if (uiState.isShowReviewImageCropDialog) {
         PlanDetailImageCropDialog(
-            images = uiState.planDetail.images,
+            images = uiState.planItem.images,
             selectedIndex = uiState.selectedImageIndex,
             onUiAction = onUiAction
         )

@@ -41,4 +41,8 @@ internal interface PlanRemoteDataSource {
         longitude: Double,
         latitude: Double,
     ): PlanResponse
+
+    suspend fun deletePlan(planId: String)
+
+    suspend fun reportPlan(planId: String)
 }

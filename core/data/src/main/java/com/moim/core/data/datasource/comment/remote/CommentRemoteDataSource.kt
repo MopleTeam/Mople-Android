@@ -18,5 +18,5 @@ internal interface CommentRemoteDataSource {
 
     suspend fun deleteComment(commentId: String)
 
-    suspend fun reportComment(commentId: String, reason: String)
+    suspend fun reportComment(commentId: String)
 }

@@ -49,7 +49,7 @@ fun PlanWriteSelectedBox(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
-                .background(MoimTheme.colors.bg.input)
+                .background(if (enable) MoimTheme.colors.bg.input else MoimTheme.colors.input.disable)
                 .onSingleClick(
                     onClick = onClick,
                     enabled = enable
@@ -57,12 +57,13 @@ fun PlanWriteSelectedBox(
                 .padding(horizontal = 16.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             if (iconRes != null) {
                 Icon(
                     modifier = Modifier.size(20.dp),
                     imageVector = ImageVector.vectorResource(iconRes),
                     contentDescription = "",
-                    tint = MoimTheme.colors.icon
+                    tint = if (enable) MoimTheme.colors.icon else MoimTheme.colors.gray.gray06
                 )
                 Spacer(Modifier.width(16.dp))
             }
@@ -90,6 +91,7 @@ private fun PlanWriteSelectedBoxPreview() {
             PlanWriteSelectedBox(
                 titleText = "날짜 선택",
                 hintText = "날짜를 선택해주세요",
+                enable = false,
                 iconRes = R.drawable.ic_calendar,
                 onClick = {},
             )
