@@ -1,8 +1,10 @@
 package com.moim.feature.alarmsetting
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -44,6 +46,7 @@ import com.moim.core.designsystem.component.MoimSwitch
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
+import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import kotlinx.coroutines.delay
 
@@ -68,10 +71,24 @@ fun AlarmSettingRoute(
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
         isPostNotificationPermission = result
     }
+    val settingLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+        isPostNotificationPermission = result
+    }
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is AlarmSettingUiEvent.NavigateToBack -> navigateToBack()
+
+            is AlarmSettingUiEvent.NavigateToSystemSetting -> {
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply { putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName) }
+                settingLauncher.launch(intent)
+            }
+
             is AlarmSettingUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
@@ -80,10 +97,6 @@ fun AlarmSettingRoute(
         if (isPostNotificationPermission.not() && Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
             delay(2000)
             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            isPostNotificationPermission = mutableStateOf(ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED).value
         }
     }
 
@@ -121,7 +134,7 @@ fun AlarmSettingScreen(
             onClickNavigate = { onUiAction(AlarmSettingUiAction.OnClickBack) }
         )
         if (isPostNotificationPermission.not()) {
-            AlarmSettingPermissionItem()
+            AlarmSettingPermissionItem(onUiAction = onUiAction)
         }
 
         Spacer(Modifier.height(8.dp))
@@ -146,6 +159,7 @@ fun AlarmSettingScreen(
 @Composable
 private fun AlarmSettingPermissionItem(
     modifier: Modifier = Modifier,
+    onUiAction: (AlarmSettingUiAction) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -153,6 +167,7 @@ private fun AlarmSettingPermissionItem(
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(MoimTheme.colors.bg.input)
+            .onSingleClick { onUiAction(AlarmSettingUiAction.OnClickPermissionRequest) }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center

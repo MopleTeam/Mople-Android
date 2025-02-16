@@ -50,6 +50,7 @@ class AlarmSettingViewModel @Inject constructor(
         when (uiAction) {
             is AlarmSettingUiAction.OnClickBack -> setUiEvent(AlarmSettingUiEvent.NavigateToBack)
             is AlarmSettingUiAction.OnClickRefresh -> onRefresh()
+            is AlarmSettingUiAction.OnClickPermissionRequest -> setUiEvent(AlarmSettingUiEvent.NavigateToSystemSetting)
             is AlarmSettingUiAction.OnChangeMeetingNotify -> setSubscribeNotify(ENABLE_MEET, uiAction.isCheck)
             is AlarmSettingUiAction.OnChangePlanNotify -> setSubscribeNotify(ENABLE_PLAN, uiAction.isCheck)
         }
@@ -107,11 +108,13 @@ sealed interface AlarmSettingUiState : UiState {
 sealed interface AlarmSettingUiAction : UiAction {
     data object OnClickBack : AlarmSettingUiAction
     data object OnClickRefresh : AlarmSettingUiAction
+    data object OnClickPermissionRequest : AlarmSettingUiAction
     data class OnChangeMeetingNotify(val isCheck: Boolean) : AlarmSettingUiAction
     data class OnChangePlanNotify(val isCheck: Boolean) : AlarmSettingUiAction
 }
 
 sealed interface AlarmSettingUiEvent : UiEvent {
     data object NavigateToBack : AlarmSettingUiEvent
+    data object NavigateToSystemSetting : AlarmSettingUiEvent
     data class ShowToastMessage(val message: ToastMessage) : AlarmSettingUiEvent
 }
