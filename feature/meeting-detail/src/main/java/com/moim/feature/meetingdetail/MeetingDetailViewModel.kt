@@ -126,11 +126,7 @@ class MeetingDetailViewModel @Inject constructor(
                                     set(index, action.plan)
                                 }
 
-                                setUiState(
-                                    copy(
-                                        plans = plans
-                                    )
-                                )
+                                setUiState(copy(plans = plans))
                             }
 
                             is PlanAction.PlanDelete -> setUiState(
@@ -141,7 +137,6 @@ class MeetingDetailViewModel @Inject constructor(
                                     }
                                 )
                             )
-
 
                             is PlanAction.PlanInvalidate -> onRefresh()
 

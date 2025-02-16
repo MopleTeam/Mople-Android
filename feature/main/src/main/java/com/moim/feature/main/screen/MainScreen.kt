@@ -52,7 +52,7 @@ fun MainScreen(
                     navigateToMeetingWrite = navigator.navController::navigateToMeetingWrite,
                     navigateToPlanWrite = navigator.navController::navigateToPlanWrite,
                     navigateToCalendar = { navigator.navigate(MainTab.Calendar) },
-                    navigateToMeetingDetail = navigator.navController::navigateToMeetingDetail,
+                    navigateToPlanDetail = navigator.navController::navigateToPlanDetail,
                 )
                 meetingScreen(
                     padding = innerPadding,

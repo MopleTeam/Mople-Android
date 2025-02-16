@@ -67,7 +67,7 @@ fun HomeRoute(
     navigateToMeetingWrite: () -> Unit = {},
     navigateToPlanWrite: () -> Unit = {},
     navigateToCalendar: () -> Unit = {},
-    navigateToMeetingDetail: (String) -> Unit = {},
+    navigateToPlanDetail: (String, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -91,7 +91,7 @@ fun HomeRoute(
             is HomeUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite()
             is HomeUiEvent.NavigateToPlanWrite -> navigateToPlanWrite()
             is HomeUiEvent.NavigateToCalendar -> navigateToCalendar()
-            is HomeUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
+            is HomeUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.planId, event.isPlan)
             is HomeUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }

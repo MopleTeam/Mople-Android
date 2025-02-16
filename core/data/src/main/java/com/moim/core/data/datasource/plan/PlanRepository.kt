@@ -3,6 +3,7 @@ package com.moim.core.data.datasource.plan
 import com.moim.core.model.MeetingPlanContainer
 import com.moim.core.model.Place
 import com.moim.core.model.Plan
+import com.moim.core.model.PlanReviewContainer
 import kotlinx.coroutines.flow.Flow
 
 interface PlanRepository {
@@ -14,10 +15,8 @@ interface PlanRepository {
     fun getPlans(meetingId: String): Flow<List<Plan>>
 
     fun getPlansForCalendar(
-        page: Int,
-        yearAndMonth: String,
-        isClosed: Boolean
-    ): Flow<List<Plan>>
+        date: String
+    ): Flow<PlanReviewContainer>
 
     fun getSearchPlace(
         keyword: String,
@@ -45,9 +44,9 @@ interface PlanRepository {
 
     fun deletePlan(
         planId: String
-    ) : Flow<Unit>
+    ): Flow<Unit>
 
     fun reportPlan(
         planId: String
-    ) : Flow<Unit>
+    ): Flow<Unit>
 }

@@ -29,7 +29,7 @@ fun HomePlanMoreCard(
 ) {
     MoimCard(
         modifier = modifier.fillMaxHeight(),
-        onClick = { onUiAction(HomeUiAction.OnClickMeetingMore) }
+        onClick = { onUiAction(HomeUiAction.OnClickPlanMore) }
     ) {
         Column(
             modifier = Modifier

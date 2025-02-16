@@ -7,6 +7,7 @@ import com.moim.core.data.util.converterException
 import com.moim.core.datamodel.MeetingPlanContainerResponse
 import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.datamodel.PlanResponse
+import com.moim.core.datamodel.PlanReviewContainerResponse
 import javax.inject.Inject
 
 internal class PlanRemoteDataSourceImpl @Inject constructor(
@@ -38,13 +39,9 @@ internal class PlanRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getPlansForCalendar(
-        page: Int,
-        yearAndMonth: String,
-        isClosed: Boolean
-    ): List<PlanResponse> {
+    override suspend fun getPlansForCalendar(date: String): PlanReviewContainerResponse {
         return try {
-            planApi.getPlansForCalendar(page = page, yearMonth = yearAndMonth, isClosed = isClosed)
+            planApi.getPlansForCalendar(date)
         } catch (e: Exception) {
             throw converterException(e)
         }

@@ -41,7 +41,7 @@ fun getLongFormatZonedDateTime(epochMilli: Long): ZonedDateTime {
 }
 
 fun getZonedDateTimeDefault(zonedDateTime: ZonedDateTime = ZonedDateTime.now()): ZonedDateTime {
-    return zonedDateTime.withHour(0).withMinute(0).withSecond(0).withNano(0)
+    return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).withHour(0).withMinute(0).withSecond(0).withNano(0)
 }
 
 fun getDateTimeBetweenDay(startDate: ZonedDateTime? = null, endDate: ZonedDateTime? = null): Int {
@@ -52,20 +52,20 @@ fun getDateTimeBetweenDay(startDate: ZonedDateTime? = null, endDate: ZonedDateTi
 
 fun String?.parseZonedDateTime(): ZonedDateTime {
     val zonedDateTime = this?.let { ZonedDateTime.parse(this) } ?: ZonedDateTime.now()
-    return zonedDateTime
+    return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault())
 }
 
 fun ZonedDateTime?.parseDateString(): String {
     val zonedDateTime = this ?: ZonedDateTime.now()
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-    return zonedDateTime.format(formatter)
+    return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).format(formatter)
 }
 
 fun String?.parseZonedDateTimeForDateString(): ZonedDateTime {
     return try {
         val formatterWithTimezone = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssXXX")
-        ZonedDateTime.parse("$this+09:00", formatterWithTimezone)
+        ZonedDateTime.parse("$this+09:00", formatterWithTimezone).withZoneSameInstant(ZoneId.systemDefault())
     } catch (e: Exception) {
         ZonedDateTime.now()
     }
@@ -77,5 +77,5 @@ fun LocalDate.parseZonedDateTime(): ZonedDateTime {
 }
 
 fun ZonedDateTime.default(): ZonedDateTime {
-    return this.withHour(0).withMinute(0).withSecond(0).withNano(0)
+    return this.withZoneSameInstant(ZoneId.systemDefault()).withHour(0).withMinute(0).withSecond(0).withNano(0)
 }

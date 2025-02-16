@@ -2,6 +2,7 @@ package com.moim.core.data.service
 
 import com.moim.core.datamodel.MeetingPlanContainerResponse
 import com.moim.core.datamodel.PlanResponse
+import com.moim.core.datamodel.PlanReviewContainerResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -19,12 +20,10 @@ internal interface PlanApi {
     @GET("/plan/list/{meetId}")
     suspend fun getPlans(@Path("meetId") id: String): List<PlanResponse>
 
-    @GET("/plan/plans")
+    @GET("/plan/page")
     suspend fun getPlansForCalendar(
-        @Query("page") page: Int,
-        @Query("yearMonth") yearMonth: String,
-        @Query("closed") isClosed: Boolean,
-    ): List<PlanResponse>
+        @Query("date") date: String,
+    ): PlanReviewContainerResponse
 
     @GET("/plan/detail/{planId}")
     suspend fun getPlan(@Path("planId") planId: String): PlanResponse

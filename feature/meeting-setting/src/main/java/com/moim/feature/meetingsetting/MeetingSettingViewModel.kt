@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.PlanViewModelDelegate
+import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
@@ -20,10 +21,9 @@ import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.model.Meeting
 import com.moim.core.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.ZonedDateTime
@@ -45,8 +45,7 @@ class MeetingSettingViewModel @Inject constructor(
             .toRoute<DetailRoute.MeetingSetting>(DetailRoute.MeetingSetting.typeMap)
             .meeting
 
-    private val meetingActionReceiver = meetingAction
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MeetingAction.None)
+    private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
 
     init {
         viewModelScope.launch {
@@ -62,13 +61,13 @@ class MeetingSettingViewModel @Inject constructor(
             }
 
             launch {
-                meetingActionReceiver.collect { action ->
-                    uiState.checkState<MeetingSettingUiState.MeetingSetting> {
-                        if (action is MeetingAction.MeetingUpdate) {
+                meetingActionReceiver
+                    .filterIsInstance<MeetingAction.MeetingUpdate>()
+                    .collect { action ->
+                        uiState.checkState<MeetingSettingUiState.MeetingSetting> {
                             setUiState(copy(meeting = action.meeting))
                         }
                     }
-                }
             }
         }
     }

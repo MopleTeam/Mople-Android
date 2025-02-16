@@ -3,6 +3,7 @@ package com.moim.core.data.datasource.plan.remote
 import com.moim.core.datamodel.MeetingPlanContainerResponse
 import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.datamodel.PlanResponse
+import com.moim.core.datamodel.PlanReviewContainerResponse
 
 internal interface PlanRemoteDataSource {
 
@@ -13,10 +14,8 @@ internal interface PlanRemoteDataSource {
     suspend fun getCurrentPlan(): MeetingPlanContainerResponse
 
     suspend fun getPlansForCalendar(
-        page: Int,
-        yearAndMonth: String,
-        isClosed: Boolean
-    ): List<PlanResponse>
+        date : String,
+    ): PlanReviewContainerResponse
 
     suspend fun getSearchPlace(
         keyword: String,

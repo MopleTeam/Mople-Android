@@ -29,6 +29,6 @@ data class ReviewResponse(
     val memberCount: Int = 1,
     @SerialName("images")
     val images: List<String> = emptyList(),
-    @SerialName("reviewDateTime")
-    val reviewAt: String,
+    @SerialName("reviewTime")
+    val reviewAt: String = "",
 )

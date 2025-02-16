@@ -45,7 +45,7 @@ fun HomePlanCard(
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(HomeUiAction.OnClickMeeting(meetingId = plan.meetingId)) }
+        onClick = { onUiAction(HomeUiAction.OnClickPlan(planId = plan.planId, isPlan = true)) }
     ) {
         Column(
             modifier = Modifier

@@ -22,23 +22,27 @@ data class PlanItem(
     val address: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
+    val weatherIconUrl: String = "",
+    val temperature: Float = 0f,
     val images: List<String> = emptyList(),
 )
 
 fun Plan.asPlanItem(): PlanItem {
     return PlanItem(
         isPlanAtBefore = true,
-        userId = this.userId,
-        postId = this.planId,
-        meetingId = this.meetingId,
-        meetingName = this.meetingName,
-        meetingImageUrl = this.meetingImageUrl,
-        planName = this.planName,
-        participantsCount = this.planMemberCount,
-        planAt = this.planTime,
-        address = this.planAddress,
-        latitude = this.planLatitude,
-        longitude = this.planLongitude,
+        userId = userId,
+        postId = planId,
+        meetingId = meetingId,
+        meetingName = meetingName,
+        meetingImageUrl = meetingImageUrl,
+        planName = planName,
+        participantsCount = planMemberCount,
+        planAt = planTime,
+        address = planAddress,
+        latitude = planLatitude,
+        longitude = planLongitude,
+        temperature = temperature,
+        weatherIconUrl = weatherIconUrl,
         images = emptyList()
     )
 }
@@ -46,18 +50,18 @@ fun Plan.asPlanItem(): PlanItem {
 fun Review.asPlanItem(): PlanItem {
     return PlanItem(
         isPlanAtBefore = false,
-        userId = this.userId,
-        postId = this.postId,
-        meetingId = this.meetingId,
-        meetingName = this.meetingName,
-        meetingImageUrl = this.meetingImageUrl,
-        planName = this.reviewName,
-        participantsCount = this.memberCount,
-        planAt = this.reviewAt,
-        address = this.address,
-        latitude = this.latitude,
-        longitude = this.longitude,
-        images = this.images
+        userId = userId,
+        postId = reviewId,
+        meetingId = meetingId,
+        meetingName = meetingName,
+        meetingImageUrl = meetingImageUrl,
+        planName = reviewName,
+        participantsCount = memberCount,
+        planAt = reviewAt,
+        address = address,
+        latitude = latitude,
+        longitude = longitude,
+        images = images
     )
 }
 

@@ -4,6 +4,8 @@ import com.moim.core.data.datastore.PreferenceStorage
 import com.moim.core.data.service.AuthTokenApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.Authenticator
 import okhttp3.Interceptor
 import okhttp3.Request
@@ -16,20 +18,24 @@ internal class TokenAuthenticator @Inject constructor(
     private val preferenceStorage: PreferenceStorage,
     private val authTokenApi: AuthTokenApi
 ) : Authenticator {
+    private val mutex: Mutex = Mutex()
 
     override fun authenticate(route: Route?, response: Response): Request? {
         return runBlocking {
-            val refreshToken = preferenceStorage.token.first()?.refreshToken ?: ""
-            try {
-                val token = authTokenApi.getRefreshToken(refreshToken)
-                    .also { preferenceStorage.saveUserToken(it) }
+            mutex.withLock {
+                val refreshToken = preferenceStorage.token.first()?.refreshToken ?: ""
 
-                response.request.newBuilder()
-                    .header("Authorization", token.accessToken.convertToToken())
-                    .build()
-            } catch (e: Exception) {
-                Timber.e("[TokenAuthenticator Exception]:${e.message}")
-                null
+                try {
+                    val token = authTokenApi.getRefreshToken(refreshToken)
+                        .also { preferenceStorage.saveUserToken(it) }
+
+                    response.request.newBuilder()
+                        .header("Authorization", token.accessToken.convertToToken())
+                        .build()
+                } catch (e: Exception) {
+                    Timber.e("[TokenAuthenticator Exception]:${e.message}")
+                    null
+                }
             }
         }
     }

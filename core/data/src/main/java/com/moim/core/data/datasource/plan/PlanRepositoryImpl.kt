@@ -3,6 +3,7 @@ package com.moim.core.data.datasource.plan
 import com.moim.core.data.datasource.plan.remote.PlanRemoteDataSource
 import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.datamodel.PlanResponse
+import com.moim.core.model.PlanReviewContainer
 import com.moim.core.model.asItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -24,8 +25,8 @@ internal class PlanRepositoryImpl @Inject constructor(
         emit(remoteDataSource.getPlan(planId).asItem())
     }
 
-    override fun getPlansForCalendar(page: Int, yearAndMonth: String, isClosed: Boolean) = flow {
-        emit(remoteDataSource.getPlansForCalendar(page, yearAndMonth, isClosed).map(PlanResponse::asItem))
+    override fun getPlansForCalendar(date: String): Flow<PlanReviewContainer> = flow {
+        emit(remoteDataSource.getPlansForCalendar(date).asItem())
     }
 
     override fun getSearchPlace(keyword: String, xPoint: String, yPoint: String) = flow {

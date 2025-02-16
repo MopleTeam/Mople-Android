@@ -35,7 +35,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_F6F8FA
-import com.moim.core.model.Plan
+import com.moim.core.model.item.PlanItem
 import com.moim.feature.calendar.CalendarUiAction
 import com.moim.feature.calendar.OnCalendarUiAction
 import java.time.ZonedDateTime
@@ -44,7 +44,7 @@ import java.time.ZonedDateTime
 fun CalendarPlanContent(
     modifier: Modifier = Modifier,
     selectDate: ZonedDateTime,
-    plans: List<Plan> = emptyList(),
+    plans: List<PlanItem> = emptyList(),
     onUiAction: OnCalendarUiAction = {}
 ) {
     LazyColumn(
@@ -70,7 +70,7 @@ fun CalendarPlanContent(
 
         items(
             items = plans,
-            key = { plan -> plan.planId }
+            key = { plan -> plan.postId }
         ) {
             CalendarPlanItem(
                 plan = it,
@@ -83,12 +83,13 @@ fun CalendarPlanContent(
 @Composable
 fun CalendarPlanItem(
     modifier: Modifier = Modifier,
-    plan: Plan,
+    plan: PlanItem,
     onUiAction: OnCalendarUiAction = {}
 ) {
+
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(CalendarUiAction.OnClickMeetingPlan(postId = plan.meetingId)) }
+        onClick = { onUiAction(CalendarUiAction.OnClickMeetingPlan(postId = plan.postId, isPlan = plan.isPlanAtBefore)) }
     ) {
         Column(
             modifier = Modifier
@@ -97,6 +98,7 @@ fun CalendarPlanItem(
                 .padding(16.dp)
         ) {
             MeetingInfoTopAppbar(
+                meetingImageUrl= plan.meetingImageUrl,
                 groupName = plan.meetingName
             )
             Spacer(Modifier.height(16.dp))
@@ -124,7 +126,7 @@ fun CalendarPlanItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 4.dp),
-                    text = stringResource(R.string.unit_participants_count, plan.planMemberCount),
+                    text = stringResource(R.string.unit_participants_count, plan.participantsCount),
                     style = MoimTheme.typography.body02.medium,
                     color = MoimTheme.colors.gray.gray04,
                 )
@@ -134,8 +136,8 @@ fun CalendarPlanItem(
             MeetingWeatherInfo(
                 modifier = Modifier.align(Alignment.Start),
                 temperature = plan.temperature,
-                address = plan.planAddress,
-                weatherIconUrl = plan.weatherIconUrl
+                address = plan.address,
+                weatherIconUrl = plan.weatherIconUrl,
             )
         }
     }
@@ -144,6 +146,7 @@ fun CalendarPlanItem(
 @Composable
 private fun MeetingInfoTopAppbar(
     modifier: Modifier = Modifier,
+    meetingImageUrl: String,
     groupName: String,
 ) {
     Row(
@@ -154,7 +157,7 @@ private fun MeetingInfoTopAppbar(
             modifier = Modifier
                 .size(28.dp)
                 .clip(RoundedCornerShape(6.dp)),
-            imageUrl = "https://plus.unsplash.com/premium_photo-1670333183316-ab697ddd9b13",
+            imageUrl = meetingImageUrl,
             errorImage = painterResource(R.drawable.ic_empty_meeting)
         )
 

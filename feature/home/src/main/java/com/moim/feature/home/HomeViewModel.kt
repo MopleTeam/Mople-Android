@@ -143,8 +143,8 @@ class HomeViewModel @Inject constructor(
             is HomeUiAction.OnClickAlarm -> setUiEvent(HomeUiEvent.NavigateToAlarm)
             is HomeUiAction.OnClickMeetingWrite -> setUiEvent(HomeUiEvent.NavigateToMeetingWrite)
             is HomeUiAction.OnClickPlanWrite -> navigateToPlanWrite()
-            is HomeUiAction.OnClickMeetingMore -> setUiEvent(HomeUiEvent.NavigateToCalendar)
-            is HomeUiAction.OnClickMeeting -> setUiEvent(HomeUiEvent.NavigateToMeetingDetail(uiAction.meetingId))
+            is HomeUiAction.OnClickPlanMore -> setUiEvent(HomeUiEvent.NavigateToCalendar)
+            is HomeUiAction.OnClickPlan -> setUiEvent(HomeUiEvent.NavigateToPlanDetail(uiAction.planId, uiAction.isPlan))
             is HomeUiAction.OnClickRefresh -> onRefresh()
         }
     }
@@ -175,8 +175,8 @@ sealed interface HomeUiAction : UiAction {
     data object OnClickAlarm : HomeUiAction
     data object OnClickMeetingWrite : HomeUiAction
     data object OnClickPlanWrite : HomeUiAction
-    data object OnClickMeetingMore : HomeUiAction
-    data class OnClickMeeting(val meetingId: String) : HomeUiAction
+    data object OnClickPlanMore : HomeUiAction
+    data class OnClickPlan(val planId: String, val isPlan: Boolean) : HomeUiAction
     data object OnClickRefresh : HomeUiAction
 }
 
@@ -185,6 +185,6 @@ sealed interface HomeUiEvent : UiEvent {
     data object NavigateToMeetingWrite : HomeUiEvent
     data object NavigateToPlanWrite : HomeUiEvent
     data object NavigateToCalendar : HomeUiEvent
-    data class NavigateToMeetingDetail(val meetingId: String) : HomeUiEvent
+    data class NavigateToPlanDetail(val planId: String, val isPlan: Boolean) : HomeUiEvent
     data class ShowToastMessage(val message: ToastMessage) : HomeUiEvent
 }
