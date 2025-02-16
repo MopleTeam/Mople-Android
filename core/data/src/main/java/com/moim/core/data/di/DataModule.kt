@@ -14,6 +14,10 @@ import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.meeting.MeetingRepositoryImpl
 import com.moim.core.data.datasource.meeting.remote.MeetingRemoteDataSource
 import com.moim.core.data.datasource.meeting.remote.MeetingRemoteDataSourceImpl
+import com.moim.core.data.datasource.notification.NotificationRepository
+import com.moim.core.data.datasource.notification.NotificationRepositoryImpl
+import com.moim.core.data.datasource.notification.remote.NotificationDataSource
+import com.moim.core.data.datasource.notification.remote.NotificationDataSourceImpl
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.plan.PlanRepositoryImpl
 import com.moim.core.data.datasource.plan.remote.PlanRemoteDataSource
@@ -102,6 +106,15 @@ internal abstract class DataModule {
     @Singleton
     @Binds
     abstract fun bindCommentRemoteDataSource(commentRemoteDataSourceImpl: CommentRemoteDataSourceImpl): CommentRemoteDataSource
+
+    //================================ Notification ============================================//
+    @Singleton
+    @Binds
+    abstract fun bindNotificationRepository(notificationRepositoryImpl: NotificationRepositoryImpl): NotificationRepository
+
+    @Singleton
+    @Binds
+    abstract fun bindNotificationDataSource(notificationDataSourceImpl: NotificationDataSourceImpl): NotificationDataSource
 
     //================================ Image ============================================//
     @Singleton

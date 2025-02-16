@@ -145,6 +145,14 @@
     <string name="profile_update_regex_error">공백 또는 특수문자는 사용할 수 없습니다.</string>
     <string name="profile_update_hint">닉네임을 입력해주세요</string>
 
+    <!-- AlarmSetting -->
+    <string name="alarm_setting_title">알림 관리</string>
+    <string name="alarm_setting_permission">알람을 활성화하고  일정관리에 도움을 받아보세요</string>
+    <string name="alarm_setting_meeting_notify">모임 알림</string>
+    <string name="alarm_setting_meeting_notify_description">모임에 관련된 알림</string>
+    <string name="alarm_setting_plan_notify">일정 알림</string>
+    <string name="alarm_setting_plan_notify_description">다가오는 일정이나 변동사항에 대한 알림</string>
+
     <!-- Unit -->
     <string name="unit_participants_count">%d명 참여</string>
     <string name="unit_participants_count_short">%d명</string>

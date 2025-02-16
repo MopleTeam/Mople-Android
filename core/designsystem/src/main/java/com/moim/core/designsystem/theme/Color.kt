@@ -1,6 +1,7 @@
 package com.moim.core.designsystem.theme
 
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -116,7 +117,7 @@ fun moimTextFieldColors() = TextFieldDefaults.colors(
     // rightIcon
     focusedTrailingIconColor = MoimTheme.colors.gray.gray01,
     unfocusedTrailingIconColor = MoimTheme.colors.gray.gray01,
-    disabledTrailingIconColor =MoimTheme.colors.gray.gray06,
+    disabledTrailingIconColor = MoimTheme.colors.gray.gray06,
     errorTrailingIconColor = MoimTheme.colors.gray.gray01,
 
     // placeHolder
@@ -137,3 +138,15 @@ fun moimButtomColors() = ButtonDefaults.buttonColors(
     disabledContainerColor = MoimTheme.colors.primary.disable,
     disabledContentColor = MoimTheme.colors.white,
 )
+
+
+@Composable
+fun moimSwitchColors() =
+    SwitchDefaults.colors(
+        checkedThumbColor = MoimTheme.colors.white,
+        checkedBorderColor = MoimTheme.colors.primary.primary,
+        checkedTrackColor = MoimTheme.colors.primary.primary,
+        uncheckedThumbColor = MoimTheme.colors.white,
+        uncheckedBorderColor = MoimTheme.colors.gray.gray07,
+        uncheckedTrackColor = MoimTheme.colors.gray.gray07,
+    )

@@ -80,4 +80,7 @@ sealed interface DetailRoute : Route {
 
     @Serializable
     data object ProfileUpdate : DetailRoute
+
+    @Serializable
+    data object AlarmSetting : DetailRoute
 }

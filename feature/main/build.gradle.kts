@@ -18,4 +18,5 @@ dependencies {
     implementation(projects.feature.calendar)
     implementation(projects.feature.profile)
     implementation(projects.feature.profileUpdate)
+    implementation(projects.feature.alarmSetting)
 }

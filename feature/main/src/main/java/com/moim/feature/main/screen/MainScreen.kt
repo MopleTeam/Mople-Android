@@ -9,6 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.feature.alarmsetting.alarmSettingScreen
+import com.moim.feature.alarmsetting.navigateToAlarmSetting
 import com.moim.feature.calendar.calendarScreen
 import com.moim.feature.home.homeScreen
 import com.moim.feature.main.navigation.MainNavController
@@ -102,11 +104,15 @@ fun MainScreen(
                 profileScreen(
                     padding = innerPadding,
                     navigateToProfileUpdate = navigator.navController::navigateToProfileUpdate,
-                    navigateToAlarmSetting = {},
+                    navigateToAlarmSetting = navigator.navController::navigateToAlarmSetting,
                     navigateToPrivacyPolicy = {},
                     navigateToIntro = navigateToIntro
                 )
                 profileUpdateScreen(
+                    padding = innerPadding,
+                    navigateToBack = navigator.navController::popBackStack
+                )
+                alarmSettingScreen(
                     padding = innerPadding,
                     navigateToBack = navigator.navController::popBackStack
                 )

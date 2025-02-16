@@ -7,6 +7,7 @@ import com.moim.core.data.service.CommentApi
 import com.moim.core.data.service.ImageApi
 import com.moim.core.data.service.LocationApi
 import com.moim.core.data.service.MeetingApi
+import com.moim.core.data.service.NotificationApi
 import com.moim.core.data.service.PlanApi
 import com.moim.core.data.service.ReviewApi
 import com.moim.core.data.service.TokenApi
@@ -50,7 +51,7 @@ internal object ApiModule {
     @Singleton
     fun provideReviewApi(
         @MoimApi retrofit: Retrofit
-    ) : ReviewApi = retrofit.create(ReviewApi::class.java)
+    ): ReviewApi = retrofit.create(ReviewApi::class.java)
 
     @Provides
     @Singleton
@@ -63,6 +64,12 @@ internal object ApiModule {
     fun provideCommentApi(
         @MoimApi retrofit: Retrofit
     ): CommentApi = retrofit.create(CommentApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideNotificationApi(
+        @MoimApi retrofit: Retrofit
+    ): NotificationApi = retrofit.create(NotificationApi::class.java)
 
     @Provides
     @Singleton
