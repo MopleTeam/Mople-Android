@@ -1,4 +1,4 @@
-package com.moim.feature.plandetail
+package com.moim.feature.participantlist
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -8,32 +8,34 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.moim.core.model.item.PlanItem
 import com.moim.core.route.DetailRoute
 
-fun NavGraphBuilder.planDetailScreen(
+fun NavGraphBuilder.participantListNavigation(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToParticipants: (Boolean, Boolean, String) -> Unit,
-    navigateToPlanWrite: (PlanItem) -> Unit,
 ) {
-    composable<DetailRoute.PlanDetail>(
+    composable<DetailRoute.ParticipantList>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },
-        exitTransition = { fadeOut(animationSpec = tween(0)) }
+        exitTransition = { fadeOut(animationSpec = tween(500)) }
     ) {
-        PlanDetailRoute(
+        ParticipantListRoute(
             padding = padding,
-            navigateToBack = navigateToBack,
-            navigateToParticipants = navigateToParticipants,
-            navigateToPlanWrite = navigateToPlanWrite
+            navigateToBack = navigateToBack
         )
     }
 }
 
-fun NavController.navigateToPlanDetail(
-    postId: String,
+fun NavController.navigateToParticipantList(
+    isMeeting: Boolean,
     isPlan: Boolean,
+    id: String,
     navOptions: NavOptions? = null
 ) {
-    this.navigate(DetailRoute.PlanDetail(postId, isPlan), navOptions)
+    this.navigate(
+        DetailRoute.ParticipantList(
+            isMeeting = isMeeting,
+            isPlan = isPlan,
+            id = id
+        ), navOptions
+    )
 }

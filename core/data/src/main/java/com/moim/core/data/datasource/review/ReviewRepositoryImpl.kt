@@ -1,7 +1,6 @@
 package com.moim.core.data.datasource.review
 
 import com.moim.core.data.datasource.review.remote.ReviewRemoteDataSource
-import com.moim.core.datamodel.MemberResponse
 import com.moim.core.datamodel.ReviewResponse
 import com.moim.core.model.asItem
 import kotlinx.coroutines.flow.Flow
@@ -20,8 +19,9 @@ internal class ReviewRepositoryImpl @Inject constructor(
         emit(remoteDataSource.getReview(reviewId).asItem())
     }
 
-    override fun getReviewParticipant(reviewId: String) = flow {
-        emit(remoteDataSource.getReviewParticipant(reviewId).map(MemberResponse::asItem))
+    override fun getReviewParticipants(reviewId: String) = flow {
+        val reviewParticipants = remoteDataSource.getReviewParticipant(reviewId)
+        emit(reviewParticipants.members.map { it.asItem(reviewParticipants.creatorId == it.memberId) })
     }
 
     override fun deleteReviewImage(reviewId: String, images: List<String>): Flow<Unit> = flow {

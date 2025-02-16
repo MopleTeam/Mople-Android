@@ -72,5 +72,12 @@ sealed interface DetailRoute : Route {
     }
 
     @Serializable
+    data class ParticipantList(
+        val isMeeting: Boolean,
+        val isPlan: Boolean,
+        val id: String,
+    ) : DetailRoute
+
+    @Serializable
     data object ProfileUpdate : DetailRoute
 }

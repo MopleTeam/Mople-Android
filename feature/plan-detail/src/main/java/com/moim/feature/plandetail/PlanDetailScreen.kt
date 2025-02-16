@@ -45,6 +45,7 @@ fun PlanDetailRoute(
     viewModel: PlanDetailViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToBack: () -> Unit,
+    navigateToParticipants: (Boolean, Boolean, String) -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit
 ) {
     val context = LocalContext.current
@@ -55,7 +56,7 @@ fun PlanDetailRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is PlanDetailUiEvent.NavigateToBack -> navigateToBack()
-            is PlanDetailUiEvent.NavigateToParticipants -> {}
+            is PlanDetailUiEvent.NavigateToParticipants -> navigateToParticipants(false, event.isPlan, event.postId)
             is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.planItem)
             is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }

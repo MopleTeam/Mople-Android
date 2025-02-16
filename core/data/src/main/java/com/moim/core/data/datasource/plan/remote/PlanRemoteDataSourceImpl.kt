@@ -5,6 +5,7 @@ import com.moim.core.data.service.PlanApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.converterException
 import com.moim.core.datamodel.MeetingPlanContainerResponse
+import com.moim.core.datamodel.ParticipantContainerResponse
 import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.datamodel.PlanResponse
 import com.moim.core.datamodel.PlanReviewContainerResponse
@@ -131,6 +132,14 @@ internal class PlanRemoteDataSourceImpl @Inject constructor(
                     KEY_REASON to "",
                 )
             )
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+    }
+
+    override suspend fun getPlanParticipants(planId: String): ParticipantContainerResponse {
+        return try {
+            planApi.getPlanParticipants(planId)
         } catch (e: Exception) {
             throw converterException(e)
         }

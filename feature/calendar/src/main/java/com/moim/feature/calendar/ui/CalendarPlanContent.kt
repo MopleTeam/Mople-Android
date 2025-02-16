@@ -1,6 +1,8 @@
 package com.moim.feature.calendar.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -98,7 +100,7 @@ fun CalendarPlanItem(
                 .padding(16.dp)
         ) {
             MeetingInfoTopAppbar(
-                meetingImageUrl= plan.meetingImageUrl,
+                meetingImageUrl = plan.meetingImageUrl,
                 groupName = plan.meetingName
             )
             Spacer(Modifier.height(16.dp))
@@ -155,8 +157,9 @@ private fun MeetingInfoTopAppbar(
     ) {
         NetworkImage(
             modifier = Modifier
-                .size(28.dp)
-                .clip(RoundedCornerShape(6.dp)),
+                .clip(RoundedCornerShape(6.dp))
+                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
+                .size(28.dp),
             imageUrl = meetingImageUrl,
             errorImage = painterResource(R.drawable.ic_empty_meeting)
         )

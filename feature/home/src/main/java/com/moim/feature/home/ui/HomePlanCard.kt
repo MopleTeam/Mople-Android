@@ -1,7 +1,9 @@
 package com.moim.feature.home.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -102,8 +104,9 @@ private fun MeetingInfoTopAppbar(
     ) {
         NetworkImage(
             modifier = Modifier
-                .size(28.dp)
-                .clip(RoundedCornerShape(6.dp)),
+                .clip(RoundedCornerShape(6.dp))
+                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(6.dp))
+                .size(28.dp),
             imageUrl = meetingProfile,
             errorImage = painterResource(R.drawable.ic_empty_meeting)
         )

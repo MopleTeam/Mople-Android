@@ -43,6 +43,7 @@ fun MeetingSettingRoute(
     viewModel: MeetingSettingViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToBack: (Boolean) -> Unit,
+    navigateToParticipants: (Boolean, Boolean, String) -> Unit,
     navigateToMeetingWrite: (Meeting) -> Unit,
 ) {
     val context = LocalContext.current
@@ -54,7 +55,7 @@ fun MeetingSettingRoute(
             is MeetingSettingUiEvent.NavigateToBack -> navigateToBack(false)
             is MeetingSettingUiEvent.NavigateToBackForDelete -> navigateToBack(true)
             is MeetingSettingUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite(event.meeting)
-            is MeetingSettingUiEvent.NavigateToMeetingParticipants -> {}
+            is MeetingSettingUiEvent.NavigateToMeetingParticipants -> navigateToParticipants(true, false, event.meetingId)
             is MeetingSettingUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
@@ -128,8 +129,8 @@ fun MeetingSettingScreen(
 
 @Composable
 fun MeetingExitDialog(
-    isDelete : Boolean,
-    dismissAction : MeetingSettingUiAction,
+    isDelete: Boolean,
+    dismissAction: MeetingSettingUiAction,
     onUiAction: OnMeetingSettingUiAction,
 ) {
     MoimAlertDialog(

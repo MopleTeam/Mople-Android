@@ -4,6 +4,7 @@ import com.moim.core.data.service.MeetingApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.converterException
 import com.moim.core.datamodel.MeetingResponse
+import com.moim.core.datamodel.ParticipantContainerResponse
 import javax.inject.Inject
 
 internal class MeetingRemoteDataSourceImpl @Inject constructor(
@@ -21,6 +22,14 @@ internal class MeetingRemoteDataSourceImpl @Inject constructor(
     override suspend fun getMeeting(meetingId: String): MeetingResponse {
         return try {
             meetingApi.getMeeting(meetingId)
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+    }
+
+    override suspend fun getMeetingParticipants(meetingId: String): ParticipantContainerResponse {
+        return try {
+            meetingApi.getMeetingParticipants(meetingId)
         } catch (e: Exception) {
             throw converterException(e)
         }

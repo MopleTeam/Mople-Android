@@ -1,6 +1,8 @@
 package com.moim.feature.meetingwrite.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -59,8 +61,9 @@ fun MeetingWriteImage(
             } else {
                 NetworkImage(
                     modifier = Modifier
-                        .size(80.dp)
                         .clip(RoundedCornerShape(20.dp))
+                        .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(20.dp))
+                        .size(80.dp)
                         .align(Alignment.Center)
                         .onSingleClick { onUiAction(MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(true)) },
                     imageUrl = meetingImageUrl,

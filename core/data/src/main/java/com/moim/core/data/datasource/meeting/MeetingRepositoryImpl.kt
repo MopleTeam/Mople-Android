@@ -22,6 +22,11 @@ internal class MeetingRepositoryImpl @Inject constructor(
         emit(remoteDataSource.getMeeting(meetingId).asItem())
     }
 
+    override fun getMeetingParticipants(meetingId: String) = flow {
+        val meetingParticipants = remoteDataSource.getMeetingParticipants(meetingId)
+        emit(meetingParticipants.members.map { it.asItem(meetingParticipants.creatorId == it.memberId) })
+    }
+
     override fun createMeeting(meetingName: String, meetingImageUrl: String?): Flow<Meeting> = flow {
         val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meeting")
         emit(remoteDataSource.createMeeting(meetingName, uploadImageUrl).asItem())

@@ -1,6 +1,8 @@
 package com.moim.feature.plandetail.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,6 +52,7 @@ fun PlanDetailContent(
             NetworkImage(
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
+                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
                     .size(20.dp),
                 imageUrl = planItem.meetingImageUrl,
                 errorImage = painterResource(R.drawable.ic_empty_meeting)

@@ -3,7 +3,7 @@ package com.moim.core.data.datasource.review.remote
 import com.moim.core.data.service.ReviewApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.converterException
-import com.moim.core.datamodel.MemberResponse
+import com.moim.core.datamodel.ParticipantContainerResponse
 import com.moim.core.datamodel.ReviewResponse
 import javax.inject.Inject
 
@@ -27,7 +27,7 @@ internal class ReviewRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getReviewParticipant(reviewId: String): List<MemberResponse> {
+    override suspend fun getReviewParticipant(reviewId: String): ParticipantContainerResponse {
         return try {
             reviewApi.getReviewParticipant(reviewId)
         } catch (e: Exception) {

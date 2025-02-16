@@ -1,6 +1,7 @@
 package com.moim.core.data.service
 
 import com.moim.core.datamodel.MeetingPlanContainerResponse
+import com.moim.core.datamodel.ParticipantContainerResponse
 import com.moim.core.datamodel.PlanResponse
 import com.moim.core.datamodel.PlanReviewContainerResponse
 import kotlinx.serialization.json.JsonObject
@@ -27,6 +28,9 @@ internal interface PlanApi {
 
     @GET("/plan/detail/{planId}")
     suspend fun getPlan(@Path("planId") planId: String): PlanResponse
+
+    @GET("/plan/participants/{planId}")
+    suspend fun getPlanParticipants(@Path("planId") planId: String) : ParticipantContainerResponse
 
     @POST("/plan/create")
     suspend fun createPlan(@Body params: JsonObject): PlanResponse

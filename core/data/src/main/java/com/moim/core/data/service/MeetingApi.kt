@@ -1,6 +1,7 @@
 package com.moim.core.data.service
 
 import com.moim.core.datamodel.MeetingResponse
+import com.moim.core.datamodel.ParticipantContainerResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -16,6 +17,9 @@ internal interface MeetingApi {
 
     @GET("meet/{meetId}")
     suspend fun getMeeting(@Path("meetId") id: String): MeetingResponse
+
+    @GET("/meet/members/{meetId}")
+    suspend fun getMeetingParticipants(@Path("meetId") id: String): ParticipantContainerResponse
 
     @POST("/meet/create")
     suspend fun createMeeting(

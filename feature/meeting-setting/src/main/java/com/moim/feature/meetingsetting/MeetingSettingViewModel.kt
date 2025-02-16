@@ -77,7 +77,7 @@ class MeetingSettingViewModel @Inject constructor(
             is MeetingSettingUiAction.OnClickBack -> setUiEvent(MeetingSettingUiEvent.NavigateToBack)
             is MeetingSettingUiAction.OnClickMeetingEdit -> setUiEvent(MeetingSettingUiEvent.NavigateToMeetingWrite(uiAction.meeting))
             is MeetingSettingUiAction.OnClickMeetingExit -> deleteMeeting()
-            is MeetingSettingUiAction.OnClickMeetingParticipants -> {}
+            is MeetingSettingUiAction.OnClickMeetingParticipants -> setUiEvent(MeetingSettingUiEvent.NavigateToMeetingParticipants(uiAction.meetingId))
             is MeetingSettingUiAction.OnClickAddUser -> {}
             is MeetingSettingUiAction.OnShowMeetingExitDialog -> showMeetingExitDialog(uiAction.isShow)
             is MeetingSettingUiAction.OnShowMeetingDeleteDialog -> showMeetingDeleteDialog(uiAction.isShow)

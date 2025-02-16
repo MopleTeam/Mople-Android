@@ -1,11 +1,13 @@
 package com.moim.feature.profileupdate.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
+import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.profileupdate.OnProfileUpdateUiAction
 import com.moim.feature.profileupdate.ProfileUpdateUiAction
 
@@ -38,12 +41,13 @@ fun ProfileUpdateImage(
         Box {
             NetworkImage(
                 modifier = Modifier
+                    .clip(CircleShape)
+                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
                     .size(80.dp)
-                    .clip(RoundedCornerShape(100))
                     .align(Alignment.Center)
                     .onSingleClick { onUiAction(ProfileUpdateUiAction.OnShowProfileEditDialog(true)) },
                 imageUrl = profileUrl,
-                errorImage =  painterResource(R.drawable.ic_profile),
+                errorImage = painterResource(R.drawable.ic_profile),
             )
 
             Icon(

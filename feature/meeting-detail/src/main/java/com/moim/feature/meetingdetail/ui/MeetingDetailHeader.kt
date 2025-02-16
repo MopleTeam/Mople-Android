@@ -1,6 +1,8 @@
 package com.moim.feature.meetingdetail.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -87,8 +89,9 @@ private fun MeetingDetailInfo(
     ) {
         NetworkImage(
             modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(12.dp)),
+                .clip(RoundedCornerShape(12.dp))
+                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(12.dp))
+                .size(56.dp),
             imageUrl = meeting.imageUrl,
             errorImage = painterResource(R.drawable.ic_empty_meeting)
         )

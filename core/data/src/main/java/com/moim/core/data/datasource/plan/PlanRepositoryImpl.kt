@@ -33,6 +33,11 @@ internal class PlanRepositoryImpl @Inject constructor(
         emit(remoteDataSource.getSearchPlace(keyword, xPoint, yPoint).map(PlaceResponse::asItem))
     }
 
+    override fun getPlanParticipants(planId: String) = flow {
+        val planParticipants = remoteDataSource.getPlanParticipants(planId)
+        emit(planParticipants.members.map { it.asItem(planParticipants.creatorId == it.memberId) })
+    }
+
     override fun createPlan(
         meetingId: String,
         planName: String,

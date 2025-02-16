@@ -1,6 +1,7 @@
 package com.moim.core.data.datasource.plan
 
 import com.moim.core.model.MeetingPlanContainer
+import com.moim.core.model.Participant
 import com.moim.core.model.Place
 import com.moim.core.model.Plan
 import com.moim.core.model.PlanReviewContainer
@@ -14,15 +15,15 @@ interface PlanRepository {
 
     fun getPlans(meetingId: String): Flow<List<Plan>>
 
-    fun getPlansForCalendar(
-        date: String
-    ): Flow<PlanReviewContainer>
+    fun getPlansForCalendar(date: String): Flow<PlanReviewContainer>
 
     fun getSearchPlace(
         keyword: String,
         xPoint: String,
         yPoint: String
     ): Flow<List<Place>>
+
+    fun getPlanParticipants(planId: String): Flow<List<Participant>>
 
     fun createPlan(
         meetingId: String,
@@ -42,11 +43,7 @@ interface PlanRepository {
         latitude: Double,
     ): Flow<Plan>
 
-    fun deletePlan(
-        planId: String
-    ): Flow<Unit>
+    fun deletePlan(planId: String): Flow<Unit>
 
-    fun reportPlan(
-        planId: String
-    ): Flow<Unit>
+    fun reportPlan(planId: String): Flow<Unit>
 }

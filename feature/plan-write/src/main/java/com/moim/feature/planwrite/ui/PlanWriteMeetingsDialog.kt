@@ -1,6 +1,8 @@
 package com.moim.feature.planwrite.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -146,8 +148,9 @@ fun PlanWriteMeetingInfo(
     ) {
         NetworkImage(
             modifier = Modifier
-                .size(22.dp)
-                .clip(RoundedCornerShape(6.dp)),
+                .clip(RoundedCornerShape(6.dp))
+                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(6.dp))
+                .size(22.dp),
             imageUrl = meeting.imageUrl,
             errorImage = painterResource(R.drawable.ic_empty_meeting)
         )
