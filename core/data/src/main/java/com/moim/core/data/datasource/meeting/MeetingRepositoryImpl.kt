@@ -1,43 +1,58 @@
 package com.moim.core.data.datasource.meeting
 
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
-import com.moim.core.data.datasource.meeting.remote.MeetingRemoteDataSource
+import com.moim.core.data.service.MeetingApi
+import com.moim.core.data.util.JsonUtil.jsonOf
+import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.MeetingResponse
 import com.moim.core.model.Meeting
 import com.moim.core.model.asItem
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class MeetingRepositoryImpl @Inject constructor(
-    private val remoteDataSource: MeetingRemoteDataSource,
+    private val meetingApi: MeetingApi,
     private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource
 ) : MeetingRepository {
 
-    override fun getMeetings() = flow {
-        emit((remoteDataSource.getMeetings().map(MeetingResponse::asItem)))
+    override fun getMeetings() = catchFlow {
+        emit(meetingApi.getMeetings().map(MeetingResponse::asItem))
     }
 
-    override fun getMeeting(meetingId: String) = flow {
-        emit(remoteDataSource.getMeeting(meetingId).asItem())
+    override fun getMeeting(meetingId: String) = catchFlow {
+        emit(meetingApi.getMeeting(meetingId).asItem())
     }
 
-    override fun getMeetingParticipants(meetingId: String) = flow {
-        val meetingParticipants = remoteDataSource.getMeetingParticipants(meetingId)
+    override fun getMeetingParticipants(meetingId: String) = catchFlow {
+        val meetingParticipants = meetingApi.getMeetingParticipants(meetingId)
         emit(meetingParticipants.members.map { it.asItem(meetingParticipants.creatorId == it.memberId) })
     }
 
-    override fun createMeeting(meetingName: String, meetingImageUrl: String?): Flow<Meeting> = flow {
+    override fun createMeeting(meetingName: String, meetingImageUrl: String?): Flow<Meeting> = catchFlow {
         val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meeting")
-        emit(remoteDataSource.createMeeting(meetingName, uploadImageUrl).asItem())
+        emit(meetingApi.createMeeting(jsonOf(KEY_NAME to meetingName, KEY_IMAGE to uploadImageUrl)).asItem())
     }
 
-    override fun updateMeeting(meetingId: String, meetingName: String, meetingImageUrl: String?): Flow<Meeting> = flow {
+    override fun updateMeeting(meetingId: String, meetingName: String, meetingImageUrl: String?): Flow<Meeting> = catchFlow {
         val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meeting")
-        emit(remoteDataSource.updateMeeting(meetingId, meetingName, uploadImageUrl).asItem())
+
+        emit(
+            meetingApi.updateMeeting(
+                id = meetingId,
+                params = jsonOf(
+                    KEY_NAME to meetingName,
+                    KEY_IMAGE to uploadImageUrl
+                )
+            ).asItem()
+        )
     }
 
-    override fun deleteMeeting(meetingId: String): Flow<Unit> = flow {
-        emit(remoteDataSource.deleteMeeting(meetingId))
+    override fun deleteMeeting(meetingId: String): Flow<Unit> = catchFlow {
+        emit(meetingApi.deleteMeeting(meetingId))
+    }
+
+    companion object {
+        private const val KEY_NAME = "name"
+        private const val KEY_IMAGE = "image"
     }
 }

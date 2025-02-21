@@ -1,38 +1,52 @@
 package com.moim.core.data.datasource.review
 
-import com.moim.core.data.datasource.review.remote.ReviewRemoteDataSource
+import com.moim.core.data.service.ReviewApi
+import com.moim.core.data.util.JsonUtil.jsonOf
+import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.ReviewResponse
 import com.moim.core.model.asItem
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class ReviewRepositoryImpl @Inject constructor(
-    private val remoteDataSource: ReviewRemoteDataSource
+    private val reviewApi: ReviewApi
 ) : ReviewRepository {
 
-    override fun getReviews(meetingId: String) = flow {
-        emit(remoteDataSource.getReviews(meetingId).map(ReviewResponse::asItem))
+    override fun getReviews(meetingId: String) = catchFlow {
+        emit(reviewApi.getReviews(meetingId).map(ReviewResponse::asItem))
     }
 
-    override fun getReview(reviewId: String) = flow {
-        emit(remoteDataSource.getReview(reviewId).asItem())
+    override fun getReview(reviewId: String) = catchFlow {
+        emit(reviewApi.getReview(reviewId).asItem())
     }
 
-    override fun getReviewParticipants(reviewId: String) = flow {
-        val reviewParticipants = remoteDataSource.getReviewParticipant(reviewId)
+    override fun getReviewParticipants(reviewId: String) = catchFlow {
+        val reviewParticipants = reviewApi.getReviewParticipant(reviewId)
         emit(reviewParticipants.members.map { it.asItem(reviewParticipants.creatorId == it.memberId) })
     }
 
-    override fun deleteReviewImage(reviewId: String, images: List<String>): Flow<Unit> = flow {
-        emit(remoteDataSource.deleteReviewImage(reviewId, images))
+    override fun deleteReviewImage(reviewId: String, images: List<String>): Flow<Unit> = catchFlow {
+        emit(reviewApi.deleteReviewImage(reviewId, jsonOf(KEY_REVIEW_IMAGES to images)))
     }
 
-    override fun deleteReview(reviewId: String) = flow {
-        emit(remoteDataSource.deleteReview(reviewId))
+    override fun deleteReview(reviewId: String) = catchFlow {
+        emit(reviewApi.deleteReview(reviewId))
     }
 
-    override fun reportReview(reviewId: String) = flow {
-        emit(remoteDataSource.reportReview(reviewId))
+    override fun reportReview(reviewId: String) = catchFlow {
+        emit(
+            reviewApi.reportReview(
+                jsonOf(
+                    KEY_REVIEW_ID to reviewId,
+                    KEY_REASON to ""
+                )
+            )
+        )
+    }
+
+    companion object {
+        private const val KEY_REVIEW_IMAGES = "reviewImages"
+        private const val KEY_REVIEW_ID = "reviewId"
+        private const val KEY_REASON = "reason"
     }
 }

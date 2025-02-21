@@ -15,7 +15,7 @@ internal interface ReviewApi {
     suspend fun getReviews(@Path("meetId") id: String): List<ReviewResponse>
 
     @GET("/review/{reviewId}")
-    suspend fun getReviewDetail(@Path("reviewId") id: String): ReviewResponse
+    suspend fun getReview(@Path("reviewId") id: String): ReviewResponse
 
     @GET("/review/participant/{reviewId}")
     suspend fun getReviewParticipant(@Path("reviewId") id: String): ParticipantContainerResponse

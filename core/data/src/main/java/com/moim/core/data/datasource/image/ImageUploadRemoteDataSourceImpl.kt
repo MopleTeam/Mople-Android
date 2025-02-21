@@ -3,7 +3,6 @@ package com.moim.core.data.datasource.image
 import com.moim.core.data.service.ImageApi
 import com.moim.core.data.util.CompressorUtil
 import com.moim.core.data.util.FileUtil
-import com.moim.core.data.util.converterException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -24,18 +23,14 @@ internal class ImageUploadRemoteDataSourceImpl @Inject constructor(
         } else {
             val imageFile = fileUtil.from(url).run { compressorUtil.compressFile(this) }
 
-            try {
-                imageApi.uploadImage(
-                    folderName = folderName,
-                    file = MultipartBody.Part.createFormData(
-                        name = "image",
-                        filename = URLEncoder.encode(imageFile.name, Charsets.UTF_8.displayName()),
-                        body = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
-                    )
+            imageApi.uploadImage(
+                folderName = folderName,
+                file = MultipartBody.Part.createFormData(
+                    name = "image",
+                    filename = URLEncoder.encode(imageFile.name, Charsets.UTF_8.displayName()),
+                    body = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
                 )
-            } catch (e: Exception) {
-                throw converterException(e)
-            }
+            )
         }
     }
 }

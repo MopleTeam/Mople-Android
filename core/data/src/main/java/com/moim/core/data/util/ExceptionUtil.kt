@@ -21,7 +21,7 @@ internal data class ErrorResponse(
     val message: String? = null,
 )
 
-internal fun converterException(exception: Exception): Exception {
+internal fun converterException(exception: Throwable): Exception {
     return when (exception) {
         is IOException -> exception
         is HttpException -> {

@@ -1,17 +1,19 @@
 package com.moim.core.data.datasource.auth
 
-import com.moim.core.data.datasource.auth.remote.AuthRemoteDataSource
+import com.moim.core.common.consts.DEVICE_TYPE_ANDROID
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.datastore.PreferenceStorage
+import com.moim.core.data.service.AuthApi
+import com.moim.core.data.util.JsonUtil.jsonOf
+import com.moim.core.data.util.catchFlow
 import com.moim.core.model.Token
 import com.moim.core.model.asItem
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 internal class AuthRepositoryImpl @Inject constructor(
-    private val authRemoteDataSource: AuthRemoteDataSource,
+    private val authApi: AuthApi,
     private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource,
     private val preferenceStorage: PreferenceStorage,
 ) : AuthRepository {
@@ -20,12 +22,40 @@ internal class AuthRepositoryImpl @Inject constructor(
         return preferenceStorage.token.map { it?.asItem() }
     }
 
-    override fun signUp(socialType: String, token: String, email: String, nickname: String, profileUrl: String?) = flow {
-        val uploadProfileUrl = imageUploadRemoteDataSource.uploadImage(url = profileUrl, "profile")
-        emit(authRemoteDataSource.signUp(socialType, token, email, nickname, uploadProfileUrl).also { preferenceStorage.saveUserToken(it) }.asItem())
+    override fun signUp(socialType: String, token: String, email: String, nickname: String, profileUrl: String?) = catchFlow {
+        val uploadProfileUrl = imageUploadRemoteDataSource.uploadImage(profileUrl, "profile")
+        val authToken = authApi.signUp(
+            params = jsonOf(
+                KEY_SOCIAL_PROVIDER to socialType,
+                KEY_PROVIDER_TOKEN to token,
+                KEY_EMAIL to email,
+                KEY_NICKNAME to nickname,
+                KEY_IMAGE to uploadProfileUrl,
+                KEY_DEVICE_TYPE to DEVICE_TYPE_ANDROID
+            )
+        ).also { preferenceStorage.saveUserToken(it) }.asItem()
+
+        emit(authToken)
     }
 
-    override fun signIn(socialType: String, token: String, email: String) = flow {
-        emit(authRemoteDataSource.signIn(socialType, token, email).also { preferenceStorage.saveUserToken(it) }.asItem())
+    override fun signIn(socialType: String, token: String, email: String) = catchFlow {
+        val authToken = authApi.signIn(
+            params = jsonOf(
+                KEY_SOCIAL_PROVIDER to socialType,
+                KEY_PROVIDER_TOKEN to token,
+                KEY_EMAIL to email
+            )
+        ).also { preferenceStorage.saveUserToken(it) }.asItem()
+
+        emit(authToken)
+    }
+
+    companion object {
+        private const val KEY_SOCIAL_PROVIDER = "socialProvider"
+        private const val KEY_PROVIDER_TOKEN = "providerToken"
+        private const val KEY_EMAIL = "email"
+        private const val KEY_NICKNAME = "nickname"
+        private const val KEY_IMAGE = "image"
+        private const val KEY_DEVICE_TYPE = "deviceType"
     }
 }

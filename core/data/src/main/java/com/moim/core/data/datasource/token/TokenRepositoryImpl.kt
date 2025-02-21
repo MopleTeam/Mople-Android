@@ -1,15 +1,20 @@
 package com.moim.core.data.datasource.token
 
-import com.moim.core.data.datasource.token.remote.TokenRemoteDataSource
+import com.moim.core.data.service.TokenApi
+import com.moim.core.data.util.JsonUtil.jsonOf
+import com.moim.core.data.util.catchFlow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class TokenRepositoryImpl @Inject constructor(
-    private val remoteDataSource: TokenRemoteDataSource
+    private val tokenApi: TokenApi,
 ) : TokenRepository {
 
-    override fun setFcmToken(token: String): Flow<Unit> = flow {
-        emit(remoteDataSource.setFcmToken(token))
+    override fun setFcmToken(token: String): Flow<Unit> = catchFlow {
+        emit(tokenApi.setFcmToken(jsonOf(KEY_TOKEN to token)))
+    }
+
+    companion object {
+        private const val KEY_TOKEN = "token"
     }
 }
