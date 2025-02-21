@@ -13,6 +13,7 @@ data class PlanItem(
     val isPlanAtBefore: Boolean = true,
     val userId: String = "",
     val postId: String = "",
+    val commentCheckId: String = "",
     val meetingId: String = "",
     val meetingName: String = "",
     val meetingImageUrl: String = "",
@@ -32,6 +33,7 @@ fun Plan.asPlanItem(): PlanItem {
         isPlanAtBefore = true,
         userId = userId,
         postId = planId,
+        commentCheckId = planId,
         meetingId = meetingId,
         meetingName = meetingName,
         meetingImageUrl = meetingImageUrl,
@@ -52,6 +54,7 @@ fun Review.asPlanItem(): PlanItem {
         isPlanAtBefore = false,
         userId = userId,
         postId = reviewId,
+        commentCheckId = postId,
         meetingId = meetingId,
         meetingName = meetingName,
         meetingImageUrl = meetingImageUrl,
@@ -83,9 +86,7 @@ val PlanItemType = object : NavType<PlanItem?>(isNullableAllowed = true) {
             ?.let {
                 Json.encodeToString(
                     serializer = PlanItem.serializer(),
-                    value = it.copy(
-                        meetingImageUrl = it.meetingImageUrl.encoding(),
-                    )
+                    value = it.copy(meetingImageUrl = it.meetingImageUrl.encoding())
                 )
             }
             ?: ""

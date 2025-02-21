@@ -33,7 +33,7 @@
     <string name="sign_up_duplicate_error">이미 사용중인 닉네임 입니다.</string>
     <string name="sign_up_duplicate_pass">사용 가능한 닉네임입니다.</string>
     <string name="sign_up_regex_error">공백 또는 특수문자는 사용할 수 없습니다.</string>
-    <string name="sign_up_start">모임테이블 시작하기</string>
+    <string name="sign_up_start">모플 시작하기</string>
 
     <!-- Main -->
     <string name="main_tab_home">홈</string>

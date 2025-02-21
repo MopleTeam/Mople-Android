@@ -13,8 +13,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.Call
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -42,13 +44,20 @@ internal object ServiceModule {
     @Provides
     fun provideOkHttpClient(
         httpLoggingInterceptor: HttpLoggingInterceptor,
+        headerInterceptor: Interceptor,
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor(headerInterceptor)
             .addInterceptor(httpLoggingInterceptor)
             .build()
+    }
+
+    @Provides
+    fun provideHeaderInterceptor(): Interceptor = Interceptor { chain ->
+        chain.proceed(chain.addHeaders())
     }
 
     @Singleton
@@ -67,6 +76,7 @@ internal object ServiceModule {
     @Provides
     fun provideApiOkHttpCallFactory(
         httpLoggingInterceptor: HttpLoggingInterceptor,
+        headerInterceptor: Interceptor,
         tokenInterceptor: TokenInterceptor,
         tokenAuthenticator: TokenAuthenticator
     ): Call.Factory = OkHttpClient.Builder()
@@ -76,18 +86,21 @@ internal object ServiceModule {
         .addInterceptor(httpLoggingInterceptor)
         .addInterceptor(tokenInterceptor)
         .authenticator(tokenAuthenticator)
+        .addInterceptor(headerInterceptor)
         .build()
 
     @NormalApiOkHttp
     @Singleton
     @Provides
     fun provideNormalApiOkHttpCallFactory(
-        httpLoggingInterceptor: HttpLoggingInterceptor
+        httpLoggingInterceptor: HttpLoggingInterceptor,
+        headerInterceptor: Interceptor,
     ): Call.Factory = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.MINUTES)
         .readTimeout(10, TimeUnit.MINUTES)
         .writeTimeout(10, TimeUnit.MINUTES)
         .addInterceptor(httpLoggingInterceptor)
+        .addInterceptor(headerInterceptor)
         .build()
 
     // header Token이 필요한 API에 사용하는 Retrofit 입니다.
@@ -123,4 +136,9 @@ internal object ServiceModule {
             .baseUrl(BuildConfig.API_URL)
             .build()
     }
+
+    private fun Interceptor.Chain.addHeaders(): Request = this.request().newBuilder()
+        .addHeader("os", "android")
+        .addHeader("version", BuildConfig.VERSION_NAME)
+        .build()
 }

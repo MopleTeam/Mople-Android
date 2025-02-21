@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import com.moim.core.data.service.AuthTokenApi
 import kotlinx.serialization.json.Json
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 
 @InstallIn(SingletonComponent::class)
@@ -28,11 +29,13 @@ internal object TokenServiceModule {
     @Singleton
     @Provides
     fun provideApiOkHttpCallFactory(
+        headerInterceptor: Interceptor,
         httpLoggingInterceptor: HttpLoggingInterceptor,
     ): Call.Factory = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.MINUTES)
         .readTimeout(10, TimeUnit.MINUTES)
         .writeTimeout(10, TimeUnit.MINUTES)
+        .addInterceptor(headerInterceptor)
         .addInterceptor(httpLoggingInterceptor)
         .build()
 

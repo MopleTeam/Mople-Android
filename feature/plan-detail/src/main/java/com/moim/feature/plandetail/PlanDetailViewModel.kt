@@ -80,7 +80,7 @@ class PlanDetailViewModel @Inject constructor(
                             val (user, post) = result.data
                             val uiState = PlanDetailUiState.Success(user, post)
                             setUiState(uiState)
-                            savedStateHandle[KEY_PLAN_ID] = uiState.planItem.postId
+                            savedStateHandle[KEY_PLAN_ID] = uiState.planItem.commentCheckId
                         }
 
                         is Result.Error -> setUiState(PlanDetailUiState.Error)

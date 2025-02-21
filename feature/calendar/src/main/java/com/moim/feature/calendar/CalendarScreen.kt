@@ -1,6 +1,8 @@
 package com.moim.feature.calendar
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -144,7 +146,9 @@ fun CalendarScreen(
             currentDate = currentDate,
             onUiAction = onUiAction
         )
-        AnimatedVisibility(visible = uiState.isExpandable) {
+        AnimatedVisibility(
+            visible = uiState.isExpandable
+        ) {
             CalendarMonth(
                 uiState = uiState,
                 currentDate = currentDate,
@@ -153,7 +157,11 @@ fun CalendarScreen(
             )
         }
 
-        AnimatedVisibility(visible = uiState.isExpandable.not()) {
+        AnimatedVisibility(
+            enter = fadeIn(),
+            exit = fadeOut(),
+            visible = uiState.isExpandable.not()
+        ) {
             CalendarWeek(
                 uiState = uiState,
                 weekState = weekState,
