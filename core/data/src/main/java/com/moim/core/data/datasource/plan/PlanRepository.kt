@@ -30,6 +30,7 @@ interface PlanRepository {
         planName: String,
         planTime: String,
         planAddress: String,
+        title : String,
         longitude: Double,
         latitude: Double,
     ): Flow<Plan>
@@ -39,6 +40,7 @@ interface PlanRepository {
         planName: String,
         planTime: String,
         planAddress: String,
+        title : String,
         longitude: Double,
         latitude: Double,
     ): Flow<Plan>

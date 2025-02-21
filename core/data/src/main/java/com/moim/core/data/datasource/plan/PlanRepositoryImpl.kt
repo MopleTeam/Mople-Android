@@ -54,6 +54,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         planName: String,
         planTime: String,
         planAddress: String,
+        title : String,
         longitude: Double,
         latitude: Double
     ) = catchFlow {
@@ -64,6 +65,7 @@ internal class PlanRepositoryImpl @Inject constructor(
                     KEY_NAME to planName,
                     KEY_PLAN_TIME to planTime,
                     KEY_PLAN_ADDRESS to planAddress,
+                    KEY_TITLE to title,
                     KEY_LOT to longitude,
                     KEY_LAT to latitude,
                     KEY_WEATHER_ADDRESS to planAddress
@@ -77,6 +79,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         planName: String,
         planTime: String,
         planAddress: String,
+        title : String,
         longitude: Double,
         latitude: Double
     ) = catchFlow {
@@ -118,6 +121,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         private const val KEY_PLAN_ADDRESS = "planAddress"
         private const val KEY_WEATHER_ADDRESS = "weatherAddress"
         private const val KEY_NAME = "name"
+        private const val KEY_TITLE = "title"
         private const val KEY_X_POINT = "x"
         private const val KEY_Y_POINT = "y"
         private const val KEY_LOT = "lot"

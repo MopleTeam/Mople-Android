@@ -23,6 +23,7 @@ data class PlanItem(
     val address: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
+    val placeName: String = "",
     val weatherIconUrl: String = "",
     val temperature: Float = 0f,
     val images: List<String> = emptyList(),
@@ -43,6 +44,7 @@ fun Plan.asPlanItem(): PlanItem {
         address = planAddress,
         latitude = planLatitude,
         longitude = planLongitude,
+        placeName = placeName,
         temperature = temperature,
         weatherIconUrl = weatherIconUrl,
         images = emptyList()
@@ -64,6 +66,7 @@ fun Review.asPlanItem(): PlanItem {
         address = address,
         latitude = latitude,
         longitude = longitude,
+        placeName = placeName,
         images = images
     )
 }

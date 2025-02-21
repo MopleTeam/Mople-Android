@@ -23,6 +23,8 @@ data class PlanResponse(
     val planTime: String = "",
     @SerialName("planAddress")
     val planAddress: String = "",
+    @SerialName("title")
+    val placeName: String = "",
     @SerialName("lot")
     val planLongitude: Double = 0.0,
     @SerialName("lat")

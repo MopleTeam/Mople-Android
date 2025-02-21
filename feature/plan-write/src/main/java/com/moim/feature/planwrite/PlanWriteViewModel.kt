@@ -52,6 +52,7 @@ class PlanWriteViewModel @Inject constructor(
                         planDate = planDate,
                         planTime = planDate,
                         planPlace = plan.address,
+                        planPlaceName = plan.planName,
                         planLongitude = plan.longitude,
                         planLatitude = plan.latitude,
                         selectMeetingId = plan.meetingId,
@@ -104,6 +105,7 @@ class PlanWriteViewModel @Inject constructor(
             setUiState(
                 copy(
                     planPlace = place.roadAddress,
+                    planPlaceName = place.title,
                     planLongitude = place.xPoint.toDouble(),
                     planLatitude = place.yPoint.toDouble(),
                     selectedPlace = null,
@@ -201,6 +203,7 @@ class PlanWriteViewModel @Inject constructor(
                             planName = planName!!,
                             planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute).parseDateString(),
                             planAddress = planPlace!!,
+                            title = planPlaceName!!,
                             longitude = planLongitude,
                             latitude = planLatitude,
                         )
@@ -211,6 +214,7 @@ class PlanWriteViewModel @Inject constructor(
                             planName = planName!!,
                             planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute).parseDateString(),
                             planAddress = planPlace!!,
+                            title = planPlaceName!!,
                             longitude = planLongitude,
                             latitude = planLatitude,
                         )
@@ -329,6 +333,7 @@ sealed interface PlanWriteUiState : UiState {
         val planDate: ZonedDateTime? = null,
         val planTime: ZonedDateTime? = null,
         val planPlace: String? = null,
+        val planPlaceName :String? = null,
         val planLongitude: Double = 0.0,
         val planLatitude: Double = 0.0,
         val selectMeetingId: String? = null,

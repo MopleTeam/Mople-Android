@@ -25,6 +25,8 @@ data class ReviewResponse(
     val latitude: Double = 0.0, // x
     @SerialName("lot")
     val longitude: Double = 0.0, // y
+    @SerialName("title")
+    val placeName: String = "",
     @SerialName("participantsCount")
     val memberCount: Int = 1,
     @SerialName("images")

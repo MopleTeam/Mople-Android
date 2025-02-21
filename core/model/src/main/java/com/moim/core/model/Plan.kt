@@ -20,11 +20,12 @@ data class Plan(
     val planMemberCount: Int = 0,
     val planTime: String = "",
     val planAddress: String = "",
+    val planLongitude: Double = 0.0,
+    val planLatitude: Double = 0.0,
+    val placeName : String = "",
     val weatherIconUrl: String = "",
     val temperature: Float = 0f,
     val isParticipant: Boolean = false,
-    val planLongitude: Double = 0.0,
-    val planLatitude: Double = 0.0,
 )
 
 fun PlanResponse.asItem(): Plan {
@@ -40,6 +41,7 @@ fun PlanResponse.asItem(): Plan {
         planLatitude = planLatitude,
         planLongitude = planLongitude,
         planAddress = planAddress,
+        placeName = placeName,
         weatherIconUrl = weatherIconUrl,
         temperature = temperature,
         isParticipant = isParticipant
