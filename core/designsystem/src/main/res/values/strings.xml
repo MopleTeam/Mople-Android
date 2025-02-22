@@ -145,6 +145,11 @@
     <string name="profile_update_regex_error">공백 또는 특수문자는 사용할 수 없습니다.</string>
     <string name="profile_update_hint">닉네임을 입력해주세요</string>
 
+    <!-- Alarm -->
+    <string name="alarm_title">알람</string>
+    <string name="alarm_empty">새로운 알림이 없어요.</string>
+    <string name="alarm_new">새로운 알림</string>
+
     <!-- AlarmSetting -->
     <string name="alarm_setting_title">알림 관리</string>
     <string name="alarm_setting_permission">알람을 활성화하고  일정관리에 도움을 받아보세요</string>

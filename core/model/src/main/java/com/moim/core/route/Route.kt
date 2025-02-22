@@ -82,5 +82,8 @@ sealed interface DetailRoute : Route {
     data object ProfileUpdate : DetailRoute
 
     @Serializable
+    data object Alarm : DetailRoute
+
+    @Serializable
     data object AlarmSetting : DetailRoute
 }

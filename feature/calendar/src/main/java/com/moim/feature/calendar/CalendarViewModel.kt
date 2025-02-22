@@ -70,13 +70,18 @@ class CalendarViewModel @Inject constructor(
                             }
 
                             is MeetingAction.MeetingUpdate -> {
-                                val (index, plan) = plans.withIndex().find { it.value.meetingId == action.meeting.id } ?: return@collect
-                                val updatePlan = plan.copy(
-                                    meetingName = action.meeting.name,
-                                    meetingImageUrl = action.meeting.imageUrl,
-                                )
+                                val plans = plans.map { plan ->
+                                    if (plan.meetingId == action.meeting.id) {
+                                        plan.copy(
+                                            meetingName = action.meeting.name,
+                                            meetingImageUrl = action.meeting.imageUrl,
+                                        )
+                                    } else {
+                                        plan
+                                    }
+                                }
 
-                                setUiState(copy(plans = plans.toMutableList().apply { set(index, updatePlan) }))
+                                setUiState(copy(plans = plans))
                             }
 
                             is MeetingAction.MeetingInvalidate -> onRefresh()

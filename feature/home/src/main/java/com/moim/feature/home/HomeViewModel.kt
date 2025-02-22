@@ -69,15 +69,26 @@ class HomeViewModel @Inject constructor(
                                 setUiState(copy(meetings = meetings))
                             }
 
-                            is MeetingAction.MeetingDelete -> {
+                            is MeetingAction.MeetingUpdate -> {
                                 val meetings = meetings.toMutableList().apply {
                                     withIndex()
-                                        .firstOrNull { action.meetId == it.value.id }
+                                        .firstOrNull { action.meeting.id == it.value.id }
                                         ?.index
-                                        ?.let { index -> removeAt(index) }
+                                        ?.let { index -> set(index, action.meeting) }
                                 }
 
-                                setUiState(copy(meetings = meetings))
+                                val plans = plans.map { plan ->
+                                    if (plan.meetingId == action.meeting.id) {
+                                        plan.copy(
+                                            meetingName = action.meeting.name,
+                                            meetingImageUrl = action.meeting.imageUrl,
+                                        )
+                                    } else {
+                                        plan
+                                    }
+                                }
+
+                                setUiState(copy(meetings = meetings, plans = plans))
                             }
 
                             else -> return@collect
