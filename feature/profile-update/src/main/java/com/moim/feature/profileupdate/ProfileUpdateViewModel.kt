@@ -42,6 +42,7 @@ class ProfileUpdateViewModel @Inject constructor(
                         setUiState(
                             ProfileUpdateUiState.Success(
                                 profileUrl = user.profileUrl,
+                                currentNickname = user.nickname,
                                 nickname = user.nickname,
                                 enableProfileUpdate = false
                             )
@@ -98,7 +99,7 @@ class ProfileUpdateViewModel @Inject constructor(
     private fun validateDuplicateNickname() {
         viewModelScope.launch {
             uiState.checkState<ProfileUpdateUiState.Success> {
-                if (nickname.isEmpty() || isRegexError) return@checkState
+                if (currentNickname == nickname || nickname.isEmpty() || isRegexError) return@checkState
                 userRepository
                     .checkedNickname(nickname)
                     .asResult()
@@ -143,6 +144,7 @@ sealed interface ProfileUpdateUiState : UiState {
 
     data class Success(
         val profileUrl: String? = null,
+        val currentNickname: String = "",
         val nickname: String = "",
         val isDuplicatedName: Boolean? = null,
         val isRegexError: Boolean = false,

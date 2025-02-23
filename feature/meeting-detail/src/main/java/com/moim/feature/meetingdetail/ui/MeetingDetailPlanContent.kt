@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.util.getDateTimeFormatString
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.util.toDecimalString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
@@ -43,10 +44,12 @@ import com.moim.core.model.Plan
 import com.moim.core.model.Review
 import com.moim.feature.meetingdetail.MeetingDetailUiAction
 import com.moim.feature.meetingdetail.OnMeetingDetailUiAction
+import java.time.ZonedDateTime
 
 @Composable
 fun MeetingDetailPlanContent(
     modifier: Modifier = Modifier,
+    userId: String,
     plans: List<Plan>,
     reviews: List<Review>,
     isPlanSelected: Boolean,
@@ -89,6 +92,7 @@ fun MeetingDetailPlanContent(
                 key = { it.planId }
             ) {
                 MeetingDetailPlanItem(
+                    userId = userId,
                     plan = it,
                     onUiAction = onUiAction
                 )
@@ -110,6 +114,7 @@ fun MeetingDetailPlanContent(
 @Composable
 fun MeetingDetailPlanItem(
     modifier: Modifier = Modifier,
+    userId: String,
     plan: Plan,
     onUiAction: OnMeetingDetailUiAction
 ) {
@@ -143,7 +148,23 @@ fun MeetingDetailPlanItem(
             )
             Spacer(Modifier.height(16.dp))
 
-            if (plan.isParticipant) {
+            if (plan.planTime.parseZonedDateTime().isBefore(ZonedDateTime.now())) {
+                MoimText(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    text = stringResource(R.string.meeting_detail_plan_disable),
+                    style = MoimTheme.typography.body01.medium,
+                    color = MoimTheme.colors.gray.gray05,
+                    textAlign = TextAlign.Center,
+                )
+            } else if (plan.userId == userId) {
+                MoimPrimaryButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(R.string.meeting_detail_plan_me),
+                    enable = false,
+                )
+            } else if (plan.isParticipant) {
                 MoimPrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
                     buttonColors = moimButtomColors().copy(
@@ -314,6 +335,7 @@ private fun MeetingDetailPlanContentPreview() {
                 .background(MoimTheme.colors.bg.primary),
         ) {
             MeetingDetailPlanContent(
+                userId = "",
                 plans = listOf(
                     Plan(
                         planId = "1",

@@ -9,7 +9,7 @@ import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.delegate.planStateIn
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.parseZonedDateTimeForDateString
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -106,8 +106,8 @@ class HomeViewModel @Inject constructor(
                                     .apply {
                                         withIndex()
                                             .firstOrNull {
-                                                val newPlanTime = action.plan.planTime.parseZonedDateTimeForDateString()
-                                                val currentPlanTime = it.value.planTime.parseZonedDateTimeForDateString()
+                                                val newPlanTime = action.plan.planTime.parseZonedDateTime()
+                                                val currentPlanTime = it.value.planTime.parseZonedDateTime()
                                                 newPlanTime.isBefore(currentPlanTime)
                                             }
                                             ?.let { add(it.index, action.plan) }
@@ -118,14 +118,18 @@ class HomeViewModel @Inject constructor(
                             }
 
                             is PlanAction.PlanUpdate -> {
-                                val plans = plans.toMutableList().apply {
-                                    withIndex()
-                                        .firstOrNull { action.plan.planId == it.value.planId }
-                                        ?.index
-                                        ?.let { index -> set(index, action.plan) }
-                                }
+                                if (plans.isEmpty()) {
+                                    onRefresh()
+                                } else {
+                                    val plans = plans.toMutableList().apply {
+                                        withIndex()
+                                            .firstOrNull { action.plan.planId == it.value.planId }
+                                            ?.index
+                                            ?.let { index -> set(index, action.plan) }
+                                    }
 
-                                setUiState(copy(plans = plans))
+                                    setUiState(copy(plans = plans))
+                                }
                             }
 
                             is PlanAction.PlanDelete -> {

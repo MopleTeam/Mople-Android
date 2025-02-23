@@ -35,6 +35,14 @@ interface PlanRepository {
         latitude: Double,
     ): Flow<Plan>
 
+    fun joinPlan(
+        planId: String,
+    ): Flow<Unit>
+
+    fun leavePlan(
+        planId: String
+    ): Flow<Unit>
+
     fun updatePlan(
         planId: String,
         planName: String,

@@ -10,7 +10,7 @@ import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.delegate.planStateIn
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.parseZonedDateTimeForDateString
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -20,23 +20,28 @@ import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
+import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
 import com.moim.core.model.Review
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class MeetingDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
+    private val userRepository: UserRepository,
+    private val planRepository: PlanRepository,
     meetingRepository: MeetingRepository,
-    planRepository: PlanRepository,
     reviewRepository: ReviewRepository,
     meetingViewModelDelegate: MeetingViewModelDelegate,
     planViewModelDelegate: PlanViewModelDelegate
@@ -68,10 +73,12 @@ class MeetingDetailViewModel @Inject constructor(
                     when (result) {
                         is Result.Loading -> setUiState(MeetingDetailUiState.Loading)
                         is Result.Success -> {
+                            val user = userRepository.getUser().first()
                             val (meeting, plans, reviews) = result.data
 
                             setUiState(
                                 MeetingDetailUiState.Success(
+                                    userId = user.userId,
                                     meeting = meeting,
                                     plans = plans,
                                     reviews = reviews,
@@ -105,8 +112,8 @@ class MeetingDetailViewModel @Inject constructor(
                                     .apply {
                                         withIndex()
                                             .firstOrNull {
-                                                val newPlanTime = action.plan.planTime.parseZonedDateTimeForDateString()
-                                                val currentPlanTime = it.value.planTime.parseZonedDateTimeForDateString()
+                                                val newPlanTime = action.plan.planTime.parseZonedDateTime()
+                                                val currentPlanTime = it.value.planTime.parseZonedDateTime()
                                                 newPlanTime.isBefore(currentPlanTime)
                                             }
                                             ?.let { add(it.index, action.plan) }
@@ -155,8 +162,46 @@ class MeetingDetailViewModel @Inject constructor(
             is MeetingDetailUiAction.OnClickPlanWrite -> navigateToPlanWrite()
             is MeetingDetailUiAction.OnClickMeetingSetting -> navigateToMeetingSetting()
             is MeetingDetailUiAction.OnClickPlanTab -> setPlanTab(uiAction.isBefore)
-            is MeetingDetailUiAction.OnClickPlanApply -> {}
+            is MeetingDetailUiAction.OnClickPlanApply -> setPlanApply(uiAction.planId, uiAction.isApply)
             is MeetingDetailUiAction.OnClickPlanDetail -> setUiEvent(MeetingDetailUiEvent.NavigateToPlanDetail(uiAction.postId, uiAction.isPlan))
+        }
+    }
+
+    private fun setPlanApply(
+        planId: String,
+        isApply: Boolean
+    ) {
+        viewModelScope.launch {
+            if (isApply) {
+                planRepository.joinPlan(planId)
+            } else {
+                planRepository.leavePlan(planId)
+            }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
+                uiState.checkState<MeetingDetailUiState.Success> {
+                    when (result) {
+                        is Result.Loading -> return@collect
+                        is Result.Success -> {
+                            val (index, plan) = plans.withIndex()
+                                .find { (_, plan) -> plan.planId == planId }
+                                ?.let { it.index to it.value }
+                                ?: return@collect
+
+                            setUiState(
+                                copy(
+                                    plans = plans
+                                        .toMutableList()
+                                        .apply { set(index = index, element = plan.copy(isParticipant = !plan.isParticipant)) }
+                                )
+                            )
+                        }
+
+                        is Result.Error -> when (result.exception) {
+                            is IOException -> setUiEvent(MeetingDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                            else -> setUiEvent(MeetingDetailUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -198,6 +243,7 @@ sealed interface MeetingDetailUiState : UiState {
     data object Loading : MeetingDetailUiState
 
     data class Success(
+        val userId :String = "",
         val meeting: Meeting = Meeting(),
         val plans: List<Plan> = emptyList(),
         val reviews: List<Review> = emptyList(),

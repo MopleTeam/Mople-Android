@@ -60,6 +60,7 @@
     <!-- MeetingDetail -->
     <string name="meeting_detail_future_plan">예정된 약속</string>
     <string name="meeting_detail_past_plan">지난 약속</string>
+    <string name="meeting_detail_plan_me">내가 만든 약속</string>
     <string name="meeting_detail_plan_apply">약속 참여하기</string>
     <string name="meeting_detail_plan_not_apply">약속 불참</string>
     <string name="meeting_detail_plan_disable">해당 약속은 마감되었어요</string>
@@ -80,6 +81,7 @@
     <string name="meeting_setting_exit">모임을 삭제할까요?</string>
     <string name="meeting_setting_exit_description">해당 모임에 대한 모든 기록을 복구할 수 없어요</string>
     <string name="meeting_setting_delete_btn">모임삭제</string>
+    <string name="meeting_setting_exit_btn">모임 나가기</string>
 
     <!-- PlanWrite -->
     <string name="plan_write_title_for_create">약속 생성하기</string>
@@ -93,6 +95,7 @@
     <string name="plan_write_date_select_hint">날짜를 선택해주세요</string>
     <string name="plan_write_time_select">시간 선택</string>
     <string name="plan_write_time_select_hint">시간을 선택해주세요</string>
+    <string name="plan_write_time_error">약속 시간이 현재 시간보다 이릅니다\n약속 시간을 수정해주세요</string>
     <string name="plan_write_place_select">장소 선택</string>
     <string name="plan_write_place_select_hint">장소를 선택해주세요</string>
     <string name="plan_write_place_search_hint">약속 장소를 검색해주세요</string>
@@ -165,7 +168,7 @@
     <string name="unit_count">%d개</string>
 
     <!-- Regex -->
-    <string name="regex_date_full">yyyy.MM.dd E hh시 mm분</string>
+    <string name="regex_date_full">yyyy.MM.dd E HH시 mm분</string>
     <string name="regex_date_year_month">yyyy년 M월</string>
     <string name="regex_date_year_month_day">yyyy년 M월 d일 EEEE</string>
     <string name="regex_date_year_month_day_short">yyyy년 M월 d일 E</string>

@@ -32,6 +32,12 @@ internal interface PlanApi {
     @GET("/plan/participants/{planId}")
     suspend fun getPlanParticipants(@Path("planId") planId: String) : ParticipantContainerResponse
 
+    @POST("plan/join/{planId}")
+    suspend fun joinPlan(@Path("planId") id: String)
+
+    @DELETE("plan/leave/{planId}")
+    suspend fun leavePlan(@Path("planId") id: String)
+
     @POST("/plan/create")
     suspend fun createPlan(@Body params: JsonObject): PlanResponse
 

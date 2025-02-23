@@ -117,6 +117,7 @@ fun MeetingDetailScreen(
                     MeetingDetailPlanEmpty()
                 } else {
                     MeetingDetailPlanContent(
+                        userId = uiState.userId,
                         plans = uiState.plans,
                         reviews = uiState.reviews,
                         isPlanSelected = true,
@@ -128,6 +129,7 @@ fun MeetingDetailScreen(
                     MeetingDetailPlanEmpty()
                 } else {
                     MeetingDetailPlanContent(
+                        userId = uiState.userId,
                         plans = uiState.plans,
                         reviews = uiState.reviews,
                         isPlanSelected = false,
@@ -161,7 +163,8 @@ private fun MeetingDetailScreenPreview() {
         MeetingDetailScreen(
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
             uiState = MeetingDetailUiState.Success(
-                Meeting(
+                userId = "",
+                meeting = Meeting(
                     name = "우리 중학교 동창",
                     memberCount = 3,
                 ),

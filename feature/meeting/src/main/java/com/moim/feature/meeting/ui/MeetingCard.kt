@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -28,7 +27,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.util.getDateTimeBetweenDay
-import com.moim.core.common.util.parseZonedDateTimeForDateString
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
@@ -47,7 +46,7 @@ fun MeetingCard(
 ) {
     val (count, comment) = meeting.lastPlanAt
         ?.let { lastDate ->
-            val day = getDateTimeBetweenDay(endDate = lastDate.parseZonedDateTimeForDateString())
+            val day = getDateTimeBetweenDay(endDate = lastDate.parseZonedDateTime())
             when {
                 day == 0 -> stringResource(R.string.meeting_plan_today_count) to stringResource(R.string.meeting_plan_comment)
                 day > 0 -> stringResource(R.string.meeting_plan_after_count, day) to stringResource(R.string.meeting_plan_comment)

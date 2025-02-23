@@ -136,7 +136,7 @@ fun MeetingExitDialog(
     MoimAlertDialog(
         title = stringResource(R.string.meeting_setting_exit),
         description = stringResource(R.string.meeting_setting_exit_description),
-        positiveText = stringResource(if (isDelete) R.string.meeting_setting_delete_btn else R.string.meeting_setting_exit),
+        positiveText = stringResource(if (isDelete) R.string.meeting_setting_delete_btn else R.string.meeting_setting_exit_btn),
         positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
         onClickPositive = {
             onUiAction(dismissAction)

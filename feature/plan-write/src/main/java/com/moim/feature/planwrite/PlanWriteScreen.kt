@@ -162,7 +162,7 @@ fun PlanWriteScreen(
     }
     if (uiState.isShowTimePickerDialog) {
         MoimTimePickerDialog(
-            date = uiState.planTime ?: ZonedDateTime.now().withMinute(0),
+            date = uiState.planTime ?: ZonedDateTime.now().plusHours(1).withMinute(0),
             onDateSelected = { onUiAction(PlanWriteUiAction.OnClickPlanTime(it)) },
             onDismiss = { onUiAction(PlanWriteUiAction.OnShowTimePickerDialog(false)) }
         )

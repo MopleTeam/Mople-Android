@@ -9,7 +9,7 @@ import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.delegate.planStateIn
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.parseZonedDateTimeForDateString
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -97,10 +98,10 @@ class MeetingViewModel @Inject constructor(
                         when (action) {
                             is PlanAction.PlanCreate -> {
                                 val meeting = meetings.withIndex().find { it.value.id == action.plan.meetingId } ?: return@collect
-                                val currentLastAt = meeting.value.lastPlanAt.parseZonedDateTimeForDateString()
-                                val newLastAt = action.plan.planTime.parseZonedDateTimeForDateString()
+                                val currentLastAt = meeting.value.lastPlanAt.parseZonedDateTime()
+                                val newLastAt = action.plan.planTime.parseZonedDateTime()
 
-                                if (currentLastAt.isBefore(newLastAt)) return@collect
+                                if (newLastAt.isBefore(currentLastAt)) return@collect
 
                                 setUiState(
                                     copy(
@@ -113,11 +114,10 @@ class MeetingViewModel @Inject constructor(
 
                             is PlanAction.PlanUpdate -> {
                                 val meeting = meetings.withIndex().find { it.value.id == action.plan.meetingId } ?: return@collect
-                                val currentLastAt = meeting.value.lastPlanAt.parseZonedDateTimeForDateString()
-                                val newLastAt = action.plan.planTime.parseZonedDateTimeForDateString()
+                                val currentLastAt = meeting.value.lastPlanAt.parseZonedDateTime()
+                                val newLastAt = action.plan.planTime.parseZonedDateTime()
 
-                                if (currentLastAt.isBefore(newLastAt)) return@collect
-
+                                if (newLastAt.isBefore(currentLastAt)) return@collect
                                 setUiState(
                                     copy(
                                         meetings = meetings

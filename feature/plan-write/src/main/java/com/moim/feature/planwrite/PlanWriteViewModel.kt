@@ -8,7 +8,7 @@ import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseDateString
-import com.moim.core.common.util.parseZonedDateTimeForDateString
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -43,7 +43,7 @@ class PlanWriteViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             plan?.let { plan ->
-                val planDate = plan.planAt.parseZonedDateTimeForDateString()
+                val planDate = plan.planAt.parseZonedDateTime()
 
                 setUiState(
                     PlanWriteUiState.PlanWrite(
@@ -196,12 +196,17 @@ class PlanWriteViewModel @Inject constructor(
     private fun setPlan() {
         viewModelScope.launch {
             uiState.checkState<PlanWriteUiState.PlanWrite> {
+                if (planTime!!.isBefore(ZonedDateTime.now())) {
+                    setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.PlanWriteTimeErrorMessage))
+                    return@launch
+                }
+
                 if (planId.isNullOrEmpty()) {
                     planRepository
                         .createPlan(
                             meetingId = selectMeetingId!!,
                             planName = planName!!,
-                            planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute).parseDateString(),
+                            planTime = planDate!!.withHour(planTime.hour).withMinute(planTime.minute).parseDateString(),
                             planAddress = planPlace!!,
                             title = planPlaceName!!,
                             longitude = planLongitude,
@@ -212,7 +217,7 @@ class PlanWriteViewModel @Inject constructor(
                         .updatePlan(
                             planId = planId,
                             planName = planName!!,
-                            planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute).parseDateString(),
+                            planTime = planDate!!.withHour(planTime.hour).withMinute(planTime.minute).parseDateString(),
                             planAddress = planPlace!!,
                             title = planPlaceName!!,
                             longitude = planLongitude,

@@ -49,12 +49,20 @@ internal class PlanRepositoryImpl @Inject constructor(
         emit(planParticipants.members.map { it.asItem(planParticipants.creatorId == it.memberId) })
     }
 
+    override fun joinPlan(planId: String) = catchFlow {
+        emit(planApi.joinPlan(planId))
+    }
+
+    override fun leavePlan(planId: String) = catchFlow {
+        emit(planApi.leavePlan(planId))
+    }
+
     override fun createPlan(
         meetingId: String,
         planName: String,
         planTime: String,
         planAddress: String,
-        title : String,
+        title: String,
         longitude: Double,
         latitude: Double
     ) = catchFlow {
@@ -79,7 +87,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         planName: String,
         planTime: String,
         planAddress: String,
-        title : String,
+        title: String,
         longitude: Double,
         latitude: Double
     ) = catchFlow {
