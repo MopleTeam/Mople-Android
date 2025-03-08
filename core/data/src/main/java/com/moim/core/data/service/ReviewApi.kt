@@ -1,11 +1,13 @@
 package com.moim.core.data.service
 
 import com.moim.core.datamodel.ParticipantContainerResponse
+import com.moim.core.datamodel.ReviewImageResponse
 import com.moim.core.datamodel.ReviewResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.POST
 import retrofit2.http.Path
 
@@ -17,10 +19,13 @@ internal interface ReviewApi {
     @GET("/review/{reviewId}")
     suspend fun getReview(@Path("reviewId") id: String): ReviewResponse
 
+    @GET("/review/images/{reviewId}")
+    suspend fun getReviewImages(@Path("reviewId") id: String) : List<ReviewImageResponse>
+
     @GET("/review/participant/{reviewId}")
     suspend fun getReviewParticipant(@Path("reviewId") id: String): ParticipantContainerResponse
 
-    @DELETE("/review/images/{reviewId}")
+    @HTTP(method = "DELETE", path = "/review/images/{reviewId}", hasBody = true)
     suspend fun deleteReviewImage(@Path("reviewId") id: String, @Body params: JsonObject)
 
     @DELETE("review/{reviewId}")

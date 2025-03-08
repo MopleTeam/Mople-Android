@@ -35,6 +35,8 @@ import com.moim.feature.planwrite.planWriteScreen
 import com.moim.feature.profile.profileScreen
 import com.moim.feature.profileupdate.navigateToProfileUpdate
 import com.moim.feature.profileupdate.profileUpdateScreen
+import com.moim.feature.reviewwrite.navigateToReviewWrite
+import com.moim.feature.reviewwrite.reviewWriteScreen
 
 @Composable
 fun MainScreen(
@@ -85,6 +87,11 @@ fun MainScreen(
                     navigateToParticipants = navigator.navController::navigateToParticipantList,
                     navigateToMeetingWrite = navigator.navController::navigateToMeetingWrite
                 )
+                reviewWriteScreen(
+                    padding = innerPadding,
+                    navigateToBack = navigator.navController::popBackStack,
+                    navigateToParticipants = navigator.navController::navigateToParticipantList,
+                )
                 planWriteScreen(
                     padding = innerPadding,
                     navigateToBack = navigator.navController::popBackStack
@@ -93,7 +100,8 @@ fun MainScreen(
                     padding = innerPadding,
                     navigateToBack = navigator.navController::popBackStack,
                     navigateToParticipants = navigator.navController::navigateToParticipantList,
-                    navigateToPlanWrite = navigator.navController::navigateToPlanWrite
+                    navigateToPlanWrite = navigator.navController::navigateToPlanWrite,
+                    navigateToReviewWrite = navigator.navController::navigateToReviewWrite,
                 )
                 participantListNavigation(
                     padding = innerPadding,

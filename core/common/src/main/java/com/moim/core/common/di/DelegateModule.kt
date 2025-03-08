@@ -2,8 +2,8 @@ package com.moim.core.common.di
 
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.MeetingViewModelDelegateImpl
-import com.moim.core.common.delegate.PlanViewModelDelegate
-import com.moim.core.common.delegate.PlanViewModelDelegateImpl
+import com.moim.core.common.delegate.PlanItemViewModelDelegate
+import com.moim.core.common.delegate.PlanItemViewModelDelegateImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -19,8 +19,8 @@ internal abstract class DelegateModule {
     @Binds
     abstract fun bindMeetingViewModelDelegate(meetingViewModelDelegateImpl: MeetingViewModelDelegateImpl): MeetingViewModelDelegate
 
-    //================================ PlanViewModelDelegate ============================================//
+    //================================ PlanItemViewModelDelegate ============================================//
     @Singleton
     @Binds
-    abstract fun bindPlanViewModelDelegate(planViewModelDelegateImpl: PlanViewModelDelegateImpl): PlanViewModelDelegate
+    abstract fun bindPlanItemViewModelDelegate(planItemViewModelDelegateImpl: PlanItemViewModelDelegateImpl): PlanItemViewModelDelegate
 }

@@ -121,6 +121,14 @@
     <string name="plan_detail_comment_empty">아직 댓글이 없어요</string>
     <string name="plan_detail_image">함께한 순간</string>
 
+    <!-- ReviewWrite -->
+    <string name="review_write_title_create">후기 작성</string>
+    <string name="review_write_title_update">후기 수정</string>
+    <string name="review_write_header">만족스러운 약속이셨나요?\n사진을 남겨 추억을 나눠보세요</string>
+    <string name="review_write_photo_title">함께한 순간</string>
+    <string name="review_write_create">후기 작성하기</string>
+    <string name="review_write_update">후기 수정하기</string>
+
     <!-- ParticipantList -->
     <string name="participant_list_title">참여자 목록</string>
 

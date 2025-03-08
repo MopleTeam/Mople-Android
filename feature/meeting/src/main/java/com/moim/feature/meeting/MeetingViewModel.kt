@@ -4,9 +4,9 @@ import androidx.lifecycle.viewModelScope
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.PlanAction
-import com.moim.core.common.delegate.PlanViewModelDelegate
+import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
-import com.moim.core.common.delegate.planStateIn
+import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseZonedDateTime
@@ -22,20 +22,19 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class MeetingViewModel @Inject constructor(
     private val meetingRepository: MeetingRepository,
     private val meetingViewModelDelegate: MeetingViewModelDelegate,
-    private val planViewModelDelegate: PlanViewModelDelegate
+    private val planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(),
     MeetingViewModelDelegate by meetingViewModelDelegate,
-    PlanViewModelDelegate by planViewModelDelegate {
+    PlanItemViewModelDelegate by planItemViewModelDelegate {
 
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
-    private val planActionReceiver = planAction.planStateIn(viewModelScope)
+    private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
     private val meetingsResult = loadDataSignal
         .flatMapLatest { meetingRepository.getMeetings().asResult() }
@@ -97,9 +96,9 @@ class MeetingViewModel @Inject constructor(
                     uiState.checkState<MeetingUiState.Success> {
                         when (action) {
                             is PlanAction.PlanCreate -> {
-                                val meeting = meetings.withIndex().find { it.value.id == action.plan.meetingId } ?: return@collect
+                                val meeting = meetings.withIndex().find { it.value.id == action.planItem.meetingId } ?: return@collect
                                 val currentLastAt = meeting.value.lastPlanAt.parseZonedDateTime()
-                                val newLastAt = action.plan.planTime.parseZonedDateTime()
+                                val newLastAt = action.planItem.planAt.parseZonedDateTime()
 
                                 if (newLastAt.isBefore(currentLastAt)) return@collect
 
@@ -107,22 +106,22 @@ class MeetingViewModel @Inject constructor(
                                     copy(
                                         meetings = meetings
                                             .toMutableList()
-                                            .apply { set(meeting.index, meeting.value.copy(lastPlanAt = action.plan.planTime)) }
+                                            .apply { set(meeting.index, meeting.value.copy(lastPlanAt = action.planItem.planAt)) }
                                     )
                                 )
                             }
 
                             is PlanAction.PlanUpdate -> {
-                                val meeting = meetings.withIndex().find { it.value.id == action.plan.meetingId } ?: return@collect
+                                val meeting = meetings.withIndex().find { it.value.id == action.planItem.meetingId } ?: return@collect
                                 val currentLastAt = meeting.value.lastPlanAt.parseZonedDateTime()
-                                val newLastAt = action.plan.planTime.parseZonedDateTime()
+                                val newLastAt = action.planItem.planAt.parseZonedDateTime()
 
                                 if (newLastAt.isBefore(currentLastAt)) return@collect
                                 setUiState(
                                     copy(
                                         meetings = meetings
                                             .toMutableList()
-                                            .apply { set(meeting.index, meeting.value.copy(lastPlanAt = action.plan.planTime)) }
+                                            .apply { set(meeting.index, meeting.value.copy(lastPlanAt = action.planItem.planAt)) }
                                     )
                                 )
                             }

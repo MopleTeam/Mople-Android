@@ -4,9 +4,9 @@ import androidx.lifecycle.viewModelScope
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.PlanAction
-import com.moim.core.common.delegate.PlanViewModelDelegate
+import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
-import com.moim.core.common.delegate.planStateIn
+import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseZonedDateTime
@@ -19,6 +19,7 @@ import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
+import com.moim.core.model.item.asPlan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
@@ -30,13 +31,13 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val planRepository: PlanRepository,
     meetingViewModelDelegate: MeetingViewModelDelegate,
-    planViewModelDelegate: PlanViewModelDelegate
+    planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(),
     MeetingViewModelDelegate by meetingViewModelDelegate,
-    PlanViewModelDelegate by planViewModelDelegate {
+    PlanItemViewModelDelegate by planItemViewModelDelegate {
 
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
-    private val planActionReceiver = planAction.planStateIn(viewModelScope)
+    private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
     private val meetingPlansResult = loadDataSignal
         .flatMapLatest { planRepository.getCurrentPlans().asResult() }
@@ -106,12 +107,12 @@ class HomeViewModel @Inject constructor(
                                     .apply {
                                         withIndex()
                                             .firstOrNull {
-                                                val newPlanTime = action.plan.planTime.parseZonedDateTime()
+                                                val newPlanTime = action.planItem.planAt.parseZonedDateTime()
                                                 val currentPlanTime = it.value.planTime.parseZonedDateTime()
                                                 newPlanTime.isBefore(currentPlanTime)
                                             }
-                                            ?.let { add(it.index, action.plan) }
-                                            ?: run { add(action.plan) }
+                                            ?.let { add(it.index, action.planItem.asPlan()) }
+                                            ?: run { add(action.planItem.asPlan()) }
                                     }.take(5)
 
                                 setUiState(copy(plans = plans))
@@ -123,9 +124,9 @@ class HomeViewModel @Inject constructor(
                                 } else {
                                     val plans = plans.toMutableList().apply {
                                         withIndex()
-                                            .firstOrNull { action.plan.planId == it.value.planId }
+                                            .firstOrNull { action.planItem.postId == it.value.planId }
                                             ?.index
-                                            ?.let { index -> set(index, action.plan) }
+                                            ?.let { index -> set(index, action.planItem.asPlan()) }
                                     }
 
                                     setUiState(copy(plans = plans))
@@ -135,7 +136,7 @@ class HomeViewModel @Inject constructor(
                             is PlanAction.PlanDelete -> {
                                 val plans = plans.toMutableList().apply {
                                     withIndex()
-                                        .firstOrNull { action.planId == it.value.planId }
+                                        .firstOrNull { action.postId == it.value.planId }
                                         ?.index
                                         ?.let { index -> removeAt(index) }
                                 }

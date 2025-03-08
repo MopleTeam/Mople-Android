@@ -21,13 +21,14 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.model.ReviewImage
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
 
 @Composable
 fun PlanDetailReviewImages(
     modifier: Modifier = Modifier,
-    images: List<String>,
+    images: List<ReviewImage>,
     onUiAction: OnPlanDetailUiAction
 ) {
     if (images.isEmpty()) return
@@ -70,7 +71,7 @@ fun PlanDetailReviewImages(
                         .size(109.dp)
                         .onSingleClick { onUiAction(PlanDetailUiAction.OnShowReviewImageCropDialog(true, index)) },
                     errorImage = painterResource(R.drawable.ic_empty_image),
-                    imageUrl = images[index]
+                    imageUrl = images[index].imageUrl
                 )
             }
         }

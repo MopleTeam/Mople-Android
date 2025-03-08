@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.PlanAction
-import com.moim.core.common.delegate.PlanViewModelDelegate
+import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
-import com.moim.core.common.delegate.planStateIn
+import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseZonedDateTime
@@ -24,6 +24,7 @@ import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
 import com.moim.core.model.Review
+import com.moim.core.model.item.asPlan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -44,16 +45,16 @@ class MeetingDetailViewModel @Inject constructor(
     meetingRepository: MeetingRepository,
     reviewRepository: ReviewRepository,
     meetingViewModelDelegate: MeetingViewModelDelegate,
-    planViewModelDelegate: PlanViewModelDelegate
+    planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(),
     MeetingViewModelDelegate by meetingViewModelDelegate,
-    PlanViewModelDelegate by planViewModelDelegate {
+    PlanItemViewModelDelegate by planItemViewModelDelegate {
 
     private val meetingId
         get() = savedStateHandle.get<String>(KEY_MEETING_ID) ?: ""
 
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
-    private val planActionReceiver = planAction.planStateIn(viewModelScope)
+    private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
     private val meetingDetailResult = loadDataSignal
         .flatMapLatest {
@@ -112,12 +113,12 @@ class MeetingDetailViewModel @Inject constructor(
                                     .apply {
                                         withIndex()
                                             .firstOrNull {
-                                                val newPlanTime = action.plan.planTime.parseZonedDateTime()
+                                                val newPlanTime = action.planItem.planAt.parseZonedDateTime()
                                                 val currentPlanTime = it.value.planTime.parseZonedDateTime()
                                                 newPlanTime.isBefore(currentPlanTime)
                                             }
-                                            ?.let { add(it.index, action.plan) }
-                                            ?: run { add(action.plan) }
+                                            ?.let { add(it.index, action.planItem.asPlan()) }
+                                            ?: run { add(action.planItem.asPlan()) }
                                     }
 
                                 setUiState(copy(plans = plans))
@@ -126,11 +127,11 @@ class MeetingDetailViewModel @Inject constructor(
                             is PlanAction.PlanUpdate -> {
                                 val plans = plans.toMutableList().apply {
                                     val index = withIndex()
-                                        .find { it.value.planId == action.plan.planId }
+                                        .find { it.value.planId == action.planItem.postId }
                                         ?.index
                                         ?: return@collect
 
-                                    set(index, action.plan)
+                                    set(index, action.planItem.asPlan())
                                 }
 
                                 setUiState(copy(plans = plans))
@@ -139,7 +140,7 @@ class MeetingDetailViewModel @Inject constructor(
                             is PlanAction.PlanDelete -> setUiState(
                                 copy(
                                     plans = plans.toMutableList().apply {
-                                        val removePlan = find { it.planId == action.planId } ?: return@collect
+                                        val removePlan = find { it.planId == action.postId } ?: return@collect
                                         remove(removePlan)
                                     }
                                 )

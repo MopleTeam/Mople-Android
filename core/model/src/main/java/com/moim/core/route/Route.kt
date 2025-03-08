@@ -72,6 +72,12 @@ sealed interface DetailRoute : Route {
     }
 
     @Serializable
+    data class ReviewWrite(
+        val postId: String,
+        val isUpdated: Boolean
+    ) : DetailRoute
+
+    @Serializable
     data class ParticipantList(
         val isMeeting: Boolean,
         val isPlan: Boolean,

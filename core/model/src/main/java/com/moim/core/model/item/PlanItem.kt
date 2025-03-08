@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.navigation.NavType
 import com.moim.core.model.Plan
 import com.moim.core.model.Review
+import com.moim.core.model.ReviewImage
 import com.moim.core.model.util.encoding
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -26,8 +27,27 @@ data class PlanItem(
     val placeName: String = "",
     val weatherIconUrl: String = "",
     val temperature: Float = 0f,
-    val images: List<String> = emptyList(),
+    val reviewImages: List<ReviewImage> = emptyList(),
 )
+
+fun PlanItem.asPlan() : Plan {
+    return Plan(
+        userId = userId,
+        meetingId = meetingId,
+        meetingName = meetingName,
+        meetingImageUrl = meetingImageUrl,
+        planId = postId,
+        planName = planName,
+        planMemberCount = participantsCount,
+        planTime = planAt,
+        planAddress = address,
+        planLongitude = longitude,
+        planLatitude = latitude,
+        placeName = placeName,
+        weatherIconUrl = weatherIconUrl,
+        temperature = temperature,
+    )
+}
 
 fun Plan.asPlanItem(): PlanItem {
     return PlanItem(
@@ -47,7 +67,7 @@ fun Plan.asPlanItem(): PlanItem {
         placeName = placeName,
         temperature = temperature,
         weatherIconUrl = weatherIconUrl,
-        images = emptyList()
+        reviewImages = emptyList()
     )
 }
 
@@ -67,7 +87,7 @@ fun Review.asPlanItem(): PlanItem {
         latitude = latitude,
         longitude = longitude,
         placeName = placeName,
-        images = images
+        reviewImages = images
     )
 }
 

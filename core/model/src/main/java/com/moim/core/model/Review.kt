@@ -1,12 +1,15 @@
 package com.moim.core.model
 
 import android.os.Bundle
+import androidx.compose.runtime.Stable
 import androidx.navigation.NavType
+import com.moim.core.datamodel.ReviewImageResponse
 import com.moim.core.datamodel.ReviewResponse
 import com.moim.core.model.util.encoding
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
+@Stable
 @Serializable
 data class Review(
     val userId: String = "",
@@ -19,10 +22,17 @@ data class Review(
     val address: String,
     val latitude: Double = 0.0, // x
     val longitude: Double = 0.0, // y
-    val placeName :String = "",
+    val placeName: String = "",
     val memberCount: Int = 1,
-    val images: List<String> = emptyList(),
+    val images: List<ReviewImage> = emptyList(),
     val reviewAt: String,
+)
+
+@Stable
+@Serializable
+data class ReviewImage(
+    val imageId: String,
+    val imageUrl: String,
 )
 
 fun ReviewResponse.asItem(): Review {
@@ -39,8 +49,15 @@ fun ReviewResponse.asItem(): Review {
         longitude = longitude,
         placeName = placeName,
         memberCount = memberCount,
-        images = images,
+        images = images.map(ReviewImageResponse::asItem),
         reviewAt = reviewAt
+    )
+}
+
+fun ReviewImageResponse.asItem(): ReviewImage {
+    return ReviewImage(
+        imageId = imageId,
+        imageUrl = reviewImageUrl
     )
 }
 
@@ -64,7 +81,7 @@ val ReviewType = object : NavType<Review?>(isNullableAllowed = true) {
                     serializer = Review.serializer(),
                     value = it.copy(
                         meetingImageUrl = it.meetingImageUrl.encoding(),
-                        images = it.images.map(String::encoding)
+                        images = it.images.map { image -> image.copy(imageId = image.imageUrl.encoding()) }
                     )
                 )
             }

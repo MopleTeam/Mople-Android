@@ -5,9 +5,9 @@ import com.kizitonwose.calendar.core.daysOfWeek
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.PlanAction
-import com.moim.core.common.delegate.PlanViewModelDelegate
+import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
-import com.moim.core.common.delegate.planStateIn
+import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
@@ -37,12 +37,12 @@ import javax.inject.Inject
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
     private val getPlanItemForCalendarUseCase: GetPlanItemForCalendarUseCase,
-    private val planViewModelDelegate: PlanViewModelDelegate,
+    private val planItemViewModelDelegate: PlanItemViewModelDelegate,
     private val meetingViewModelDelegate: MeetingViewModelDelegate,
-) : BaseViewModel(), MeetingViewModelDelegate by meetingViewModelDelegate, PlanViewModelDelegate by planViewModelDelegate {
+) : BaseViewModel(), MeetingViewModelDelegate by meetingViewModelDelegate, PlanItemViewModelDelegate by planItemViewModelDelegate {
 
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
-    private val planActionReceiver = planAction.planStateIn(viewModelScope)
+    private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
     private val meetingPlanResult = loadDataSignal
         .flatMapLatest { getPlanItemForCalendarUseCase(getDateTimeFormatZonedDate(pattern = "yyyyMM")).asResult() }
@@ -98,14 +98,14 @@ class CalendarViewModel @Inject constructor(
                         when (action) {
                             is PlanAction.PlanCreate -> {
                                 val newPlans = plans.toMutableList()
-                                    .apply { add(action.plan.asPlanItem()) }
+                                    .apply { add(action.planItem) }
                                     .sortedBy { it.planAt }
 
                                 setUiState(copy(plans = newPlans))
                             }
 
                             is PlanAction.PlanUpdate -> {
-                                val newPlan = action.plan.asPlanItem()
+                                val newPlan = action.planItem
                                 val findIndex = plans
                                     .withIndex()
                                     .find { it.value.postId == newPlan.postId }
@@ -119,7 +119,7 @@ class CalendarViewModel @Inject constructor(
                             }
 
                             is PlanAction.PlanDelete -> {
-                                val deletePlans = plans.toMutableList().apply { removeIf { it.postId == action.planId } }
+                                val deletePlans = plans.toMutableList().apply { removeIf { it.postId == action.postId } }
                                 setUiState(copy(plans = deletePlans))
                             }
 

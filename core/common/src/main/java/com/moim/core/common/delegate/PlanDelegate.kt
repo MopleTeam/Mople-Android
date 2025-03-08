@@ -1,7 +1,7 @@
 package com.moim.core.common.delegate
 
 import com.moim.core.common.di.ApplicationScope
-import com.moim.core.model.Plan
+import com.moim.core.model.item.PlanItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -13,53 +13,53 @@ import kotlinx.coroutines.launch
 import java.time.ZonedDateTime
 import javax.inject.Inject
 
-fun Flow<PlanAction>.planStateIn(
+fun Flow<PlanAction>.planItemStateIn(
     coroutineScope: CoroutineScope
 ) = stateIn(coroutineScope, SharingStarted.WhileSubscribed(5000), PlanAction.None)
 
-interface PlanViewModelDelegate {
+interface PlanItemViewModelDelegate {
 
-    val planAction: SharedFlow<PlanAction>
+    val planItemAction: SharedFlow<PlanAction>
 
-    fun createPlan(actionAt: ZonedDateTime, plan: Plan)
+    fun createPlanItem(actionAt: ZonedDateTime, planItem: PlanItem)
 
-    fun updatePlan(actionAt: ZonedDateTime, plan: Plan)
+    fun updatePlanItem(actionAt: ZonedDateTime, planItem: PlanItem)
 
-    fun deletePlan(actionAt: ZonedDateTime, planId: String)
+    fun deletePlanItem(actionAt: ZonedDateTime, postId: String)
 
-    fun invalidatePlan(actionAt: ZonedDateTime)
+    fun invalidatePlanItem(actionAt: ZonedDateTime)
 }
 
-internal class PlanViewModelDelegateImpl @Inject constructor(
+internal class PlanItemViewModelDelegateImpl @Inject constructor(
     @ApplicationScope private val coroutineScope: CoroutineScope
-) : PlanViewModelDelegate {
+) : PlanItemViewModelDelegate {
 
     private val _planAction = MutableSharedFlow<PlanAction>(
         extraBufferCapacity = Int.MAX_VALUE,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    override val planAction: SharedFlow<PlanAction> = _planAction
+    override val planItemAction: SharedFlow<PlanAction> = _planAction
 
-    override fun createPlan(actionAt: ZonedDateTime, plan: Plan) {
+    override fun createPlanItem(actionAt: ZonedDateTime, planItem: PlanItem) {
         coroutineScope.launch {
-            _planAction.emit(PlanAction.PlanCreate(actionAt, plan))
+            _planAction.emit(PlanAction.PlanCreate(actionAt, planItem))
         }
     }
 
-    override fun updatePlan(actionAt: ZonedDateTime, plan: Plan) {
+    override fun updatePlanItem(actionAt: ZonedDateTime, planItem: PlanItem) {
         coroutineScope.launch {
-            _planAction.emit(PlanAction.PlanUpdate(actionAt, plan))
+            _planAction.emit(PlanAction.PlanUpdate(actionAt, planItem))
         }
     }
 
-    override fun deletePlan(actionAt: ZonedDateTime, planId: String) {
+    override fun deletePlanItem(actionAt: ZonedDateTime, postId: String) {
         coroutineScope.launch {
-            _planAction.emit(PlanAction.PlanDelete(actionAt, planId))
+            _planAction.emit(PlanAction.PlanDelete(actionAt, postId))
         }
     }
 
-    override fun invalidatePlan(actionAt: ZonedDateTime) {
+    override fun invalidatePlanItem(actionAt: ZonedDateTime) {
         coroutineScope.launch {
             _planAction.emit(PlanAction.PlanInvalidate(actionAt))
         }
@@ -75,17 +75,17 @@ sealed class PlanAction(
 
     data class PlanCreate(
         override val actionAt: ZonedDateTime,
-        val plan: Plan
+        val planItem: PlanItem
     ) : PlanAction(actionAt)
 
     data class PlanUpdate(
         override val actionAt: ZonedDateTime,
-        val plan: Plan
+        val planItem: PlanItem
     ) : PlanAction(actionAt)
 
     data class PlanDelete(
         override val actionAt: ZonedDateTime,
-        val planId: String
+        val postId: String
     ) : PlanAction(actionAt)
 
     data object None : PlanAction(ZonedDateTime.now())

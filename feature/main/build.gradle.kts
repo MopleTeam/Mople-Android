@@ -12,6 +12,7 @@ dependencies {
     implementation(projects.feature.meetingWrite)
     implementation(projects.feature.meetingDetail)
     implementation(projects.feature.meetingSetting)
+    implementation(projects.feature.reviewWrite)
     implementation(projects.feature.planWrite)
     implementation(projects.feature.planDetail)
     implementation(projects.feature.participantList)

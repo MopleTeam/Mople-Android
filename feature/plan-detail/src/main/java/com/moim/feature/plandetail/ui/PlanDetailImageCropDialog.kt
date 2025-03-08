@@ -20,13 +20,14 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.model.ReviewImage
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
 
 @Composable
 fun PlanDetailImageCropDialog(
     modifier: Modifier = Modifier,
-    images: List<String>,
+    images: List<ReviewImage>,
     selectedIndex : Int,
     onUiAction: OnPlanDetailUiAction
 ) {
@@ -62,7 +63,7 @@ fun PlanDetailImageCropDialog(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(vertical = 20.dp),
-                    imageUrl = images[index]
+                    imageUrl = images[index].imageUrl
                 )
             }
         }

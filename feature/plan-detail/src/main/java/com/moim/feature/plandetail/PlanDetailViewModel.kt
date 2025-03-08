@@ -3,8 +3,8 @@ package com.moim.feature.plandetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.delegate.PlanAction
-import com.moim.core.common.delegate.PlanViewModelDelegate
-import com.moim.core.common.delegate.planStateIn
+import com.moim.core.common.delegate.PlanItemViewModelDelegate
+import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
@@ -25,7 +25,6 @@ import com.moim.core.model.item.PlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
@@ -43,8 +42,8 @@ class PlanDetailViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val commentRepository: CommentRepository,
     private val getPlanItemUseCase: GetPlanItemUseCase,
-    planViewModelDelegate: PlanViewModelDelegate
-) : BaseViewModel(), PlanViewModelDelegate by planViewModelDelegate {
+    planItemViewModelDelegate: PlanItemViewModelDelegate
+) : BaseViewModel(), PlanItemViewModelDelegate by planItemViewModelDelegate {
 
     private val postId
         get() = savedStateHandle.get<String>(KEY_POST_ID) ?: ""
@@ -54,7 +53,7 @@ class PlanDetailViewModel @Inject constructor(
 
     private val planId = savedStateHandle.getStateFlow<String?>(KEY_PLAN_ID, null)
 
-    private val planReceiver = planAction.planStateIn(viewModelScope)
+    private val planItemReceiver = planItemAction.planItemStateIn(viewModelScope)
 
     private val planResult =
         loadDataSignal.flatMapLatest {
@@ -101,8 +100,17 @@ class PlanDetailViewModel @Inject constructor(
             }
 
             launch {
-                planReceiver.filterIsInstance<PlanAction.PlanUpdate>().collect {
-                    onRefresh()
+                planItemReceiver.collect { action ->
+                    when (action) {
+                        is PlanAction.PlanUpdate -> {
+                            uiState.checkState<PlanDetailUiState.Success> {
+                                setUiState(copy(planItem = action.planItem))
+                            }
+                        }
+
+                        is PlanAction.PlanInvalidate -> onRefresh()
+                        else -> return@collect
+                    }
                 }
             }
         }
@@ -157,7 +165,7 @@ class PlanDetailViewModel @Inject constructor(
                     when (result) {
                         is Result.Loading -> return@collect
                         is Result.Success -> {
-                            deletePlan(ZonedDateTime.now(), planItem.postId)
+                            deletePlanItem(ZonedDateTime.now(), planItem.postId)
                             setUiEvent(PlanDetailUiEvent.NavigateToBack)
                         }
 
@@ -270,7 +278,11 @@ class PlanDetailViewModel @Inject constructor(
 
     private fun navigateToPlanWrite() {
         uiState.checkState<PlanDetailUiState.Success> {
-            setUiEvent(PlanDetailUiEvent.NavigateToPlanWrite(planItem))
+            if (planItem.isPlanAtBefore) {
+                setUiEvent(PlanDetailUiEvent.NavigateToPlanWrite(planItem))
+            } else {
+                setUiEvent(PlanDetailUiEvent.NavigateToReviewWrite(planItem.postId))
+            }
         }
     }
 
@@ -328,5 +340,6 @@ sealed interface PlanDetailUiEvent : UiEvent {
     data object NavigateToBack : PlanDetailUiEvent
     data class NavigateToParticipants(val postId: String, val isPlan: Boolean) : PlanDetailUiEvent
     data class NavigateToPlanWrite(val planItem: PlanItem) : PlanDetailUiEvent
+    data class NavigateToReviewWrite(val postId: String) : PlanDetailUiEvent
     data class ShowToastMessage(val message: ToastMessage) : PlanDetailUiEvent
 }

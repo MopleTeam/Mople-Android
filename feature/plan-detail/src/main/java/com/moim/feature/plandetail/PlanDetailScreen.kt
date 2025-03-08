@@ -46,7 +46,8 @@ fun PlanDetailRoute(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
     navigateToParticipants: (Boolean, Boolean, String) -> Unit,
-    navigateToPlanWrite: (PlanItem) -> Unit
+    navigateToPlanWrite: (PlanItem) -> Unit,
+    navigateToReviewWrite: (String, Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -58,6 +59,7 @@ fun PlanDetailRoute(
             is PlanDetailUiEvent.NavigateToBack -> navigateToBack()
             is PlanDetailUiEvent.NavigateToParticipants -> navigateToParticipants(false, event.isPlan, event.postId)
             is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.planItem)
+            is PlanDetailUiEvent.NavigateToReviewWrite -> navigateToReviewWrite(event.postId, true)
             is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
@@ -115,7 +117,7 @@ fun PlanDetailScreen(
 
                 item {
                     PlanDetailReviewImages(
-                        images = uiState.planItem.images,
+                        images = uiState.planItem.reviewImages,
                         onUiAction = onUiAction
                     )
                 }
@@ -152,7 +154,7 @@ fun PlanDetailScreen(
 
     if (uiState.isShowReviewImageCropDialog) {
         PlanDetailImageCropDialog(
-            images = uiState.planItem.images,
+            images = uiState.planItem.reviewImages,
             selectedIndex = uiState.selectedImageIndex,
             onUiAction = onUiAction
         )

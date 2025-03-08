@@ -30,7 +30,15 @@ data class ReviewResponse(
     @SerialName("participantsCount")
     val memberCount: Int = 1,
     @SerialName("images")
-    val images: List<String> = emptyList(),
+    val images: List<ReviewImageResponse> = emptyList(),
     @SerialName("reviewTime")
     val reviewAt: String = "",
+)
+
+@Serializable
+data class ReviewImageResponse(
+    @SerialName("imageId")
+    val imageId :String,
+    @SerialName("reviewImg")
+    val reviewImageUrl: String
 )

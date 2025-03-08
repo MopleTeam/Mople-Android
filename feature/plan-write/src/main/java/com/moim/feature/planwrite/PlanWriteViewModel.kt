@@ -3,7 +3,7 @@ package com.moim.feature.planwrite
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.moim.core.common.delegate.PlanViewModelDelegate
+import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
@@ -19,6 +19,7 @@ import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.model.Meeting
 import com.moim.core.model.Place
+import com.moim.core.model.item.asPlanItem
 import com.moim.core.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.onEach
@@ -32,8 +33,8 @@ class PlanWriteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val planRepository: PlanRepository,
     private val meetingRepository: MeetingRepository,
-    planViewModelDelegate: PlanViewModelDelegate
-) : BaseViewModel(), PlanViewModelDelegate by planViewModelDelegate {
+    planItemViewModelDelegate: PlanItemViewModelDelegate
+) : BaseViewModel(), PlanItemViewModelDelegate by planItemViewModelDelegate {
 
     private val plan
         get() = savedStateHandle
@@ -58,7 +59,7 @@ class PlanWriteViewModel @Inject constructor(
                         selectMeetingId = plan.meetingId,
                         selectMeetingName = plan.meetingName,
                         enableMeetingSelected = false,
-                        enabledSubmit = true
+                        enabledSubmit = plan.postId.isNotEmpty()
                     )
                 )
             } ?: run { setUiState(PlanWriteUiState.PlanWrite()) }
@@ -196,6 +197,8 @@ class PlanWriteViewModel @Inject constructor(
     private fun setPlan() {
         viewModelScope.launch {
             uiState.checkState<PlanWriteUiState.PlanWrite> {
+                val planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute)
+
                 if (planTime!!.isBefore(ZonedDateTime.now())) {
                     setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.PlanWriteTimeErrorMessage))
                     return@launch
@@ -206,7 +209,7 @@ class PlanWriteViewModel @Inject constructor(
                         .createPlan(
                             meetingId = selectMeetingId!!,
                             planName = planName!!,
-                            planTime = planDate!!.withHour(planTime.hour).withMinute(planTime.minute).parseDateString(),
+                            planTime = planTime.parseDateString(),
                             planAddress = planPlace!!,
                             title = planPlaceName!!,
                             longitude = planLongitude,
@@ -217,7 +220,7 @@ class PlanWriteViewModel @Inject constructor(
                         .updatePlan(
                             planId = planId,
                             planName = planName!!,
-                            planTime = planDate!!.withHour(planTime.hour).withMinute(planTime.minute).parseDateString(),
+                            planTime = planTime.parseDateString(),
                             planAddress = planPlace!!,
                             title = planPlaceName!!,
                             longitude = planLongitude,
@@ -228,9 +231,9 @@ class PlanWriteViewModel @Inject constructor(
                         is Result.Loading -> return@collect
                         is Result.Success -> {
                             if (planId.isNullOrEmpty()) {
-                                createPlan(ZonedDateTime.now(), plan = result.data)
+                                createPlanItem(ZonedDateTime.now(), result.data.asPlanItem())
                             } else {
-                                updatePlan(ZonedDateTime.now(), plan = result.data)
+                                updatePlanItem(ZonedDateTime.now(), result.data.asPlanItem())
                             }
                             setUiEvent(PlanWriteUiEvent.NavigateToBack)
                         }
@@ -338,7 +341,7 @@ sealed interface PlanWriteUiState : UiState {
         val planDate: ZonedDateTime? = null,
         val planTime: ZonedDateTime? = null,
         val planPlace: String? = null,
-        val planPlaceName :String? = null,
+        val planPlaceName: String? = null,
         val planLongitude: Double = 0.0,
         val planLatitude: Double = 0.0,
         val selectMeetingId: String? = null,

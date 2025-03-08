@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
-import com.moim.core.common.delegate.PlanViewModelDelegate
+import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
@@ -35,10 +35,10 @@ class MeetingSettingViewModel @Inject constructor(
     private val meetingRepository: MeetingRepository,
     userRepository: UserRepository,
     meetingViewModelDelegate: MeetingViewModelDelegate,
-    planViewModelDelegate: PlanViewModelDelegate
+    planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(),
     MeetingViewModelDelegate by meetingViewModelDelegate,
-    PlanViewModelDelegate by planViewModelDelegate {
+    PlanItemViewModelDelegate by planItemViewModelDelegate {
 
     private val meeting
         get() = savedStateHandle
@@ -107,7 +107,7 @@ class MeetingSettingViewModel @Inject constructor(
                             is Result.Loading -> return@collect
                             is Result.Success -> {
                                 deleteMeeting(ZonedDateTime.now(), meeting.id)
-                                invalidatePlan(ZonedDateTime.now())
+                                invalidatePlanItem(ZonedDateTime.now())
                                 setUiEvent(MeetingSettingUiEvent.NavigateToBackForDelete)
                             }
 
