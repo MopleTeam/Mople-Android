@@ -92,7 +92,10 @@ fun PlanDetailContent(
         )
         PlanInfoItem(
             startIconRes = R.drawable.ic_location,
-            text = planItem.address
+            endIconRes = R.drawable.ic_next,
+            enable = true,
+            text = planItem.address,
+            onClick = { onUiAction(PlanDetailUiAction.OnShowMapAppDialog(true)) }
         )
 
         if (planItem.latitude != 0.0 && planItem.longitude != 0.0) {

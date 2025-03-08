@@ -1,11 +1,15 @@
 package com.moim.feature.plandetail.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -38,12 +42,14 @@ fun PlanDetailMapContent(
     NaverMap(
         modifier = modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(6.dp))
+            .border(BorderStroke(1.dp, MoimTheme.colors.stroke))
             .aspectRatio(33f / 16f),
         uiSettings = MapUiSettings(
             isZoomControlEnabled = false,
             isScaleBarEnabled = false,
             isLogoClickEnabled = false,
-            isCompassEnabled = false
+            isCompassEnabled = false,
         ),
         cameraPositionState = cameraPositionState,
         locationSource = rememberFusedLocationSource(),
