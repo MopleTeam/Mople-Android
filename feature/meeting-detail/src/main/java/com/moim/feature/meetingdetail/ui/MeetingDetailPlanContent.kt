@@ -1,6 +1,8 @@
 package com.moim.feature.meetingdetail.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -42,6 +45,7 @@ import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.model.Plan
 import com.moim.core.model.Review
+import com.moim.core.model.ReviewImage
 import com.moim.feature.meetingdetail.MeetingDetailUiAction
 import com.moim.feature.meetingdetail.OnMeetingDetailUiAction
 import java.time.ZonedDateTime
@@ -61,7 +65,7 @@ fun MeetingDetailPlanContent(
             .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 28.dp)
+        contentPadding = PaddingValues(top = 28.dp, bottom = 64.dp)
     ) {
         item {
             Row(
@@ -202,10 +206,13 @@ fun MeetingDetailReviewItem(
             MeetingDetailPlanHeader(time = review.reviewAt)
             Spacer(Modifier.height(16.dp))
 
-            Row {
-                Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     MoimText(
-                        modifier = Modifier.fillMaxWidth(),
                         text = review.reviewName,
                         style = MoimTheme.typography.title03.semiBold,
                         color = MoimTheme.colors.gray.gray01
@@ -215,6 +222,39 @@ fun MeetingDetailReviewItem(
                     PlanParticipantCount(
                         count = review.memberCount
                     )
+                }
+
+                if (review.images.isNotEmpty()) {
+                    Spacer(Modifier.width(16.dp))
+
+                    Box {
+                        NetworkImage(
+                            modifier = Modifier
+                                .padding(end = 4.dp, bottom = 4.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
+                                .size(50.dp),
+                            imageUrl = review.images.first().imageUrl,
+                            errorImage = painterResource(R.drawable.ic_empty_image)
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .background(MoimTheme.colors.primary.disable, shape = CircleShape)
+                                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
+                                .size(24.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            MoimText(
+                                text = review.images.size.toString(),
+                                textAlign = TextAlign.Center,
+                                style = MoimTheme.typography.body01.medium,
+                                color = MoimTheme.colors.primary.primary
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -336,6 +376,7 @@ private fun MeetingDetailPlanContentPreview() {
         ) {
             MeetingDetailPlanContent(
                 userId = "",
+                isPlanSelected = false,
                 plans = listOf(
                     Plan(
                         planId = "1",
@@ -360,8 +401,45 @@ private fun MeetingDetailPlanContentPreview() {
                         planAddress = "서울시 강남구"
                     )
                 ),
-                reviews = emptyList(),
-                isPlanSelected = true,
+                reviews = listOf(
+                    Review(
+                        postId = "1",
+                        meetingId = "1",
+                        reviewId = "1",
+                        reviewName = "술 한 잔 하는 날1",
+                        memberCount = 6,
+                        reviewAt = "2023-12-12 09:00:00",
+                        address = "서울시 강남구",
+                        images = listOf(ReviewImage(imageId = "", imageUrl = "aaa"))
+                    ),
+                    Review(
+                        postId = "1",
+                        meetingId = "1",
+                        reviewId = "2",
+                        reviewName = "술 한 잔 하는 날2",
+                        memberCount = 6,
+                        reviewAt = "2023-12-13 09:00:00",
+                        address = "서울시 강남구"
+                    ),
+                    Review(
+                        postId = "1",
+                        meetingId = "1",
+                        reviewId = "3",
+                        reviewName = "술 한 잔 하는 날3",
+                        memberCount = 6,
+                        reviewAt = "2023-12-14 09:00:00",
+                        address = "서울시 강남구"
+                    ),
+                    Review(
+                        postId = "1",
+                        meetingId = "1",
+                        reviewId = "4",
+                        reviewName = "술 한 잔 하는 날4",
+                        memberCount = 6,
+                        reviewAt = "2023-12-15 09:00:00",
+                        address = "서울시 강남구"
+                    ),
+                ),
                 onUiAction = {}
             )
         }

@@ -49,6 +49,24 @@ fun PlanItem.asPlan() : Plan {
     )
 }
 
+fun PlanItem.asReview() : Review {
+    return Review(
+        userId = userId,
+        meetingId = meetingId,
+        meetingName = meetingName,
+        meetingImageUrl = meetingImageUrl,
+        postId = commentCheckId,
+        reviewId = postId,
+        reviewName = planName,
+        memberCount = participantsCount,
+        reviewAt = planAt,
+        address = address,
+        longitude = longitude,
+        latitude = latitude,
+        placeName = placeName,
+        images = reviewImages,
+    )
+}
 fun Plan.asPlanItem(): PlanItem {
     return PlanItem(
         isPlanAtBefore = true,

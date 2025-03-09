@@ -25,6 +25,7 @@ import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
 import com.moim.core.model.Review
 import com.moim.core.model.item.asPlan
+import com.moim.core.model.item.asReview
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -125,16 +126,30 @@ class MeetingDetailViewModel @Inject constructor(
                             }
 
                             is PlanAction.PlanUpdate -> {
-                                val plans = plans.toMutableList().apply {
-                                    val index = withIndex()
-                                        .find { it.value.planId == action.planItem.postId }
-                                        ?.index
-                                        ?: return@collect
+                                if (action.planItem.isPlanAtBefore) {
+                                    val plans = plans.toMutableList().apply {
+                                        val index = withIndex()
+                                            .find { it.value.planId == action.planItem.postId }
+                                            ?.index
+                                            ?: return@collect
 
-                                    set(index, action.planItem.asPlan())
+
+                                        set(index, action.planItem.asPlan())
+                                    }
+
+                                    setUiState(copy(plans = plans))
+                                } else {
+                                    val reviews = reviews.toMutableList().apply {
+                                        val index = withIndex()
+                                            .find { it.value.reviewId == action.planItem.postId }
+                                            ?.index
+                                            ?: return@collect
+
+                                        set(index, action.planItem.asReview())
+                                    }
+
+                                    setUiState(copy(reviews = reviews))
                                 }
-
-                                setUiState(copy(plans = plans))
                             }
 
                             is PlanAction.PlanDelete -> setUiState(
@@ -244,7 +259,7 @@ sealed interface MeetingDetailUiState : UiState {
     data object Loading : MeetingDetailUiState
 
     data class Success(
-        val userId :String = "",
+        val userId: String = "",
         val meeting: Meeting = Meeting(),
         val plans: List<Plan> = emptyList(),
         val reviews: List<Review> = emptyList(),
