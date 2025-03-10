@@ -19,8 +19,10 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -34,6 +36,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -136,6 +139,102 @@ fun MoimTextField(
     )
 }
 
+@Composable
+fun MoimTextField(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    hintText: String,
+    textFieldValue: TextFieldValue = TextFieldValue(),
+    textStyle: TextStyle = MoimTheme.typography.body01.regular,
+    textMaxLength: Int = 100,
+    textFieldColors: TextFieldColors = moimTextFieldColors(),
+    onTextChanged: (TextFieldValue) -> Unit = {},
+    supportText: String? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    imeAction: ImeAction = ImeAction.Done,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    isError: Boolean = false,
+    errorMessage: String? = null,
+    singleLine: Boolean = true,
+    maxLine: Int = 1,
+    shape: Shape = RoundedCornerShape(6),
+    paddingValues: PaddingValues = PaddingValues(16.dp),
+    unfocusedBorderThickness: Dp = 1.dp,
+    focusedBorderThickness: Dp = 2.dp,
+    minWidth: Dp = OutlinedTextFieldDefaults.MinWidth,
+    minHeight: Dp = OutlinedTextFieldDefaults.MinHeight,
+    focusManager: FocusManager = LocalFocusManager.current,
+    isClearFocus: Boolean = true,
+) {
+    val currentText by rememberUpdatedState(newValue = textFieldValue)
+    var dummyText by remember { mutableStateOf(currentText) }
+    val onTextTriggered = {
+        if (isClearFocus) focusManager.clearFocus()
+        onTextChanged(textFieldValue)
+    }
+
+    if (currentText.text.isEmpty() && dummyText.text.isNotEmpty()) {
+        dummyText = TextFieldValue()
+    }
+
+    LaunchedEffect(currentText) {
+        dummyText = currentText
+    }
+
+    MoimOutlinedTextField(
+        modifier = modifier.onKeyEvent {
+            val pressedEnter = (it.key == Key.Enter)
+            if (pressedEnter) {
+                onTextTriggered()
+            }
+            pressedEnter
+        },
+        colors = textFieldColors,
+        value = dummyText,
+        enabled = enabled,
+        onValueChange = {
+            dummyText = it.copy(text = it.text.take(textMaxLength))
+            onTextChanged(dummyText)
+        },
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        placeholder = {
+            Text(
+                text = hintText,
+                style = textStyle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+
+        visualTransformation = visualTransformation,
+        textStyle = textStyle,
+        isError = isError,
+        shape = shape,
+
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = imeAction,
+            keyboardType = keyboardType
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                onTextChanged(dummyText)
+                focusManager.clearFocus()
+            }
+        ),
+        supportingText = if (isError && errorMessage != null) errorMessage else supportText,
+        maxLines = maxLine,
+        singleLine = singleLine,
+        paddingValues = paddingValues,
+        minWidth = minWidth,
+        minHeight = minHeight,
+        focusedBorderThickness = focusedBorderThickness,
+        unfocusedBorderThickness = unfocusedBorderThickness,
+    )
+}
+
 @Preview
 @Composable
 private fun MoimTextFieldPreview() {
@@ -149,6 +248,7 @@ private fun MoimTextFieldPreview() {
         ) {
             MoimTextField(
                 modifier = Modifier.fillMaxWidth(),
+                text = "",
                 hintText = "This is Basic",
                 singleLine = false,
                 supportText = "dummy support message",
@@ -183,6 +283,7 @@ private fun MoimTextFieldPreview() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 139.dp),
+                text = "",
                 hintText = "This is Multi Line",
                 singleLine = false,
                 supportText = "dummy support message",

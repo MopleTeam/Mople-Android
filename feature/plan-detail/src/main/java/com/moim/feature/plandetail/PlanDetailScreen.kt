@@ -69,7 +69,7 @@ fun PlanDetailRoute(
             is PlanDetailUiEvent.NavigateToReviewWrite -> navigateToReviewWrite(event.postId, true)
             is PlanDetailUiEvent.NavigateToMap -> {
                 try {
-                    when(event.mapType) {
+                    when (event.mapType) {
                         MapType.KAKAO -> {
                             val kakaoMapUrl = MAP_INTENT_FOR_KAKAO.format(event.latitude.toString(), event.longitude.toString())
                             val intent = Intent(Intent.ACTION_VIEW, kakaoMapUrl.toUri())
@@ -86,6 +86,7 @@ fun PlanDetailRoute(
                     showToast(context, context.getString(R.string.plan_detail_map_intent_fail))
                 }
             }
+
             is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
@@ -172,7 +173,7 @@ fun PlanDetailScreen(
         },
         bottomBar = {
             PlanDetailBottomBar(
-                updateComment = uiState.selectedComment,
+                updateComment = uiState.selectedUpdateComment,
                 onUiAction = onUiAction
             )
         }

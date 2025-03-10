@@ -127,7 +127,7 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickPlanReport -> reportPlan()
             is PlanDetailUiAction.OnClickCommentUpload -> uploadComment(uiAction.commentText, uiAction.updateComment)
             is PlanDetailUiAction.OnClickCommentReport -> reportComment(uiAction.comment)
-            is PlanDetailUiAction.OnClickCommentUpdate -> {}
+            is PlanDetailUiAction.OnClickCommentUpdate -> updateComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentDelete -> deleteComment(uiAction.comment)
             is PlanDetailUiAction.OnClickMapAddress -> navigateToMap(uiAction.mapType)
             is PlanDetailUiAction.OnShowReviewImageCropDialog -> showPlanDetailImageCropDialog(uiAction.isShow, uiAction.selectedImageIndex)
@@ -136,6 +136,12 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnShowPlanReportDialog -> showPlanReportDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowCommentEditDialog -> showCommentEditDialog(uiAction.isShow, uiAction.comment)
             is PlanDetailUiAction.OnShowCommentReportDialog -> showCommentReportDialog(uiAction.isShow, uiAction.comment)
+        }
+    }
+
+    private fun updateComment(comment: Comment) {
+        uiState.checkState<PlanDetailUiState.Success> {
+            setUiState(copy(selectedUpdateComment = comment))
         }
     }
 
@@ -323,6 +329,7 @@ sealed interface PlanDetailUiState : UiState {
         val comments: List<Comment> = emptyList(),
         val selectedImageIndex: Int = 0,
         val selectedComment: Comment? = null,
+        val selectedUpdateComment : Comment? = null,
         val isShowPlanEditDialog: Boolean = false,
         val isShowPlanReportDialog: Boolean = false,
         val isShowCommentEditDialog: Boolean = false,
