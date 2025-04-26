@@ -18,6 +18,9 @@ internal interface MeetingApi {
     @GET("meet/{meetId}")
     suspend fun getMeeting(@Path("meetId") id: String): MeetingResponse
 
+    @POST("meet/invite/{meetId}")
+    suspend fun getMeetingInviteCode(@Path("meetId") id: String): String
+
     @GET("/meet/members/{meetId}")
     suspend fun getMeetingParticipants(@Path("meetId") id: String): ParticipantContainerResponse
 

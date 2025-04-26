@@ -23,6 +23,10 @@ internal class MeetingRepositoryImpl @Inject constructor(
         emit(meetingApi.getMeeting(meetingId).asItem())
     }
 
+    override fun getMeetingInviteCode(meetingId: String) = catchFlow {
+        emit(meetingApi.getMeetingInviteCode(meetingId))
+    }
+
     override fun getMeetingParticipants(meetingId: String) = catchFlow {
         val meetingParticipants = meetingApi.getMeetingParticipants(meetingId)
         emit(meetingParticipants.members.map { it.asItem(meetingParticipants.creatorId == it.memberId) })

@@ -13,6 +13,7 @@ interface CommentRepository {
     ): Flow<List<Comment>>
 
     fun updateComment(
+        postId: String,
         commentId: String,
         content: String,
     ): Flow<List<Comment>>

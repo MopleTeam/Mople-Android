@@ -21,8 +21,8 @@ internal class CommentRepositoryImpl @Inject constructor(
         emit(commentApi.createComment(postId, jsonOf(KEY_CONTENTS to content)).map(CommentResponse::asItem))
     }
 
-    override fun updateComment(commentId: String, content: String): Flow<List<Comment>> = catchFlow {
-        emit(commentApi.updateComment(commentId, jsonOf(KEY_CONTENTS to content)).map(CommentResponse::asItem))
+    override fun updateComment(postId: String,commentId: String, content: String): Flow<List<Comment>> = catchFlow {
+        emit(commentApi.updateComment(postId, commentId, jsonOf(KEY_CONTENTS to content)).map(CommentResponse::asItem))
     }
 
     override fun deleteComment(commentId: String): Flow<Unit> = catchFlow {

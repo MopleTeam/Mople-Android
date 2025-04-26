@@ -193,6 +193,7 @@ class PlanDetailViewModel @Inject constructor(
             uiState.checkState<PlanDetailUiState.Success> {
                 if (updateComment != null) {
                     commentRepository.updateComment(
+                        postId = postId,
                         commentId = updateComment.commentId,
                         content = content.trim()
                     )

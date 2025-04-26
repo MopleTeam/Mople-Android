@@ -21,7 +21,7 @@ fun CommentResponse.asItem(): Comment {
         commentId = commentId,
         userId = userId,
         userName = userName,
-        userImageUrl = userImageUrl,
+        userImageUrl = userImageUrl ?: "",
         content = content,
         commentAt = commentAt,
         isUpdate = isUpdate

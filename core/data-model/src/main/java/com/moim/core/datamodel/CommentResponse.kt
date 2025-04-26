@@ -14,7 +14,7 @@ data class CommentResponse(
     @SerialName("writerName")
     val userName: String,
     @SerialName("writerImage")
-    val userImageUrl: String,
+    val userImageUrl: String? = null,
     @SerialName("content")
     val content: String,
     @SerialName("time")

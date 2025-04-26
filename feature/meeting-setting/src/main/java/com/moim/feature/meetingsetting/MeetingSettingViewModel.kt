@@ -78,7 +78,7 @@ class MeetingSettingViewModel @Inject constructor(
             is MeetingSettingUiAction.OnClickMeetingEdit -> setUiEvent(MeetingSettingUiEvent.NavigateToMeetingWrite(uiAction.meeting))
             is MeetingSettingUiAction.OnClickMeetingExit -> deleteMeeting()
             is MeetingSettingUiAction.OnClickMeetingParticipants -> setUiEvent(MeetingSettingUiEvent.NavigateToMeetingParticipants(uiAction.meetingId))
-            is MeetingSettingUiAction.OnClickAddUser -> {}
+            is MeetingSettingUiAction.OnClickAddUser -> getInviteLink()
             is MeetingSettingUiAction.OnShowMeetingExitDialog -> showMeetingExitDialog(uiAction.isShow)
             is MeetingSettingUiAction.OnShowMeetingDeleteDialog -> showMeetingDeleteDialog(uiAction.isShow)
         }
@@ -93,6 +93,23 @@ class MeetingSettingViewModel @Inject constructor(
     private fun showMeetingDeleteDialog(isShow: Boolean) {
         uiState.checkState<MeetingSettingUiState.MeetingSetting> {
             setUiState(copy(isShowMeetingDeleteDialog = isShow))
+        }
+    }
+
+    private fun getInviteLink() {
+        viewModelScope.launch {
+            uiState.checkState<MeetingSettingUiState.MeetingSetting> {
+                meetingRepository.getMeetingInviteCode(meeting.id)
+                    .asResult()
+                    .onEach { setLoading(it is Result.Loading) }
+                    .collect { result ->
+                        when (result) {
+                            is Result.Loading -> return@collect
+                            is Result.Success -> setUiEvent(MeetingSettingUiEvent.NavigateToExternalShareUrl(result.data))
+                            is Result.Error -> showErrorMessage(result.exception)
+                        }
+                    }
+            }
         }
     }
 
@@ -111,13 +128,17 @@ class MeetingSettingViewModel @Inject constructor(
                                 setUiEvent(MeetingSettingUiEvent.NavigateToBackForDelete)
                             }
 
-                            is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(MeetingSettingUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                is NetworkException -> setUiEvent(MeetingSettingUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                            }
+                            is Result.Error -> showErrorMessage(result.exception)
                         }
                     }
             }
+        }
+    }
+
+    private fun showErrorMessage(error: Throwable) {
+        when (error) {
+            is IOException -> setUiEvent(MeetingSettingUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+            is NetworkException -> setUiEvent(MeetingSettingUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
         }
     }
 }
@@ -146,5 +167,6 @@ sealed interface MeetingSettingUiEvent : UiEvent {
     data object NavigateToBackForDelete : MeetingSettingUiEvent
     data class NavigateToMeetingWrite(val meeting: Meeting) : MeetingSettingUiEvent
     data class NavigateToMeetingParticipants(val meetingId: String) : MeetingSettingUiEvent
+    data class NavigateToExternalShareUrl(val url: String) : MeetingSettingUiEvent
     data class ShowToastMessage(val message: ToastMessage) : MeetingSettingUiEvent
 }

@@ -1,6 +1,8 @@
 package com.moim.feature.plandetail.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +31,7 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Comment
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
+import java.time.LocalDate
 
 @Composable
 fun PlanDetailCommentHeader(
@@ -74,9 +77,10 @@ fun PlanDetailCommentItem(
             modifier = Modifier
                 .padding(top = 4.dp)
                 .size(32.dp)
-                .clip(RoundedCornerShape(100)),
+                .clip(CircleShape)
+                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape),
             imageUrl = comment.userImageUrl,
-            errorImage = painterResource(R.drawable.ic_empty_image)
+            errorImage = painterResource(R.drawable.ic_profile),
         )
 
         Spacer(Modifier.width(12.dp))
@@ -161,7 +165,7 @@ private fun PlanDetailCommentItemPreview() {
                     userName = "모닝커피클럽회원",
                     userImageUrl = "",
                     content = "이른 아침, 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 다음에 또 뵐 수 있으면 좋겠네요.",
-                    commentAt = "",
+                    commentAt = "2025-03-29 21:23:20",
                     isUpdate = false,
                 ),
                 onUiAction = {}

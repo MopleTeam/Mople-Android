@@ -20,8 +20,9 @@ internal interface CommentApi {
         @Body params: JsonObject
     ): List<CommentResponse>
 
-    @PATCH("/comment/{commentId}")
+    @PATCH("/comment/{postId}/{commentId}")
     suspend fun updateComment(
+        @Path("postId") postId: String,
         @Path("commentId") commentId: String,
         @Body params: JsonObject
     ): List<CommentResponse>

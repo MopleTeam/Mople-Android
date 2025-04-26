@@ -10,6 +10,8 @@ interface MeetingRepository {
 
     fun getMeeting(meetingId: String): Flow<Meeting>
 
+    fun getMeetingInviteCode(meetingId: String) : Flow<String>
+
     fun getMeetingParticipants(meetingId: String): Flow<List<Participant>>
 
     fun createMeeting(meetingName: String, meetingImageUrl: String?): Flow<Meeting>

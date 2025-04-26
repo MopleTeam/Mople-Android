@@ -53,11 +53,10 @@ fun MeetingSettingProfile(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(10.dp))
-                .onSingleClick {
-                    if (isMeetingHost) {
-                        onUiAction(MeetingSettingUiAction.OnClickMeetingEdit(meeting))
-                    }
-                },
+                .onSingleClick(
+                    enabled = isMeetingHost,
+                    onClick = { onUiAction(MeetingSettingUiAction.OnClickMeetingEdit(meeting)) }
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             NetworkImage(

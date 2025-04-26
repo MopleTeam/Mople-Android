@@ -53,11 +53,12 @@ fun MoimTopAppbar(
             modifier = modifier
                 .fillMaxWidth()
                 .background(backgroundColor)
-                .padding(horizontal = 12.dp),
+                .padding(end = 12.dp),
             title = title,
             navigationIcon = {
                 if (isNavigationIconVisible) {
                     IconButton(
+                        modifier = Modifier.padding(12.dp),
                         onClick = {
                             keyboardController?.hide()
                             focusManager.clearFocus()
@@ -110,7 +111,7 @@ fun MoimTopAppbar(
             modifier = modifier
                 .fillMaxWidth()
                 .background(backgroundColor)
-                .padding(horizontal = 12.dp),
+                .padding(end = 12.dp),
             title = {
                 Text(
                     text = title,
@@ -122,6 +123,7 @@ fun MoimTopAppbar(
             navigationIcon = {
                 if (isNavigationIconVisible) {
                     IconButton(
+                        modifier = Modifier.padding(12.dp),
                         onClick = {
                             keyboardController?.hide()
                             focusManager.clearFocus()
