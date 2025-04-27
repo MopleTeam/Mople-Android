@@ -1,43 +1,43 @@
 [versions]
 # Project
-androidGradlePlugin = "8.7.2"
+androidGradlePlugin = "8.9.2"
 playservicesGradlePlugin = "4.4.2"
-firebaseCrashlyticsGradlePlugin = "3.0.2"
+firebaseCrashlyticsGradlePlugin = "3.0.3"
 
 # AndroidX
-androidxCore = "1.13.1"
-androidxComposeBom = "2024.10.01"
+androidxCore = "1.16.0"
+androidxComposeBom = "2025.04.01"
 androidxStartUp = "1.2.0"
 androidxLifecycle = "2.8.7"
 androidxHilt = "1.2.0"
 androidxCoreSplashScreen = "1.0.1"
-androidxActivity = "1.9.3"
-androidxNavigation = "2.8.3"
+androidxActivity = "1.10.1"
+androidxNavigation = "2.8.9"
 androidxDataStore = "1.1.1"
-androidxRoom = "2.6.1"
+androidxRoom = "2.7.1"
 androidxAppcompat = "1.7.0"
-androidxPaging = "3.3.2"
+androidxPaging = "3.3.6"
 
 # Android
-androidPlayServicesLocation = "21.0.1"
+androidPlayServicesLocation = "21.3.0"
 
 # Kotlin
-kotlin = "2.0.21"
-kotlinxCoroutines = "1.9.0"
+kotlin = "2.1.0"
+kotlinxCoroutines = "1.10.1"
 kotlinxSerializationJson = "1.7.3"
-ksp = "2.0.21-1.0.25"
+ksp = "2.1.0-1.0.29"
 
 # Firebase
-firebaseBom = "33.5.1"
+firebaseBom = "33.13.0"
 
 # hilt
-hilt = "2.52"
+hilt = "2.55"
 
 # Coil
 coil = "2.7.0"
 
 # coreDseugar
-androidDesugarJdkLibs = "2.1.3"
+androidDesugarJdkLibs = "2.1.5"
 
 # Test
 junit = "4.13.2"
@@ -47,13 +47,13 @@ espresso-core = "3.6.1"
 # ETC
 retrofit = "2.11.0"
 okhttp = "4.12.0"
-lottie = "6.4.0"
+lottie = "6.6.3"
 timber = "5.0.1"
 leakCanary = "2.14"
 compressor = "3.0.1"
 calendarCompose = "2.6.0"
 composeStableMarker = "1.0.5"
-kakaoCore = "2.17.0"
+kakaoCore = "2.21.1"
 naverMapCompose = "1.7.1"
 naverMapLocation = "21.0.1"
 tedClusteringNaver = "1.0.2"

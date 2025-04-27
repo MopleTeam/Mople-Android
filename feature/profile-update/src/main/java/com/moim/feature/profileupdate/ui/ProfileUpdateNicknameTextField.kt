@@ -41,7 +41,7 @@ fun ProfileUpdateNicknameTextField(
             unfocusedSupportingTextColor = color_34C759,
         ),
         isError = isDuplicated == true || isRegexError,
-        errorMessage = stringResource(if (isRegexError) R.string.profile_update_regex_error else R.string.sign_up_duplicate_error),
+        errorMessage = stringResource(if (isRegexError) R.string.profile_update_regex_error else R.string.profile_update_duplicate_error),
         supportText = if (isDuplicated == false) stringResource(R.string.profile_update_pass) else null,
         text = nickname,
         textMaxLength = 12,

@@ -11,7 +11,7 @@ data class ReviewResponse(
     val meetingId: String = "",
     @SerialName("meetName")
     val meetingName: String = "",
-    @SerialName("meetImage")
+    @SerialName("meetImg")
     val meetingImageUrl: String = "",
     @SerialName("reviewId")
     val reviewId: String,
