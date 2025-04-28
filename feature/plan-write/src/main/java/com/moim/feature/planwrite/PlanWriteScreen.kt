@@ -127,7 +127,7 @@ fun PlanWriteScreen(
             PlanWriteSelectedBox(
                 titleText = stringResource(R.string.plan_write_place_select),
                 hintText = stringResource(R.string.plan_write_place_select_hint),
-                valueText = uiState.planPlace,
+                valueText = uiState.planLoadAddress,
                 iconRes = R.drawable.ic_location,
                 onClick = {
                     keyboardController?.hide()

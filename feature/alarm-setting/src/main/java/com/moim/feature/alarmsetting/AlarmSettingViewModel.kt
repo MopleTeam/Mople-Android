@@ -89,8 +89,8 @@ class AlarmSettingViewModel @Inject constructor(
     }
 
     companion object {
-        private const val ENABLE_MEET = "meet"
-        private const val ENABLE_PLAN = "plan"
+        private const val ENABLE_MEET = "MEET"
+        private const val ENABLE_PLAN = "PLAN"
     }
 }
 

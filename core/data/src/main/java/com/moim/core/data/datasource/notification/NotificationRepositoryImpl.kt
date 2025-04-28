@@ -22,6 +22,6 @@ internal class NotificationRepositoryImpl @Inject constructor(
     }
 
     companion object {
-        private const val KEY_TOPIC = "topic"
+        private const val KEY_TOPIC = "topics"
     }
 }

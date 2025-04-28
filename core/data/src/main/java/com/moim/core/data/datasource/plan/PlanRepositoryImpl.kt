@@ -62,6 +62,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         planName: String,
         planTime: String,
         planAddress: String,
+        planWeatherAddress: String,
         title: String,
         longitude: Double,
         latitude: Double
@@ -76,7 +77,7 @@ internal class PlanRepositoryImpl @Inject constructor(
                     KEY_TITLE to title,
                     KEY_LOT to longitude,
                     KEY_LAT to latitude,
-                    KEY_WEATHER_ADDRESS to planAddress
+                    KEY_WEATHER_ADDRESS to planWeatherAddress
                 )
             ).asItem()
         )
@@ -87,6 +88,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         planName: String,
         planTime: String,
         planAddress: String,
+        planWeatehrAddress: String,
         title: String,
         longitude: Double,
         latitude: Double
@@ -100,7 +102,7 @@ internal class PlanRepositoryImpl @Inject constructor(
                     KEY_PLAN_ADDRESS to planAddress,
                     KEY_LOT to longitude,
                     KEY_LAT to latitude,
-                    KEY_WEATHER_ADDRESS to planAddress
+                    KEY_WEATHER_ADDRESS to planWeatehrAddress
                 )
             ).asItem()
         )

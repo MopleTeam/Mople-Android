@@ -10,4 +10,6 @@ interface AuthRepository {
     fun signUp(socialType: String, token: String, email: String, nickname: String, profileUrl: String? = null): Flow<Token>
 
     fun signIn(socialType: String, token: String, email: String,): Flow<Token>
+
+    fun signOut(userId: String) : Flow<Unit>
 }

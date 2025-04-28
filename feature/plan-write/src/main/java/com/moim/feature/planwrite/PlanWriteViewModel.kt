@@ -52,7 +52,8 @@ class PlanWriteViewModel @Inject constructor(
                         planName = plan.planName,
                         planDate = planDate,
                         planTime = planDate,
-                        planPlace = plan.address,
+                        planLoadAddress = plan.loadAddress,
+                        planWeatherAddress = plan.weatherAddress,
                         planPlaceName = plan.planName,
                         planLongitude = plan.longitude,
                         planLatitude = plan.latitude,
@@ -105,7 +106,8 @@ class PlanWriteViewModel @Inject constructor(
         uiState.checkState<PlanWriteUiState.PlanWrite> {
             setUiState(
                 copy(
-                    planPlace = place.roadAddress,
+                    planLoadAddress = place.roadAddress,
+                    planWeatherAddress = place.address,
                     planPlaceName = place.title,
                     planLongitude = place.xPoint.toDouble(),
                     planLatitude = place.yPoint.toDouble(),
@@ -154,7 +156,7 @@ class PlanWriteViewModel @Inject constructor(
     private fun setPlanCreateEnabled() {
         uiState.checkState<PlanWriteUiState.PlanWrite> {
             val enable = planName.isNullOrEmpty().not()
-                    && planPlace.isNullOrEmpty().not()
+                    && planLoadAddress.isNullOrEmpty().not()
                     && selectMeetingId.isNullOrEmpty().not()
                     && planDate != null
                     && planTime != null
@@ -210,7 +212,8 @@ class PlanWriteViewModel @Inject constructor(
                             meetingId = selectMeetingId!!,
                             planName = planName!!,
                             planTime = planTime.parseDateString(),
-                            planAddress = planPlace!!,
+                            planAddress = planLoadAddress!!,
+                            planWeatherAddress = planWeatherAddress!!,
                             title = planPlaceName!!,
                             longitude = planLongitude,
                             latitude = planLatitude,
@@ -221,7 +224,8 @@ class PlanWriteViewModel @Inject constructor(
                             planId = planId,
                             planName = planName!!,
                             planTime = planTime.parseDateString(),
-                            planAddress = planPlace!!,
+                            planAddress = planLoadAddress!!,
+                            planWeatherAddress = planWeatherAddress!!,
                             title = planPlaceName!!,
                             longitude = planLongitude,
                             latitude = planLatitude,
@@ -340,7 +344,8 @@ sealed interface PlanWriteUiState : UiState {
         val planName: String? = null,
         val planDate: ZonedDateTime? = null,
         val planTime: ZonedDateTime? = null,
-        val planPlace: String? = null,
+        val planLoadAddress: String? = null,
+        val planWeatherAddress : String? = null,
         val planPlaceName: String? = null,
         val planLongitude: Double = 0.0,
         val planLatitude: Double = 0.0,

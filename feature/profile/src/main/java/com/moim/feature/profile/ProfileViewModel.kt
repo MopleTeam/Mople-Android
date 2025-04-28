@@ -9,6 +9,7 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val authRepository: AuthRepository
 ) : BaseViewModel() {
 
     private val userResult = loadDataSignal
@@ -68,8 +70,21 @@ class ProfileViewModel @Inject constructor(
 
     private fun logout() {
         viewModelScope.launch {
-            userRepository.clearMoimStorage()
-            setUiEvent(ProfileUiEvent.NavigateToIntro)
+            uiState.checkState<ProfileUiState.Success> {
+                authRepository.signOut(user.userId)
+                    .asResult()
+                    .onEach { setLoading(it is Result.Loading) }
+                    .collect { result ->
+                        when (result) {
+                            is Result.Loading -> return@collect
+                            is Result.Success -> clearUserData()
+                            is Result.Error -> when (result.exception) {
+                                is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
+                        }
+                    }
+            }
         }
     }
 
@@ -80,10 +95,10 @@ class ProfileViewModel @Inject constructor(
                     .asResult()
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
-                        when(result) {
+                        when (result) {
                             is Result.Loading -> return@collect
-                            is Result.Success -> logout()
-                            is Result.Error -> when(result.exception) {
+                            is Result.Success -> clearUserData()
+                            is Result.Error -> when (result.exception) {
                                 is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
                                 else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
                             }
@@ -91,6 +106,11 @@ class ProfileViewModel @Inject constructor(
                     }
             }
         }
+    }
+
+    private suspend fun clearUserData() {
+        userRepository.clearMoimStorage()
+        setUiEvent(ProfileUiEvent.NavigateToIntro)
     }
 }
 

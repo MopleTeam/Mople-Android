@@ -304,7 +304,7 @@ class PlanDetailViewModel @Inject constructor(
 
     private fun navigateToMap(mapType: MapType) {
         uiState.checkState<PlanDetailUiState.Success> {
-            setUiEvent(PlanDetailUiEvent.NavigateToMap(mapType, planItem.latitude, planItem.longitude, planItem.address))
+            setUiEvent(PlanDetailUiEvent.NavigateToMap(mapType, planItem.latitude, planItem.longitude, planItem.loadAddress))
         }
     }
 

@@ -19,6 +19,8 @@ data class PlaceResponse(
     val distance: String,
     @SerialName("title")
     val title: String,
+    @SerialName("address")
+    val address: String = "",
     @SerialName("roadAddress")
     val roadAddress: String,
     @SerialName("x")

@@ -13,7 +13,7 @@ data class PlanResponse(
     val meetingId: String = "",
     @SerialName("meetName")
     val meetingName: String = "",
-    @SerialName("meetImage")
+    @SerialName("meetImg")
     val meetingImage: String = "",
     @SerialName("planName")
     val planName: String = "",
@@ -29,6 +29,8 @@ data class PlanResponse(
     val planLongitude: Double = 0.0,
     @SerialName("lat")
     val planLatitude: Double = 0.0,
+    @SerialName("weatherAddress")
+    val weatherAddress: String = "",
     @SerialName("weatherIcon")
     val weatherIconUrl: String = "",
     @SerialName("temperature")

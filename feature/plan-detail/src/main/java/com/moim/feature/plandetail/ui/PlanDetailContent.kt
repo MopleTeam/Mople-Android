@@ -94,7 +94,7 @@ fun PlanDetailContent(
             startIconRes = R.drawable.ic_location,
             endIconRes = R.drawable.ic_next,
             enable = true,
-            text = planItem.address,
+            text = planItem.loadAddress,
             onClick = { onUiAction(PlanDetailUiAction.OnShowMapAppDialog(true)) }
         )
 

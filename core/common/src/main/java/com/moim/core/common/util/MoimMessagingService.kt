@@ -21,9 +21,13 @@ class MoimMessagingService : FirebaseMessagingService() {
     }
 
     private fun sendNotification(remoteMessage: RemoteMessage) {
-        val (notifyTitle, notifyBody) = remoteMessage.data[NOTIFY_TITLE] to remoteMessage.data[NOTIFY_BODY]
-        val meetId = remoteMessage.data[NOTIFY_MEET_ID].toString()
-        val query = mapOf(QUERY_CODE to meetId)
+        val (notifyTitle, notifyBody) = remoteMessage.notification?.title to remoteMessage.notification?.body
+        val meetId = remoteMessage.data[NOTIFY_MEET_ID]
+        val reviewId = remoteMessage.data[NOTIFY_REVIEW_ID]
+        val planId = remoteMessage.data[NOTIFY_PLAN_ID]
+
+        val id = meetId ?: planId ?: reviewId ?: ""
+        val query = mapOf(QUERY_CODE to id)
 
         val notificationBuilder = moimNotificationManager
             .createNotificationBuilder()
@@ -37,9 +41,9 @@ class MoimMessagingService : FirebaseMessagingService() {
 
     companion object {
         private const val REQUEST_CODE = 100
-        private const val NOTIFY_TITLE = "title"
-        private const val NOTIFY_BODY = "body"
         private const val NOTIFY_MEET_ID = "meetId"
+        private const val NOTIFY_PLAN_ID = "planId"
+        private const val NOTIFY_REVIEW_ID = "reviewId"
 
         private const val QUERY_CODE = "code"
     }

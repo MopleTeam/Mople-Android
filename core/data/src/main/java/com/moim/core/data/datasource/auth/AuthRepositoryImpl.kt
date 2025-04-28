@@ -6,9 +6,11 @@ import com.moim.core.data.datastore.PreferenceStorage
 import com.moim.core.data.service.AuthApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
+import com.moim.core.data.util.convertToToken
 import com.moim.core.model.Token
 import com.moim.core.model.asItem
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -50,12 +52,28 @@ internal class AuthRepositoryImpl @Inject constructor(
         emit(authToken)
     }
 
+    override fun signOut(userId: String): Flow<Unit> = catchFlow {
+        val token = preferenceStorage.token.first()?.accessToken
+
+        emit(
+            authApi.signOut(
+                token = token.convertToToken(),
+                params = jsonOf(
+                    KEY_ID to userId,
+                    KEY_ROLE to "ADMIN"
+                )
+            )
+        )
+    }
+
     companion object {
         private const val KEY_SOCIAL_PROVIDER = "socialProvider"
         private const val KEY_PROVIDER_TOKEN = "providerToken"
         private const val KEY_EMAIL = "email"
         private const val KEY_NICKNAME = "nickname"
         private const val KEY_IMAGE = "image"
+        private const val KEY_ID = "id"
+        private const val KEY_ROLE = "role"
         private const val KEY_DEVICE_TYPE = "deviceType"
     }
 }

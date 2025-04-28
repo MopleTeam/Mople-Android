@@ -138,7 +138,7 @@ fun CalendarPlanItem(
             MeetingWeatherInfo(
                 modifier = Modifier.align(Alignment.Start),
                 temperature = plan.temperature,
-                address = plan.address,
+                address = plan.loadAddress,
                 weatherIconUrl = plan.weatherIconUrl,
             )
         }
