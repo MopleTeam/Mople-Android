@@ -5,6 +5,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.moim.core.designsystem.component.MoimScaffold
@@ -41,8 +42,14 @@ import com.moim.feature.reviewwrite.reviewWriteScreen
 @Composable
 fun MainScreen(
     navigator: MainNavController = rememberMainNavController(),
+    meetingId: String? = null,
     navigateToIntro: () -> Unit,
 ) {
+    LaunchedEffect(meetingId) {
+        if (meetingId == null) return@LaunchedEffect
+        navigator.navController.navigateToMeetingDetail(meetingId)
+    }
+
     MoimScaffold(
         content = { innerPadding ->
             NavHost(

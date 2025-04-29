@@ -51,6 +51,10 @@ internal class MeetingRepositoryImpl @Inject constructor(
         )
     }
 
+    override fun joinMeeting(code: String): Flow<Meeting> = catchFlow {
+        emit(meetingApi.joinMeeting(code).asItem())
+    }
+
     override fun deleteMeeting(meetingId: String): Flow<Unit> = catchFlow {
         emit(meetingApi.deleteMeeting(meetingId))
     }

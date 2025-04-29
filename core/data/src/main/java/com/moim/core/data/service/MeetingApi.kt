@@ -35,6 +35,11 @@ internal interface MeetingApi {
         @Body params: JsonObject
     ): MeetingResponse
 
+    @POST("/meet/join/{meetCode}")
+    suspend fun joinMeeting(
+        @Path("meetCode") meetCode: String
+    ): MeetingResponse
+
     @DELETE("/meet/{meetId}")
     suspend fun deleteMeeting(@Path("meetId") id: String)
 }

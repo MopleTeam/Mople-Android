@@ -13,7 +13,7 @@ data class MeetingResponse(
     val name: String,
     @SerialName("meetImage")
     val imageUrl: String = "",
-    @SerialName("members")
+    @SerialName("memberCount")
     val memberCount: Int = 1,
     @SerialName("meetStartDate")
     val meetStartDate: Int = 0,

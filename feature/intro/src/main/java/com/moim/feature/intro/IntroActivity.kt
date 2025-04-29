@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.moim.core.common.consts.KEY_INVITE_CODE
 import com.moim.core.common.consts.MAIN_ACTIVITY_NAME
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.intro.navigation.IntroNavHost
@@ -32,8 +33,8 @@ class IntroActivity : ComponentActivity() {
 }
 
 private fun Activity.navigateToMain() {
-    val intent = Intent(this, Class.forName(MAIN_ACTIVITY_NAME))
-
+    val inviteCode = intent.data?.getQueryParameter(KEY_INVITE_CODE).also { intent.data = null }
+    val intent = Intent(this, Class.forName(MAIN_ACTIVITY_NAME)).apply { putExtra(KEY_INVITE_CODE, inviteCode) }
     finish()
     startActivity(intent)
 }

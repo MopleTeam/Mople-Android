@@ -13,7 +13,7 @@ fun NavGraphBuilder.homeScreen(
     navigateToMeetingWrite: () -> Unit = {},
     navigateToPlanWrite: () -> Unit = {},
     navigateToCalendar: () -> Unit = {},
-    navigateToPlanDetail: (String,Boolean) -> Unit,
+    navigateToPlanDetail: (String, Boolean) -> Unit,
 ) {
     composable<MainRoute.Home> {
         HomeRoute(
