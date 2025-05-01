@@ -38,6 +38,8 @@ import com.moim.feature.profileupdate.navigateToProfileUpdate
 import com.moim.feature.profileupdate.profileUpdateScreen
 import com.moim.feature.reviewwrite.navigateToReviewWrite
 import com.moim.feature.reviewwrite.reviewWriteScreen
+import com.moim.feature.webview.navigateToWebView
+import com.moim.feature.webview.webViewScreen
 
 @Composable
 fun MainScreen(
@@ -122,7 +124,7 @@ fun MainScreen(
                     padding = innerPadding,
                     navigateToProfileUpdate = navigator.navController::navigateToProfileUpdate,
                     navigateToAlarmSetting = navigator.navController::navigateToAlarmSetting,
-                    navigateToPrivacyPolicy = {},
+                    navigateToPrivacyPolicy = navigator.navController::navigateToWebView,
                     navigateToIntro = navigateToIntro
                 )
                 profileUpdateScreen(
@@ -135,6 +137,10 @@ fun MainScreen(
                     navigateToDeepLink = {}
                 )
                 alarmSettingScreen(
+                    padding = innerPadding,
+                    navigateToBack = navigator.navController::popBackStack
+                )
+                webViewScreen(
                     padding = innerPadding,
                     navigateToBack = navigator.navController::popBackStack
                 )

@@ -11,7 +11,7 @@ fun NavGraphBuilder.profileScreen(
     padding: PaddingValues,
     navigateToProfileUpdate: () -> Unit,
     navigateToAlarmSetting: () -> Unit,
-    navigateToPrivacyPolicy: () -> Unit,
+    navigateToPrivacyPolicy: (String) -> Unit,
     navigateToIntro: () -> Unit,
 ) {
     composable<MainRoute.Profile> {

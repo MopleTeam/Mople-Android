@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.common.consts.NOTION_URL
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -40,7 +41,7 @@ fun ProfileRoute(
     padding: PaddingValues,
     navigateToProfileUpdate: () -> Unit,
     navigateToAlarmSetting: () -> Unit,
-    navigateToPrivacyPolicy: () -> Unit,
+    navigateToPrivacyPolicy: (String) -> Unit,
     navigateToIntro: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -52,7 +53,7 @@ fun ProfileRoute(
         when (event) {
             is ProfileUiEvent.NavigateToProfileUpdate -> navigateToProfileUpdate()
             is ProfileUiEvent.NavigateToAlarmSetting -> navigateToAlarmSetting()
-            is ProfileUiEvent.NavigateToPrivacyPolicy -> navigateToPrivacyPolicy()
+            is ProfileUiEvent.NavigateToPrivacyPolicy -> navigateToPrivacyPolicy(NOTION_URL)
             is ProfileUiEvent.NavigateToIntro -> navigateToIntro()
             is ProfileUiEvent.ShowToastMessage -> showToast(context, event.message)
         }

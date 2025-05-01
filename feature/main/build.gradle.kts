@@ -21,4 +21,5 @@ dependencies {
     implementation(projects.feature.profileUpdate)
     implementation(projects.feature.alarm)
     implementation(projects.feature.alarmSetting)
+    implementation(projects.feature.webview)
 }
