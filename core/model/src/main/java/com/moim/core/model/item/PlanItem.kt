@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 
 @Serializable
 data class PlanItem(
-    val isPlanAtBefore: Boolean = true,
+    val isPlanAtBefore: Boolean = true, // false면 후기(review)
     val userId: String = "",
     val postId: String = "",
     val commentCheckId: String = "",

@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -84,6 +85,7 @@ fun ProfileUpdateScreen(
     isLoading: Boolean,
     onUiAction: OnProfileUpdateUiAction
 ) {
+    TrackScreenViewEvent(screenName = "profile_write")
     Column(
         modifier = modifier
     ) {

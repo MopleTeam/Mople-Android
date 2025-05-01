@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -84,6 +85,7 @@ fun ReviewWriteScreen(
     isLoading: Boolean,
     onUiAction: (ReviewWriteUiAction) -> Unit,
 ) {
+    TrackScreenViewEvent(screenName = "review_write")
     MoimScaffold(
         modifier = modifier,
         topBar = {

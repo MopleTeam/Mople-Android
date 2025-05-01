@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.util.externalShareForUrl
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
@@ -79,6 +80,7 @@ fun MeetingSettingScreen(
     isLoading: Boolean,
     onUiAction: OnMeetingSettingUiAction
 ) {
+    TrackScreenViewEvent(screenName = "meet_setting")
     Column(
         modifier = modifier,
     ) {

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavOptions
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -74,6 +75,7 @@ fun SignInScreen(
     isLoading: Boolean = false,
     onUiAction: OnSignInUiAction,
 ) {
+    TrackScreenViewEvent(screenName = "sign_in")
     Box(
         modifier = modifier
             .systemBarsPadding()

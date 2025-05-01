@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
@@ -76,6 +77,7 @@ fun MeetingScreen(
     uiState: MeetingUiState.Success,
     onUiAction: OnMeetingUiAction = {}
 ) {
+    TrackScreenViewEvent(screenName = "meet_list")
     MoimScaffold(
         modifier = modifier,
         backgroundColor = MoimTheme.colors.bg.primary,

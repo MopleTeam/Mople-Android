@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
@@ -38,6 +39,8 @@ fun PlaceSearchScreen(
     selectedPlace: Place? = null,
     onUiAction: OnPlanWriteUiAction = {}
 ) {
+    TrackScreenViewEvent(screenName = "plan_write_map_search")
+
     if (searchPlaces.isNotEmpty()) {
         LazyColumn(
             modifier = modifier,

@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.planwrite.PlanWriteUiAction
@@ -38,6 +39,8 @@ fun PlaceMapScreen(
 ) {
     val cameraPositionState = rememberCameraPositionState()
     val markerState = rememberMarkerState(position = LatLng(markerLatitude, markerLongitude))
+
+    TrackScreenViewEvent(screenName = "plan_write_map")
 
     LaunchedEffect(latitude, longitude) {
         if (longitude != 0.0 && latitude != 0.0) {

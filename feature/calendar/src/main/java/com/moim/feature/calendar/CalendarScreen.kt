@@ -37,6 +37,7 @@ import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.WeekDayPosition
 import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.util.default
 import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.ObserveAsEvents
@@ -138,6 +139,7 @@ fun CalendarScreen(
         onUiAction(CalendarUiAction.OnChangeDate(currentDate))
     }
 
+    TrackScreenViewEvent(screenName = "calendar")
     Column(
         modifier = modifier
     ) {

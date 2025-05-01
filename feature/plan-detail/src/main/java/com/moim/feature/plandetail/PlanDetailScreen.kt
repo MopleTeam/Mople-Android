@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.consts.MAP_INTENT_FOR_KAKAO
 import com.moim.core.common.consts.MAP_INTENT_FOR_NAVER
 import com.moim.core.common.view.ObserveAsEvents
@@ -115,6 +116,8 @@ fun PlanDetailScreen(
     isLoading: Boolean,
     onUiAction: OnPlanDetailUiAction
 ) {
+    val screenName = if (uiState.planItem.isPlanAtBefore) "plan_detail" else "review_detail"
+    TrackScreenViewEvent(screenName = screenName)
     MoimScaffold(
         modifier = modifier
             .fillMaxSize()

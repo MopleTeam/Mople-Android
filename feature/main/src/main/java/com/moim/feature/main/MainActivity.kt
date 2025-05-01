@@ -8,9 +8,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.moim.core.analytics.AnalyticsHelper
+import com.moim.core.analytics.LocalAnalyticsHelper
 import com.moim.core.common.consts.INTRO_ACTIVITY_NAME
 import com.moim.core.common.consts.KEY_INVITE_CODE
 import com.moim.core.data.datasource.meeting.MeetingRepository
@@ -29,19 +32,26 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var meetingRepository: MeetingRepository
 
+    @Inject
+    lateinit var analyticsHelper: AnalyticsHelper
+
     private val meetingId = MutableStateFlow<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT))
         setContent {
-            MoimTheme {
-                val meetingId by meetingId.collectAsStateWithLifecycle()
+            CompositionLocalProvider(
+                LocalAnalyticsHelper provides analyticsHelper,
+            ) {
+                MoimTheme {
+                    val meetingId by meetingId.collectAsStateWithLifecycle()
 
-                MainScreen(
-                    meetingId = meetingId,
-                    navigateToIntro = this::navigateToIntro
-                )
+                    MainScreen(
+                        meetingId = meetingId,
+                        navigateToIntro = this::navigateToIntro
+                    )
+                }
             }
         }
 

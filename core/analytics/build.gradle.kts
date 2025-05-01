@@ -12,4 +12,5 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.timber)
 }

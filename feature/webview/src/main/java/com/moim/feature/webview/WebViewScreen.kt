@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,6 +24,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.common.view.ObserveAsEvents
+import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
@@ -58,30 +60,35 @@ fun WebViewScreen(
     uiState: WebViewUiState,
     onUiAction: (WebViewUiAction) -> Unit
 ) {
-    Column(
-        modifier = modifier
-    ) {
-        MoimTopAppbar(
-            modifier = Modifier.fillMaxWidth(),
-            title = uiState.webTitle,
-            onClickNavigate = { onUiAction(WebViewUiAction.OnClickBack) }
-        )
-        AnimatedVisibility(uiState.loadProgress < 1f) {
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth(),
-                trackColor = MoimTheme.colors.primary.disable,
-                color = MoimTheme.colors.primary.primary,
-                progress = { uiState.loadProgress },
-                drawStopIndicator = {},
+    MoimScaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            Column {
+                MoimTopAppbar(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = uiState.webTitle,
+                    onClickNavigate = { onUiAction(WebViewUiAction.OnClickBack) }
+                )
+                AnimatedVisibility(uiState.loadProgress < 1f) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        trackColor = MoimTheme.colors.primary.disable,
+                        color = MoimTheme.colors.primary.primary,
+                        progress = { uiState.loadProgress },
+                        drawStopIndicator = {},
+                    )
+                }
+            }
+        },
+        content = {
+            WebViewContainer(
+                modifier = Modifier.padding(it),
+                webUrl = uiState.webUrl,
+                onProgress = { onUiAction(WebViewUiAction.UpdatedProgress(it)) },
+                onWebTitle = { onUiAction(WebViewUiAction.UpdatedWebTitle(it)) }
             )
         }
-
-        WebViewContainer(
-            webUrl = uiState.webUrl,
-            onProgress = { onUiAction(WebViewUiAction.UpdatedProgress(it)) },
-            onWebTitle = { onUiAction(WebViewUiAction.UpdatedWebTitle(it)) }
-        )
-    }
+    )
 }
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -104,8 +111,6 @@ private fun WebViewContainer(
             displayZoomControls = false
             javaScriptEnabled = true
             domStorageEnabled = true
-            cacheMode = WebSettings.LOAD_DEFAULT
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
         webView.run {
             webViewClient =

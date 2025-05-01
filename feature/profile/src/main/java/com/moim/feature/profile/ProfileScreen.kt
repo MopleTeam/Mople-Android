@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.consts.NOTION_URL
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
@@ -83,6 +84,7 @@ fun ProfileScreen(
     isLoading: Boolean = false,
     onUiAction: OnProfileUiAction,
 ) {
+    TrackScreenViewEvent(screenName = "profile")
     Column(
         modifier = modifier
     ) {

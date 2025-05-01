@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -127,6 +128,7 @@ fun HomeScreen(
     isLoading: Boolean,
     onUiAction: OnHomeUiAction
 ) {
+    TrackScreenViewEvent(screenName = "home")
     Column(modifier = modifier) {
         HomeTopAppbar(onUiAction = onUiAction)
         Column(

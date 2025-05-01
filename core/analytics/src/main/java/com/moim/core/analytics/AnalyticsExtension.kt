@@ -13,11 +13,6 @@ fun AnalyticsHelper.logScreenView(screenName: String) {
         ),
     )
 }
-/*
-type- screen_view
-{ "screen_name" : "login"}
-
- */
 
 @Composable
 fun TrackScreenViewEvent(

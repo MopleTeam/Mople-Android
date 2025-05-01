@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavOptions
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimAlertDialog
@@ -59,6 +60,7 @@ private fun SplashScreen(
     uiState: SplashUiState.Splash,
     onClickFinish: () -> Unit
 ) {
+    TrackScreenViewEvent(screenName = "splash")
     Box(
         modifier = Modifier
             .containerScreen(backgroundColor = MoimTheme.colors.white)

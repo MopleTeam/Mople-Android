@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -126,6 +127,7 @@ fun AlarmSettingScreen(
     isLoading: Boolean,
     onUiAction: (AlarmSettingUiAction) -> Unit
 ) {
+    TrackScreenViewEvent(screenName = "notification_setting")
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
     ) {
