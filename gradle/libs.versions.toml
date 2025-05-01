@@ -57,6 +57,7 @@ kakaoCore = "2.21.1"
 naverMapCompose = "1.7.1"
 naverMapLocation = "21.0.1"
 tedClusteringNaver = "1.0.2"
+material = "1.12.0"
 
 [libraries]
 # AndroidX
@@ -131,6 +132,7 @@ kotlin-compose-compiler-extension = { group = "org.jetbrains.kotlin", name = "co
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" } # For platform
 firebase-messageing = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 
 # Coil
 coil-kt = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
@@ -158,6 +160,7 @@ kakao-login = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaoC
 # Dependencies of the included build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [bundles]
 androidx-room = ["androidx-room-runtime", "androidx-room-coroutine", "androidx-room-paging"]
