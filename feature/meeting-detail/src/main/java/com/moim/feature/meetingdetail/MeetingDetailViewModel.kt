@@ -25,6 +25,7 @@ import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
 import com.moim.core.model.Review
 import com.moim.core.model.item.asPlan
+import com.moim.core.model.item.asPlanItem
 import com.moim.core.model.item.asReview
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -155,9 +156,13 @@ class MeetingDetailViewModel @Inject constructor(
                             is PlanAction.PlanDelete -> setUiState(
                                 copy(
                                     plans = plans.toMutableList().apply {
-                                        val removePlan = find { it.planId == action.postId } ?: return@collect
+                                        val removePlan = find { it.planId == action.postId } ?: return@apply
                                         remove(removePlan)
-                                    }
+                                    },
+                                    reviews = reviews.toMutableList().apply {
+                                        val removeReview = find { it.reviewId == action.postId } ?: return@apply
+                                        remove(removeReview)
+                                    },
                                 )
                             )
 
@@ -197,18 +202,8 @@ class MeetingDetailViewModel @Inject constructor(
                     when (result) {
                         is Result.Loading -> return@collect
                         is Result.Success -> {
-                            val (index, plan) = plans.withIndex()
-                                .find { (_, plan) -> plan.planId == planId }
-                                ?.let { it.index to it.value }
-                                ?: return@collect
-
-                            setUiState(
-                                copy(
-                                    plans = plans
-                                        .toMutableList()
-                                        .apply { set(index = index, element = plan.copy(isParticipant = !plan.isParticipant)) }
-                                )
-                            )
+                            val plan = plans.first { plan -> plan.planId == planId }
+                            updatePlanItem(ZonedDateTime.now(), plan.copy(isParticipant = !plan.isParticipant).asPlanItem())
                         }
 
                         is Result.Error -> when (result.exception) {

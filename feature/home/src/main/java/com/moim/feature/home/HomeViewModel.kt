@@ -127,6 +127,11 @@ class HomeViewModel @Inject constructor(
                                             .firstOrNull { action.planItem.postId == it.value.planId }
                                             ?.index
                                             ?.let { index -> set(index, action.planItem.asPlan()) }
+                                            ?: run { add(action.planItem.asPlan()) }
+                                    }.sortedBy {
+                                        it.planTime
+                                    }.filter {
+                                        it.isParticipant
                                     }
 
                                     setUiState(copy(plans = plans))

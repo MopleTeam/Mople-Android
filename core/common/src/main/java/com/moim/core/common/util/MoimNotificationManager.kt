@@ -6,9 +6,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import androidx.core.app.NotificationCompat
-import androidx.core.net.toUri
-import com.moim.core.common.consts.DEEP_LINK_FOR_MEET
+import com.moim.core.common.consts.MAIN_ACTIVITY_NAME
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -36,7 +36,7 @@ class MoimNotificationManager @Inject constructor(
                 group = NOTIFICATION_GROUP_ID
                 description = NOTIFICATION_DESCRIPTION
                 lockscreenVisibility = NotificationCompat.VISIBILITY_PRIVATE
-                setShowBadge(true)
+                setShowBadge(false)
                 enableVibration(true)
             }
 
@@ -50,12 +50,8 @@ class MoimNotificationManager @Inject constructor(
             .setAutoCancel(true)
     }
 
-    fun getNotificationContentIntent(requestCode: Int, query: Map<String, String>): PendingIntent {
-        val deepLink = DEEP_LINK_FOR_MEET.toUri()
-            .buildUpon()
-            .apply { query.map { appendQueryParameter(it.key, it.value) } }
-            .build()
-        val contentIntent = Intent(Intent.ACTION_VIEW, deepLink)
+    fun getNotificationContentIntent(requestCode: Int, bundle: Bundle): PendingIntent {
+        val contentIntent = Intent(context, Class.forName(MAIN_ACTIVITY_NAME)).apply { putExtras(bundle) }
         val pendingIntentFlag = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
         return PendingIntent.getActivity(context, requestCode, contentIntent, pendingIntentFlag)

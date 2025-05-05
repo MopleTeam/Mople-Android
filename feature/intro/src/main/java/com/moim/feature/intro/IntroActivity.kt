@@ -26,8 +26,6 @@ class IntroActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val hasFcmData = intent?.extras ?: false
-
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT))
         setContent {
             CompositionLocalProvider(
@@ -40,12 +38,20 @@ class IntroActivity : ComponentActivity() {
                 }
             }
         }
+
+        if (intent.extras != null) {
+            navigateToMain()
+        }
     }
 }
 
 private fun Activity.navigateToMain() {
+    val bundles = intent.extras
     val inviteCode = intent.data?.getQueryParameter(KEY_INVITE_CODE).also { intent.data = null }
-    val intent = Intent(this, Class.forName(MAIN_ACTIVITY_NAME)).apply { putExtra(KEY_INVITE_CODE, inviteCode) }
+    val intent = Intent(this, Class.forName(MAIN_ACTIVITY_NAME)).apply {
+        putExtra(KEY_INVITE_CODE, inviteCode)
+        if (bundles != null) putExtras(bundles)
+    }
     finish()
     startActivity(intent)
 }

@@ -11,7 +11,7 @@ data class MeetingPlanContainer(
 
 fun MeetingPlanContainerResponse.asItem() : MeetingPlanContainer {
     return MeetingPlanContainer(
-        plans = plans.map(PlanResponse::asItem),
+        plans = plans.map(PlanResponse::asItem).map { it.copy(isParticipant = true) },
         meetings = meetings.map(MeetingResponse::asItem)
     )
 }

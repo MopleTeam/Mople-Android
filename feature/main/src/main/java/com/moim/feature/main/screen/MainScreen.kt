@@ -47,11 +47,20 @@ import com.moim.feature.webview.webViewScreen
 fun MainScreen(
     navigator: MainNavController = rememberMainNavController(),
     meetingId: String? = null,
+    planId: String? = null,
+    reviewId: String? = null,
     navigateToIntro: () -> Unit,
 ) {
-    LaunchedEffect(meetingId) {
-        if (meetingId == null) return@LaunchedEffect
-        navigator.navController.navigateToMeetingDetail(meetingId)
+    LaunchedEffect(
+        key1 = meetingId,
+        key2 = planId,
+        key3 = reviewId,
+    ) {
+        when {
+            meetingId != null -> navigator.navController.navigateToMeetingDetail(meetingId)
+            planId != null -> navigator.navController.navigateToPlanDetail(planId, true)
+            reviewId != null -> navigator.navController.navigateToPlanDetail(reviewId, false)
+        }
     }
 
     MoimScaffold(

@@ -26,7 +26,7 @@ data class Plan(
     val weatherAddress: String = "",
     val weatherIconUrl: String = "",
     val temperature: Float = 0f,
-    val isParticipant: Boolean = false,
+    val isParticipant: Boolean = true,
 )
 
 fun PlanResponse.asItem(): Plan {

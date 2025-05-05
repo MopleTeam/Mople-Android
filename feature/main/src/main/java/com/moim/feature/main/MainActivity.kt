@@ -36,6 +36,8 @@ class MainActivity : ComponentActivity() {
     lateinit var analyticsHelper: AnalyticsHelper
 
     private val meetingId = MutableStateFlow<String?>(null)
+    private val planId = MutableStateFlow<String?>(null)
+    private val reviewId = MutableStateFlow<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,24 +48,30 @@ class MainActivity : ComponentActivity() {
             ) {
                 MoimTheme {
                     val meetingId by meetingId.collectAsStateWithLifecycle()
+                    val planId by planId.collectAsStateWithLifecycle()
+                    val reviewId by reviewId.collectAsStateWithLifecycle()
 
                     MainScreen(
                         meetingId = meetingId,
+                        planId = planId,
+                        reviewId = reviewId,
                         navigateToIntro = this::navigateToIntro
                     )
                 }
             }
         }
 
-        joinMeeting()
+        joinMeeting(intent)
+        getNotifyData(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        joinMeeting()
+        joinMeeting(intent)
+        getNotifyData(intent)
     }
 
-    private fun joinMeeting() {
+    private fun joinMeeting(intent: Intent) {
         val meetCode = intent.getStringExtra(KEY_INVITE_CODE) ?: return
         lifecycleScope.launch {
             runCatching {
@@ -71,6 +79,18 @@ class MainActivity : ComponentActivity() {
                 meetingId.update { meeting.id }
             }
         }
+    }
+
+    private fun getNotifyData(notifyIntent: Intent) {
+        meetingId.update { notifyIntent.getStringExtra(NOTIFY_MEET_ID) }
+        planId.update { notifyIntent.getStringExtra(NOTIFY_PLAN_ID) }
+        reviewId.update { notifyIntent.getStringExtra(NOTIFY_REVIEW_ID) }
+    }
+
+    companion object {
+        private const val NOTIFY_MEET_ID = "meetId"
+        private const val NOTIFY_PLAN_ID = "planId"
+        private const val NOTIFY_REVIEW_ID = "reviewId"
     }
 }
 
