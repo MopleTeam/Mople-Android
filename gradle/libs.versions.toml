@@ -54,6 +54,7 @@ compressor = "3.0.1"
 calendarCompose = "2.6.0"
 composeStableMarker = "1.0.5"
 kakaoCore = "2.21.1"
+zoomable = "2.6.0"
 naverMapCompose = "1.7.1"
 naverMapLocation = "21.0.1"
 tedClusteringNaver = "1.0.2"
@@ -156,6 +157,7 @@ tedclustering-naver = { group = "io.github.ParkSangGwon", name = "tedclustering-
 leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }
 compressor = { group = "id.zelory", name = "compressor", version.ref = "compressor" }
 kakao-login = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaoCore" }
+image-zoomable = { group= "net.engawapg.lib", name ="zoomable", version.ref ="zoomable" }
 
 # Dependencies of the included build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }

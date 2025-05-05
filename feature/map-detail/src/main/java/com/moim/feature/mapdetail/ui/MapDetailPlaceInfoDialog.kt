@@ -19,6 +19,7 @@ import com.moim.core.designsystem.component.MoimBottomSheetDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.feature.mapdetail.MapDetailUiAction
 import kotlinx.coroutines.launch
 
@@ -65,6 +66,10 @@ fun MapDetailPlaceInfoDialog(
 
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
+                buttonColors = moimButtomColors().copy(
+                    containerColor = MoimTheme.colors.tertiary,
+                    contentColor = MoimTheme.colors.gray.gray01
+                ),
                 onClick = {
                     onUiAction(MapDetailUiAction.OnShowMapAppDialog(true))
                     onUiAction(dismissAction)
@@ -72,7 +77,7 @@ fun MapDetailPlaceInfoDialog(
             ) {
                 Text(
                     text = stringResource(R.string.map_detail_find_location),
-                    style = MoimTheme.typography.body01.semiBold
+                    style = MoimTheme.typography.title03.semiBold
                 )
             }
         }

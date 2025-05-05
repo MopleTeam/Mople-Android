@@ -1,16 +1,19 @@
 package com.moim.feature.plandetail.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -23,12 +26,14 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.ReviewImage
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 
 @Composable
 fun PlanDetailImageCropDialog(
     modifier: Modifier = Modifier,
     images: List<ReviewImage>,
-    selectedIndex : Int,
+    selectedIndex: Int,
     onUiAction: OnPlanDetailUiAction
 ) {
     val onDismissAction = PlanDetailUiAction.OnShowReviewImageCropDialog(false, 0)
@@ -37,33 +42,40 @@ fun PlanDetailImageCropDialog(
         pageCount = { pageSize },
         initialPage = selectedIndex
     )
+    val zoomState = rememberZoomState(initialScale = 1.0f)
 
     MoimDialog(
         usePlatformDefaultWidth = false,
         decorFitsSystemWindows = false,
         onDismiss = { onUiAction(onDismissAction) },
     ) {
-        Column(
+        Box(
             modifier = modifier
                 .fillMaxSize()
                 .background(MoimTheme.colors.black)
+                .systemBarsPadding()
         ) {
             ImageCropDialogTopAppbar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
                 currentIndex = pagerState.currentPage + 1,
                 totalIndex = pageSize,
-                onClickDismiss = {
-                    onUiAction(onDismissAction)
-                }
+                onClickDismiss = { onUiAction(onDismissAction) }
             )
             HorizontalPager(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center),
                 state = pagerState,
             ) { index ->
                 NetworkImage(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(vertical = 20.dp),
-                    imageUrl = images[index].imageUrl
+                        .padding(vertical = 20.dp)
+                        .zoomable(zoomState = zoomState),
+                    imageUrl = images[index].imageUrl,
+                    contentScale = ContentScale.Fit
                 )
             }
         }
@@ -72,11 +84,13 @@ fun PlanDetailImageCropDialog(
 
 @Composable
 private fun ImageCropDialogTopAppbar(
+    modifier: Modifier = Modifier,
     currentIndex: Int,
     totalIndex: Int,
     onClickDismiss: () -> Unit
 ) {
     MoimTopAppbar(
+        modifier = modifier,
         backgroundColor = MoimTheme.colors.black,
         navigationIcon = {
             Icon(

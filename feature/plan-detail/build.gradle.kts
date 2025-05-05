@@ -8,4 +8,5 @@ android {
 
 dependencies {
     implementation(libs.bundles.naver.map.compose)
+    implementation(libs.image.zoomable)
 }

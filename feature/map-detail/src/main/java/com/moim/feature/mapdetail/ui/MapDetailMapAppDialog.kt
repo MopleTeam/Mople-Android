@@ -68,7 +68,6 @@ fun MapDetailMapAppDialog(
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 MapLogo(
                     appLogoRes = R.drawable.img_map_app_logo_for_naver,
