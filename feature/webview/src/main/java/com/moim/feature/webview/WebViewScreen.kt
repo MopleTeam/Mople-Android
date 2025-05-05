@@ -1,6 +1,7 @@
 package com.moim.feature.webview
 
 import android.annotation.SuppressLint
+import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -112,7 +113,11 @@ private fun WebViewContainer(
             javaScriptEnabled = true
             domStorageEnabled = true
         }
-        webView.run {
+        webView.apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            )
             webViewClient =
                 object : WebViewClient() {
                     override fun shouldOverrideUrlLoading(

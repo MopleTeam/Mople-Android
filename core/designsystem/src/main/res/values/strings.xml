@@ -120,10 +120,13 @@
     <string name="plan_detail_comment_error">댓글을 불러오지 못했어요\n잠시 후 다시 시도해주세요</string>
     <string name="plan_detail_comment_empty">아직 댓글이 없어요</string>
     <string name="plan_detail_image">함께한 순간</string>
-    <string name="plan_detail_map_title">지도앱 연결</string>
-    <string name="plan_detail_map_for_naver">네이버 지도</string>
-    <string name="plan_detail_map_for_kakao">카카오 지도</string>
-    <string name="plan_detail_map_intent_fail">해당 지도앱을 여는데 실패했어요.\n지도앱이 설치되어 있는지 확인해주세요.</string>
+
+    <!-- MapDetail -->
+    <string name="map_detail_title">상세 지도</string>
+    <string name="map_detail_find_location">약속장소 길찾기</string>
+    <string name="map_detail_map_for_naver">네이버 지도</string>
+    <string name="map_detail_map_for_kakao">카카오맵</string>
+    <string name="map_detail_map_intent_fail">해당 지도앱을 여는데 실패했어요.\n지도앱이 설치되어 있는지 확인해주세요.</string>
 
     <!-- ReviewWrite -->
     <string name="review_write_title_create">후기 작성</string>
@@ -178,6 +181,7 @@
     <string name="unit_participants_count_short">%d명</string>
     <string name="unit_weather">%s°C</string>
     <string name="unit_count">%d개</string>
+    <string name="unit_dot">·</string>
 
     <!-- Regex -->
     <string name="regex_date_full">yyyy.MM.dd E HH시 mm분</string>

@@ -59,6 +59,14 @@ sealed interface DetailRoute : Route {
     }
 
     @Serializable
+    data class MapDetail(
+        val placeName: String,
+        val address: String,
+        val latitude: Double,
+        val longitude: Double,
+    ) : DetailRoute
+
+    @Serializable
     data class PlanDetail(
         val postId: String,
         val isPlan: Boolean

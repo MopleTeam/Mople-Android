@@ -13,7 +13,7 @@ import com.moim.core.route.DetailRoute
 fun NavGraphBuilder.reviewWriteScreen(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToParticipants: (Boolean, Boolean, String) -> Unit,
+    navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
 ) {
     composable<DetailRoute.ReviewWrite>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },

@@ -1,6 +1,5 @@
 package com.moim.feature.plandetail
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -16,22 +15,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
-import com.moim.core.common.consts.MAP_INTENT_FOR_KAKAO
-import com.moim.core.common.consts.MAP_INTENT_FOR_NAVER
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
-import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.MapType
 import com.moim.core.model.item.PlanItem
 import com.moim.feature.plandetail.ui.PlanDetailBottomBar
 import com.moim.feature.plandetail.ui.PlanDetailCommentEditDialog
@@ -41,7 +35,6 @@ import com.moim.feature.plandetail.ui.PlanDetailCommentReportDialog
 import com.moim.feature.plandetail.ui.PlanDetailContent
 import com.moim.feature.plandetail.ui.PlanDetailEditDialog
 import com.moim.feature.plandetail.ui.PlanDetailImageCropDialog
-import com.moim.feature.plandetail.ui.PlanDetailMapAppDialog
 import com.moim.feature.plandetail.ui.PlanDetailReportDialog
 import com.moim.feature.plandetail.ui.PlanDetailReviewImages
 import com.moim.feature.plandetail.ui.PlanDetailTopAppbar
@@ -53,7 +46,8 @@ fun PlanDetailRoute(
     viewModel: PlanDetailViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToParticipants: (Boolean, Boolean, String) -> Unit,
+    navigateToMapDetail: (placeName: String, address: String, latitude: Double, longitude: Double) -> Unit,
+    navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToReviewWrite: (String, Boolean) -> Unit
 ) {
@@ -68,26 +62,7 @@ fun PlanDetailRoute(
             is PlanDetailUiEvent.NavigateToParticipants -> navigateToParticipants(false, event.isPlan, event.postId)
             is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.planItem)
             is PlanDetailUiEvent.NavigateToReviewWrite -> navigateToReviewWrite(event.postId, true)
-            is PlanDetailUiEvent.NavigateToMap -> {
-                try {
-                    when (event.mapType) {
-                        MapType.KAKAO -> {
-                            val kakaoMapUrl = MAP_INTENT_FOR_KAKAO.format(event.latitude.toString(), event.longitude.toString())
-                            val intent = Intent(Intent.ACTION_VIEW, kakaoMapUrl.toUri())
-                            context.startActivity(intent)
-                        }
-
-                        MapType.NAVER -> {
-                            val naverMapUrl = MAP_INTENT_FOR_NAVER.format(event.latitude.toString(), event.longitude.toString(), event.address)
-                            val intent = Intent.parseUri(naverMapUrl, Intent.URI_INTENT_SCHEME)
-                            context.startActivity(intent)
-                        }
-                    }
-                } catch (e: Exception) {
-                    showToast(context, context.getString(R.string.plan_detail_map_intent_fail))
-                }
-            }
-
+            is PlanDetailUiEvent.NavigateToMapDetail -> navigateToMapDetail(event.placeName, event.address, event.latitude, event.longitude)
             is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
@@ -198,12 +173,6 @@ fun PlanDetailScreen(
 
     if (uiState.isShowPlanReportDialog) {
         PlanDetailReportDialog(
-            onUiAction = onUiAction
-        )
-    }
-
-    if (uiState.isShowMapAppDialog) {
-        PlanDetailMapAppDialog(
             onUiAction = onUiAction
         )
     }

@@ -2,6 +2,7 @@ package com.moim.feature.plandetail.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -15,6 +16,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.feature.plandetail.PlanDetailUiAction
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
@@ -32,40 +34,50 @@ import com.naver.maps.map.compose.rememberMarkerState
 fun PlanDetailMapContent(
     modifier: Modifier = Modifier,
     latitude: Double,
-    longitude: Double
+    longitude: Double,
+    onUiAction: (PlanDetailUiAction) -> Unit,
 ) {
     val cameraPositionState = rememberCameraPositionState().apply {
         position = CameraPosition(LatLng(latitude, longitude), 15.2)
     }
     val markerState = rememberMarkerState(position = LatLng(latitude, longitude))
-
-    NaverMap(
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
             .border(BorderStroke(1.dp, MoimTheme.colors.stroke))
-            .aspectRatio(33f / 16f),
-        uiSettings = MapUiSettings(
-            isZoomControlEnabled = false,
-            isScaleBarEnabled = false,
-            isLogoClickEnabled = false,
-            isCompassEnabled = false,
-        ),
-        cameraPositionState = cameraPositionState,
-        locationSource = rememberFusedLocationSource(),
-        properties = MapProperties(locationTrackingMode = LocationTrackingMode.Follow),
-        onLocationChange = {}
+            .aspectRatio(33f / 16f)
     ) {
-        MarkerComposable(
-            keys = arrayOf("location"),
-            state = markerState,
+        NaverMap(
+            uiSettings = MapUiSettings(
+                isScrollGesturesEnabled = false,
+                isZoomGesturesEnabled = false,
+                isTiltGesturesEnabled = false,
+                isRotateGesturesEnabled = false,
+                isStopGesturesEnabled = false,
+                isZoomControlEnabled = false,
+                isCompassEnabled = false,
+                isScaleBarEnabled = false,
+                isLocationButtonEnabled = false,
+                isLogoClickEnabled = false,
+            ),
+            onMapClick = { _, _ -> onUiAction(PlanDetailUiAction.OnClickMapDetail) },
+            cameraPositionState = cameraPositionState,
+            locationSource = rememberFusedLocationSource(),
+            properties = MapProperties(locationTrackingMode = LocationTrackingMode.Follow),
+            onLocationChange = {}
         ) {
-            Icon(
-                modifier = Modifier.size(54.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.ic_location),
-                contentDescription = "",
-                tint = MoimTheme.colors.primary.primary
-            )
+            MarkerComposable(
+                keys = arrayOf("location"),
+                state = markerState,
+            ) {
+                Icon(
+                    modifier = Modifier.size(54.dp),
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_location),
+                    contentDescription = "",
+                    tint = MoimTheme.colors.primary.primary
+                )
+            }
         }
     }
 }

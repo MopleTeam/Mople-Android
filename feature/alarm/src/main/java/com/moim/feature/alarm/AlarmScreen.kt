@@ -77,19 +77,19 @@ fun AlarmScreen(
             onClickNavigate = { onUiAction(AlarmUiAction.OnClickBack) }
         )
 
-        AlarmCount(alarmCount = uiState.alarms.size)
+        AlarmCount(alarmCount = uiState.notifications.size)
 
-        if (uiState.alarms.isNotEmpty()) {
+        if (uiState.notifications.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 64.dp)
             ) {
                 items(
-                    items = uiState.alarms,
-                    key = { it.alarmId }
-                ) { alarm ->
+                    items = uiState.notifications,
+                    key = { it.notificationId }
+                ) { notification ->
                     AlarmListItem(
-                        alarm = alarm,
+                        notification = notification,
                         onUiAction = onUiAction
                     )
                 }

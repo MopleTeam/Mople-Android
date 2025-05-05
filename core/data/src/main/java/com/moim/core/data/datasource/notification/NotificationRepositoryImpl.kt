@@ -3,11 +3,19 @@ package com.moim.core.data.datasource.notification
 import com.moim.core.data.service.NotificationApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
+import com.moim.core.datamodel.NotificationResponse
+import com.moim.core.model.Notification
+import com.moim.core.model.asItem
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 internal class NotificationRepositoryImpl @Inject constructor(
     private val notificationApi: NotificationApi,
 ) : NotificationRepository {
+
+    override fun getNotifications() = catchFlow {
+        emit(notificationApi.getNotifications().map(NotificationResponse::asItem))
+    }
 
     override fun getNotificationSubscribes() = catchFlow {
         emit(notificationApi.getNotificationSubscribes())

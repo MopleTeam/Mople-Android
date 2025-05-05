@@ -1,8 +1,9 @@
-package com.moim.feature.plandetail.ui
+package com.moim.feature.mapdetail.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -29,21 +30,29 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.MapType
-import com.moim.feature.plandetail.OnPlanDetailUiAction
-import com.moim.feature.plandetail.PlanDetailUiAction
+import com.moim.feature.mapdetail.MapDetailUiAction
 import kotlinx.coroutines.launch
 
 @Composable
-fun PlanDetailMapAppDialog(
+fun MapDetailMapAppDialog(
     modifier: Modifier = Modifier,
-    onUiAction: OnPlanDetailUiAction
+    onUiAction: (MapDetailUiAction) -> Unit,
 ) {
-    val dismissAction = PlanDetailUiAction.OnShowMapAppDialog(false)
+    val dismissAction = MapDetailUiAction.OnShowMapAppDialog(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
     val coroutineScope = rememberCoroutineScope()
 
     MoimBottomSheetDialog(
         modifier = modifier.fillMaxWidth(),
+        dragHandle = {
+            Spacer(
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .size(width = 80.dp, height = 8.dp)
+                    .clip(CircleShape)
+                    .background(MoimTheme.colors.tertiary)
+            )
+        },
         onDismiss = {
             coroutineScope
                 .launch { sheetState.hide() }
@@ -53,35 +62,28 @@ fun PlanDetailMapAppDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(vertical = 20.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MoimText(
-                text = stringResource(R.string.plan_detail_map_title),
-                style = MoimTheme.typography.title01.bold,
-                color = MoimTheme.colors.gray.gray01
-            )
-            Spacer(Modifier.height(24.dp))
-
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 MapLogo(
                     appLogoRes = R.drawable.img_map_app_logo_for_naver,
-                    appName = stringResource(R.string.plan_detail_map_for_naver),
+                    appName = stringResource(R.string.map_detail_map_for_naver),
                     onClick = {
-                        onUiAction(PlanDetailUiAction.OnClickMapAddress(MapType.NAVER))
+                        onUiAction(MapDetailUiAction.OnClickMapAddress(MapType.NAVER))
                         onUiAction(dismissAction)
                     }
                 )
 
                 MapLogo(
                     appLogoRes = R.drawable.img_map_app_logo_for_kakao,
-                    appName = stringResource(R.string.plan_detail_map_for_kakao),
+                    appName = stringResource(R.string.map_detail_map_for_kakao),
                     onClick = {
-                        onUiAction(PlanDetailUiAction.OnClickMapAddress(MapType.KAKAO))
+                        onUiAction(MapDetailUiAction.OnClickMapAddress(MapType.KAKAO))
                         onUiAction(dismissAction)
                     }
                 )
@@ -98,28 +100,28 @@ private fun MapLogo(
     appName: String,
     onClick: () -> Unit
 ) {
-    Column(
+    Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
+            .fillMaxWidth()
             .onSingleClick(onClick = onClick)
-            .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
             modifier = Modifier
-                .size(46.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp)),
+                .size(28.dp)
+                .clip(CircleShape)
+                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape),
             painter = painterResource(appLogoRes),
             contentDescription = ""
         )
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.size(8.dp))
 
         MoimText(
             text = appName,
-            style = MoimTheme.typography.body01.semiBold,
-            color = MoimTheme.colors.gray.gray01
+            style = MoimTheme.typography.body01.medium,
+            color = MoimTheme.colors.gray.gray02
         )
     }
 }

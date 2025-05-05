@@ -41,7 +41,7 @@ fun ReviewWriteRoute(
     viewModel: ReviewWriteViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToParticipants: (Boolean, Boolean, String) -> Unit,
+    navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
 ) {
     val context = LocalContext.current
     val reviewWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()

@@ -45,7 +45,7 @@ fun MeetingSettingRoute(
     viewModel: MeetingSettingViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToBack: (Boolean) -> Unit,
-    navigateToParticipants: (Boolean, Boolean, String) -> Unit,
+    navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
     navigateToMeetingWrite: (Meeting) -> Unit,
 ) {
     val context = LocalContext.current

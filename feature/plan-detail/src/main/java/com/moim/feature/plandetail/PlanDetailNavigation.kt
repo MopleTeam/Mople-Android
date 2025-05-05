@@ -14,9 +14,10 @@ import com.moim.core.route.DetailRoute
 fun NavGraphBuilder.planDetailScreen(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToParticipants: (Boolean, Boolean, String) -> Unit,
+    navigateToMapDetail: (placeName: String, address: String, latitude: Double, longitude: Double) -> Unit,
+    navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
-    navigateToReviewWrite: (String,Boolean) -> Unit
+    navigateToReviewWrite: (String, Boolean) -> Unit
 ) {
     composable<DetailRoute.PlanDetail>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },
@@ -25,6 +26,7 @@ fun NavGraphBuilder.planDetailScreen(
         PlanDetailRoute(
             padding = padding,
             navigateToBack = navigateToBack,
+            navigateToMapDetail = navigateToMapDetail,
             navigateToParticipants = navigateToParticipants,
             navigateToPlanWrite = navigateToPlanWrite,
             navigateToReviewWrite = navigateToReviewWrite

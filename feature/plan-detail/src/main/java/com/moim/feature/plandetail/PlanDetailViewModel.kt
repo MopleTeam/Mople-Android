@@ -20,7 +20,6 @@ import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.domain.usecase.GetPlanItemUseCase
 import com.moim.core.model.Comment
-import com.moim.core.model.MapType
 import com.moim.core.model.User
 import com.moim.core.model.item.PlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -125,13 +124,12 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickPlanUpdate -> navigateToPlanWrite()
             is PlanDetailUiAction.OnClickPlanDelete -> deletePlan()
             is PlanDetailUiAction.OnClickPlanReport -> reportPlan()
+            is PlanDetailUiAction.OnClickMapDetail -> navigateToMapDetail()
             is PlanDetailUiAction.OnClickCommentUpload -> uploadComment(uiAction.commentText, uiAction.updateComment)
             is PlanDetailUiAction.OnClickCommentReport -> reportComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentUpdate -> updateComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentDelete -> deleteComment(uiAction.comment)
-            is PlanDetailUiAction.OnClickMapAddress -> navigateToMap(uiAction.mapType)
             is PlanDetailUiAction.OnShowReviewImageCropDialog -> showPlanDetailImageCropDialog(uiAction.isShow, uiAction.selectedImageIndex)
-            is PlanDetailUiAction.OnShowMapAppDialog -> showMapAppDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanEditDialog -> showPlanEditDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanReportDialog -> showPlanReportDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowCommentEditDialog -> showCommentEditDialog(uiAction.isShow, uiAction.comment)
@@ -273,12 +271,6 @@ class PlanDetailViewModel @Inject constructor(
         }
     }
 
-    private fun showMapAppDialog(isShow: Boolean) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiState(copy(isShowMapAppDialog = isShow))
-        }
-    }
-
     private fun showPlanDetailImageCropDialog(isShow: Boolean, selectedImageIndex: Int) {
         uiState.checkState<PlanDetailUiState.Success> {
             setUiState(copy(isShowReviewImageCropDialog = isShow, selectedImageIndex = selectedImageIndex))
@@ -302,9 +294,16 @@ class PlanDetailViewModel @Inject constructor(
         }
     }
 
-    private fun navigateToMap(mapType: MapType) {
+    private fun navigateToMapDetail() {
         uiState.checkState<PlanDetailUiState.Success> {
-            setUiEvent(PlanDetailUiEvent.NavigateToMap(mapType, planItem.latitude, planItem.longitude, planItem.loadAddress))
+            setUiEvent(
+                PlanDetailUiEvent.NavigateToMapDetail(
+                    placeName = planItem.placeName,
+                    address = planItem.loadAddress,
+                    latitude = planItem.latitude,
+                    longitude = planItem.longitude
+                )
+            )
         }
     }
 
@@ -330,12 +329,11 @@ sealed interface PlanDetailUiState : UiState {
         val comments: List<Comment> = emptyList(),
         val selectedImageIndex: Int = 0,
         val selectedComment: Comment? = null,
-        val selectedUpdateComment : Comment? = null,
+        val selectedUpdateComment: Comment? = null,
         val isShowPlanEditDialog: Boolean = false,
         val isShowPlanReportDialog: Boolean = false,
         val isShowCommentEditDialog: Boolean = false,
         val isShowCommentReportDialog: Boolean = false,
-        val isShowMapAppDialog: Boolean = false,
         val isShowReviewImageCropDialog: Boolean = false,
     ) : PlanDetailUiState
 
@@ -349,14 +347,13 @@ sealed interface PlanDetailUiAction : UiAction {
     data object OnClickPlanDelete : PlanDetailUiAction
     data object OnClickPlanUpdate : PlanDetailUiAction
     data object OnClickPlanReport : PlanDetailUiAction
-    data class OnClickMapAddress(val mapType: MapType) : PlanDetailUiAction
+    data object OnClickMapDetail : PlanDetailUiAction
     data class OnClickCommentReport(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentUpdate(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentDelete(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentUpload(val commentText: String, val updateComment: Comment?) : PlanDetailUiAction
     data class OnShowReviewImageCropDialog(val isShow: Boolean, val selectedImageIndex: Int) : PlanDetailUiAction
     data class OnShowPlanEditDialog(val isShow: Boolean) : PlanDetailUiAction
-    data class OnShowMapAppDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowPlanReportDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowCommentEditDialog(val isShow: Boolean, val comment: Comment?) : PlanDetailUiAction
     data class OnShowCommentReportDialog(val isShow: Boolean, val comment: Comment?) : PlanDetailUiAction
@@ -367,6 +364,6 @@ sealed interface PlanDetailUiEvent : UiEvent {
     data class NavigateToParticipants(val postId: String, val isPlan: Boolean) : PlanDetailUiEvent
     data class NavigateToPlanWrite(val planItem: PlanItem) : PlanDetailUiEvent
     data class NavigateToReviewWrite(val postId: String) : PlanDetailUiEvent
-    data class NavigateToMap(val mapType: MapType, val latitude: Double, val longitude: Double, val address: String) : PlanDetailUiEvent
+    data class NavigateToMapDetail(val placeName: String, val address: String, val latitude: Double, val longitude: Double) : PlanDetailUiEvent
     data class ShowToastMessage(val message: ToastMessage) : PlanDetailUiEvent
 }

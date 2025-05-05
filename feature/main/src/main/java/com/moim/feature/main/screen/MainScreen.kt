@@ -20,6 +20,8 @@ import com.moim.feature.main.navigation.MainNavController
 import com.moim.feature.main.navigation.MainTab
 import com.moim.feature.main.navigation.rememberMainNavController
 import com.moim.feature.main.screen.ui.MainBottomBar
+import com.moim.feature.mapdetail.mapDetailScreen
+import com.moim.feature.mapdetail.navigateToMapDetail
 import com.moim.feature.meeting.meetingScreen
 import com.moim.feature.meetingdetail.meetingDetailScreen
 import com.moim.feature.meetingdetail.navigateToMeetingDetail
@@ -108,9 +110,14 @@ fun MainScreen(
                 planDetailScreen(
                     padding = innerPadding,
                     navigateToBack = navigator.navController::popBackStack,
+                    navigateToMapDetail = navigator.navController::navigateToMapDetail,
                     navigateToParticipants = navigator.navController::navigateToParticipantList,
                     navigateToPlanWrite = navigator.navController::navigateToPlanWrite,
                     navigateToReviewWrite = navigator.navController::navigateToReviewWrite,
+                )
+                mapDetailScreen(
+                    innerPadding = innerPadding,
+                    navigateToBack = navigator.navController::popBackStack
                 )
                 participantListNavigation(
                     padding = innerPadding,

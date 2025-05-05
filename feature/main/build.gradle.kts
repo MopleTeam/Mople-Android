@@ -17,6 +17,7 @@ dependencies {
     implementation(projects.feature.planDetail)
     implementation(projects.feature.participantList)
     implementation(projects.feature.calendar)
+    implementation(projects.feature.mapDetail)
     implementation(projects.feature.profile)
     implementation(projects.feature.profileUpdate)
     implementation(projects.feature.alarm)
