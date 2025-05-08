@@ -11,12 +11,11 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import okio.IOException
 import java.util.regex.Pattern
@@ -27,9 +26,10 @@ class ProfileUpdateViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : BaseViewModel() {
 
-    private val userResult = loadDataSignal
-        .flatMapLatest { userRepository.getUser().asResult() }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val userResult =
+        userRepository.getUser()
+            .asResult()
+            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -60,7 +60,7 @@ class ProfileUpdateViewModel @Inject constructor(
             is ProfileUpdateUiAction.OnClickBack -> setUiEvent(ProfileUpdateUiEvent.NavigateToBack)
             is ProfileUpdateUiAction.OnClickProfileUpdate -> updateUser()
             is ProfileUpdateUiAction.OnClickDuplicatedCheck -> validateDuplicateNickname()
-            is ProfileUpdateUiAction.OnClickRefresh -> onRefresh()
+            is ProfileUpdateUiAction.OnClickRefresh -> userResult.restart()
             is ProfileUpdateUiAction.OnChangeProfileUrl -> setProfileUrl(uiAction.profileUrl)
             is ProfileUpdateUiAction.OnChangeNickname -> setNickname(uiAction.nickname)
             is ProfileUpdateUiAction.OnShowProfileEditDialog -> showProfileEditDialog(uiAction.isShow)

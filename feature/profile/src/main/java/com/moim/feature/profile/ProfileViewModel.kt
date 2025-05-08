@@ -9,14 +9,13 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
@@ -27,9 +26,10 @@ class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : BaseViewModel() {
 
-    private val userResult = loadDataSignal
-        .flatMapLatest { userRepository.getUser().asResult() }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val userResult =
+        userRepository.getUser()
+            .asResult()
+            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -50,7 +50,7 @@ class ProfileViewModel @Inject constructor(
             is ProfileUiAction.OnClickPrivacyPolicy -> setUiEvent(ProfileUiEvent.NavigateToPrivacyPolicy)
             is ProfileUiAction.OnClickLogout -> logout()
             is ProfileUiAction.OnClickUserDelete -> deleteUser()
-            is ProfileUiAction.OnClickRefresh -> onRefresh()
+            is ProfileUiAction.OnClickRefresh -> userResult.restart()
             is ProfileUiAction.OnShowUserLogoutDialog -> showUserLogoutDialog(uiAction.isShow)
             is ProfileUiAction.OnShowUserDeleteDialog -> showUserDeleteDialog(uiAction.isShow)
         }

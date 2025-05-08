@@ -16,20 +16,19 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
 import com.moim.core.model.item.asPlan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val planRepository: PlanRepository,
+    planRepository: PlanRepository,
     meetingViewModelDelegate: MeetingViewModelDelegate,
     planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(),
@@ -39,9 +38,9 @@ class HomeViewModel @Inject constructor(
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
     private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
-    private val meetingPlansResult = loadDataSignal
-        .flatMapLatest { planRepository.getCurrentPlans().asResult() }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val meetingPlansResult = planRepository.getCurrentPlans()
+        .asResult()
+        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -120,7 +119,7 @@ class HomeViewModel @Inject constructor(
 
                             is PlanAction.PlanUpdate -> {
                                 if (plans.isEmpty()) {
-                                    onRefresh()
+                                    meetingPlansResult.restart()
                                 } else {
                                     val plans = plans.toMutableList().apply {
                                         withIndex()
@@ -149,7 +148,7 @@ class HomeViewModel @Inject constructor(
                                 setUiState(copy(plans = plans))
                             }
 
-                            is PlanAction.PlanInvalidate -> onRefresh()
+                            is PlanAction.PlanInvalidate -> meetingPlansResult.restart()
 
                             else -> return@collect
                         }
@@ -166,7 +165,7 @@ class HomeViewModel @Inject constructor(
             is HomeUiAction.OnClickPlanWrite -> navigateToPlanWrite()
             is HomeUiAction.OnClickPlanMore -> setUiEvent(HomeUiEvent.NavigateToCalendar)
             is HomeUiAction.OnClickPlan -> setUiEvent(HomeUiEvent.NavigateToPlanDetail(uiAction.planId, uiAction.isPlan))
-            is HomeUiAction.OnClickRefresh -> onRefresh()
+            is HomeUiAction.OnClickRefresh -> meetingPlansResult.restart()
         }
     }
 

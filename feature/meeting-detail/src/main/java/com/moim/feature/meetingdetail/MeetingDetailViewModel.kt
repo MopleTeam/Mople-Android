@@ -17,6 +17,7 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
@@ -31,9 +32,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.ZonedDateTime
@@ -58,16 +57,13 @@ class MeetingDetailViewModel @Inject constructor(
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
     private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
-    private val meetingDetailResult = loadDataSignal
-        .flatMapLatest {
-            combine(
-                meetingRepository.getMeeting(meetingId),
-                planRepository.getPlans(meetingId),
-                reviewRepository.getReviews(meetingId),
-                ::Triple
-            ).asResult()
-        }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val meetingDetailResult =
+        combine(
+            meetingRepository.getMeeting(meetingId),
+            planRepository.getPlans(meetingId),
+            reviewRepository.getReviews(meetingId),
+            ::Triple
+        ).asResult().restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -99,7 +95,7 @@ class MeetingDetailViewModel @Inject constructor(
                     uiState.checkState<MeetingDetailUiState.Success> {
                         when (action) {
                             is MeetingAction.MeetingUpdate -> setUiState(copy(meeting = action.meeting))
-                            is MeetingAction.MeetingInvalidate -> onRefresh()
+                            is MeetingAction.MeetingInvalidate -> meetingDetailResult.restart()
                             else -> return@collect
                         }
                     }
@@ -166,7 +162,7 @@ class MeetingDetailViewModel @Inject constructor(
                                 )
                             )
 
-                            is PlanAction.PlanInvalidate -> onRefresh()
+                            is PlanAction.PlanInvalidate -> meetingDetailResult.restart()
 
                             is PlanAction.None -> return@collect
                         }
@@ -179,7 +175,7 @@ class MeetingDetailViewModel @Inject constructor(
     fun onUiAction(uiAction: UiAction) {
         when (uiAction) {
             is MeetingDetailUiAction.OnClickBack -> setUiEvent(MeetingDetailUiEvent.NavigateToBack)
-            is MeetingDetailUiAction.OnClickRefresh -> onRefresh()
+            is MeetingDetailUiAction.OnClickRefresh -> meetingDetailResult.restart()
             is MeetingDetailUiAction.OnClickPlanWrite -> navigateToPlanWrite()
             is MeetingDetailUiAction.OnClickMeetingSetting -> navigateToMeetingSetting()
             is MeetingDetailUiAction.OnClickPlanTab -> setPlanTab(uiAction.isBefore)

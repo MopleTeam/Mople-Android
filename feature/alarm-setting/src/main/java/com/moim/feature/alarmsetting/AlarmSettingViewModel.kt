@@ -9,12 +9,11 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.notification.NotificationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import okio.IOException
 import javax.inject.Inject
@@ -24,9 +23,10 @@ class AlarmSettingViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
 ) : BaseViewModel() {
 
-    private val alarmSettingResult = loadDataSignal
-        .flatMapLatest { notificationRepository.getNotificationSubscribes().asResult() }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val alarmSettingResult = notificationRepository
+        .getNotificationSubscribes()
+        .asResult()
+        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -49,7 +49,7 @@ class AlarmSettingViewModel @Inject constructor(
     fun onUiAction(uiAction: AlarmSettingUiAction) {
         when (uiAction) {
             is AlarmSettingUiAction.OnClickBack -> setUiEvent(AlarmSettingUiEvent.NavigateToBack)
-            is AlarmSettingUiAction.OnClickRefresh -> onRefresh()
+            is AlarmSettingUiAction.OnClickRefresh -> alarmSettingResult.restart()
             is AlarmSettingUiAction.OnClickPermissionRequest -> setUiEvent(AlarmSettingUiEvent.NavigateToSystemSetting)
             is AlarmSettingUiAction.OnChangeMeetingNotify -> setSubscribeNotify(ENABLE_MEET, uiAction.isCheck)
             is AlarmSettingUiAction.OnChangePlanNotify -> setSubscribeNotify(ENABLE_PLAN, uiAction.isCheck)

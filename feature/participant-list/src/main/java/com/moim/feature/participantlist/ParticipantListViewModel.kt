@@ -8,14 +8,13 @@ import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
+import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.model.Participant
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,14 +35,12 @@ class ParticipantListViewModel @Inject constructor(
     private val id
         get() = savedStateHandle.get<String>(KEY_ID) ?: ""
 
-    private val participantListResult = loadDataSignal
-        .flatMapLatest {
-            when {
-                isMeeting -> meetingRepository.getMeetingParticipants(id)
-                isPlan -> planRepository.getPlanParticipants(id)
-                else -> reviewRepository.getReviewParticipants(id)
-            }.asResult()
-        }.stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val participantListResult =
+        when {
+            isMeeting -> meetingRepository.getMeetingParticipants(id)
+            isPlan -> planRepository.getPlanParticipants(id)
+            else -> reviewRepository.getReviewParticipants(id)
+        }.asResult().restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -60,7 +57,7 @@ class ParticipantListViewModel @Inject constructor(
     fun onUiAction(uiAction: ParticipantListUiAction) {
         when (uiAction) {
             is ParticipantListUiAction.OnClickBack -> setUiEvent(ParticipantListUiEvent.NavigateToBack)
-            is ParticipantListUiAction.OnClickRefresh -> onRefresh()
+            is ParticipantListUiAction.OnClickRefresh -> participantListResult.restart()
         }
     }
 

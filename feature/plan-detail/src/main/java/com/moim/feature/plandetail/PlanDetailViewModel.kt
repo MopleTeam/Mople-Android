@@ -14,6 +14,7 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
@@ -37,11 +38,11 @@ import javax.inject.Inject
 @HiltViewModel
 class PlanDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val userRepository: UserRepository,
+    userRepository: UserRepository,
+    getPlanItemUseCase: GetPlanItemUseCase,
     private val planRepository: PlanRepository,
     private val reviewRepository: ReviewRepository,
     private val commentRepository: CommentRepository,
-    private val getPlanItemUseCase: GetPlanItemUseCase,
     planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(), PlanItemViewModelDelegate by planItemViewModelDelegate {
 
@@ -56,13 +57,11 @@ class PlanDetailViewModel @Inject constructor(
     private val planItemReceiver = planItemAction.planItemStateIn(viewModelScope)
 
     private val planResult =
-        loadDataSignal.flatMapLatest {
-            combine(
-                userRepository.getUser(),
-                getPlanItemUseCase(GetPlanItemUseCase.Params(postId, isPlan)),
-                ::Pair
-            ).asResult()
-        }.stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+        combine(
+            userRepository.getUser(),
+            getPlanItemUseCase(GetPlanItemUseCase.Params(postId, isPlan)),
+            ::Pair
+        ).asResult().restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     private val commentResult = planId
         .filterNotNull()
@@ -108,7 +107,7 @@ class PlanDetailViewModel @Inject constructor(
                             }
                         }
 
-                        is PlanAction.PlanInvalidate -> onRefresh()
+                        is PlanAction.PlanInvalidate -> planResult.restart()
                         else -> return@collect
                     }
                 }
@@ -119,7 +118,7 @@ class PlanDetailViewModel @Inject constructor(
     fun onUiAction(uiAction: PlanDetailUiAction) {
         when (uiAction) {
             is PlanDetailUiAction.OnClickBack -> setUiEvent(PlanDetailUiEvent.NavigateToBack)
-            is PlanDetailUiAction.OnClickRefresh -> onRefresh()
+            is PlanDetailUiAction.OnClickRefresh -> planResult.restart()
             is PlanDetailUiAction.OnClickParticipants -> navigateToParticipants()
             is PlanDetailUiAction.OnClickPlanUpdate -> navigateToPlanWrite()
             is PlanDetailUiAction.OnClickPlanDelete -> deletePlan()

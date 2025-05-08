@@ -20,14 +20,12 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.common.view.restartableStateIn
 import com.moim.core.domain.usecase.GetPlanItemForCalendarUseCase
 import com.moim.core.model.item.PlanItem
-import com.moim.core.model.item.asPlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import okio.IOException
 import java.time.DayOfWeek
@@ -44,9 +42,9 @@ class CalendarViewModel @Inject constructor(
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
     private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
-    private val meetingPlanResult = loadDataSignal
-        .flatMapLatest { getPlanItemForCalendarUseCase(getDateTimeFormatZonedDate(pattern = "yyyyMM")).asResult() }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val meetingPlanResult = getPlanItemForCalendarUseCase(getDateTimeFormatZonedDate(pattern = "yyyyMM"))
+        .asResult()
+        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -84,7 +82,7 @@ class CalendarViewModel @Inject constructor(
                                 setUiState(copy(plans = plans))
                             }
 
-                            is MeetingAction.MeetingInvalidate -> onRefresh()
+                            is MeetingAction.MeetingInvalidate -> meetingPlanResult.restart()
 
                             else -> return@collect
                         }
@@ -123,7 +121,7 @@ class CalendarViewModel @Inject constructor(
                                 setUiState(copy(plans = deletePlans))
                             }
 
-                            is PlanAction.PlanInvalidate -> onRefresh()
+                            is PlanAction.PlanInvalidate -> meetingPlanResult.restart()
 
                             is PlanAction.None -> return@collect
                         }
@@ -135,7 +133,7 @@ class CalendarViewModel @Inject constructor(
 
     fun onUiAction(uiAction: CalendarUiAction) {
         when (uiAction) {
-            is CalendarUiAction.OnClickRefresh -> onRefresh()
+            is CalendarUiAction.OnClickRefresh -> meetingPlanResult.restart()
             is CalendarUiAction.OnClickDateDay -> setSelectDay(uiAction.date)
             is CalendarUiAction.OnClickExpandable -> setExpandable(uiAction.date)
             is CalendarUiAction.OnClickMeetingPlan -> setUiEvent(CalendarUiEvent.NavigateToPlanDetail(uiAction.postId, uiAction.isPlan))

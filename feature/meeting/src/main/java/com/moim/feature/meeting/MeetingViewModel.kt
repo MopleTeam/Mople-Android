@@ -15,18 +15,17 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.model.Meeting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MeetingViewModel @Inject constructor(
-    private val meetingRepository: MeetingRepository,
+    meetingRepository: MeetingRepository,
     private val meetingViewModelDelegate: MeetingViewModelDelegate,
     private val planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(),
@@ -36,9 +35,9 @@ class MeetingViewModel @Inject constructor(
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
     private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
-    private val meetingsResult = loadDataSignal
-        .flatMapLatest { meetingRepository.getMeetings().asResult() }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val meetingsResult = meetingRepository.getMeetings()
+        .asResult()
+        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -83,7 +82,7 @@ class MeetingViewModel @Inject constructor(
                                 setUiState(copy(meetings = meeting))
                             }
 
-                            is MeetingAction.MeetingInvalidate -> onRefresh()
+                            is MeetingAction.MeetingInvalidate -> meetingsResult.restart()
 
                             else -> return@collect
                         }
@@ -126,7 +125,7 @@ class MeetingViewModel @Inject constructor(
                                 )
                             }
 
-                            is PlanAction.PlanDelete, is PlanAction.PlanInvalidate -> onRefresh()
+                            is PlanAction.PlanDelete, is PlanAction.PlanInvalidate -> meetingsResult.restart()
                             is PlanAction.None -> return@collect
                         }
                     }
@@ -139,7 +138,7 @@ class MeetingViewModel @Inject constructor(
         when (uiAction) {
             is MeetingUiAction.OnClickMeetingWrite -> setUiEvent(MeetingUiEvent.NavigateToMeetingWrite)
             is MeetingUiAction.OnClickMeeting -> setUiEvent(MeetingUiEvent.NavigateToMeetingDetail(uiAction.meetingId))
-            is MeetingUiAction.OnClickRefresh -> onRefresh()
+            is MeetingUiAction.OnClickRefresh -> meetingsResult.restart()
         }
     }
 }

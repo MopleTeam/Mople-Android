@@ -11,6 +11,7 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.domain.usecase.UpdateReviewImagesUseCase
 import com.moim.core.model.Review
@@ -18,9 +19,7 @@ import com.moim.core.model.ReviewImage
 import com.moim.core.model.item.asPlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.ZonedDateTime
@@ -29,7 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ReviewWriteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val reviewRepository: ReviewRepository,
+    reviewRepository: ReviewRepository,
     private val updateReviewImagesUseCase: UpdateReviewImagesUseCase,
     private val planItemViewModelDelegate: PlanItemViewModelDelegate,
 ) : BaseViewModel(), PlanItemViewModelDelegate by planItemViewModelDelegate {
@@ -40,9 +39,10 @@ class ReviewWriteViewModel @Inject constructor(
     private val isUpdated
         get() = savedStateHandle.get<Boolean>(KEY_IS_UPDATED) ?: false
 
-    private val reviewWriteResult = loadDataSignal
-        .flatMapLatest { reviewRepository.getReview(postId).asResult() }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val reviewWriteResult =
+        reviewRepository.getReview(postId)
+            .asResult()
+            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -73,7 +73,7 @@ class ReviewWriteViewModel @Inject constructor(
     fun onUiAction(uiAction: ReviewWriteUiAction) {
         when (uiAction) {
             is ReviewWriteUiAction.OnClickBack -> setUiEvent(ReviewWriteUiEvent.NavigateToBack)
-            is ReviewWriteUiAction.OnClickRefresh -> onRefresh()
+            is ReviewWriteUiAction.OnClickRefresh -> reviewWriteResult.restart()
             is ReviewWriteUiAction.OnClickImageUpload -> setUiEvent(ReviewWriteUiEvent.NavigateToPhotoPicker)
             is ReviewWriteUiAction.OnClickAddImages -> addUploadImages(uiAction.imageUrls)
             is ReviewWriteUiAction.OnClickRemoveImage -> removeUploadImages(uiAction.reviewImage)

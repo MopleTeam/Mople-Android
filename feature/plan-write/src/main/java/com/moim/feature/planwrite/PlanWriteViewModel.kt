@@ -70,7 +70,6 @@ class PlanWriteViewModel @Inject constructor(
     fun onUiAction(uiAction: PlanWriteUiAction) {
         when (uiAction) {
             is PlanWriteUiAction.OnClickBack -> navigateToBack()
-            is PlanWriteUiAction.OnClickRefresh -> onRefresh()
             is PlanWriteUiAction.OnClickPlanMeeting -> setPlanMeeting(uiAction.meeting)
             is PlanWriteUiAction.OnClickPlanDate -> setPlanDate(uiAction.date)
             is PlanWriteUiAction.OnClickPlanTime -> setPlanTime(uiAction.date)
@@ -377,7 +376,6 @@ sealed interface PlanWriteDialogUiState : UiState {
 sealed interface PlanWriteUiAction : UiAction {
     data object OnClickBack : PlanWriteUiAction
     data object OnClickPlanWrite : PlanWriteUiAction
-    data object OnClickRefresh : PlanWriteUiAction
     data class OnClickPlanPlaceSearch(val keyword: String, val xPoint: String, val yPoint: String) : PlanWriteUiAction
     data class OnClickSearchPlace(val place: Place) : PlanWriteUiAction
     data class OnClickPlanPlace(val place: Place) : PlanWriteUiAction
