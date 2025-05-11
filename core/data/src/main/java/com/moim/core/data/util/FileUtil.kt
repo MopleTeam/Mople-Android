@@ -17,6 +17,8 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
+import androidx.core.net.toUri
+import androidx.core.graphics.createBitmap
 
 internal class FileUtil @Inject constructor(
     @ApplicationContext private val context: Context
@@ -25,7 +27,7 @@ internal class FileUtil @Inject constructor(
     private val contentResolver = context.contentResolver
 
     fun from(path: String): File {
-        val uri = Uri.parse(path)
+        val uri = path.toUri()
 
         return if (uri.scheme.isNullOrEmpty()) {
             File(path)
@@ -108,7 +110,7 @@ internal class FileUtil @Inject constructor(
         var bitmap: Bitmap? = null
 
         try {
-            bitmap = Bitmap.createBitmap(320, 320, Bitmap.Config.ARGB_8888)
+            bitmap = createBitmap(320, 320)
             Canvas(bitmap).apply { drawColor(Color.LTGRAY) }
             bos = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos)

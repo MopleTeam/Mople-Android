@@ -39,12 +39,11 @@ fun HomeTopAppbar(
         )
 
         Spacer(Modifier.weight(1f))
-        /* TODO:: 알람 조회 서버 작업 완료 되면 주석 해제
-                MoimIconButton(
-                    onClick = { onUiAction(HomeUiAction.OnClickAlarm) },
-                    iconRes = R.drawable.ic_alarm,
-                )
-         */
+
+        MoimIconButton(
+            onClick = { onUiAction(HomeUiAction.OnClickAlarm) },
+            iconRes = R.drawable.ic_alarm,
+        )
     }
 }
 

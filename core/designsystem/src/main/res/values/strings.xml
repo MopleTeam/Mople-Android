@@ -120,6 +120,9 @@
     <string name="plan_detail_comment_error">댓글을 불러오지 못했어요\n잠시 후 다시 시도해주세요</string>
     <string name="plan_detail_comment_empty">아직 댓글이 없어요</string>
     <string name="plan_detail_image">함께한 순간</string>
+    <string name="plan_detail_plan_apply">약속 참여하기</string>
+    <string name="plan_detail_plan_not_apply">약속 불참</string>
+    <string name="plan_detail_plan_disable">해당 약속은 마감되었어요</string>
 
     <!-- MapDetail -->
     <string name="map_detail_title">상세 지도</string>

@@ -24,10 +24,12 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.util.getDateTimeFormatString
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.model.item.PlanItem
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
@@ -35,6 +37,7 @@ import com.moim.feature.plandetail.PlanDetailUiAction
 @Composable
 fun PlanDetailContent(
     modifier: Modifier = Modifier,
+    isMyPlan: Boolean,
     planItem: PlanItem,
     onUiAction: OnPlanDetailUiAction = {}
 ) {
@@ -101,6 +104,22 @@ fun PlanDetailContent(
                 latitude = planItem.latitude,
                 longitude = planItem.longitude,
                 onUiAction = onUiAction,
+            )
+        }
+
+        if (planItem.isPlanAtBefore && isMyPlan.not()) {
+            val btnTextRes = if (planItem.isParticipant) R.string.plan_detail_plan_not_apply else R.string.plan_detail_plan_apply
+            val buttonColors = moimButtomColors().copy(
+                containerColor = if (planItem.isParticipant) MoimTheme.colors.tertiary else MoimTheme.colors.primary.primary,
+                contentColor = if (planItem.isParticipant) MoimTheme.colors.gray.gray03 else MoimTheme.colors.white
+            )
+
+            Spacer(Modifier.height(16.dp))
+            MoimPrimaryButton(
+                modifier = Modifier.fillMaxWidth(),
+                buttonColors = buttonColors,
+                text = stringResource(btnTextRes),
+                onClick = { onUiAction(PlanDetailUiAction.OnClickPlanApply(planItem.isParticipant.not())) }
             )
         }
 

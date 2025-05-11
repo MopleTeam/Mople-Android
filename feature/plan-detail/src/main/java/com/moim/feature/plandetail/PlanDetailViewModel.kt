@@ -124,6 +124,7 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickPlanDelete -> deletePlan()
             is PlanDetailUiAction.OnClickPlanReport -> reportPlan()
             is PlanDetailUiAction.OnClickMapDetail -> navigateToMapDetail()
+            is PlanDetailUiAction.OnClickPlanApply -> planApply(uiAction.isApply)
             is PlanDetailUiAction.OnClickCommentUpload -> uploadComment(uiAction.commentText, uiAction.updateComment)
             is PlanDetailUiAction.OnClickCommentReport -> reportComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentUpdate -> updateComment(uiAction.comment)
@@ -139,6 +140,30 @@ class PlanDetailViewModel @Inject constructor(
     private fun updateComment(comment: Comment) {
         uiState.checkState<PlanDetailUiState.Success> {
             setUiState(copy(selectedUpdateComment = comment))
+        }
+    }
+
+    private fun planApply(isApply: Boolean) {
+        viewModelScope.launch {
+            uiState.checkState<PlanDetailUiState.Success> {
+                if (isApply) {
+                    planRepository.joinPlan(postId)
+                } else {
+                    planRepository.leavePlan(postId)
+                }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
+                    when (result) {
+                        is Result.Loading -> return@collect
+
+                        is Result.Success -> {
+                            val planItem = planItem.copy(isParticipant = isApply)
+                            setUiState(copy(planItem = planItem))
+                            updatePlanItem(ZonedDateTime.now(), planItem)
+                        }
+
+                        is Result.Error -> showErrorToast(result.exception)
+                    }
+                }
+            }
         }
     }
 
@@ -190,13 +215,13 @@ class PlanDetailViewModel @Inject constructor(
             uiState.checkState<PlanDetailUiState.Success> {
                 if (updateComment != null) {
                     commentRepository.updateComment(
-                        postId = postId,
+                        postId = planItem.commentCheckId,
                         commentId = updateComment.commentId,
                         content = content.trim()
                     )
                 } else {
                     commentRepository.createComment(
-                        postId = planItem.postId,
+                        postId = planItem.commentCheckId,
                         content = content.trim()
                     )
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
@@ -347,6 +372,7 @@ sealed interface PlanDetailUiAction : UiAction {
     data object OnClickPlanUpdate : PlanDetailUiAction
     data object OnClickPlanReport : PlanDetailUiAction
     data object OnClickMapDetail : PlanDetailUiAction
+    data class OnClickPlanApply(val isApply: Boolean) : PlanDetailUiAction
     data class OnClickCommentReport(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentUpdate(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentDelete(val comment: Comment) : PlanDetailUiAction
