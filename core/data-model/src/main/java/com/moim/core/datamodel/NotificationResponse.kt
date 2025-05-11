@@ -7,6 +7,10 @@ import kotlinx.serialization.Serializable
 data class NotificationResponse(
     @SerialName("notificationId")
     val notificationId: String,
+    @SerialName("meetName")
+    val meetName: String = "",
+    @SerialName("meetImg")
+    val meetImgUrl: String = "",
     @SerialName("meetId")
     val meetId: String? = null,
     @SerialName("planId")
@@ -16,7 +20,9 @@ data class NotificationResponse(
     @SerialName("type")
     val type: String,
     @SerialName("payload")
-    val payload: PayloadResponse
+    val payload: PayloadResponse,
+    @SerialName("sendAt")
+    val sendAt: String,
 )
 
 @Serializable

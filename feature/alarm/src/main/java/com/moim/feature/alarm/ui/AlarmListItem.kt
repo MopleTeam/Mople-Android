@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.util.getDateTimeFormatString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
@@ -41,7 +42,7 @@ fun AlarmListItem(
                 .clip(RoundedCornerShape(10.dp))
                 .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(10.dp))
                 .size(40.dp),
-            imageUrl = ""
+            imageUrl = notification.meetImgUrl
         )
         Spacer(Modifier.size(16.dp))
 
@@ -57,7 +58,7 @@ fun AlarmListItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 MoimText(
-                    text = notification.type,
+                    text = notification.meetName,
                     style = MoimTheme.typography.body02.medium,
                     color = MoimTheme.colors.gray.gray04,
                 )
@@ -67,8 +68,12 @@ fun AlarmListItem(
                     style = MoimTheme.typography.body02.medium,
                     color = MoimTheme.colors.gray.gray04,
                 )
+
                 MoimText(
-                    text = "",
+                    text = getDateTimeFormatString(
+                        dateTime = notification.sendAt,
+                        pattern = stringResource(R.string.regex_date_year_month_day_short)
+                    ),
                     style = MoimTheme.typography.body02.medium,
                     color = MoimTheme.colors.gray.gray04,
                 )

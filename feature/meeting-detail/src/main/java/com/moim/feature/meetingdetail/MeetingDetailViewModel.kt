@@ -79,7 +79,9 @@ class MeetingDetailViewModel @Inject constructor(
                                 MeetingDetailUiState.Success(
                                     userId = user.userId,
                                     meeting = meeting,
-                                    plans = plans,
+                                    plans = plans.sortedBy {
+                                        it.planTime.parseZonedDateTime().isBefore(ZonedDateTime.now())
+                                    },
                                     reviews = reviews,
                                 )
                             )

@@ -10,6 +10,7 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.notification.NotificationRepository
 import com.moim.core.model.Notification
+import com.moim.core.model.NotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
@@ -30,7 +31,7 @@ class AlarmViewModel @Inject constructor(
             notificationResult.collect { result ->
                 when (result) {
                     is Result.Loading -> setUiState(AlarmUiState.Loading)
-                    is Result.Success -> setUiState(AlarmUiState.Success(result.data))
+                    is Result.Success -> setUiState(AlarmUiState.Success(result.data.sortedByDescending { it.sendAt }))
                     is Result.Error -> setUiState(AlarmUiState.Error)
                 }
             }
@@ -41,7 +42,28 @@ class AlarmViewModel @Inject constructor(
         when (uiAction) {
             is AlarmUiAction.OnClickBack -> setUiEvent(AlarmUiEvent.NavigateToBack)
             is AlarmUiAction.OnClickRefresh -> notificationResult.restart()
-            is AlarmUiAction.OnClickAlarm -> {}
+            is AlarmUiAction.OnClickAlarm -> navigateToNotifyTarget(uiAction.notification)
+        }
+    }
+
+    private fun navigateToNotifyTarget(notification: Notification) {
+        when (notification.type) {
+            NotificationType.MEET_NEW_MEMBER,
+            NotificationType.PLAN_DELETE -> {
+                setUiEvent(AlarmUiEvent.NavigateToMeetingDetail(requireNotNull(notification.meetId)))
+            }
+
+            NotificationType.PLAN_CREATE,
+            NotificationType.PLAN_UPDATE,
+            NotificationType.PLAN_REMIND,
+            NotificationType.REVIEW_REMIND,
+            NotificationType.REVIEW_UPDATE -> {
+                val postId = notification.planId ?: notification.reviewId ?: return
+                val isPlan = notification.planId != null
+                setUiEvent(AlarmUiEvent.NavigateToPlanDetail(postId, isPlan))
+            }
+
+            NotificationType.NONE -> return
         }
     }
 }
@@ -64,6 +86,6 @@ sealed interface AlarmUiAction : UiAction {
 
 sealed interface AlarmUiEvent : UiEvent {
     data object NavigateToBack : AlarmUiEvent
-
-    data class NavigateToDeepLink(val deepLink: String) : AlarmUiEvent
+    data class NavigateToMeetingDetail(val meetingId: String) : AlarmUiEvent
+    data class NavigateToPlanDetail(val postId: String, val isPlan: Boolean) : AlarmUiEvent
 }

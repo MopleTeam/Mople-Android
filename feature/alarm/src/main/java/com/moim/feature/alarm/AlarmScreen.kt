@@ -32,8 +32,9 @@ import com.moim.feature.alarm.ui.AlarmListItem
 fun AlarmRoute(
     padding: PaddingValues,
     viewModel: AlarmViewModel = hiltViewModel(),
+    navigateToMeetingDetail: (String) -> Unit,
+    navigateToPlanDetail: (String, Boolean) -> Unit,
     navigateToBack: () -> Unit,
-    navigateToDeepLink: (String) -> Unit,
 ) {
     val alarmUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
@@ -41,7 +42,8 @@ fun AlarmRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is AlarmUiEvent.NavigateToBack -> navigateToBack()
-            is AlarmUiEvent.NavigateToDeepLink -> navigateToDeepLink(event.deepLink)
+            is AlarmUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
+            is AlarmUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
         }
     }
 

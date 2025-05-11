@@ -13,8 +13,9 @@ import com.moim.core.route.DetailRoute
 
 fun NavGraphBuilder.alarmScreen(
     padding: PaddingValues,
+    navigateToMeetingDetail: (String) -> Unit,
+    navigateToPlanDetail: (String, Boolean) -> Unit,
     navigateToBack: () -> Unit,
-    navigateToDeepLink: (String) -> Unit
 ) {
     composable<DetailRoute.Alarm>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },
@@ -22,8 +23,9 @@ fun NavGraphBuilder.alarmScreen(
     ) {
         AlarmRoute(
             padding = padding,
+            navigateToMeetingDetail = navigateToMeetingDetail,
+            navigateToPlanDetail = navigateToPlanDetail,
             navigateToBack = navigateToBack,
-            navigateToDeepLink = navigateToDeepLink
         )
     }
 }

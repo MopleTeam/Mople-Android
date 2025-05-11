@@ -149,8 +149,9 @@ fun MainScreen(
                 )
                 alarmScreen(
                     padding = innerPadding,
+                    navigateToMeetingDetail = navigator.navController::navigateToMeetingDetail,
+                    navigateToPlanDetail = navigator.navController::navigateToPlanDetail,
                     navigateToBack = navigator.navController::popBackStack,
-                    navigateToDeepLink = {}
                 )
                 alarmSettingScreen(
                     padding = innerPadding,
