@@ -16,7 +16,6 @@ import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.domain.usecase.UpdateReviewImagesUseCase
 import com.moim.core.model.Review
 import com.moim.core.model.ReviewImage
-import com.moim.core.model.item.asPlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onEach
@@ -76,7 +75,7 @@ class ReviewWriteViewModel @Inject constructor(
             is ReviewWriteUiAction.OnClickRefresh -> reviewWriteResult.restart()
             is ReviewWriteUiAction.OnClickImageUpload -> setUiEvent(ReviewWriteUiEvent.NavigateToPhotoPicker)
             is ReviewWriteUiAction.OnClickAddImages -> addUploadImages(uiAction.imageUrls)
-            is ReviewWriteUiAction.OnClickRemoveImage -> removeUploadImages(uiAction.reviewImage)
+            is ReviewWriteUiAction.OnClickRemoveImage -> removeImages(uiAction.reviewImage)
             is ReviewWriteUiAction.OnClickParticipants -> setUiEvent(ReviewWriteUiEvent.NavigateToParticipants(postId))
             is ReviewWriteUiAction.OnClickSubmit -> submitReviewImages()
         }
@@ -100,7 +99,7 @@ class ReviewWriteViewModel @Inject constructor(
         }
     }
 
-    private fun removeUploadImages(image: ReviewImage) {
+    private fun removeImages(image: ReviewImage) {
         uiState.checkState<ReviewWriteUiState.Success> {
             val uploadImages = uploadImages.toMutableList().apply { removeIf { it.imageUrl == image.imageUrl } }
             val removeImageIds = removeImageIds.toMutableList().apply { if (image.imageId.isNotEmpty()) add(image.imageId) }
@@ -131,8 +130,7 @@ class ReviewWriteViewModel @Inject constructor(
                         when (result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> {
-                                val removeImages = review.images.toMutableList().apply { removeAll { removeImageIds.any { id -> id == it.imageId } } }
-                                updatePlanItem(ZonedDateTime.now(), review.asPlanItem().copy(reviewImages = removeImages + result.data))
+                                invalidatePlanItem(ZonedDateTime.now())
                                 setUiEvent(ReviewWriteUiEvent.NavigateToBack)
                             }
 

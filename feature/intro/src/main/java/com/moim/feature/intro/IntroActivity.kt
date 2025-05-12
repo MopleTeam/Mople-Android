@@ -38,10 +38,6 @@ class IntroActivity : ComponentActivity() {
                 }
             }
         }
-
-        if (intent.extras != null) {
-            navigateToMain()
-        }
     }
 }
 
