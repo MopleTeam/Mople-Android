@@ -22,5 +22,5 @@ interface ReviewRepository {
     fun updateReviewImages(
         reviewId: String,
         uploadImages: List<String>,
-    ): Flow<List<ReviewImage>>
+    ): Flow<Unit>
 }

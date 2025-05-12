@@ -1,7 +1,6 @@
 package com.moim.core.data.service
 
 import com.moim.core.datamodel.ParticipantContainerResponse
-import com.moim.core.datamodel.ReviewImageResponse
 import com.moim.core.datamodel.ReviewResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
@@ -18,9 +17,6 @@ internal interface ReviewApi {
 
     @GET("/review/{reviewId}")
     suspend fun getReview(@Path("reviewId") id: String): ReviewResponse
-
-    @GET("/review/images/{reviewId}")
-    suspend fun getReviewImages(@Path("reviewId") id: String) : List<ReviewImageResponse>
 
     @GET("/review/participant/{reviewId}")
     suspend fun getReviewParticipant(@Path("reviewId") id: String): ParticipantContainerResponse

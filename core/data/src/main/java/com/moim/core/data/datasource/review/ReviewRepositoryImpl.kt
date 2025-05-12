@@ -4,7 +4,6 @@ import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.service.ReviewApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
-import com.moim.core.datamodel.ReviewImageResponse
 import com.moim.core.datamodel.ReviewResponse
 import com.moim.core.model.asItem
 import kotlinx.coroutines.flow.Flow
@@ -51,8 +50,7 @@ internal class ReviewRepositoryImpl @Inject constructor(
         reviewId: String,
         uploadImages: List<String>,
     ) = catchFlow {
-        imageUploadRemoteDataSource.uploadReviewImages(reviewId, uploadImages, "review_image")
-        emit(reviewApi.getReviewImages(reviewId).map(ReviewImageResponse::asItem))
+        emit(imageUploadRemoteDataSource.uploadReviewImages(reviewId, uploadImages, "review_image"))
     }
 
     companion object {
