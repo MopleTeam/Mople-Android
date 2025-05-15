@@ -61,8 +61,10 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        joinMeeting(intent)
-        getNotifyData(intent)
+        if (savedInstanceState == null) {
+            joinMeeting(intent)
+            getNotifyData(intent)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
