@@ -1,5 +1,6 @@
 ## 모임부터 약속까지 간편한 모임플래너 앱, 모플
-<img src="https://github.com/user-attachments/assets/7b372dfd-2ef5-4a08-9cae-313e1a6b51cf" width="400" alt="모플 아이콘 "/>
+<img src="https://github.com/user-attachments/assets/4a4e7073-be41-4ce8-8451-76bfc8010baf" width="800" alt="모플 아이콘 "/>
+
 
 ## 📱 앱 스크린샷
 <table>
