@@ -69,7 +69,7 @@ fun PlanDetailReviewImages(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .size(109.dp)
-                        .onSingleClick { onUiAction(PlanDetailUiAction.OnShowReviewImageCropDialog(true, index)) },
+                        .onSingleClick { onUiAction(PlanDetailUiAction.OnClickReviewImage(index)) },
                     errorImage = painterResource(R.drawable.ic_empty_image),
                     imageUrl = images[index].imageUrl
                 )

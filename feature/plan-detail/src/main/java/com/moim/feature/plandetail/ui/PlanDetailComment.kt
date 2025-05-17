@@ -27,6 +27,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
+import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Comment
 import com.moim.feature.plandetail.OnPlanDetailUiAction
@@ -78,9 +79,10 @@ fun PlanDetailCommentItem(
                 .padding(top = 4.dp)
                 .size(32.dp)
                 .clip(CircleShape)
-                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape),
+                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
+                .onSingleClick { onUiAction(PlanDetailUiAction.OnClickUserProfileImage(imageUrl = comment.userImageUrl, userName = comment.userName)) },
             imageUrl = comment.userImageUrl,
-            errorImage = painterResource(R.drawable.ic_profile),
+            errorImage = painterResource(R.drawable.ic_empty_logo),
         )
 
         Spacer(Modifier.width(12.dp))

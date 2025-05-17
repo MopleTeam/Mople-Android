@@ -129,7 +129,8 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickCommentReport -> reportComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentUpdate -> updateComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentDelete -> deleteComment(uiAction.comment)
-            is PlanDetailUiAction.OnShowReviewImageCropDialog -> showPlanDetailImageCropDialog(uiAction.isShow, uiAction.selectedImageIndex)
+            is PlanDetailUiAction.OnClickReviewImage -> navigateToImageViewerForReview(uiAction.selectedImageIndex)
+            is PlanDetailUiAction.OnClickUserProfileImage -> navigateToImageViewerForUser(uiAction.imageUrl, uiAction.userName)
             is PlanDetailUiAction.OnShowPlanEditDialog -> showPlanEditDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanReportDialog -> showPlanReportDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowCommentEditDialog -> showCommentEditDialog(uiAction.isShow, uiAction.comment)
@@ -295,12 +296,6 @@ class PlanDetailViewModel @Inject constructor(
         }
     }
 
-    private fun showPlanDetailImageCropDialog(isShow: Boolean, selectedImageIndex: Int) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiState(copy(isShowReviewImageCropDialog = isShow, selectedImageIndex = selectedImageIndex))
-        }
-    }
-
     private fun showErrorToast(exception: Throwable) {
         when (exception) {
             is IOException -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
@@ -337,6 +332,26 @@ class PlanDetailViewModel @Inject constructor(
         }
     }
 
+    private fun navigateToImageViewerForReview(selectedImageIndex: Int) {
+        uiState.checkState<PlanDetailUiState.Success> {
+            setUiEvent(
+                PlanDetailUiEvent.NavigateToImageViewerForReview(
+                    images = this.planItem.reviewImages.map { it.imageUrl },
+                    position = selectedImageIndex
+                )
+            )
+        }
+    }
+
+    private fun navigateToImageViewerForUser(userImageUrl: String, userName: String) {
+        setUiEvent(
+            PlanDetailUiEvent.NavigateToImageViewerForUser(
+                image = userImageUrl,
+                userName = userName
+            )
+        )
+    }
+
     companion object {
         private const val KEY_PLAN_ID = "planId"
         private const val KEY_POST_ID = "postId"
@@ -358,7 +373,6 @@ sealed interface PlanDetailUiState : UiState {
         val isShowPlanReportDialog: Boolean = false,
         val isShowCommentEditDialog: Boolean = false,
         val isShowCommentReportDialog: Boolean = false,
-        val isShowReviewImageCropDialog: Boolean = false,
     ) : PlanDetailUiState
 
     data object Error : PlanDetailUiState
@@ -377,7 +391,8 @@ sealed interface PlanDetailUiAction : UiAction {
     data class OnClickCommentUpdate(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentDelete(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentUpload(val commentText: String, val updateComment: Comment?) : PlanDetailUiAction
-    data class OnShowReviewImageCropDialog(val isShow: Boolean, val selectedImageIndex: Int) : PlanDetailUiAction
+    data class OnClickReviewImage(val selectedImageIndex: Int) : PlanDetailUiAction
+    data class OnClickUserProfileImage(val imageUrl: String, val userName: String) : PlanDetailUiAction
     data class OnShowPlanEditDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowPlanReportDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowCommentEditDialog(val isShow: Boolean, val comment: Comment?) : PlanDetailUiAction
@@ -390,5 +405,7 @@ sealed interface PlanDetailUiEvent : UiEvent {
     data class NavigateToPlanWrite(val planItem: PlanItem) : PlanDetailUiEvent
     data class NavigateToReviewWrite(val postId: String) : PlanDetailUiEvent
     data class NavigateToMapDetail(val placeName: String, val address: String, val latitude: Double, val longitude: Double) : PlanDetailUiEvent
+    data class NavigateToImageViewerForReview(val images: List<String>, val position: Int) : PlanDetailUiEvent
+    data class NavigateToImageViewerForUser(val image: String, val userName: String) : PlanDetailUiEvent
     data class ShowToastMessage(val message: ToastMessage) : PlanDetailUiEvent
 }

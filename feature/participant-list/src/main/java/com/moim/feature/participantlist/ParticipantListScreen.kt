@@ -34,7 +34,8 @@ import com.moim.feature.participantlist.ui.ParticipantListItem
 fun ParticipantListRoute(
     padding: PaddingValues,
     viewModel: ParticipantListViewModel = hiltViewModel(),
-    navigateToBack: () -> Unit
+    navigateToBack: () -> Unit,
+    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit
 ) {
     val participantListUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(
@@ -45,6 +46,7 @@ fun ParticipantListRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is ParticipantListUiEvent.NavigateToBack -> navigateToBack()
+            is ParticipantListUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.userName, listOf(event.userImage), 0)
         }
     }
 
@@ -108,7 +110,8 @@ fun ParticipantListScreen(
             ) {
                 ParticipantListItem(
                     isMeeting = uiState.isMeeting,
-                    participant = it
+                    participant = it,
+                    onUiAction = onUiAction
                 )
             }
         }

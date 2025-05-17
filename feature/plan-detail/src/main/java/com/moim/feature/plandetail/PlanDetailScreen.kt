@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
+import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
@@ -34,7 +35,6 @@ import com.moim.feature.plandetail.ui.PlanDetailCommentItem
 import com.moim.feature.plandetail.ui.PlanDetailCommentReportDialog
 import com.moim.feature.plandetail.ui.PlanDetailContent
 import com.moim.feature.plandetail.ui.PlanDetailEditDialog
-import com.moim.feature.plandetail.ui.PlanDetailImageCropDialog
 import com.moim.feature.plandetail.ui.PlanDetailReportDialog
 import com.moim.feature.plandetail.ui.PlanDetailReviewImages
 import com.moim.feature.plandetail.ui.PlanDetailTopAppbar
@@ -49,7 +49,8 @@ fun PlanDetailRoute(
     navigateToMapDetail: (placeName: String, address: String, latitude: Double, longitude: Double) -> Unit,
     navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
-    navigateToReviewWrite: (String, Boolean) -> Unit
+    navigateToReviewWrite: (id: String, isUpdated: Boolean) -> Unit,
+    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -63,6 +64,8 @@ fun PlanDetailRoute(
             is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.planItem)
             is PlanDetailUiEvent.NavigateToReviewWrite -> navigateToReviewWrite(event.postId, true)
             is PlanDetailUiEvent.NavigateToMapDetail -> navigateToMapDetail(event.placeName, event.address, event.latitude, event.longitude)
+            is PlanDetailUiEvent.NavigateToImageViewerForReview -> navigateToImageViewer(context.getString(R.string.plan_detail_image), event.images, event.position)
+            is PlanDetailUiEvent.NavigateToImageViewerForUser -> navigateToImageViewer(event.userName, listOf(event.image), 0)
             is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
@@ -157,14 +160,6 @@ fun PlanDetailScreen(
             )
         }
     )
-
-    if (uiState.isShowReviewImageCropDialog) {
-        PlanDetailImageCropDialog(
-            images = uiState.planItem.reviewImages,
-            selectedIndex = uiState.selectedImageIndex,
-            onUiAction = onUiAction
-        )
-    }
 
     if (uiState.isShowPlanEditDialog) {
         PlanDetailEditDialog(

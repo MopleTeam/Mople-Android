@@ -17,7 +17,8 @@ fun NavGraphBuilder.planDetailScreen(
     navigateToMapDetail: (placeName: String, address: String, latitude: Double, longitude: Double) -> Unit,
     navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
-    navigateToReviewWrite: (String, Boolean) -> Unit
+    navigateToReviewWrite: (id: String, isUpdated: Boolean) -> Unit,
+    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit
 ) {
     composable<DetailRoute.PlanDetail>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },
@@ -29,7 +30,8 @@ fun NavGraphBuilder.planDetailScreen(
             navigateToMapDetail = navigateToMapDetail,
             navigateToParticipants = navigateToParticipants,
             navigateToPlanWrite = navigateToPlanWrite,
-            navigateToReviewWrite = navigateToReviewWrite
+            navigateToReviewWrite = navigateToReviewWrite,
+            navigateToImageViewer = navigateToImageViewer
         )
     }
 }

@@ -58,6 +58,7 @@ class ParticipantListViewModel @Inject constructor(
         when (uiAction) {
             is ParticipantListUiAction.OnClickBack -> setUiEvent(ParticipantListUiEvent.NavigateToBack)
             is ParticipantListUiAction.OnClickRefresh -> participantListResult.restart()
+            is ParticipantListUiAction.OnClickUserImage -> setUiEvent(ParticipantListUiEvent.NavigateToImageViewer(uiAction.userImage, uiAction.userName))
         }
     }
 
@@ -82,8 +83,10 @@ sealed interface ParticipantListUiState : UiState {
 sealed interface ParticipantListUiAction : UiAction {
     data object OnClickBack : ParticipantListUiAction
     data object OnClickRefresh : ParticipantListUiAction
+    data class OnClickUserImage(val userImage: String, val userName: String) : ParticipantListUiAction
 }
 
 sealed interface ParticipantListUiEvent : UiEvent {
     data object NavigateToBack : ParticipantListUiEvent
+    data class NavigateToImageViewer(val userImage: String, val userName: String) : ParticipantListUiEvent
 }

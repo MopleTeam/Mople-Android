@@ -17,7 +17,8 @@ fun NavGraphBuilder.meetingDetailScreen(
     navigateToBack: () -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToPlanDetail: (String, Boolean) -> Unit,
-    navigateToMeetingSetting: (Meeting) -> Unit
+    navigateToMeetingSetting: (Meeting) -> Unit,
+    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit,
 ) {
     composable<DetailRoute.MeetingDetail>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },
@@ -28,7 +29,8 @@ fun NavGraphBuilder.meetingDetailScreen(
             navigateToBack = navigateToBack,
             navigateToPlanWrite = navigateToPlanWrite,
             navigateToPlanDetail = navigateToPlanDetail,
-            navigateToMeetingSetting = navigateToMeetingSetting
+            navigateToMeetingSetting = navigateToMeetingSetting,
+            navigateToImageViewer = navigateToImageViewer
         )
     }
 }

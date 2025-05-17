@@ -181,6 +181,7 @@ class MeetingDetailViewModel @Inject constructor(
             is MeetingDetailUiAction.OnClickPlanTab -> setPlanTab(uiAction.isBefore)
             is MeetingDetailUiAction.OnClickPlanApply -> setPlanApply(uiAction.planId, uiAction.isApply)
             is MeetingDetailUiAction.OnClickPlanDetail -> setUiEvent(MeetingDetailUiEvent.NavigateToPlanDetail(uiAction.postId, uiAction.isPlan))
+            is MeetingDetailUiAction.OnClickMeetingImage -> setUiEvent(MeetingDetailUiEvent.NavigateToImageViewer(uiAction.imageUrl, uiAction.meetingName))
         }
     }
 
@@ -268,6 +269,7 @@ sealed interface MeetingDetailUiAction : UiAction {
     data class OnClickPlanTab(val isBefore: Boolean) : MeetingDetailUiAction
     data class OnClickPlanApply(val planId: String, val isApply: Boolean) : MeetingDetailUiAction
     data class OnClickPlanDetail(val postId: String, val isPlan: Boolean) : MeetingDetailUiAction
+    data class OnClickMeetingImage(val imageUrl: String, val meetingName: String) : MeetingDetailUiAction
 }
 
 sealed interface MeetingDetailUiEvent : UiEvent {
@@ -275,5 +277,6 @@ sealed interface MeetingDetailUiEvent : UiEvent {
     data class NavigateToPlanWrite(val plan: Plan) : MeetingDetailUiEvent
     data class NavigateToMeetingSetting(val meeting: Meeting) : MeetingDetailUiEvent
     data class NavigateToPlanDetail(val postId: String, val isPlan: Boolean) : MeetingDetailUiEvent
+    data class NavigateToImageViewer(val imageUrl: String, val meetingName: String) : MeetingDetailUiEvent
     data class ShowToastMessage(val message: ToastMessage) : MeetingDetailUiEvent
 }

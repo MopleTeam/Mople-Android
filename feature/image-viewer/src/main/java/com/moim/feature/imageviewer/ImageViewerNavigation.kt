@@ -1,4 +1,4 @@
-package com.moim.feature.participantlist
+package com.moim.feature.imageviewer
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -10,34 +10,33 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.moim.core.route.DetailRoute
 
-fun NavGraphBuilder.participantListNavigation(
+fun NavGraphBuilder.imageViewerScreen(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit,
 ) {
-    composable<DetailRoute.ParticipantList>(
+    composable<DetailRoute.ImageViewer>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },
         exitTransition = { fadeOut(animationSpec = tween(500)) }
     ) {
-        ParticipantListRoute(
+        ImageViewerRoute(
             padding = padding,
-            navigateToBack = navigateToBack,
-            navigateToImageViewer = navigateToImageViewer
+            navigateToBack = navigateToBack
         )
     }
 }
 
-fun NavController.navigateToParticipantList(
-    isMeeting: Boolean,
-    isPlan: Boolean,
-    id: String,
+fun NavController.navigateToImageViewer(
+    title: String,
+    images: List<String>,
+    position: Int,
     navOptions: NavOptions? = null
 ) {
     this.navigate(
-        DetailRoute.ParticipantList(
-            isMeeting = isMeeting,
-            isPlan = isPlan,
-            id = id
-        ), navOptions
+        route = DetailRoute.ImageViewer(
+            title = title,
+            images = images,
+            position = position
+        ),
+        navOptions = navOptions
     )
 }

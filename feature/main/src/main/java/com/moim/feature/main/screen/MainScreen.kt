@@ -16,6 +16,8 @@ import com.moim.feature.alarmsetting.alarmSettingScreen
 import com.moim.feature.alarmsetting.navigateToAlarmSetting
 import com.moim.feature.calendar.calendarScreen
 import com.moim.feature.home.homeScreen
+import com.moim.feature.imageviewer.imageViewerScreen
+import com.moim.feature.imageviewer.navigateToImageViewer
 import com.moim.feature.main.navigation.MainNavController
 import com.moim.feature.main.navigation.MainTab
 import com.moim.feature.main.navigation.rememberMainNavController
@@ -96,7 +98,8 @@ fun MainScreen(
                     navigateToBack = navigator.navController::popBackStack,
                     navigateToPlanWrite = navigator.navController::navigateToPlanWrite,
                     navigateToPlanDetail = navigator.navController::navigateToPlanDetail,
-                    navigateToMeetingSetting = navigator.navController::navigateToMeetingSetting
+                    navigateToMeetingSetting = navigator.navController::navigateToMeetingSetting,
+                    navigateToImageViewer = navigator.navController::navigateToImageViewer
                 )
                 meetingSettingScreen(
                     padding = innerPadding,
@@ -123,6 +126,7 @@ fun MainScreen(
                     navigateToParticipants = navigator.navController::navigateToParticipantList,
                     navigateToPlanWrite = navigator.navController::navigateToPlanWrite,
                     navigateToReviewWrite = navigator.navController::navigateToReviewWrite,
+                    navigateToImageViewer = navigator.navController::navigateToImageViewer
                 )
                 mapDetailScreen(
                     innerPadding = innerPadding,
@@ -130,7 +134,8 @@ fun MainScreen(
                 )
                 participantListNavigation(
                     padding = innerPadding,
-                    navigateToBack = navigator.navController::popBackStack
+                    navigateToBack = navigator.navController::popBackStack,
+                    navigateToImageViewer = navigator.navController::navigateToImageViewer
                 )
                 calendarScreen(
                     padding = innerPadding,
@@ -158,6 +163,10 @@ fun MainScreen(
                     navigateToBack = navigator.navController::popBackStack
                 )
                 webViewScreen(
+                    padding = innerPadding,
+                    navigateToBack = navigator.navController::popBackStack
+                )
+                imageViewerScreen(
                     padding = innerPadding,
                     navigateToBack = navigator.navController::popBackStack
                 )

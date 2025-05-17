@@ -32,7 +32,6 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Meeting
-import com.moim.core.model.Plan
 import com.moim.core.model.item.PlanItem
 import com.moim.core.model.item.asPlanItem
 import com.moim.feature.meetingdetail.ui.MeetingDetailHeader
@@ -48,7 +47,8 @@ fun MeetingDetailRoute(
     navigateToBack: () -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToPlanDetail: (String, Boolean) -> Unit,
-    navigateToMeetingSetting: (Meeting) -> Unit
+    navigateToMeetingSetting: (Meeting) -> Unit,
+    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit,
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -61,6 +61,7 @@ fun MeetingDetailRoute(
             is MeetingDetailUiEvent.NavigateToMeetingSetting -> navigateToMeetingSetting(event.meeting)
             is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
             is MeetingDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan.asPlanItem())
+            is MeetingDetailUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.meetingName, listOf(event.imageUrl), 0)
             is MeetingDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }

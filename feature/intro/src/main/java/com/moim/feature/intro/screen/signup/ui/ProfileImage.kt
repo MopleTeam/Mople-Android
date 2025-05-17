@@ -43,7 +43,7 @@ fun ProfileImage(
                     .align(Alignment.Center)
                     .onSingleClick { onUiAction(SignUpUiAction.OnShowProfileEditDialog(true)) },
                 imageUrl = profileUrl,
-                errorImage = painterResource(R.drawable.ic_profile),
+                errorImage = painterResource(R.drawable.ic_empty_logo),
             )
 
             Icon(

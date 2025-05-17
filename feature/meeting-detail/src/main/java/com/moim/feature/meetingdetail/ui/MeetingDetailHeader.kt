@@ -27,6 +27,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
+import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.model.Meeting
@@ -45,7 +46,10 @@ fun MeetingDetailHeader(
             .fillMaxWidth()
             .padding(20.dp)
     ) {
-        MeetingDetailInfo(meeting = meeting)
+        MeetingDetailInfo(
+            meeting = meeting,
+            onUiAction = onUiAction
+        )
         Spacer(Modifier.height(24.dp))
         Row(
             modifier = Modifier
@@ -82,6 +86,7 @@ fun MeetingDetailHeader(
 private fun MeetingDetailInfo(
     modifier: Modifier = Modifier,
     meeting: Meeting,
+    onUiAction: OnMeetingDetailUiAction,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -91,7 +96,8 @@ private fun MeetingDetailInfo(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
                 .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(12.dp))
-                .size(56.dp),
+                .size(56.dp)
+                .onSingleClick { onUiAction(MeetingDetailUiAction.OnClickMeetingImage(meeting.imageUrl, meeting.name)) },
             imageUrl = meeting.imageUrl,
             errorImage = painterResource(R.drawable.ic_empty_meeting)
         )

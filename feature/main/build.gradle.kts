@@ -23,4 +23,5 @@ dependencies {
     implementation(projects.feature.alarm)
     implementation(projects.feature.alarmSetting)
     implementation(projects.feature.webview)
+    implementation(projects.feature.imageViewer)
 }

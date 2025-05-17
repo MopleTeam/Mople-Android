@@ -93,6 +93,13 @@ sealed interface DetailRoute : Route {
     ) : DetailRoute
 
     @Serializable
+    data class ImageViewer(
+        val title: String,
+        val images: List<String>,
+        val position: Int,
+    ) : DetailRoute
+
+    @Serializable
     data object ProfileUpdate : DetailRoute
 
     @Serializable

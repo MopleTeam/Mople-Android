@@ -25,14 +25,17 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
+import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Participant
+import com.moim.feature.participantlist.ParticipantListUiAction
 
 @Composable
 fun ParticipantListItem(
     modifier: Modifier = Modifier,
     isMeeting: Boolean,
     participant: Participant,
+    onUiAction: (ParticipantListUiAction) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -46,9 +49,10 @@ fun ParticipantListItem(
                 modifier = Modifier
                     .clip(shape = CircleShape)
                     .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = CircleShape)
-                    .size(40.dp),
+                    .size(40.dp)
+                    .onSingleClick { onUiAction(ParticipantListUiAction.OnClickUserImage(userImage = participant.imageUrl, userName = participant.nickname)) },
                 imageUrl = participant.imageUrl,
-                errorImage = painterResource(R.drawable.ic_empty_image),
+                errorImage = painterResource(R.drawable.ic_empty_logo),
             )
 
             if (participant.isCreator) {
@@ -99,6 +103,7 @@ private fun ParticipantListItemPreview() {
                 imageUrl = "",
                 nickname = "퉁퉁이",
             ),
+            onUiAction = {}
         )
     }
 }
