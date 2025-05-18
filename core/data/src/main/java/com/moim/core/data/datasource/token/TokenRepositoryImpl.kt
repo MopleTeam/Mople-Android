@@ -11,10 +11,18 @@ internal class TokenRepositoryImpl @Inject constructor(
 ) : TokenRepository {
 
     override fun setFcmToken(token: String): Flow<Unit> = catchFlow {
-        emit(tokenApi.setFcmToken(jsonOf(KEY_TOKEN to token)))
+        emit(
+            tokenApi.setFcmToken(
+                jsonOf(
+                    KEY_TOKEN to token,
+                    KEY_SUBSCRIBE to true
+                )
+            )
+        )
     }
 
     companion object {
         private const val KEY_TOKEN = "token"
+        private const val KEY_SUBSCRIBE = "subscribe"
     }
 }
