@@ -28,16 +28,16 @@ android {
 
     buildTypes {
         debug {
+            isDebuggable = true
             isMinifyEnabled = false
             isShrinkResources = false
-            isDebuggable = true
             manifestPlaceholders["crashlyticsCollectionEnabled"] = false
         }
 
         release {
             isDebuggable = false
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
             manifestPlaceholders["crashlyticsCollectionEnabled"] = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
