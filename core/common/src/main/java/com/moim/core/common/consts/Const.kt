@@ -11,5 +11,4 @@ const val NOTION_URL = "https://unexpected-buckaroo-42a.notion.site/1bc90068602b
 const val MAP_INTENT_FOR_KAKAO = "kakaomap://look?p=%s,%s"
 const val MAP_INTENT_FOR_NAVER = "intent://place?lat=%s&lng=%s&name=%s&appname=com.moim.moimtable#Intent;scheme=nmap;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.nmap;end"
 
-const val DEEP_LINK_FOR_MEET = "https://www.mople.invite/"
 const val KEY_INVITE_CODE = "code"
