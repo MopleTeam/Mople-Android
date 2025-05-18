@@ -1,5 +1,9 @@
 ## DOWNLOAD
-<a href="https://play.google.com/store/apps/details?id=com.moim.moimtable"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="100"></a>
+<p align="left">
+  <a href="https://play.google.com/store/apps/details?id=com.moim.moimtable"><img src="https://github.com/user-attachments/assets/c28115bd-21e8-496d-9266-ed2a0f684b22" height="100"></a>
+  <br>
+  <a href="https://apps.apple.com/kr/app/%EB%AA%A8%ED%94%8C-%EB%AA%A8%EC%9E%84%ED%94%8C%EB%9E%98%EB%84%88/id6738402542"><img src="https://github.com/user-attachments/assets/3eac4b71-b2a4-4788-a43a-26d37c3918dd" height="95"></a>
+</p>
 
 ## 모임부터 약속까지 간편한 모임플래너 앱, 모플
 <img src="https://github.com/user-attachments/assets/4a4e7073-be41-4ce8-8451-76bfc8010baf" width="800" alt="모플 아이콘 "/>
