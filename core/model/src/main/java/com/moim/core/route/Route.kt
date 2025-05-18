@@ -1,5 +1,6 @@
 package com.moim.core.route
 
+import androidx.annotation.DrawableRes
 import com.moim.core.model.Meeting
 import com.moim.core.model.MeetingType
 import com.moim.core.model.item.PlanItem
@@ -97,6 +98,7 @@ sealed interface DetailRoute : Route {
         val title: String,
         val images: List<String>,
         val position: Int,
+        @DrawableRes val defaultImage: Int? = null,
     ) : DetailRoute
 
     @Serializable

@@ -47,7 +47,7 @@ fun ProfileUpdateImage(
                     .align(Alignment.Center)
                     .onSingleClick { onUiAction(ProfileUpdateUiAction.OnShowProfileEditDialog(true)) },
                 imageUrl = profileUrl,
-                errorImage = painterResource(R.drawable.ic_empty_logo)
+                errorImage = painterResource(R.drawable.ic_empty_user_logo)
             )
 
             Icon(

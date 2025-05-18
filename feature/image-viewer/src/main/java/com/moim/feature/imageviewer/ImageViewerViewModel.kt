@@ -1,5 +1,6 @@
 package com.moim.feature.imageviewer
 
+import androidx.annotation.DrawableRes
 import androidx.lifecycle.SavedStateHandle
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
@@ -21,12 +22,16 @@ class ImageViewerViewModel @Inject constructor(
     private val currentPosition
         get() = savedStateHandle.get<Int>(KEY_POSITION) ?: 0
 
+    private val defaultImage
+        get() = savedStateHandle.get<Int?>(KEY_DEFAULT_IMAGE)
+
     init {
         setUiState(
             ImageViewerUiState(
                 title = title,
                 images = images,
-                position = currentPosition
+                position = currentPosition,
+                defaultImage = defaultImage
             )
         )
     }
@@ -41,6 +46,7 @@ class ImageViewerViewModel @Inject constructor(
         private const val KEY_TITLE = "title"
         private const val KEY_IMAGES = "images"
         private const val KEY_POSITION = "position"
+        private const val KEY_DEFAULT_IMAGE = "defaultImage"
     }
 }
 
@@ -48,6 +54,7 @@ data class ImageViewerUiState(
     val title: String,
     val images: List<String>,
     val position: Int,
+    @DrawableRes val defaultImage: Int? = null,
 ) : UiState
 
 sealed interface ImageViewerUiAction : UiAction {

@@ -48,7 +48,7 @@ fun MeetingDetailRoute(
     navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToPlanDetail: (String, Boolean) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit,
-    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit,
+    navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit,
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -61,7 +61,7 @@ fun MeetingDetailRoute(
             is MeetingDetailUiEvent.NavigateToMeetingSetting -> navigateToMeetingSetting(event.meeting)
             is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
             is MeetingDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan.asPlanItem())
-            is MeetingDetailUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.meetingName, listOf(event.imageUrl), 0)
+            is MeetingDetailUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.meetingName, listOf(event.imageUrl), 0, R.drawable.ic_empty_meeting)
             is MeetingDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }

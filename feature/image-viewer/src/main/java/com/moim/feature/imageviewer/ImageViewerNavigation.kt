@@ -1,5 +1,6 @@
 package com.moim.feature.imageviewer
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,13 +30,15 @@ fun NavController.navigateToImageViewer(
     title: String,
     images: List<String>,
     position: Int,
+    @DrawableRes defaultImage: Int? = null,
     navOptions: NavOptions? = null
 ) {
     this.navigate(
         route = DetailRoute.ImageViewer(
             title = title,
             images = images,
-            position = position
+            position = position,
+            defaultImage = defaultImage
         ),
         navOptions = navOptions
     )

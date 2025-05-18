@@ -90,7 +90,7 @@ fun ImageViewerScreen(
                         .padding(vertical = 20.dp)
                         .zoomable(zoomState = zoomState),
                     imageUrl = uiState.images[index],
-                    errorImage = painterResource(R.drawable.ic_empty_logo),
+                    errorImage = painterResource(uiState.defaultImage ?: R.drawable.ic_empty_logo),
                     contentScale = ContentScale.Fit
                 )
             }

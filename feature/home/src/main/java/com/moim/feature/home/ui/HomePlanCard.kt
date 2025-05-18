@@ -85,7 +85,7 @@ fun HomePlanCard(
             MeetingWeatherInfo(
                 modifier = Modifier.align(Alignment.Start),
                 temperature = plan.temperature,
-                address = plan.planAddress,
+                address = plan.weatherAddress,
                 weatherUrl = plan.weatherIconUrl
             )
         }

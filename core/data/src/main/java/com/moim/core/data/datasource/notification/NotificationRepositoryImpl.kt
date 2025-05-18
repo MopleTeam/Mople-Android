@@ -4,9 +4,7 @@ import com.moim.core.data.service.NotificationApi
 import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.NotificationResponse
-import com.moim.core.model.Notification
 import com.moim.core.model.asItem
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 internal class NotificationRepositoryImpl @Inject constructor(
@@ -27,6 +25,10 @@ internal class NotificationRepositoryImpl @Inject constructor(
 
     override fun setNotificationUnSubscribe(topic: String) = catchFlow {
         emit(notificationApi.setNotificationUnSubscribe(jsonOf(KEY_TOPIC to listOf(topic))))
+    }
+
+    override fun clearNotificationCount() = catchFlow {
+        emit(notificationApi.clearNotificationCount())
     }
 
     companion object {

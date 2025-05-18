@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 
 internal interface NotificationApi {
     @GET("/notification/list")
@@ -18,4 +19,7 @@ internal interface NotificationApi {
 
     @POST("/notification/subscribe")
     suspend fun setNotificationSubscribe(@Body params: JsonObject)
+
+    @PUT("/notification/clear")
+    suspend fun clearNotificationCount()
 }

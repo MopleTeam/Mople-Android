@@ -35,7 +35,7 @@ fun ParticipantListRoute(
     padding: PaddingValues,
     viewModel: ParticipantListViewModel = hiltViewModel(),
     navigateToBack: () -> Unit,
-    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit
+    navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit
 ) {
     val participantListUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(
@@ -46,7 +46,7 @@ fun ParticipantListRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is ParticipantListUiEvent.NavigateToBack -> navigateToBack()
-            is ParticipantListUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.userName, listOf(event.userImage), 0)
+            is ParticipantListUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.userName, listOf(event.userImage), 0, R.drawable.ic_empty_user_logo)
         }
     }
 

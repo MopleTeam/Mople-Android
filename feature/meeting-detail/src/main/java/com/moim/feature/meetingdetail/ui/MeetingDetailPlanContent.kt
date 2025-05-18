@@ -147,7 +147,7 @@ fun MeetingDetailPlanItem(
 
             MeetingWeatherInfo(
                 temperature = plan.temperature,
-                address = plan.planAddress,
+                address = plan.weatherAddress,
                 weatherIconUrl = plan.weatherIconUrl
             )
             Spacer(Modifier.height(16.dp))

@@ -13,7 +13,7 @@ import com.moim.core.route.DetailRoute
 fun NavGraphBuilder.participantListNavigation(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit,
+    navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit,
 ) {
     composable<DetailRoute.ParticipantList>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },

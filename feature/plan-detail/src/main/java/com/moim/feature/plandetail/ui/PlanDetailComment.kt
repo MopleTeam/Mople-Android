@@ -82,7 +82,7 @@ fun PlanDetailCommentItem(
                 .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
                 .onSingleClick { onUiAction(PlanDetailUiAction.OnClickUserProfileImage(imageUrl = comment.userImageUrl, userName = comment.userName)) },
             imageUrl = comment.userImageUrl,
-            errorImage = painterResource(R.drawable.ic_empty_logo),
+            errorImage = painterResource(R.drawable.ic_empty_user_logo),
         )
 
         Spacer(Modifier.width(12.dp))

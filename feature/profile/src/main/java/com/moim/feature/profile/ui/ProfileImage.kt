@@ -56,7 +56,7 @@ fun ProfileImage(
                     .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
                     .size(80.dp),
                 imageUrl = user.profileUrl,
-                errorImage = painterResource(R.drawable.ic_empty_logo),
+                errorImage = painterResource(R.drawable.ic_empty_user_logo),
             )
 
             Spacer(Modifier.height(12.dp))

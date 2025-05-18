@@ -12,4 +12,6 @@ interface NotificationRepository {
     fun setNotificationSubscribe(topic: String): Flow<Unit>
 
     fun setNotificationUnSubscribe(topic: String): Flow<Unit>
+
+    fun clearNotificationCount() : Flow<Unit>
 }

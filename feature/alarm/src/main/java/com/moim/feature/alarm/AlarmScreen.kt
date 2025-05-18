@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -45,6 +46,11 @@ fun AlarmRoute(
             is AlarmUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
             is AlarmUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
         }
+    }
+
+    LaunchedEffect(alarmUiState) {
+        if (alarmUiState !is AlarmUiState.Success) return@LaunchedEffect
+        viewModel.onUiAction(AlarmUiAction.OnUpdateNotificationCount)
     }
 
     when (val uiState = alarmUiState) {

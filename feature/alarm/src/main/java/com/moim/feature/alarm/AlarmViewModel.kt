@@ -13,12 +13,13 @@ import com.moim.core.model.Notification
 import com.moim.core.model.NotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
-    notificationRepository: NotificationRepository,
+    private val notificationRepository: NotificationRepository,
 ) : BaseViewModel() {
 
     private val notificationResult = notificationRepository
@@ -42,7 +43,16 @@ class AlarmViewModel @Inject constructor(
         when (uiAction) {
             is AlarmUiAction.OnClickBack -> setUiEvent(AlarmUiEvent.NavigateToBack)
             is AlarmUiAction.OnClickRefresh -> notificationResult.restart()
+            is AlarmUiAction.OnUpdateNotificationCount -> clearNotificationCount()
             is AlarmUiAction.OnClickAlarm -> navigateToNotifyTarget(uiAction.notification)
+        }
+    }
+
+    private fun clearNotificationCount() {
+        viewModelScope.launch {
+            runCatching {
+                notificationRepository.clearNotificationCount().first()
+            }
         }
     }
 
@@ -78,10 +88,9 @@ sealed interface AlarmUiState : UiState {
 
 sealed interface AlarmUiAction : UiAction {
     data object OnClickBack : AlarmUiAction
-
     data object OnClickRefresh : AlarmUiAction
-
     data class OnClickAlarm(val notification: Notification) : AlarmUiAction
+    data object OnUpdateNotificationCount : AlarmUiAction
 }
 
 sealed interface AlarmUiEvent : UiEvent {

@@ -52,7 +52,7 @@ fun ParticipantListItem(
                     .size(40.dp)
                     .onSingleClick { onUiAction(ParticipantListUiAction.OnClickUserImage(userImage = participant.imageUrl, userName = participant.nickname)) },
                 imageUrl = participant.imageUrl,
-                errorImage = painterResource(R.drawable.ic_empty_logo),
+                errorImage = painterResource(R.drawable.ic_empty_user_logo),
             )
 
             if (participant.isCreator) {

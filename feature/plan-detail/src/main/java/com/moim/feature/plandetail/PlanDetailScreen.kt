@@ -50,7 +50,7 @@ fun PlanDetailRoute(
     navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToReviewWrite: (id: String, isUpdated: Boolean) -> Unit,
-    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit
+    navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -64,8 +64,8 @@ fun PlanDetailRoute(
             is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.planItem)
             is PlanDetailUiEvent.NavigateToReviewWrite -> navigateToReviewWrite(event.postId, true)
             is PlanDetailUiEvent.NavigateToMapDetail -> navigateToMapDetail(event.placeName, event.address, event.latitude, event.longitude)
-            is PlanDetailUiEvent.NavigateToImageViewerForReview -> navigateToImageViewer(context.getString(R.string.plan_detail_image), event.images, event.position)
-            is PlanDetailUiEvent.NavigateToImageViewerForUser -> navigateToImageViewer(event.userName, listOf(event.image), 0)
+            is PlanDetailUiEvent.NavigateToImageViewerForReview -> navigateToImageViewer(context.getString(R.string.plan_detail_image), event.images, event.position, R.drawable.ic_empty_user_logo)
+            is PlanDetailUiEvent.NavigateToImageViewerForUser -> navigateToImageViewer(event.userName, listOf(event.image), 0, R.drawable.ic_empty_user_logo)
             is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }

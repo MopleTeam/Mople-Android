@@ -181,7 +181,7 @@ class PlanWriteViewModel @Inject constructor(
                                 copy(
                                     searchKeyword = trimKeyword,
                                     isShowMapSearchScreen = true,
-                                    searchPlaces = result.data.distinctBy { it.roadAddress }
+                                    searchPlaces = result.data.filter { it.roadAddress.isNotEmpty() }.distinctBy { it.roadAddress }
                                 )
                             )
 
@@ -198,9 +198,9 @@ class PlanWriteViewModel @Inject constructor(
     private fun setPlan() {
         viewModelScope.launch {
             uiState.checkState<PlanWriteUiState.PlanWrite> {
-                val planTime = planDate!!.withHour(planTime!!.hour).withMinute(planTime.minute)
+                val planTime = requireNotNull(planDate).withHour(requireNotNull(planTime).hour).withMinute(planTime.minute)
 
-                if (planTime!!.isBefore(ZonedDateTime.now())) {
+                if (requireNotNull(planTime).isBefore(ZonedDateTime.now())) {
                     setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.PlanWriteTimeErrorMessage))
                     return@launch
                 }
@@ -208,12 +208,12 @@ class PlanWriteViewModel @Inject constructor(
                 if (planId.isNullOrEmpty()) {
                     planRepository
                         .createPlan(
-                            meetingId = selectMeetingId!!,
-                            planName = planName!!,
+                            meetingId = requireNotNull(selectMeetingId),
+                            planName = requireNotNull(planName),
                             planTime = planTime.parseDateString(),
-                            planAddress = planLoadAddress!!,
-                            planWeatherAddress = planWeatherAddress!!,
-                            title = planPlaceName!!,
+                            planAddress = requireNotNull(planLoadAddress),
+                            planWeatherAddress = requireNotNull(planWeatherAddress),
+                            title = requireNotNull(planPlaceName),
                             longitude = planLongitude,
                             latitude = planLatitude,
                         )
@@ -221,11 +221,11 @@ class PlanWriteViewModel @Inject constructor(
                     planRepository
                         .updatePlan(
                             planId = planId,
-                            planName = planName!!,
+                            planName = requireNotNull(planPlaceName),
                             planTime = planTime.parseDateString(),
-                            planAddress = planLoadAddress!!,
-                            planWeatherAddress = planWeatherAddress!!,
-                            title = planPlaceName!!,
+                            planAddress = requireNotNull(planLoadAddress),
+                            planWeatherAddress = requireNotNull(planWeatherAddress),
+                            title = planPlaceName,
                             longitude = planLongitude,
                             latitude = planLatitude,
                         )

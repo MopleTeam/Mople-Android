@@ -18,7 +18,7 @@ fun NavGraphBuilder.planDetailScreen(
     navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToReviewWrite: (id: String, isUpdated: Boolean) -> Unit,
-    navigateToImageViewer: (title: String, images: List<String>, position: Int) -> Unit
+    navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit
 ) {
     composable<DetailRoute.PlanDetail>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },
