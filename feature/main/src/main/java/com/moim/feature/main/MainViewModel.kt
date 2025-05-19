@@ -2,13 +2,12 @@ package com.moim.feature.main
 
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.delegate.MeetingViewModelDelegate
+import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.UiEvent
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.ZonedDateTime
 import javax.inject.Inject
@@ -17,27 +16,24 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val meetingRepository: MeetingRepository,
     meetingViewModelDelegate: MeetingViewModelDelegate,
-) : BaseViewModel(), MeetingViewModelDelegate by meetingViewModelDelegate {
-
-    private val _meetingId = MutableStateFlow<String?>(null)
-    val meetingId = _meetingId.asStateFlow()
-
-    private val _planId = MutableStateFlow<String?>(null)
-    val planId = _planId.asStateFlow()
-
-    private val _reviewId = MutableStateFlow<String?>(null)
-    val reviewId = _reviewId.asStateFlow()
+    planItemViewModelDelegate: PlanItemViewModelDelegate,
+) : BaseViewModel(),
+    PlanItemViewModelDelegate by planItemViewModelDelegate,
+    MeetingViewModelDelegate by meetingViewModelDelegate {
 
     fun setPlanId(planId: String) {
-        _planId.update { planId }
+        invalidatePlanItem(ZonedDateTime.now())
+        setUiEvent(MainUiEvent.NavigateToPlanDetail(planId))
     }
 
     fun setReviewId(reviewId: String) {
-        _reviewId.update { reviewId }
+        invalidatePlanItem(ZonedDateTime.now())
+        setUiEvent(MainUiEvent.NavigateToReviewDetail(reviewId))
     }
 
     fun setMeetingId(meetingId: String) {
-        _meetingId.update { meetingId }
+        invalidateMeeting(ZonedDateTime.now())
+        setUiEvent(MainUiEvent.NavigateToMeetingDetail(meetingId))
     }
 
     fun setJoinMeeting(meetCode: String) {
@@ -45,8 +41,14 @@ class MainViewModel @Inject constructor(
             runCatching {
                 val meeting = meetingRepository.joinMeeting(meetCode).first()
                 invalidateMeeting(ZonedDateTime.now())
-                _meetingId.update { meeting.id }
+                setUiEvent(MainUiEvent.NavigateToMeetingDetail(meeting.id))
             }
         }
     }
+}
+
+sealed interface MainUiEvent : UiEvent {
+    data class NavigateToPlanDetail(val planId: String) : MainUiEvent
+    data class NavigateToReviewDetail(val reviewId: String) : MainUiEvent
+    data class NavigateToMeetingDetail(val meetingId: String) : MainUiEvent
 }

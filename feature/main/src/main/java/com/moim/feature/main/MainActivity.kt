@@ -10,8 +10,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.AnalyticsHelper
 import com.moim.core.analytics.LocalAnalyticsHelper
 import com.moim.core.common.consts.INTRO_ACTIVITY_NAME
@@ -37,15 +35,9 @@ class MainActivity : ComponentActivity() {
                 LocalAnalyticsHelper provides analyticsHelper,
             ) {
                 MoimTheme {
-                    val meetingId by viewModel.meetingId.collectAsStateWithLifecycle()
-                    val planId by viewModel.planId.collectAsStateWithLifecycle()
-                    val reviewId by viewModel.reviewId.collectAsStateWithLifecycle()
-
                     MainScreen(
-                        meetingId = meetingId,
-                        planId = planId,
-                        reviewId = reviewId,
-                        navigateToIntro = this::navigateToIntro
+                        viewModel = viewModel,
+                        navigateToIntro = ::navigateToIntro
                     )
                 }
             }

@@ -5,9 +5,9 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
+import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.alarm.alarmScreen
@@ -18,6 +18,8 @@ import com.moim.feature.calendar.calendarScreen
 import com.moim.feature.home.homeScreen
 import com.moim.feature.imageviewer.imageViewerScreen
 import com.moim.feature.imageviewer.navigateToImageViewer
+import com.moim.feature.main.MainUiEvent
+import com.moim.feature.main.MainViewModel
 import com.moim.feature.main.navigation.MainNavController
 import com.moim.feature.main.navigation.MainTab
 import com.moim.feature.main.navigation.rememberMainNavController
@@ -48,20 +50,14 @@ import com.moim.feature.webview.webViewScreen
 @Composable
 fun MainScreen(
     navigator: MainNavController = rememberMainNavController(),
-    meetingId: String? = null,
-    planId: String? = null,
-    reviewId: String? = null,
+    viewModel: MainViewModel,
     navigateToIntro: () -> Unit,
 ) {
-    LaunchedEffect(
-        key1 = meetingId,
-        key2 = planId,
-        key3 = reviewId,
-    ) {
-        when {
-            meetingId != null -> navigator.navController.navigateToMeetingDetail(meetingId)
-            planId != null -> navigator.navController.navigateToPlanDetail(planId, true)
-            reviewId != null -> navigator.navController.navigateToPlanDetail(reviewId, false)
+    ObserveAsEvents(viewModel.uiEvent) { event ->
+        when (event) {
+            is MainUiEvent.NavigateToPlanDetail -> navigator.navController.navigateToPlanDetail(event.planId, true)
+            is MainUiEvent.NavigateToReviewDetail -> navigator.navController.navigateToPlanDetail(event.reviewId, false)
+            is MainUiEvent.NavigateToMeetingDetail -> navigator.navController.navigateToMeetingDetail(event.meetingId)
         }
     }
 
