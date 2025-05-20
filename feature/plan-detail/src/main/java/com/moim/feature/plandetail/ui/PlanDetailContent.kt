@@ -37,8 +37,8 @@ import com.moim.feature.plandetail.PlanDetailUiAction
 @Composable
 fun PlanDetailContent(
     modifier: Modifier = Modifier,
-    isMyPlan: Boolean,
     planItem: PlanItem,
+    isShowApplyButton: Boolean,
     onUiAction: OnPlanDetailUiAction = {}
 ) {
     Column(
@@ -107,7 +107,7 @@ fun PlanDetailContent(
             )
         }
 
-        if (planItem.isPlanAtBefore && isMyPlan.not()) {
+        if (isShowApplyButton) {
             val btnTextRes = if (planItem.isParticipant) R.string.plan_detail_plan_not_apply else R.string.plan_detail_plan_apply
             val buttonColors = moimButtomColors().copy(
                 containerColor = if (planItem.isParticipant) MoimTheme.colors.tertiary else MoimTheme.colors.primary.primary,
