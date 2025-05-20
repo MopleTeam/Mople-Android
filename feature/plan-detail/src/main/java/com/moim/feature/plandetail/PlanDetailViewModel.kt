@@ -8,6 +8,7 @@ import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -76,7 +77,12 @@ class PlanDetailViewModel @Inject constructor(
                         is Result.Loading -> setUiState(PlanDetailUiState.Loading)
                         is Result.Success -> {
                             val (user, post) = result.data
-                            val uiState = PlanDetailUiState.Success(user, post)
+                            val isShowApplyButton = post.planAt.parseZonedDateTime().isAfter(ZonedDateTime.now()) && user.userId != post.userId
+                            val uiState = PlanDetailUiState.Success(
+                                user = user,
+                                planItem = post,
+                                isShowApplyButton = isShowApplyButton
+                            )
                             setUiState(uiState)
                             savedStateHandle[KEY_PLAN_ID] = uiState.planItem.commentCheckId
                         }
@@ -369,6 +375,7 @@ sealed interface PlanDetailUiState : UiState {
         val selectedImageIndex: Int = 0,
         val selectedComment: Comment? = null,
         val selectedUpdateComment: Comment? = null,
+        val isShowApplyButton: Boolean = false,
         val isShowPlanEditDialog: Boolean = false,
         val isShowPlanReportDialog: Boolean = false,
         val isShowCommentEditDialog: Boolean = false,

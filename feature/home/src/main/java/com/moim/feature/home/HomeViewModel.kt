@@ -160,12 +160,19 @@ class HomeViewModel @Inject constructor(
 
     fun onUiAction(uiAction: HomeUiAction) {
         when (uiAction) {
+            is HomeUiAction.OnClickRefresh -> meetingPlansResult.restart()
             is HomeUiAction.OnClickAlarm -> setUiEvent(HomeUiEvent.NavigateToAlarm)
             is HomeUiAction.OnClickMeetingWrite -> setUiEvent(HomeUiEvent.NavigateToMeetingWrite)
             is HomeUiAction.OnClickPlanWrite -> navigateToPlanWrite()
             is HomeUiAction.OnClickPlanMore -> setUiEvent(HomeUiEvent.NavigateToCalendar)
             is HomeUiAction.OnClickPlan -> setUiEvent(HomeUiEvent.NavigateToPlanDetail(uiAction.planId, uiAction.isPlan))
-            is HomeUiAction.OnClickRefresh -> meetingPlansResult.restart()
+            is HomeUiAction.OnUpdatePermissionCheck -> setPermissionCheck()
+        }
+    }
+
+    private fun setPermissionCheck() {
+        uiState.checkState<HomeUiState.Success> {
+            setUiState(copy(isPermissionCheck = true))
         }
     }
 
@@ -186,18 +193,20 @@ sealed interface HomeUiState : UiState {
     data class Success(
         val plans: List<Plan> = emptyList(),
         val meetings: List<Meeting> = emptyList(),
+        val isPermissionCheck: Boolean = false,
     ) : HomeUiState
 
     data object Error : HomeUiState
 }
 
 sealed interface HomeUiAction : UiAction {
+    data object OnClickRefresh : HomeUiAction
     data object OnClickAlarm : HomeUiAction
     data object OnClickMeetingWrite : HomeUiAction
     data object OnClickPlanWrite : HomeUiAction
     data object OnClickPlanMore : HomeUiAction
     data class OnClickPlan(val planId: String, val isPlan: Boolean) : HomeUiAction
-    data object OnClickRefresh : HomeUiAction
+    data object OnUpdatePermissionCheck : HomeUiAction
 }
 
 sealed interface HomeUiEvent : UiEvent {

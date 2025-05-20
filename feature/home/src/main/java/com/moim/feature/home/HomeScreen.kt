@@ -56,7 +56,6 @@ import com.moim.feature.home.ui.HomeCreateCards
 import com.moim.feature.home.ui.HomePlanCard
 import com.moim.feature.home.ui.HomePlanMoreCard
 import com.moim.feature.home.ui.HomeTopAppbar
-import kotlinx.coroutines.delay
 
 internal typealias OnHomeUiAction = (HomeUiAction) -> Unit
 
@@ -97,9 +96,10 @@ fun HomeRoute(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(homeUiState) {
+        if ((homeUiState as? HomeUiState.Success)?.isPermissionCheck == true) return@LaunchedEffect
         if (isPostNotificationPermission.not() && Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
-            delay(2000)
+            viewModel.onUiAction(HomeUiAction.OnUpdatePermissionCheck)
             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }

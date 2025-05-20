@@ -49,7 +49,6 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import kotlinx.coroutines.delay
 
 @Composable
 fun AlarmSettingRoute(
@@ -94,9 +93,9 @@ fun AlarmSettingRoute(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(alarmSettingUiState) {
+        if (alarmSettingUiState !is AlarmSettingUiState.Success) return@LaunchedEffect
         if (isPostNotificationPermission.not() && Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
-            delay(2000)
             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }

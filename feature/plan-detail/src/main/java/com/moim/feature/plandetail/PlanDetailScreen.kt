@@ -114,8 +114,8 @@ fun PlanDetailScreen(
             ) {
                 item {
                     PlanDetailContent(
-                        isMyPlan = uiState.user.userId == uiState.planItem.userId,
                         planItem = uiState.planItem,
+                        isShowApplyButton = uiState.isShowApplyButton,
                         onUiAction = onUiAction
                     )
                 }
