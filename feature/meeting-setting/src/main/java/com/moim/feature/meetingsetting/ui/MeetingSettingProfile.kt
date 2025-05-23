@@ -96,7 +96,7 @@ fun MeetingSettingProfile(
                 modifier = Modifier.padding(12.dp),
                 text = buildAnnotatedString {
                     append(stringResource(R.string.meeting_setting_date_01))
-                    withStyle(style = SpanStyle(color = MoimTheme.colors.primary.primary)) { append(" ${meeting.meetStartDate} ") }
+                    withStyle(style = SpanStyle(color = MoimTheme.colors.primary.primary)) { append(" ${meeting.sinceDays} ") }
                     append(stringResource(R.string.meeting_setting_date_02))
                 },
                 overflow = TextOverflow.Ellipsis,
@@ -119,7 +119,7 @@ private fun MeetingSettingProfilePreview() {
             MeetingSettingProfile(
                 meeting = Meeting(
                     name = "우리중학교 동창",
-                    meetStartDate = 12,
+                    sinceDays = 12,
                 ),
                 isMeetingHost = true
             )

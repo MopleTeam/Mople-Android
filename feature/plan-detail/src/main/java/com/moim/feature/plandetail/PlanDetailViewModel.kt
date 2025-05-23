@@ -234,7 +234,7 @@ class PlanDetailViewModel @Inject constructor(
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                     when (result) {
                         is Result.Loading -> return@collect
-                        is Result.Success -> setUiState(copy(comments = result.data))
+                        is Result.Success -> setUiState(copy(comments = result.data, selectedUpdateComment = null))
                         is Result.Error -> showErrorToast(result.exception)
                     }
                 }

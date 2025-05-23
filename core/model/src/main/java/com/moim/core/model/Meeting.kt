@@ -16,8 +16,8 @@ data class Meeting(
     val name: String = "",
     val imageUrl: String = "",
     val memberCount: Int = 1,
-    val meetStartDate: Int = 0,
-    val lastPlanAt: String? = null
+    val lastPlanAt: String? = null,
+    val sinceDays: Int = 0,
 )
 
 fun MeetingResponse.asItem(): Meeting {
@@ -27,8 +27,8 @@ fun MeetingResponse.asItem(): Meeting {
         name = name,
         imageUrl = imageUrl,
         memberCount = memberCount,
-        meetStartDate = meetStartDate,
-        lastPlanAt = lastPlanAt
+        lastPlanAt = lastPlanAt,
+        sinceDays = sinceDays
     )
 }
 

@@ -107,6 +107,7 @@ fun MeetingDetailPlanContent(
                 key = { it.reviewId }
             ) {
                 MeetingDetailReviewItem(
+                    userId = userId,
                     review = it,
                     onUiAction = onUiAction
                 )
@@ -132,12 +133,18 @@ fun MeetingDetailPlanItem(
             MeetingDetailPlanHeader(time = plan.planTime)
             Spacer(Modifier.height(16.dp))
 
-            MoimText(
-                modifier = Modifier.fillMaxWidth(),
-                text = plan.planName,
-                style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01
-            )
+            Row {
+                if (plan.userId == userId) {
+                    MyPostIcon()
+                }
+
+                MoimText(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = plan.planName,
+                    style = MoimTheme.typography.title03.semiBold,
+                    color = MoimTheme.colors.gray.gray01
+                )
+            }
             Spacer(Modifier.height(4.dp))
 
             PlanParticipantCount(
@@ -162,29 +169,25 @@ fun MeetingDetailPlanItem(
                     color = MoimTheme.colors.gray.gray05,
                     textAlign = TextAlign.Center,
                 )
-            } else if (plan.userId == userId) {
-                MoimPrimaryButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.meeting_detail_plan_me),
-                    enable = false,
-                )
-            } else if (plan.isParticipant) {
-                MoimPrimaryButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    buttonColors = moimButtomColors().copy(
-                        containerColor = MoimTheme.colors.tertiary,
-                        contentColor = MoimTheme.colors.gray.gray03
-                    ),
-                    text = stringResource(R.string.meeting_detail_plan_not_apply),
-                    onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanApply(plan.planId, false)) }
-                )
-            } else {
-                MoimPrimaryButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    buttonColors = moimButtomColors(),
-                    text = stringResource(R.string.meeting_detail_plan_apply),
-                    onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanApply(plan.planId, true)) }
-                )
+            } else if (plan.userId != userId) {
+                if (plan.isParticipant) {
+                    MoimPrimaryButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        buttonColors = moimButtomColors().copy(
+                            containerColor = MoimTheme.colors.tertiary,
+                            contentColor = MoimTheme.colors.gray.gray03
+                        ),
+                        text = stringResource(R.string.meeting_detail_plan_not_apply),
+                        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanApply(plan.planId, false)) }
+                    )
+                } else {
+                    MoimPrimaryButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        buttonColors = moimButtomColors(),
+                        text = stringResource(R.string.meeting_detail_plan_apply),
+                        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanApply(plan.planId, true)) }
+                    )
+                }
             }
         }
     }
@@ -193,6 +196,7 @@ fun MeetingDetailPlanItem(
 @Composable
 fun MeetingDetailReviewItem(
     modifier: Modifier = Modifier,
+    userId: String,
     review: Review,
     onUiAction: OnMeetingDetailUiAction
 ) {
@@ -204,7 +208,7 @@ fun MeetingDetailReviewItem(
             modifier = Modifier.padding(16.dp)
         ) {
             MeetingDetailPlanHeader(time = review.reviewAt)
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(10.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -212,11 +216,19 @@ fun MeetingDetailReviewItem(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    MoimText(
-                        text = review.reviewName,
-                        style = MoimTheme.typography.title03.semiBold,
-                        color = MoimTheme.colors.gray.gray01
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (review.userId == userId) {
+                            MyPostIcon()
+                        }
+
+                        MoimText(
+                            text = review.reviewName,
+                            style = MoimTheme.typography.title03.semiBold,
+                            color = MoimTheme.colors.gray.gray01
+                        )
+                    }
                     Spacer(Modifier.height(4.dp))
 
                     PlanParticipantCount(
@@ -259,6 +271,28 @@ fun MeetingDetailReviewItem(
             }
         }
     }
+}
+
+@Composable
+private fun MyPostIcon() {
+    Box(
+        modifier = Modifier
+            .size(20.dp)
+            .padding(2.dp)
+            .clip(CircleShape)
+            .background(MoimTheme.colors.primary.primary)
+    ) {
+        Icon(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(14.dp),
+            imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
+            contentDescription = "",
+            tint = MoimTheme.colors.white
+        )
+    }
+
+    Spacer(Modifier.size(4.dp))
 }
 
 @Composable
@@ -379,11 +413,13 @@ private fun MeetingDetailPlanContentPreview() {
                 isPlanSelected = false,
                 plans = listOf(
                     Plan(
+                        userId = "100",
                         planId = "1",
                         planName = "술 한 잔 하는 날1",
                         planMemberCount = 6,
-                        planTime = "2023-12-12 09:00:00",
-                        planAddress = "서울시 강남구"
+                        planTime = "2025-12-12 09:00:00",
+                        planAddress = "서울시 강남구",
+                        isParticipant = true,
                     ),
                     Plan(
                         planId = "2",
