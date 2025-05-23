@@ -18,5 +18,7 @@ data class MeetingResponse(
     @SerialName("meetStartDate")
     val meetStartDate: Int = 0,
     @SerialName("lastPlanDay")
-    val lastPlanAt: String? = null
+    val lastPlanAt: String? = null,
+    @SerialName("sinceDays")
+    val sinceDays: Int = 0,
 )

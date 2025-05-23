@@ -187,7 +187,7 @@ private fun MeetingSettingScreenPreview() {
             uiState = MeetingSettingUiState.MeetingSetting(
                 meeting = Meeting(
                     name = "우리중학교 동창",
-                    meetStartDate = 12,
+                    sinceDays = 12,
                 ),
                 isHostUser = true
             ),
