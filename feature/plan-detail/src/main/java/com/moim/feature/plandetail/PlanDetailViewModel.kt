@@ -67,7 +67,7 @@ class PlanDetailViewModel @Inject constructor(
     private val commentResult = planId
         .filterNotNull()
         .flatMapLatest { commentRepository.getComments(it).asResult() }
-        .stateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -113,7 +113,10 @@ class PlanDetailViewModel @Inject constructor(
                             }
                         }
 
-                        is PlanAction.PlanInvalidate -> planResult.restart()
+                        is PlanAction.PlanInvalidate -> {
+                            planResult.restart()
+                            commentResult.restart()
+                        }
                         else -> return@collect
                     }
                 }
