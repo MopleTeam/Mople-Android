@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,6 +63,8 @@ fun PlanDetailBottomBar(
                 .padding(end = 52.dp)
                 .align(Alignment.CenterStart),
             hintText = stringResource(R.string.plan_detail_comment_hint),
+            singleLine = false,
+            imeAction = ImeAction.None,
             textFieldValue = commentText,
             leadingIcon = {
                 Icon(

@@ -65,7 +65,7 @@ fun MoimTextField(
     isError: Boolean = false,
     errorMessage: String? = null,
     singleLine: Boolean = true,
-    maxLine: Int = 1,
+    maxLine: Int = if (singleLine) 1 else Int.MAX_VALUE,
     shape: Shape = RoundedCornerShape(6),
     paddingValues: PaddingValues = PaddingValues(16.dp),
     unfocusedBorderThickness: Dp = 1.dp,
@@ -89,7 +89,7 @@ fun MoimTextField(
 
     MoimOutlinedTextField(
         modifier = modifier.onKeyEvent {
-            val pressedEnter = (it.key == Key.Enter)
+            val pressedEnter = (it.key == Key.Enter && imeAction == ImeAction.Done)
             if (pressedEnter) {
                 onTextTriggered()
             }
@@ -158,7 +158,7 @@ fun MoimTextField(
     isError: Boolean = false,
     errorMessage: String? = null,
     singleLine: Boolean = true,
-    maxLine: Int = 1,
+    maxLine: Int = if (singleLine) 1 else Int.MAX_VALUE,
     shape: Shape = RoundedCornerShape(6),
     paddingValues: PaddingValues = PaddingValues(16.dp),
     unfocusedBorderThickness: Dp = 1.dp,
@@ -185,7 +185,7 @@ fun MoimTextField(
 
     MoimOutlinedTextField(
         modifier = modifier.onKeyEvent {
-            val pressedEnter = (it.key == Key.Enter)
+            val pressedEnter = (it.key == Key.Enter && imeAction == ImeAction.Done)
             if (pressedEnter) {
                 onTextTriggered()
             }
@@ -248,7 +248,7 @@ private fun MoimTextFieldPreview() {
         ) {
             MoimTextField(
                 modifier = Modifier.fillMaxWidth(),
-                text = "",
+                text = "This is Multi Line\nThis is Multi Line",
                 hintText = "This is Basic",
                 singleLine = false,
                 supportText = "dummy support message",
@@ -283,7 +283,7 @@ private fun MoimTextFieldPreview() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 139.dp),
-                text = "",
+                text = "This is Multi Line\nThis is Multi Line\nThis is Multi Line\nThis is Multi Line",
                 hintText = "This is Multi Line",
                 singleLine = false,
                 supportText = "dummy support message",
