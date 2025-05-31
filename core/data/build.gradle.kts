@@ -31,9 +31,7 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.dataModel)
     implementation(projects.core.model)
-
-    // AndroidX DataStore
-    implementation(libs.androidx.dataStore)
+    implementation(projects.core.datastore)
 
     // AndroidX Room
     implementation(libs.bundles.androidx.room)

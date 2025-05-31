@@ -7,7 +7,7 @@ import com.moim.core.common.exception.NotFoundException
 import com.moim.core.common.exception.ServerErrorException
 import com.moim.core.common.exception.UnAuthorizedException
 import com.moim.core.common.exception.UnknownErrorException
-import com.moim.core.data.util.JsonUtil.toObject
+import com.moim.core.common.util.JsonUtil.toObject
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import retrofit2.HttpException

@@ -1,7 +1,7 @@
 package com.moim.core.data.util
 
-import com.moim.core.data.datastore.PreferenceStorage
 import com.moim.core.data.service.AuthTokenApi
+import com.moim.core.datastore.PreferenceStorage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex

@@ -1,10 +1,10 @@
-package com.moim.core.data.di
+package com.moim.core.datastore.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import com.moim.core.data.datastore.PreferenceStorage
+import com.moim.core.datastore.PreferenceStorageImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,16 +17,12 @@ import javax.inject.Singleton
 internal object DataStoreModule {
 
     private val Context.preference: DataStore<Preferences> by preferencesDataStore(
-        name = PreferenceStorage.PREFS_MOIM
+        name = PreferenceStorageImpl.PREFS_MOIM
     )
 
-    @Singleton
     @Provides
-    fun providePreferenceStorageModule(
+    @Singleton
+    fun providesDataStoreModule(
         @ApplicationContext context: Context,
-    ): PreferenceStorage {
-        return PreferenceStorage(
-            preference = context.preference,
-        )
-    }
+    ): DataStore<Preferences> = context.preference
 }

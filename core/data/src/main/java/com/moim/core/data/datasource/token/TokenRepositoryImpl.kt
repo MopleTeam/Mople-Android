@@ -1,7 +1,7 @@
 package com.moim.core.data.datasource.token
 
+import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.service.TokenApi
-import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

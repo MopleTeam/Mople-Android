@@ -1,8 +1,8 @@
 package com.moim.core.data.datasource.review
 
+import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.service.ReviewApi
-import com.moim.core.data.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.ReviewResponse
 import com.moim.core.model.asItem

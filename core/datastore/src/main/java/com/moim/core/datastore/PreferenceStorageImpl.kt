@@ -1,31 +1,30 @@
-package com.moim.core.data.datastore
+package com.moim.core.datastore
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.moim.core.data.datastore.PreferenceStorage.PreferenceKeys.PREF_USER
-import com.moim.core.data.datastore.PreferenceStorage.PreferenceKeys.PREF_USER_TOKEN
-import com.moim.core.data.util.JsonUtil.toJson
-import com.moim.core.data.util.JsonUtil.toObject
+import com.moim.core.common.util.JsonUtil.toJson
+import com.moim.core.common.util.JsonUtil.toObject
 import com.moim.core.datamodel.TokenResponse
 import com.moim.core.datamodel.UserResponse
+import com.moim.core.datastore.PreferenceStorageImpl.PreferenceKeys.PREF_USER
+import com.moim.core.datastore.PreferenceStorageImpl.PreferenceKeys.PREF_USER_TOKEN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
 
-internal class PreferenceStorage @Inject constructor(
+internal class PreferenceStorageImpl @Inject constructor(
     private val preference: DataStore<Preferences>,
-) {
+) : PreferenceStorage {
 
     object PreferenceKeys {
         val PREF_USER = stringPreferencesKey("pref_user")
         val PREF_USER_TOKEN = stringPreferencesKey("pref_user_token")
     }
 
-    // ==================== User ========================== //
-    val user : Flow<UserResponse?> = preference.data.map {
+    override val user: Flow<UserResponse?> = preference.data.map {
         try {
             it[PREF_USER]?.toObject<UserResponse>()
         } catch (e: Exception) {
@@ -33,7 +32,7 @@ internal class PreferenceStorage @Inject constructor(
         }
     }
 
-    suspend fun saveUser(user: UserResponse) {
+    override suspend fun saveUser(user: UserResponse) {
         preference.edit {
             it[PREF_USER] = try {
                 user.toJson()
@@ -44,8 +43,7 @@ internal class PreferenceStorage @Inject constructor(
         }
     }
 
-    // ==================== Token ========================== //
-    val token: Flow<TokenResponse?> = preference.data.map {
+    override val token: Flow<TokenResponse?> = preference.data.map {
         try {
             it[PREF_USER_TOKEN]?.toObject<TokenResponse>()
         } catch (e: Exception) {
@@ -53,7 +51,7 @@ internal class PreferenceStorage @Inject constructor(
         }
     }
 
-    suspend fun saveUserToken(token: TokenResponse) {
+    override suspend fun saveUserToken(token: TokenResponse) {
         preference.edit {
             it[PREF_USER_TOKEN] = try {
                 token.toJson()
@@ -64,7 +62,7 @@ internal class PreferenceStorage @Inject constructor(
         }
     }
 
-    suspend fun clearMoimStorage() {
+    override suspend fun clearMoimStorage() {
         preference.edit { it.clear() }
     }
 

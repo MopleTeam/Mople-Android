@@ -1,25 +1,25 @@
 package com.moim.core.data.di
 
 import com.moim.core.data.BuildConfig
-import com.moim.core.data.datastore.PreferenceStorage
 import com.moim.core.data.di.qualifiers.MoimTokenApiOkHttp
+import com.moim.core.data.service.AuthTokenApi
 import com.moim.core.data.util.TokenAuthenticator
 import com.moim.core.data.util.TokenInterceptor
+import com.moim.core.datastore.PreferenceStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
 import okhttp3.Call
+import okhttp3.Interceptor
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
-import com.moim.core.data.service.AuthTokenApi
-import kotlinx.serialization.json.Json
-import okhttp3.Interceptor
-import okhttp3.MediaType.Companion.toMediaType
 
 @InstallIn(SingletonComponent::class)
 @Module

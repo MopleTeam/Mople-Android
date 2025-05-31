@@ -1,4 +1,4 @@
-package com.moim.core.data.util
+package com.moim.core.common.util
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -9,9 +9,9 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import timber.log.Timber
 
-internal object JsonUtil {
+object JsonUtil {
 
-    private val json = Json {
+    val json = Json {
         isLenient = true
         coerceInputValues = true
         ignoreUnknownKeys = true

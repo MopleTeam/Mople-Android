@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.moim.android.library)
     alias(libs.plugins.moim.android.library.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.moim.android.hilt)
 }
 
@@ -24,6 +25,8 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messageing)
+
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.lottie.compose)
     implementation(libs.timber)
