@@ -1,10 +1,10 @@
 package com.moim.core.data.datasource.notification
 
-import com.moim.core.data.service.NotificationApi
-import com.moim.core.data.util.JsonUtil.jsonOf
+import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.NotificationResponse
 import com.moim.core.model.asItem
+import com.moim.core.network.service.NotificationApi
 import javax.inject.Inject
 
 internal class NotificationRepositoryImpl @Inject constructor(

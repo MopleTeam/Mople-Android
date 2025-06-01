@@ -30,12 +30,14 @@ rootProject.name = "MoimTable"
 include(":app")
 
 include(":core:designsystem")
-include(":core:data")
-include(":core:data-model")
-include(":core:model")
 include(":core:common")
 include(":core:analytics")
 include(":core:domain")
+include(":core:data")
+include(":core:datastore")
+include(":core:network")
+include(":core:data-model")
+include(":core:model")
 
 include(":feature:intro")
 include(":feature:main")

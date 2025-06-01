@@ -1,11 +1,11 @@
 package com.moim.core.data.datasource.comment
 
-import com.moim.core.data.service.CommentApi
-import com.moim.core.data.util.JsonUtil.jsonOf
+import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.CommentResponse
 import com.moim.core.model.Comment
 import com.moim.core.model.asItem
+import com.moim.core.network.service.CommentApi
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

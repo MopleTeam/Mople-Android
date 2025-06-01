@@ -1,13 +1,13 @@
 package com.moim.core.data.datasource.plan
 
-import com.moim.core.data.service.LocationApi
-import com.moim.core.data.service.PlanApi
-import com.moim.core.data.util.JsonUtil.jsonOf
+import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.datamodel.PlanResponse
 import com.moim.core.model.PlanReviewContainer
 import com.moim.core.model.asItem
+import com.moim.core.network.service.LocationApi
+import com.moim.core.network.service.PlanApi
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

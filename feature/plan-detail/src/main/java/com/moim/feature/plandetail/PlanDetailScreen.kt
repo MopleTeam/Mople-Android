@@ -1,5 +1,6 @@
 package com.moim.feature.plandetail
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
+import com.moim.core.common.util.toValidUrl
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -66,6 +68,14 @@ fun PlanDetailRoute(
             is PlanDetailUiEvent.NavigateToMapDetail -> navigateToMapDetail(event.placeName, event.address, event.latitude, event.longitude)
             is PlanDetailUiEvent.NavigateToImageViewerForReview -> navigateToImageViewer(context.getString(R.string.plan_detail_image), event.images, event.position, R.drawable.ic_empty_user_logo)
             is PlanDetailUiEvent.NavigateToImageViewerForUser -> navigateToImageViewer(event.userName, listOf(event.image), 0, R.drawable.ic_empty_user_logo)
+            is PlanDetailUiEvent.NavigateToWebBrowser -> {
+                try {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, event.webLink.toValidUrl()))
+                } catch (e: Exception) {
+                    showToast(context, context.getString(R.string.common_error_open_browser))
+                }
+            }
+
             is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
@@ -143,7 +153,7 @@ fun PlanDetailScreen(
 
                 items(
                     items = uiState.comments,
-                    key = { comment -> comment.commentId }
+                    key = { comment -> comment.comment.commentId }
                 ) { comment ->
                     PlanDetailCommentItem(
                         userId = uiState.user.userId,
