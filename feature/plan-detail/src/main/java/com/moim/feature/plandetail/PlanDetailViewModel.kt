@@ -8,6 +8,7 @@ import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.util.parseTextWithLinks
 import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
@@ -24,13 +25,14 @@ import com.moim.core.domain.usecase.GetPlanItemUseCase
 import com.moim.core.model.Comment
 import com.moim.core.model.User
 import com.moim.core.model.item.PlanItem
+import com.moim.feature.plandetail.model.CommentTextUiModel
+import com.moim.feature.plandetail.model.CommentUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.ZonedDateTime
@@ -97,8 +99,14 @@ class PlanDetailViewModel @Inject constructor(
                     uiState.checkState<PlanDetailUiState.Success> {
                         when (result) {
                             is Result.Loading -> return@collect
-                            is Result.Success -> setUiState(copy(comments = result.data))
-                            else -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.CommentErrorMessage))
+
+                            is Result.Success -> {
+                                setUiState(
+                                    copy(comments = result.data.map { it.createCommentUiModel() })
+                                )
+                            }
+
+                            is Result.Error -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.CommentErrorMessage))
                         }
                     }
                 }
@@ -117,6 +125,7 @@ class PlanDetailViewModel @Inject constructor(
                             planResult.restart()
                             commentResult.restart()
                         }
+
                         else -> return@collect
                     }
                 }
@@ -138,6 +147,7 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickCommentReport -> reportComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentUpdate -> updateComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentDelete -> deleteComment(uiAction.comment)
+            is PlanDetailUiAction.OnClickCommentWebLink -> setUiEvent(PlanDetailUiEvent.NavigateToWebBrowser(uiAction.webLink))
             is PlanDetailUiAction.OnClickReviewImage -> navigateToImageViewerForReview(uiAction.selectedImageIndex)
             is PlanDetailUiAction.OnClickUserProfileImage -> navigateToImageViewerForUser(uiAction.imageUrl, uiAction.userName)
             is PlanDetailUiAction.OnShowPlanEditDialog -> showPlanEditDialog(uiAction.isShow)
@@ -237,7 +247,14 @@ class PlanDetailViewModel @Inject constructor(
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                     when (result) {
                         is Result.Loading -> return@collect
-                        is Result.Success -> setUiState(copy(comments = result.data, selectedUpdateComment = null))
+
+                        is Result.Success -> setUiState(
+                            copy(
+                                comments = result.data.map { it.createCommentUiModel() },
+                                selectedUpdateComment = null
+                            )
+                        )
+
                         is Result.Error -> showErrorToast(result.exception)
                     }
                 }
@@ -255,7 +272,17 @@ class PlanDetailViewModel @Inject constructor(
                     uiState.checkState<PlanDetailUiState.Success> {
                         when (result) {
                             is Result.Loading -> return@collect
-                            is Result.Success -> setUiState(copy(comments = comments.toMutableList().apply { remove(comment) }))
+
+                            is Result.Success -> {
+                                setUiState(
+                                    copy(
+                                        comments = comments
+                                            .toMutableList()
+                                            .apply { removeIf { uiModel -> uiModel.comment.commentId == comment.commentId } }
+                                    )
+                                )
+                            }
+
                             is Result.Error -> showErrorToast(result.exception)
                         }
                     }
@@ -361,6 +388,28 @@ class PlanDetailViewModel @Inject constructor(
         )
     }
 
+
+    private fun Comment.createCommentUiModel(): CommentUiModel {
+        val commentTextUiModel = content
+            .parseTextWithLinks()
+            .map { (isWebLink, text) ->
+                if (isWebLink) {
+                    val startIndex = content.indexOf(text)
+                    val endIndex = startIndex + text.length
+
+                    CommentTextUiModel.HyperLinkText(
+                        content = text,
+                        startIndex = startIndex,
+                        endIndex = endIndex
+                    )
+                } else {
+                    CommentTextUiModel.PlainText(text)
+                }
+            }
+
+        return CommentUiModel(this, commentTextUiModel)
+    }
+
     companion object {
         private const val KEY_PLAN_ID = "planId"
         private const val KEY_POST_ID = "postId"
@@ -374,7 +423,7 @@ sealed interface PlanDetailUiState : UiState {
     data class Success(
         val user: User,
         val planItem: PlanItem,
-        val comments: List<Comment> = emptyList(),
+        val comments: List<CommentUiModel> = emptyList(),
         val selectedImageIndex: Int = 0,
         val selectedComment: Comment? = null,
         val selectedUpdateComment: Comment? = null,
@@ -401,6 +450,7 @@ sealed interface PlanDetailUiAction : UiAction {
     data class OnClickCommentUpdate(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentDelete(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentUpload(val commentText: String, val updateComment: Comment?) : PlanDetailUiAction
+    data class OnClickCommentWebLink(val webLink: String) : PlanDetailUiAction
     data class OnClickReviewImage(val selectedImageIndex: Int) : PlanDetailUiAction
     data class OnClickUserProfileImage(val imageUrl: String, val userName: String) : PlanDetailUiAction
     data class OnShowPlanEditDialog(val isShow: Boolean) : PlanDetailUiAction
@@ -411,11 +461,42 @@ sealed interface PlanDetailUiAction : UiAction {
 
 sealed interface PlanDetailUiEvent : UiEvent {
     data object NavigateToBack : PlanDetailUiEvent
-    data class NavigateToParticipants(val postId: String, val isPlan: Boolean) : PlanDetailUiEvent
-    data class NavigateToPlanWrite(val planItem: PlanItem) : PlanDetailUiEvent
-    data class NavigateToReviewWrite(val postId: String) : PlanDetailUiEvent
-    data class NavigateToMapDetail(val placeName: String, val address: String, val latitude: Double, val longitude: Double) : PlanDetailUiEvent
-    data class NavigateToImageViewerForReview(val images: List<String>, val position: Int) : PlanDetailUiEvent
-    data class NavigateToImageViewerForUser(val image: String, val userName: String) : PlanDetailUiEvent
-    data class ShowToastMessage(val message: ToastMessage) : PlanDetailUiEvent
+
+    data class NavigateToParticipants(
+        val postId: String,
+        val isPlan: Boolean
+    ) : PlanDetailUiEvent
+
+    data class NavigateToPlanWrite(
+        val planItem: PlanItem
+    ) : PlanDetailUiEvent
+
+    data class NavigateToReviewWrite(
+        val postId: String
+    ) : PlanDetailUiEvent
+
+    data class NavigateToMapDetail(
+        val placeName: String,
+        val address: String,
+        val latitude: Double,
+        val longitude: Double
+    ) : PlanDetailUiEvent
+
+    data class NavigateToImageViewerForReview(
+        val images: List<String>,
+        val position: Int
+    ) : PlanDetailUiEvent
+
+    data class NavigateToImageViewerForUser(
+        val image: String,
+        val userName: String
+    ) : PlanDetailUiEvent
+
+    data class NavigateToWebBrowser(
+        val webLink: String
+    ) : PlanDetailUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage
+    ) : PlanDetailUiEvent
 }

@@ -20,6 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.util.getDateTimeFormatString
@@ -32,7 +40,8 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Comment
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
-import java.time.LocalDate
+import com.moim.feature.plandetail.model.CommentTextUiModel
+import com.moim.feature.plandetail.model.CommentUiModel
 
 @Composable
 fun PlanDetailCommentHeader(
@@ -66,7 +75,7 @@ fun PlanDetailCommentHeader(
 fun PlanDetailCommentItem(
     modifier: Modifier = Modifier,
     userId: String,
-    comment: Comment,
+    comment: CommentUiModel,
     onUiAction: OnPlanDetailUiAction
 ) {
     Row(
@@ -80,8 +89,15 @@ fun PlanDetailCommentItem(
                 .size(32.dp)
                 .clip(CircleShape)
                 .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
-                .onSingleClick { onUiAction(PlanDetailUiAction.OnClickUserProfileImage(imageUrl = comment.userImageUrl, userName = comment.userName)) },
-            imageUrl = comment.userImageUrl,
+                .onSingleClick {
+                    onUiAction(
+                        PlanDetailUiAction.OnClickUserProfileImage(
+                            imageUrl = comment.comment.userImageUrl,
+                            userName = comment.comment.userName
+                        )
+                    )
+                },
+            imageUrl = comment.comment.userImageUrl,
             errorImage = painterResource(R.drawable.ic_empty_user_logo),
         )
 
@@ -96,7 +112,7 @@ fun PlanDetailCommentItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 MoimText(
-                    text = comment.userName,
+                    text = comment.comment.userName,
                     style = MoimTheme.typography.body01.semiBold,
                     color = MoimTheme.colors.gray.gray01
                 )
@@ -106,7 +122,7 @@ fun PlanDetailCommentItem(
                 MoimText(
                     modifier = Modifier.weight(1f),
                     text = getDateTimeFormatString(
-                        dateTime = comment.commentAt,
+                        dateTime = comment.comment.commentAt,
                         pattern = stringResource(R.string.regex_date_month_day)
                     ),
                     style = MoimTheme.typography.body02.regular,
@@ -116,15 +132,15 @@ fun PlanDetailCommentItem(
                 MoimIconButton(
                     iconRes = R.drawable.ic_more,
                     onClick = {
-                        val uiAction = if (userId == comment.userId) {
+                        val uiAction = if (userId == comment.comment.userId) {
                             PlanDetailUiAction.OnShowCommentEditDialog(
                                 isShow = true,
-                                comment = comment
+                                comment = comment.comment
                             )
                         } else {
                             PlanDetailUiAction.OnShowCommentReportDialog(
                                 isShow = true,
-                                comment = comment
+                                comment = comment.comment
                             )
                         }
 
@@ -134,11 +150,9 @@ fun PlanDetailCommentItem(
             }
 
             Spacer(Modifier.height(8.dp))
-            MoimText(
-                text = comment.content,
-                singleLine = false,
-                style = MoimTheme.typography.body01.medium,
-                color = MoimTheme.colors.gray.gray03
+            CommentText(
+                texts = comment.texts,
+                onUiAction = onUiAction
             )
         }
     }
@@ -149,9 +163,76 @@ fun PlanDetailCommentItem(
     )
 }
 
+@Composable
+private fun CommentText(
+    modifier: Modifier = Modifier,
+    texts: List<CommentTextUiModel>,
+    onUiAction: OnPlanDetailUiAction
+) {
+    val annotatedText = buildAnnotatedString {
+        texts.forEach { uiModel ->
+            when (uiModel) {
+                is CommentTextUiModel.PlainText -> {
+                    withStyle(
+                        style = SpanStyle(
+                            color = MoimTheme.colors.gray.gray03,
+                            fontFamily = FontFamily(Font(R.font.pretendard_medium, FontWeight.W600)),
+                            fontWeight = FontWeight.W600,
+                            textDecoration = TextDecoration.None
+                        )
+                    ) {
+                        append(uiModel.content)
+                    }
+                }
+
+                is CommentTextUiModel.HyperLinkText -> {
+                    withStyle(
+                        style = SpanStyle(
+                            color = MoimTheme.colors.primary.primary,
+                            fontFamily = FontFamily(Font(R.font.pretendard_medium, FontWeight.W600)),
+                            fontWeight = FontWeight.W600,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    ) {
+                        append(uiModel.content)
+                    }
+                    addLink(
+                        clickable = LinkAnnotation.Clickable(
+                            tag = "URL",
+                            linkInteractionListener = {
+                                onUiAction(PlanDetailUiAction.OnClickCommentWebLink(uiModel.content))
+                            }
+                        ),
+                        start = uiModel.startIndex,
+                        end = uiModel.endIndex
+                    )
+                }
+            }
+        }
+    }
+
+    MoimText(
+        modifier = modifier,
+        text = annotatedText,
+        singleLine = false
+    )
+}
+
+
 @Preview
 @Composable
 private fun PlanDetailCommentItemPreview() {
+    val comment = Comment(
+        postId = "",
+        commentId = "",
+        userId = "",
+        userName = "모닝커피클럽회원",
+        userImageUrl = "",
+        content = "이른 아침, 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 다음에 또 뵐 수 있으면 좋겠네요.\n제 인스타도 많이 방문해주세요 https://www.instagram.com",
+        commentAt = "2025-03-29 21:23:20",
+        isUpdate = false,
+    )
+
     MoimTheme {
         Column(
             modifier = Modifier
@@ -160,15 +241,18 @@ private fun PlanDetailCommentItemPreview() {
         ) {
             PlanDetailCommentItem(
                 userId = "",
-                comment = Comment(
-                    postId = "",
-                    commentId = "",
-                    userId = "",
-                    userName = "모닝커피클럽회원",
-                    userImageUrl = "",
-                    content = "이른 아침, 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 다음에 또 뵐 수 있으면 좋겠네요.",
-                    commentAt = "2025-03-29 21:23:20",
-                    isUpdate = false,
+                comment = CommentUiModel(
+                    comment = comment,
+                    texts = listOf(
+                        CommentTextUiModel.PlainText(
+                            content = "이른 아침, 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 다음에 또 뵐 수 있으면 좋겠네요.\n제 인스타도 많이 방문해주세요! "
+                        ),
+                        CommentTextUiModel.HyperLinkText(
+                            content = "instagram.com",
+                            startIndex = 0,
+                            endIndex = 0
+                        ),
+                    )
                 ),
                 onUiAction = {}
             )
