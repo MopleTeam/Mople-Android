@@ -1,12 +1,13 @@
-package com.moim.core.data.di
+package com.moim.core.network.di
 
-import com.moim.core.data.BuildConfig
-import com.moim.core.data.di.qualifiers.MoimApi
-import com.moim.core.data.di.qualifiers.MoimApiOkHttp
-import com.moim.core.data.di.qualifiers.NormalApi
-import com.moim.core.data.di.qualifiers.NormalApiOkHttp
-import com.moim.core.data.util.TokenAuthenticator
-import com.moim.core.data.util.TokenInterceptor
+import com.moim.core.network.BuildConfig
+import com.moim.core.network.di.qualifiers.MoimApi
+import com.moim.core.network.di.qualifiers.MoimApiOkHttp
+import com.moim.core.network.di.qualifiers.NormalApi
+import com.moim.core.network.di.qualifiers.NormalApiOkHttp
+import com.moim.core.network.util.MoimHttpLoggingInterceptor
+import com.moim.core.network.util.TokenAuthenticator
+import com.moim.core.network.util.TokenInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,18 +28,20 @@ import javax.inject.Singleton
 @Module
 internal object ServiceModule {
 
-    @Singleton
     @Provides
-    fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor()
-            .apply {
-                level = if (BuildConfig.DEBUG) {
-                    HttpLoggingInterceptor.Level.BODY
-                } else {
-                    HttpLoggingInterceptor.Level.NONE
-                }
-            }
-    }
+    @Singleton
+    fun provideJson(): Json =
+        Json {
+            isLenient = true
+            ignoreUnknownKeys = true // 알 수 없는 키 무시
+            coerceInputValues = true // 타입 불일치 시 기본값으로 대체
+            encodeDefaults = true
+            prettyPrint = true
+        }
+
+    @Provides
+    @Singleton
+    fun provideHttpLoggingInterceptor(json: Json): HttpLoggingInterceptor = MoimHttpLoggingInterceptor(json).interceptor
 
     @Singleton
     @Provides
@@ -58,17 +61,6 @@ internal object ServiceModule {
     @Provides
     fun provideHeaderInterceptor(): Interceptor = Interceptor { chain ->
         chain.proceed(chain.addHeaders())
-    }
-
-    @Singleton
-    @Provides
-    fun provideJson(): Json {
-        return Json {
-            isLenient = true
-            coerceInputValues = true
-            ignoreUnknownKeys = true
-            encodeDefaults = true
-        }
     }
 
     @MoimApiOkHttp

@@ -1,4 +1,4 @@
-package com.moim.core.data.service
+package com.moim.core.network.service
 
 import com.moim.core.datamodel.UserResponse
 import kotlinx.serialization.json.JsonObject
@@ -8,7 +8,7 @@ import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.Query
 
-internal interface UserApi {
+interface UserApi {
 
     @GET("user/info")
     suspend fun getUser(): UserResponse

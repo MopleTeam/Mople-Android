@@ -1,4 +1,4 @@
-package com.moim.core.data.util
+package com.moim.core.network.util
 
 import com.moim.core.common.exception.BadRequestException
 import com.moim.core.common.exception.ConflictException
@@ -14,14 +14,14 @@ import retrofit2.HttpException
 import java.io.IOException
 
 @Serializable
-internal data class ErrorResponse(
+data class ErrorResponse(
     @SerialName("code")
     val code: String? = null,
     @SerialName("message")
     val message: String? = null,
 )
 
-internal fun converterException(exception: Throwable): Exception {
+fun converterException(exception: Throwable): Exception {
     return when (exception) {
         is IOException -> exception
         is HttpException -> {

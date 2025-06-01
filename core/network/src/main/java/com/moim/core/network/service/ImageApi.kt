@@ -1,4 +1,4 @@
-package com.moim.core.data.service
+package com.moim.core.network.service
 
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -7,7 +7,7 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
 
-internal interface ImageApi {
+interface ImageApi {
 
     @Multipart
     @POST("image/upload/{folder}")

@@ -1,4 +1,4 @@
-package com.moim.core.data.service
+package com.moim.core.network.service
 
 import com.moim.core.datamodel.MeetingPlanContainerResponse
 import com.moim.core.datamodel.ParticipantContainerResponse
@@ -13,7 +13,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-internal interface PlanApi {
+interface PlanApi {
 
     @GET("/plan/view")
     suspend fun getCurrentPlan(): MeetingPlanContainerResponse

@@ -1,11 +1,11 @@
-package com.moim.core.data.di
+package com.moim.core.network.di
 
-import com.moim.core.data.BuildConfig
-import com.moim.core.data.di.qualifiers.MoimTokenApiOkHttp
-import com.moim.core.data.service.AuthTokenApi
-import com.moim.core.data.util.TokenAuthenticator
-import com.moim.core.data.util.TokenInterceptor
-import com.moim.core.datastore.PreferenceStorage
+import com.moim.core.network.BuildConfig
+import com.moim.core.network.di.qualifiers.MoimTokenApiOkHttp
+import com.moim.core.network.service.AuthTokenApi
+import com.moim.core.network.util.TokenAuthenticator
+import com.moim.core.network.util.TokenInterceptor
+import com.moim.core.network.util.UserDataUtil
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -63,13 +63,13 @@ internal object TokenServiceModule {
     @Singleton
     @Provides
     fun provideTokenInterceptor(
-        preferenceStorage: PreferenceStorage
-    ): TokenInterceptor = TokenInterceptor(preferenceStorage)
+        userDataUtil: UserDataUtil
+    ): TokenInterceptor = TokenInterceptor(userDataUtil)
 
     @Singleton
     @Provides
     fun provideTokenAuthenticator(
-        preferenceStorage: PreferenceStorage,
+        userDataUtil: UserDataUtil,
         authTokenApi: AuthTokenApi
-    ): TokenAuthenticator = TokenAuthenticator(preferenceStorage, authTokenApi)
+    ): TokenAuthenticator = TokenAuthenticator(userDataUtil, authTokenApi)
 }

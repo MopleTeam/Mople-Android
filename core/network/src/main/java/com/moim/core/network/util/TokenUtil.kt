@@ -1,7 +1,6 @@
-package com.moim.core.data.util
+package com.moim.core.network.util
 
-import com.moim.core.data.service.AuthTokenApi
-import com.moim.core.datastore.PreferenceStorage
+import com.moim.core.network.service.AuthTokenApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -15,7 +14,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 internal class TokenAuthenticator @Inject constructor(
-    private val preferenceStorage: PreferenceStorage,
+    private val userDataUtil: UserDataUtil,
     private val authTokenApi: AuthTokenApi
 ) : Authenticator {
     private val mutex: Mutex = Mutex()
@@ -23,11 +22,11 @@ internal class TokenAuthenticator @Inject constructor(
     override fun authenticate(route: Route?, response: Response): Request? {
         return runBlocking {
             mutex.withLock {
-                val refreshToken = preferenceStorage.token.first()?.refreshToken ?: ""
+                val refreshToken = userDataUtil.token.first()?.refreshToken ?: ""
 
                 try {
                     val token = authTokenApi.getRefreshToken(refreshToken)
-                        .also { preferenceStorage.saveUserToken(it) }
+                        .also { userDataUtil.saveUserToken(it) }
 
                     response.request.newBuilder()
                         .header("Authorization", token.accessToken.convertToToken())
@@ -42,13 +41,13 @@ internal class TokenAuthenticator @Inject constructor(
 }
 
 internal class TokenInterceptor @Inject constructor(
-    private val preferenceStorage: PreferenceStorage
+    private val userDataUtil: UserDataUtil
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val accessToken = runBlocking {
             try {
-                preferenceStorage.token.first()?.accessToken ?: ""
+                userDataUtil.token.first()?.accessToken ?: ""
             } catch (e: Exception) {
                 Timber.e("[TokenInterceptor Exception]:${e.message}")
                 ""
@@ -64,6 +63,6 @@ internal class TokenInterceptor @Inject constructor(
     }
 }
 
-internal fun String?.convertToToken(): String {
+fun String?.convertToToken(): String {
     return "Bearer $this"
 }

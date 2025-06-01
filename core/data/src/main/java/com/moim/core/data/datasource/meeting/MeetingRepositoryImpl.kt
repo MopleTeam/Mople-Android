@@ -2,11 +2,11 @@ package com.moim.core.data.datasource.meeting
 
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
-import com.moim.core.data.service.MeetingApi
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.MeetingResponse
 import com.moim.core.model.Meeting
 import com.moim.core.model.asItem
+import com.moim.core.network.service.MeetingApi
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

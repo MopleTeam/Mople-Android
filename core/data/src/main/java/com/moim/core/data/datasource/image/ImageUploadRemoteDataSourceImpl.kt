@@ -1,8 +1,8 @@
 package com.moim.core.data.datasource.image
 
-import com.moim.core.data.service.ImageApi
 import com.moim.core.data.util.CompressorUtil
 import com.moim.core.data.util.FileUtil
+import com.moim.core.network.service.ImageApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull

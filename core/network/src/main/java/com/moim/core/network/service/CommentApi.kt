@@ -1,4 +1,4 @@
-package com.moim.core.data.service
+package com.moim.core.network.service
 
 import com.moim.core.datamodel.CommentResponse
 import kotlinx.serialization.json.JsonObject
@@ -9,7 +9,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-internal interface CommentApi {
+interface CommentApi {
 
     @GET("/comment/{postId}")
     suspend fun getComments(@Path("postId") postId: String): List<CommentResponse>

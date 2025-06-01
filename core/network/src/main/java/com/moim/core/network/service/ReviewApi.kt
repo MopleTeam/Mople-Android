@@ -1,4 +1,4 @@
-package com.moim.core.data.service
+package com.moim.core.network.service
 
 import com.moim.core.datamodel.ParticipantContainerResponse
 import com.moim.core.datamodel.ReviewResponse
@@ -10,7 +10,7 @@ import retrofit2.http.HTTP
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-internal interface ReviewApi {
+interface ReviewApi {
 
     @GET("/review/list/{meetId}")
     suspend fun getReviews(@Path("meetId") id: String): List<ReviewResponse>

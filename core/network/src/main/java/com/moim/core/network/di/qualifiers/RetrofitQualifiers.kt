@@ -1,4 +1,4 @@
-package com.moim.core.data.di.qualifiers
+package com.moim.core.network.di.qualifiers
 
 import javax.inject.Qualifier
 

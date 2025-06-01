@@ -1,4 +1,4 @@
-package com.moim.core.data.service
+package com.moim.core.network.service
 
 import com.moim.core.datamodel.NotificationResponse
 import kotlinx.serialization.json.JsonObject
@@ -7,7 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 
-internal interface NotificationApi {
+interface NotificationApi {
     @GET("/notification/list")
     suspend fun getNotifications(): List<NotificationResponse>
 

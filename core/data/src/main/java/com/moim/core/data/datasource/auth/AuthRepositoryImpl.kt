@@ -3,12 +3,12 @@ package com.moim.core.data.datasource.auth
 import com.moim.core.common.consts.DEVICE_TYPE_ANDROID
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
-import com.moim.core.data.service.AuthApi
 import com.moim.core.data.util.catchFlow
-import com.moim.core.data.util.convertToToken
 import com.moim.core.datastore.PreferenceStorage
 import com.moim.core.model.Token
 import com.moim.core.model.asItem
+import com.moim.core.network.service.AuthApi
+import com.moim.core.network.util.convertToToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

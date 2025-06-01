@@ -1,4 +1,4 @@
-package com.moim.core.data.service
+package com.moim.core.network.service
 
 import com.moim.core.datamodel.MeetingResponse
 import com.moim.core.datamodel.ParticipantContainerResponse
@@ -10,7 +10,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-internal interface MeetingApi {
+interface MeetingApi {
 
     @GET("meet/list")
     suspend fun getMeetings(): List<MeetingResponse>
