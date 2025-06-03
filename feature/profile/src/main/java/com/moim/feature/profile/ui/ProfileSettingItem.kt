@@ -27,6 +27,8 @@ fun ProfileSettingContainer(
     modifier: Modifier = Modifier,
     onUiAction: OnProfileUiAction
 ) {
+    val prefix = if (BuildConfig.DEBUG) "[DEV] " else ""
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -42,7 +44,7 @@ fun ProfileSettingContainer(
         )
         ProfileSettingItem(
             text = stringResource(R.string.profile_version),
-            subText = BuildConfig.VERSION_NAME
+            subText = prefix + BuildConfig.VERSION_NAME
         )
     }
 }
