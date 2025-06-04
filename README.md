@@ -45,9 +45,3 @@
 - `Coroutine` `Flow`
 - `AAC ViewModel`
 - `Hilt`
-
-## Other Repositories
-| Part | Link |
-| --- | --- |
-| iOS | https://github.com/Dongju3079/Mople
-| BE | 비공개
