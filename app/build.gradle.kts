@@ -32,6 +32,10 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             manifestPlaceholders["crashlyticsCollectionEnabled"] = false
+            manifestPlaceholders["icon_app_launcher"] = "@mipmap/ic_launcher_dev"
+            manifestPlaceholders["icon_app_launcher_round"] = "@mipmap/ic_launcher_dev_round"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
         }
 
         release {
@@ -40,6 +44,8 @@ android {
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
             manifestPlaceholders["crashlyticsCollectionEnabled"] = true
+            manifestPlaceholders["icon_app_launcher"] = "@mipmap/ic_launcher"
+            manifestPlaceholders["icon_app_launcher_round"] = "@mipmap/ic_launcher_round"
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

@@ -9,6 +9,7 @@ internal class FirebaseAnalyticsHelper @Inject constructor(
 ) : AnalyticsHelper {
 
     override fun logEvent(event: AnalyticsEvent) {
+        if (BuildConfig.DEBUG) return
         firebaseAnalytics.logEvent(event.type) {
             for (extra in event.extras) {
                 param(

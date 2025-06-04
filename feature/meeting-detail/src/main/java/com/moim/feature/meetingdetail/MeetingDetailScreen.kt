@@ -15,22 +15,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
+import com.moim.core.common.util.externalShareForUrl
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.MoimFloatingActionButton
 import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.model.Meeting
 import com.moim.core.model.item.PlanItem
 import com.moim.core.model.item.asPlanItem
@@ -62,6 +66,7 @@ fun MeetingDetailRoute(
             is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
             is MeetingDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan.asPlanItem())
             is MeetingDetailUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.meetingName, listOf(event.imageUrl), 0, R.drawable.ic_empty_meeting)
+            is MeetingDetailUiEvent.NavigateToExternalShareUrl -> context.externalShareForUrl(event.url)
             is MeetingDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
@@ -154,6 +159,21 @@ fun MeetingDetailScreen(
                 )
             }
         }
+    }
+
+    if (uiState.isShowApplyCancelDialog) {
+        val dismissAction = MeetingDetailUiAction.OnShowPlanApplyCancelDialog(false, null)
+
+        MoimAlertDialog(
+            title = stringResource(R.string.meeting_detail_plan_cancel),
+            positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
+            onDismiss = { onUiAction(dismissAction) },
+            onClickNegative = { onUiAction(dismissAction) },
+            onClickPositive = {
+                if (uiState.cancelPlanId == null) return@MoimAlertDialog
+                onUiAction(MeetingDetailUiAction.OnClickPlanApply(uiState.cancelPlanId, false))
+            }
+        )
     }
 
     LoadingDialog(isLoading)

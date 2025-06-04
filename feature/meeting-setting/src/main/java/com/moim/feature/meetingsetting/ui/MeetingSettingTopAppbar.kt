@@ -17,12 +17,6 @@ fun MeetingSettingTopAppbar(
     MoimTopAppbar(
         modifier = modifier,
         title = stringResource(R.string.meeting_setting_title),
-        actions = {
-            MoimIconButton(
-                iconRes = R.drawable.ic_user_add,
-                onClick = { onUiAction(MeetingSettingUiAction.OnClickAddUser) }
-            )
-        },
         onClickNavigate = { onUiAction(MeetingSettingUiAction.OnClickBack) },
     )
 }
