@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -129,9 +130,36 @@ private fun MeetingDetailInfo(
                 Spacer(Modifier.width(4.dp))
                 MoimText(
                     text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
-                    style = MoimTheme.typography.body02.semiBold,
+                    style = MoimTheme.typography.body02.medium,
                     color = MoimTheme.colors.gray.gray04
                 )
+
+                MoimText(
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    text = stringResource(R.string.unit_dot),
+                    style = MoimTheme.typography.body02.medium,
+                    color = MoimTheme.colors.gray.gray04
+                )
+
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .onSingleClick { onUiAction(MeetingDetailUiAction.OnClickMeetingInvite) },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    MoimText(
+                        text = stringResource(R.string.common_invite),
+                        style = MoimTheme.typography.body02.medium,
+                        color = MoimTheme.colors.gray.gray04
+                    )
+
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_next),
+                        contentDescription = "",
+                        tint = MoimTheme.colors.icon
+                    )
+                }
             }
         }
     }

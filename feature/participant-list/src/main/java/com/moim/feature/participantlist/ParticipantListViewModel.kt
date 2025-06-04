@@ -2,9 +2,11 @@ package com.moim.feature.participantlist
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
+import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
@@ -15,15 +17,17 @@ import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.model.Participant
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
 class ParticipantListViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val planRepository: PlanRepository,
-    private val reviewRepository: ReviewRepository,
     private val meetingRepository: MeetingRepository,
+    planRepository: PlanRepository,
+    reviewRepository: ReviewRepository,
 ) : BaseViewModel() {
 
     private val isMeeting
@@ -59,6 +63,26 @@ class ParticipantListViewModel @Inject constructor(
             is ParticipantListUiAction.OnClickBack -> setUiEvent(ParticipantListUiEvent.NavigateToBack)
             is ParticipantListUiAction.OnClickRefresh -> participantListResult.restart()
             is ParticipantListUiAction.OnClickUserImage -> setUiEvent(ParticipantListUiEvent.NavigateToImageViewer(uiAction.userImage, uiAction.userName))
+            is ParticipantListUiAction.OnClickMeetingInvite -> getInviteLink()
+        }
+    }
+
+    private fun getInviteLink() {
+        viewModelScope.launch {
+            meetingRepository
+                .getMeetingInviteCode(id)
+                .asResult()
+                .onEach { setLoading(it is Result.Loading) }
+                .collect { result ->
+                    when (result) {
+                        is Result.Loading -> return@collect
+                        is Result.Success -> setUiEvent(ParticipantListUiEvent.NavigateToExternalShareUrl(result.data))
+                        is Result.Error -> when (result.exception) {
+                            is IOException -> setUiEvent(ParticipantListUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                            is NetworkException -> setUiEvent(ParticipantListUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                        }
+                    }
+                }
         }
     }
 
@@ -82,11 +106,29 @@ sealed interface ParticipantListUiState : UiState {
 
 sealed interface ParticipantListUiAction : UiAction {
     data object OnClickBack : ParticipantListUiAction
+
     data object OnClickRefresh : ParticipantListUiAction
-    data class OnClickUserImage(val userImage: String, val userName: String) : ParticipantListUiAction
+
+    data object OnClickMeetingInvite : ParticipantListUiAction
+
+    data class OnClickUserImage(
+        val userImage: String,
+        val userName: String
+    ) : ParticipantListUiAction
 }
 
 sealed interface ParticipantListUiEvent : UiEvent {
     data object NavigateToBack : ParticipantListUiEvent
-    data class NavigateToImageViewer(val userImage: String, val userName: String) : ParticipantListUiEvent
+
+    data class NavigateToImageViewer(
+        val userImage: String,
+        val userName: String
+    ) : ParticipantListUiEvent
+
+    data class NavigateToExternalShareUrl(
+        val url: String
+    ) : ParticipantListUiEvent
+
+
+    data class ShowToastMessage(val toastMessage: ToastMessage) : ParticipantListUiEvent
 }

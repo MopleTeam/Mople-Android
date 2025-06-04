@@ -177,15 +177,29 @@ fun MeetingDetailPlanItem(
                             containerColor = MoimTheme.colors.tertiary,
                             contentColor = MoimTheme.colors.gray.gray03
                         ),
-                        text = stringResource(R.string.meeting_detail_plan_not_apply),
-                        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanApply(plan.planId, false)) }
+                        text = stringResource(R.string.meeting_detail_plan_apply_done),
+                        onClick = {
+                            onUiAction(
+                                MeetingDetailUiAction.OnShowPlanApplyCancelDialog(
+                                    isShow = true,
+                                    cancelPlanId = plan.planId
+                                )
+                            )
+                        }
                     )
                 } else {
                     MoimPrimaryButton(
                         modifier = Modifier.fillMaxWidth(),
                         buttonColors = moimButtomColors(),
                         text = stringResource(R.string.meeting_detail_plan_apply),
-                        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanApply(plan.planId, true)) }
+                        onClick = {
+                            onUiAction(
+                                MeetingDetailUiAction.OnClickPlanApply(
+                                    isApply = true,
+                                    planId = plan.planId,
+                                )
+                            )
+                        }
                     )
                 }
             }

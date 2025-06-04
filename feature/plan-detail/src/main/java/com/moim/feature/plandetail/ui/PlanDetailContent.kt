@@ -108,7 +108,7 @@ fun PlanDetailContent(
         }
 
         if (isShowApplyButton) {
-            val btnTextRes = if (planItem.isParticipant) R.string.plan_detail_plan_not_apply else R.string.plan_detail_plan_apply
+            val btnTextRes = if (planItem.isParticipant) R.string.plan_detail_plan_apply_done else R.string.plan_detail_plan_apply
             val buttonColors = moimButtomColors().copy(
                 containerColor = if (planItem.isParticipant) MoimTheme.colors.tertiary else MoimTheme.colors.primary.primary,
                 contentColor = if (planItem.isParticipant) MoimTheme.colors.gray.gray03 else MoimTheme.colors.white
@@ -119,7 +119,13 @@ fun PlanDetailContent(
                 modifier = Modifier.fillMaxWidth(),
                 buttonColors = buttonColors,
                 text = stringResource(btnTextRes),
-                onClick = { onUiAction(PlanDetailUiAction.OnClickPlanApply(planItem.isParticipant.not())) }
+                onClick = {
+                    if (planItem.isParticipant) {
+                        onUiAction(PlanDetailUiAction.OnShowPlanApplyCancelDialog(true))
+                    } else {
+                        onUiAction(PlanDetailUiAction.OnClickPlanApply(true))
+                    }
+                }
             )
         }
 

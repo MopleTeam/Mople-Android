@@ -17,6 +17,7 @@
     <string name="common_confirm">확인</string>
     <string name="common_search">검색</string>
     <string name="common_done">완료</string>
+    <string name="common_invite">초대하기</string>
     <string name="common_profile_edit">프로필 편집</string>
     <string name="common_default_select">기본 프로필로 변경</string>
     <string name="common_album_select">앨범에서 사진 선택</string>
@@ -63,9 +64,10 @@
     <string name="meeting_detail_past_plan">지난 약속</string>
     <string name="meeting_detail_plan_me">내가 만든 약속</string>
     <string name="meeting_detail_plan_apply">약속 참여하기</string>
-    <string name="meeting_detail_plan_not_apply">약속 불참</string>
+    <string name="meeting_detail_plan_apply_done">약속 참여중</string>
     <string name="meeting_detail_plan_disable">해당 약속은 마감되었어요</string>
     <string name="meeting_detail_plan_empty">새로운 일정을 추가해주세요</string>
+    <string name="meeting_detail_plan_cancel">약속참여를 취소할까요?</string>
 
     <!-- MeetingWrite -->
     <string name="meeting_write_title_for_create">모임 생성하기</string>
@@ -122,8 +124,9 @@
     <string name="plan_detail_comment_empty">아직 댓글이 없어요</string>
     <string name="plan_detail_image">함께한 순간</string>
     <string name="plan_detail_plan_apply">약속 참여하기</string>
-    <string name="plan_detail_plan_not_apply">약속 불참</string>
+    <string name="plan_detail_plan_apply_done">약속 참여중</string>
     <string name="plan_detail_plan_disable">해당 약속은 마감되었어요</string>
+    <string name="plan_detail_plan_cancel">약속참여를 취소할까요?</string>
 
     <!-- MapDetail -->
     <string name="map_detail_title">상세 지도</string>

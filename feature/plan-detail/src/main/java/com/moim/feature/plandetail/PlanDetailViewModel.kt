@@ -8,7 +8,6 @@ import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.parseTextWithLinks
 import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
@@ -25,8 +24,8 @@ import com.moim.core.domain.usecase.GetPlanItemUseCase
 import com.moim.core.model.Comment
 import com.moim.core.model.User
 import com.moim.core.model.item.PlanItem
-import com.moim.feature.plandetail.model.CommentTextUiModel
 import com.moim.feature.plandetail.model.CommentUiModel
+import com.moim.feature.plandetail.model.createCommentUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -102,7 +101,7 @@ class PlanDetailViewModel @Inject constructor(
 
                             is Result.Success -> {
                                 setUiState(
-                                    copy(comments = result.data.map { it.createCommentUiModel() })
+                                    copy(comments = result.data.map(Comment::createCommentUiModel))
                                 )
                             }
 
@@ -150,6 +149,7 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickCommentWebLink -> setUiEvent(PlanDetailUiEvent.NavigateToWebBrowser(uiAction.webLink))
             is PlanDetailUiAction.OnClickReviewImage -> navigateToImageViewerForReview(uiAction.selectedImageIndex)
             is PlanDetailUiAction.OnClickUserProfileImage -> navigateToImageViewerForUser(uiAction.imageUrl, uiAction.userName)
+            is PlanDetailUiAction.OnShowPlanApplyCancelDialog -> showApplyCancelDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanEditDialog -> showPlanEditDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanReportDialog -> showPlanReportDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowCommentEditDialog -> showCommentEditDialog(uiAction.isShow, uiAction.comment)
@@ -176,8 +176,14 @@ class PlanDetailViewModel @Inject constructor(
 
                         is Result.Success -> {
                             val planItem = planItem.copy(isParticipant = isApply)
-                            setUiState(copy(planItem = planItem))
+
                             updatePlanItem(ZonedDateTime.now(), planItem)
+                            setUiState(
+                                copy(
+                                    planItem = planItem,
+                                    isShowApplyCancelDialog = false
+                                )
+                            )
                         }
 
                         is Result.Error -> showErrorToast(result.exception)
@@ -250,7 +256,7 @@ class PlanDetailViewModel @Inject constructor(
 
                         is Result.Success -> setUiState(
                             copy(
-                                comments = result.data.map { it.createCommentUiModel() },
+                                comments = result.data.map(Comment::createCommentUiModel),
                                 selectedUpdateComment = null
                             )
                         )
@@ -305,6 +311,12 @@ class PlanDetailViewModel @Inject constructor(
                         }
                     }
                 }
+        }
+    }
+
+    private fun showApplyCancelDialog(isShow: Boolean) {
+        uiState.checkState<PlanDetailUiState.Success> {
+            setUiState(copy(isShowApplyCancelDialog = isShow))
         }
     }
 
@@ -388,28 +400,6 @@ class PlanDetailViewModel @Inject constructor(
         )
     }
 
-
-    private fun Comment.createCommentUiModel(): CommentUiModel {
-        val commentTextUiModel = content
-            .parseTextWithLinks()
-            .map { (isWebLink, text) ->
-                if (isWebLink) {
-                    val startIndex = content.indexOf(text)
-                    val endIndex = startIndex + text.length
-
-                    CommentTextUiModel.HyperLinkText(
-                        content = text,
-                        startIndex = startIndex,
-                        endIndex = endIndex
-                    )
-                } else {
-                    CommentTextUiModel.PlainText(text)
-                }
-            }
-
-        return CommentUiModel(this, commentTextUiModel)
-    }
-
     companion object {
         private const val KEY_PLAN_ID = "planId"
         private const val KEY_POST_ID = "postId"
@@ -427,6 +417,7 @@ sealed interface PlanDetailUiState : UiState {
         val selectedImageIndex: Int = 0,
         val selectedComment: Comment? = null,
         val selectedUpdateComment: Comment? = null,
+        val isShowApplyCancelDialog: Boolean = false,
         val isShowApplyButton: Boolean = false,
         val isShowPlanEditDialog: Boolean = false,
         val isShowPlanReportDialog: Boolean = false,
@@ -453,6 +444,7 @@ sealed interface PlanDetailUiAction : UiAction {
     data class OnClickCommentWebLink(val webLink: String) : PlanDetailUiAction
     data class OnClickReviewImage(val selectedImageIndex: Int) : PlanDetailUiAction
     data class OnClickUserProfileImage(val imageUrl: String, val userName: String) : PlanDetailUiAction
+    data class OnShowPlanApplyCancelDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowPlanEditDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowPlanReportDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowCommentEditDialog(val isShow: Boolean, val comment: Comment?) : PlanDetailUiAction

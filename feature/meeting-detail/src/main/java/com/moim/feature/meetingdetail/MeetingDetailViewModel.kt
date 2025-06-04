@@ -8,6 +8,7 @@ import com.moim.core.common.delegate.PlanAction
 import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.delegate.planItemStateIn
+import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseZonedDateTime
@@ -43,7 +44,7 @@ class MeetingDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val userRepository: UserRepository,
     private val planRepository: PlanRepository,
-    meetingRepository: MeetingRepository,
+    private val meetingRepository: MeetingRepository,
     reviewRepository: ReviewRepository,
     meetingViewModelDelegate: MeetingViewModelDelegate,
     planItemViewModelDelegate: PlanItemViewModelDelegate
@@ -172,7 +173,7 @@ class MeetingDetailViewModel @Inject constructor(
         }
     }
 
-    fun onUiAction(uiAction: UiAction) {
+    fun onUiAction(uiAction: MeetingDetailUiAction) {
         when (uiAction) {
             is MeetingDetailUiAction.OnClickBack -> setUiEvent(MeetingDetailUiEvent.NavigateToBack)
             is MeetingDetailUiAction.OnClickRefresh -> meetingDetailResult.restart()
@@ -182,6 +183,8 @@ class MeetingDetailViewModel @Inject constructor(
             is MeetingDetailUiAction.OnClickPlanApply -> setPlanApply(uiAction.planId, uiAction.isApply)
             is MeetingDetailUiAction.OnClickPlanDetail -> setUiEvent(MeetingDetailUiEvent.NavigateToPlanDetail(uiAction.postId, uiAction.isPlan))
             is MeetingDetailUiAction.OnClickMeetingImage -> setUiEvent(MeetingDetailUiEvent.NavigateToImageViewer(uiAction.imageUrl, uiAction.meetingName))
+            is MeetingDetailUiAction.OnClickMeetingInvite -> getInviteLink()
+            is MeetingDetailUiAction.OnShowPlanApplyCancelDialog -> showApplyCancelDialog(uiAction.isShow, uiAction.cancelPlanId)
         }
     }
 
@@ -201,12 +204,13 @@ class MeetingDetailViewModel @Inject constructor(
                         is Result.Success -> {
                             val plan = plans.first { plan -> plan.planId == planId }
                             updatePlanItem(ZonedDateTime.now(), plan.copy(isParticipant = !plan.isParticipant).asPlanItem())
+
+                            if (isApply.not()) {
+                                setUiState(copy(cancelPlanId = null, isShowApplyCancelDialog = false))
+                            }
                         }
 
-                        is Result.Error -> when (result.exception) {
-                            is IOException -> setUiEvent(MeetingDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                            else -> setUiEvent(MeetingDetailUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                        }
+                        is Result.Error -> showErrorMessage(result.exception)
                     }
                 }
             }
@@ -217,6 +221,42 @@ class MeetingDetailViewModel @Inject constructor(
         uiState.checkState<MeetingDetailUiState.Success> {
             if (isPlanSelected == isBefore) return@checkState
             setUiState(copy(isPlanSelected = isBefore))
+        }
+    }
+
+    private fun getInviteLink() {
+        viewModelScope.launch {
+            uiState.checkState<MeetingDetailUiState.Success> {
+                meetingRepository.getMeetingInviteCode(meeting.id)
+                    .asResult()
+                    .onEach { setLoading(it is Result.Loading) }
+                    .collect { result ->
+                        when (result) {
+                            is Result.Loading -> return@collect
+                            is Result.Success -> setUiEvent(MeetingDetailUiEvent.NavigateToExternalShareUrl(result.data))
+                            is Result.Error -> showErrorMessage(result.exception)
+                        }
+                    }
+            }
+        }
+    }
+
+
+    private fun showApplyCancelDialog(isShow: Boolean, cancelPlanId: String?) {
+        uiState.checkState<MeetingDetailUiState.Success> {
+            setUiState(
+                copy(
+                    isShowApplyCancelDialog = isShow,
+                    cancelPlanId = cancelPlanId
+                )
+            )
+        }
+    }
+
+    private fun showErrorMessage(error: Throwable) {
+        when (error) {
+            is IOException -> setUiEvent(MeetingDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+            is NetworkException -> setUiEvent(MeetingDetailUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
         }
     }
 
@@ -255,6 +295,8 @@ sealed interface MeetingDetailUiState : UiState {
         val meeting: Meeting = Meeting(),
         val plans: List<Plan> = emptyList(),
         val reviews: List<Review> = emptyList(),
+        val cancelPlanId: String? = null,
+        val isShowApplyCancelDialog: Boolean = false,
         val isPlanSelected: Boolean = true,
     ) : MeetingDetailUiState
 
@@ -263,20 +305,66 @@ sealed interface MeetingDetailUiState : UiState {
 
 sealed interface MeetingDetailUiAction : UiAction {
     data object OnClickBack : MeetingDetailUiAction
+
     data object OnClickRefresh : MeetingDetailUiAction
+
     data object OnClickPlanWrite : MeetingDetailUiAction
+
     data object OnClickMeetingSetting : MeetingDetailUiAction
-    data class OnClickPlanTab(val isBefore: Boolean) : MeetingDetailUiAction
-    data class OnClickPlanApply(val planId: String, val isApply: Boolean) : MeetingDetailUiAction
-    data class OnClickPlanDetail(val postId: String, val isPlan: Boolean) : MeetingDetailUiAction
-    data class OnClickMeetingImage(val imageUrl: String, val meetingName: String) : MeetingDetailUiAction
+
+    data object OnClickMeetingInvite : MeetingDetailUiAction
+
+    data class OnClickPlanTab(
+        val isBefore: Boolean
+    ) : MeetingDetailUiAction
+
+    data class OnClickPlanApply(
+        val planId: String,
+        val isApply: Boolean
+    ) : MeetingDetailUiAction
+
+    data class OnClickPlanDetail(
+        val postId: String,
+        val isPlan: Boolean
+    ) : MeetingDetailUiAction
+
+    data class OnClickMeetingImage(
+        val imageUrl: String,
+        val meetingName: String
+    ) : MeetingDetailUiAction
+
+    data class OnShowPlanApplyCancelDialog(
+        val isShow: Boolean,
+        val cancelPlanId: String?,
+    ) : MeetingDetailUiAction
 }
 
 sealed interface MeetingDetailUiEvent : UiEvent {
     data object NavigateToBack : MeetingDetailUiEvent
-    data class NavigateToPlanWrite(val plan: Plan) : MeetingDetailUiEvent
-    data class NavigateToMeetingSetting(val meeting: Meeting) : MeetingDetailUiEvent
-    data class NavigateToPlanDetail(val postId: String, val isPlan: Boolean) : MeetingDetailUiEvent
-    data class NavigateToImageViewer(val imageUrl: String, val meetingName: String) : MeetingDetailUiEvent
-    data class ShowToastMessage(val message: ToastMessage) : MeetingDetailUiEvent
+
+    data class NavigateToPlanWrite(
+        val plan: Plan
+    ) : MeetingDetailUiEvent
+
+    data class NavigateToMeetingSetting(
+        val meeting: Meeting
+    ) : MeetingDetailUiEvent
+
+    data class NavigateToPlanDetail(
+        val postId: String,
+        val isPlan: Boolean
+    ) : MeetingDetailUiEvent
+
+    data class NavigateToImageViewer(
+        val imageUrl: String,
+        val meetingName: String
+    ) : MeetingDetailUiEvent
+
+    data class NavigateToExternalShareUrl(
+        val url: String
+    ) : MeetingDetailUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage
+    ) : MeetingDetailUiEvent
 }

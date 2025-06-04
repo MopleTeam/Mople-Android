@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,9 +27,11 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.model.item.PlanItem
 import com.moim.feature.plandetail.ui.PlanDetailBottomBar
 import com.moim.feature.plandetail.ui.PlanDetailCommentEditDialog
@@ -48,11 +51,30 @@ fun PlanDetailRoute(
     viewModel: PlanDetailViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToMapDetail: (placeName: String, address: String, latitude: Double, longitude: Double) -> Unit,
-    navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
-    navigateToPlanWrite: (PlanItem) -> Unit,
-    navigateToReviewWrite: (id: String, isUpdated: Boolean) -> Unit,
-    navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit
+    navigateToMapDetail: (
+        placeName: String,
+        address: String,
+        latitude: Double,
+        longitude: Double
+    ) -> Unit,
+    navigateToParticipants: (
+        isMeeting: Boolean,
+        isPlan: Boolean,
+        id: String
+    ) -> Unit,
+    navigateToPlanWrite: (
+        planItem: PlanItem
+    ) -> Unit,
+    navigateToReviewWrite: (
+        id: String,
+        isUpdated: Boolean
+    ) -> Unit,
+    navigateToImageViewer: (
+        title: String,
+        images: List<String>,
+        position: Int,
+        defaultImage: Int
+    ) -> Unit
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -170,6 +192,18 @@ fun PlanDetailScreen(
             )
         }
     )
+
+    if (uiState.isShowApplyCancelDialog) {
+        val dismissAction = PlanDetailUiAction.OnShowPlanApplyCancelDialog(false)
+
+        MoimAlertDialog(
+            title = stringResource(R.string.meeting_detail_plan_cancel),
+            positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
+            onDismiss = { onUiAction(dismissAction) },
+            onClickNegative = { onUiAction(dismissAction) },
+            onClickPositive = { onUiAction(PlanDetailUiAction.OnClickPlanApply(false)) }
+        )
+    }
 
     if (uiState.isShowPlanEditDialog) {
         PlanDetailEditDialog(

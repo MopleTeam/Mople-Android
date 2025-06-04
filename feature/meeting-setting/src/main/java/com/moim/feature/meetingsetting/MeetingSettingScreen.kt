@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
-import com.moim.core.common.util.externalShareForUrl
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -58,7 +57,6 @@ fun MeetingSettingRoute(
             is MeetingSettingUiEvent.NavigateToBackForDelete -> navigateToBack(true)
             is MeetingSettingUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite(event.meeting)
             is MeetingSettingUiEvent.NavigateToMeetingParticipants -> navigateToParticipants(true, false, event.meetingId)
-            is MeetingSettingUiEvent.NavigateToExternalShareUrl -> context.externalShareForUrl(event.url)
             is MeetingSettingUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }

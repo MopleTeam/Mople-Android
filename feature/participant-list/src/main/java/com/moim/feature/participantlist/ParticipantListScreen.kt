@@ -9,34 +9,50 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
+import com.moim.core.common.util.externalShareForUrl
 import com.moim.core.common.view.ObserveAsEvents
+import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
+import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.participantlist.ui.ParticipantListItem
+import com.moim.feature.participantlist.ui.ParticipantMeetingInviteItem
 
 @Composable
 fun ParticipantListRoute(
     padding: PaddingValues,
     viewModel: ParticipantListViewModel = hiltViewModel(),
     navigateToBack: () -> Unit,
-    navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit
+    navigateToImageViewer: (
+        title: String,
+        images: List<String>,
+        position: Int,
+        defaultImage: Int
+    ) -> Unit
 ) {
+    val context = LocalContext.current
     val participantListUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(
         backgroundColor = MoimTheme.colors.white,
@@ -45,8 +61,26 @@ fun ParticipantListRoute(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is ParticipantListUiEvent.NavigateToBack -> navigateToBack()
-            is ParticipantListUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.userName, listOf(event.userImage), 0, R.drawable.ic_empty_user_logo)
+            is ParticipantListUiEvent.NavigateToBack -> {
+                navigateToBack()
+            }
+
+            is ParticipantListUiEvent.NavigateToImageViewer -> {
+                navigateToImageViewer(
+                    event.userName,
+                    listOf(event.userImage),
+                    0,
+                    R.drawable.ic_empty_user_logo
+                )
+            }
+
+            is ParticipantListUiEvent.NavigateToExternalShareUrl -> {
+                context.externalShareForUrl(event.url)
+            }
+
+            is ParticipantListUiEvent.ShowToastMessage -> {
+                showToast(context, event.toastMessage)
+            }
         }
     }
 
@@ -104,6 +138,15 @@ fun ParticipantListScreen(
             contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+
+            if (uiState.isMeeting) {
+                item {
+                    ParticipantMeetingInviteItem(
+                        onUiAction = onUiAction
+                    )
+                }
+            }
+
             items(
                 items = uiState.participant,
                 key = { it.memberId }
@@ -117,3 +160,4 @@ fun ParticipantListScreen(
         }
     }
 }
+
