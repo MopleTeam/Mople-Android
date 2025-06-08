@@ -1,6 +1,5 @@
 package com.moim.feature.mapdetail.ui
 
-import android.location.Location
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
