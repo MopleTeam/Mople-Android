@@ -15,21 +15,21 @@ import retrofit2.http.Query
 
 interface PlanApi {
 
-    @GET("/plan/view")
+    @GET("plan/view")
     suspend fun getCurrentPlan(): MeetingPlanContainerResponse
 
-    @GET("/plan/list/{meetId}")
+    @GET("plan/list/{meetId}")
     suspend fun getPlans(@Path("meetId") id: String): List<PlanResponse>
 
-    @GET("/plan/page")
+    @GET("plan/page")
     suspend fun getPlansForCalendar(
         @Query("date") date: String,
     ): PlanReviewContainerResponse
 
-    @GET("/plan/detail/{planId}")
+    @GET("plan/detail/{planId}")
     suspend fun getPlan(@Path("planId") planId: String): PlanResponse
 
-    @GET("/plan/participants/{planId}")
+    @GET("plan/participants/{planId}")
     suspend fun getPlanParticipants(@Path("planId") planId: String) : ParticipantContainerResponse
 
     @POST("plan/join/{planId}")
@@ -38,13 +38,13 @@ interface PlanApi {
     @DELETE("plan/leave/{planId}")
     suspend fun leavePlan(@Path("planId") id: String)
 
-    @POST("/plan/create")
+    @POST("plan/create")
     suspend fun createPlan(@Body params: JsonObject): PlanResponse
 
-    @PATCH("/plan/update")
+    @PATCH("plan/update")
     suspend fun updatePlan(@Body params: JsonObject): PlanResponse
 
-    @POST("/plan/report")
+    @POST("plan/report")
     suspend fun reportPlan(@Body params: JsonObject)
 
     @DELETE("plan/{planId}")

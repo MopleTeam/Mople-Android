@@ -24,22 +24,22 @@ interface MeetingApi {
     @GET("/meet/members/{meetId}")
     suspend fun getMeetingParticipants(@Path("meetId") id: String): ParticipantContainerResponse
 
-    @POST("/meet/create")
+    @POST("meet/create")
     suspend fun createMeeting(
         @Body params: JsonObject
     ): MeetingResponse
 
-    @PATCH("/meet/update/{meetId}")
+    @PATCH("meet/update/{meetId}")
     suspend fun updateMeeting(
         @Path("meetId") id: String,
         @Body params: JsonObject
     ): MeetingResponse
 
-    @POST("/meet/join/{meetCode}")
+    @POST("meet/join/{meetCode}")
     suspend fun joinMeeting(
         @Path("meetCode") meetCode: String
     ): MeetingResponse
 
-    @DELETE("/meet/{meetId}")
+    @DELETE("meet/{meetId}")
     suspend fun deleteMeeting(@Path("meetId") id: String)
 }
