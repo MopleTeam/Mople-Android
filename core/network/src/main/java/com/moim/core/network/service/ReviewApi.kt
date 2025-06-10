@@ -12,16 +12,16 @@ import retrofit2.http.Path
 
 interface ReviewApi {
 
-    @GET("/review/list/{meetId}")
+    @GET("review/list/{meetId}")
     suspend fun getReviews(@Path("meetId") id: String): List<ReviewResponse>
 
-    @GET("/review/{reviewId}")
+    @GET("review/{reviewId}")
     suspend fun getReview(@Path("reviewId") id: String): ReviewResponse
 
-    @GET("/review/participant/{reviewId}")
+    @GET("review/participant/{reviewId}")
     suspend fun getReviewParticipant(@Path("reviewId") id: String): ParticipantContainerResponse
 
-    @HTTP(method = "DELETE", path = "/review/images/{reviewId}", hasBody = true)
+    @HTTP(method = "DELETE", path = "review/images/{reviewId}", hasBody = true)
     suspend fun deleteReviewImage(@Path("reviewId") id: String, @Body params: JsonObject)
 
     @DELETE("review/{reviewId}")

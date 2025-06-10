@@ -12,6 +12,8 @@ import com.moim.core.data.datasource.notification.NotificationRepository
 import com.moim.core.data.datasource.notification.NotificationRepositoryImpl
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.plan.PlanRepositoryImpl
+import com.moim.core.data.datasource.policy.PolicyRepository
+import com.moim.core.data.datasource.policy.PolicyRepositoryImpl
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.review.ReviewRepositoryImpl
 import com.moim.core.data.datasource.token.TokenRepository
@@ -34,6 +36,11 @@ internal abstract class DataModule {
     @Singleton
     @Binds
     abstract fun bindAuthRepository(authRepositoryImpl: AuthRepositoryImpl): AuthRepository
+
+    //================================ Policy ============================================//
+    @Singleton
+    @Binds
+    abstract fun bindPolicyRepository(policyRepositoryImpl: PolicyRepositoryImpl): PolicyRepository
 
     //================================ Token ============================================//
     @Singleton

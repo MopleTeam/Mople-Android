@@ -1,6 +1,8 @@
 package com.moim.feature.intro.screen.splash
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -15,11 +17,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavOptions
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.view.ObserveAsEvents
+import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.containerScreen
@@ -42,6 +46,16 @@ fun SplashRoute(
         when (event) {
             is SplashUiEvent.NavigateToSignIn -> navigateToSignIn(options)
             is SplashUiEvent.NavigateToMain -> navigateToMain()
+            is SplashUiEvent.NavigateToExit -> activity.finish()
+            is SplashUiEvent.NavigateToPlayStore -> {
+                val packageName = activity.packageName.replace(".dev", "")
+                try {
+                    activity.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$packageName".toUri()))
+                } catch (e: ActivityNotFoundException) {
+                    showToast(activity, activity.getString(R.string.common_error_open_browser))
+                    activity.finish()
+                }
+            }
         }
     }
 
@@ -50,7 +64,7 @@ fun SplashRoute(
     when (val uiState = splashUiState) {
         is SplashUiState.Splash -> SplashScreen(
             uiState = uiState,
-            onClickFinish = activity::finish
+            onUiAction = viewModel::onUiAction
         )
     }
 }
@@ -58,7 +72,7 @@ fun SplashRoute(
 @Composable
 private fun SplashScreen(
     uiState: SplashUiState.Splash,
-    onClickFinish: () -> Unit
+    onUiAction: (SplashUiAction) -> Unit
 ) {
     TrackScreenViewEvent(screenName = "splash")
     Box(
@@ -81,7 +95,18 @@ private fun SplashScreen(
             isNegative = false,
             cancelable = false,
             positiveText = stringResource(R.string.common_confirm),
-            onClickPositive = onClickFinish
+            onClickPositive = { onUiAction(SplashUiAction.OnClickExit) }
+        )
+    }
+
+    if (uiState.isShowForceUpdateDialog) {
+        MoimAlertDialog(
+            title = stringResource(R.string.splash_force_update_title),
+            description = stringResource(R.string.splash_force_update_description),
+            isNegative = false,
+            cancelable = false,
+            positiveText = stringResource(R.string.common_confirm),
+            onClickPositive = { onUiAction(SplashUiAction.OnClickForceUpdate) }
         )
     }
 }
@@ -90,7 +115,7 @@ private fun SplashScreen(
 @Composable
 private fun SplashScreenPreview() {
     SplashScreen(
-        uiState = SplashUiState.Splash(isShowErrorDialog = false),
-        onClickFinish = {}
+        uiState = SplashUiState.Splash(isShowForceUpdateDialog = true),
+        onUiAction = {}
     )
 }

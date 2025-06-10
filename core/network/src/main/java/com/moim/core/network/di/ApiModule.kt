@@ -9,6 +9,7 @@ import com.moim.core.network.service.LocationApi
 import com.moim.core.network.service.MeetingApi
 import com.moim.core.network.service.NotificationApi
 import com.moim.core.network.service.PlanApi
+import com.moim.core.network.service.PolicyApi
 import com.moim.core.network.service.ReviewApi
 import com.moim.core.network.service.TokenApi
 import com.moim.core.network.service.UserApi
@@ -28,6 +29,12 @@ internal object ApiModule {
     fun provideAuthApi(
         @NormalApi retrofit: Retrofit
     ): AuthApi = retrofit.create(AuthApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providePolicyApi(
+        @NormalApi retrofit: Retrofit
+    ): PolicyApi = retrofit.create(PolicyApi::class.java)
 
     @Provides
     @Singleton

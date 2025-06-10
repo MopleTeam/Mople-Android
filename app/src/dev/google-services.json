@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "941661823205",
-    "project_id": "groupmanagement-5e5d8",
-    "storage_bucket": "groupmanagement-5e5d8.firebasestorage.app"
+    "project_number": "798262595541",
+    "project_id": "mople-dev",
+    "storage_bucket": "mople-dev.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:941661823205:android:e0b9a04e5b1b214eb1340c",
+        "mobilesdk_app_id": "1:798262595541:android:63c595e3338075904a775c",
         "android_client_info": {
-          "package_name": "com.moim.moimtable"
+          "package_name": "com.moim.moimtable.dev"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDDzII1qtDfAD0nHeIIlygNvSk01Y10vIs"
+          "current_key": "AIzaSyA71xEkekUa8x6QeFRRenGe3Giq5orfVhY"
         }
       ],
       "services": {

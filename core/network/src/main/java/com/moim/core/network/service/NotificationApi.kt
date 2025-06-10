@@ -8,18 +8,18 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 
 interface NotificationApi {
-    @GET("/notification/list")
+    @GET("notification/list")
     suspend fun getNotifications(): List<NotificationResponse>
 
-    @GET("/notification/subscribe")
+    @GET("notification/subscribe")
     suspend fun getNotificationSubscribes(): List<String>
 
-    @POST("/notification/unsubscribe")
+    @POST("notification/unsubscribe")
     suspend fun setNotificationUnSubscribe(@Body params: JsonObject)
 
-    @POST("/notification/subscribe")
+    @POST("notification/subscribe")
     suspend fun setNotificationSubscribe(@Body params: JsonObject)
 
-    @PUT("/notification/clear")
+    @PUT("notification/clear")
     suspend fun clearNotificationCount()
 }
