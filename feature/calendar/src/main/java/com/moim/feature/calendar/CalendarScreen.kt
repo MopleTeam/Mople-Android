@@ -204,6 +204,7 @@ fun CalendarMonth(
                 CalendarDay(
                     day = dayForZonedDateTime,
                     selectedDay = uiState.selectDay,
+                    holidays = uiState.holidays.filter { it.year == day.date.year && it.month == day.date.month },
                     isCurrentDatePosition = day.position == DayPosition.MonthDate,
                     enabled = enabled,
                     onUiAction = onUiAction
@@ -240,6 +241,7 @@ fun CalendarWeek(
                 CalendarDay(
                     day = dayForZonedDateTime,
                     selectedDay = uiState.selectDay,
+                    holidays = uiState.holidays.filter { it.year == day.date.year && it.month == day.date.month },
                     isCurrentDatePosition = day.position == WeekDayPosition.RangeDate,
                     enabled = enabled,
                     onUiAction = onUiAction

@@ -66,6 +66,13 @@ fun String?.parseZonedDateTime(): ZonedDateTime {
     }
 }
 
+fun String.parseDateStringToZonedDateTime(): ZonedDateTime {
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val localDate = LocalDate.parse(this, formatter)
+
+    return localDate.atStartOfDay(ZoneId.systemDefault())
+}
+
 fun LocalDate.parseZonedDateTime(): ZonedDateTime {
     val zonedDateTime = this.atStartOfDay(ZoneId.systemDefault())
     return zonedDateTime

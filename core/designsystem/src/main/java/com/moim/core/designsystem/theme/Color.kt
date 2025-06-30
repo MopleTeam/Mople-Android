@@ -27,6 +27,7 @@ val color_F2F2F2 = Color(0XFFF2F2F2)
 val color_FFFFFF = Color(0xFFFFFFFF)
 
 val color_FF3B30 = Color(0XFFFF3B30)
+val color_FFCECB = Color(0XFFFFCECB)
 val color_34C759 = Color(0XFF34C759)
 val color_FEE500 = Color(0xFFFEE500)
 val color_3366FF = Color(0xFF3366FF)
@@ -48,6 +49,7 @@ data class MoimColor(
     val black: Color = color_000000,
     val white: Color = color_FFFFFF,
     val red: Color = color_FF3B30,
+    val red01: Color = color_FFCECB,
     val stroke: Color = color_F2F2F2,
     val icon: Color = color_D9D9D9,
     val blueGray: Color = color_EBF0FF,

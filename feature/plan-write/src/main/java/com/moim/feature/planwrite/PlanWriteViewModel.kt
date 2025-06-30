@@ -221,11 +221,11 @@ class PlanWriteViewModel @Inject constructor(
                     planRepository
                         .updatePlan(
                             planId = planId,
-                            planName = requireNotNull(planPlaceName),
+                            planName = requireNotNull(planName),
                             planTime = planTime.parseDateString(),
                             planAddress = requireNotNull(planLoadAddress),
                             planWeatherAddress = requireNotNull(planWeatherAddress),
-                            title = planPlaceName,
+                            title = requireNotNull(planPlaceName),
                             longitude = planLongitude,
                             latitude = planLatitude,
                         )

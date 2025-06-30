@@ -4,7 +4,7 @@ object MoimConfig {
 
     const val APPLICATION_ID = "com.moim.moimtable"
 
-    const val MIN_SDK = 29    // os 10
+    const val MIN_SDK = 28    // os 9
     const val TARGET_SDK = 34 // os 14
     const val COMPILE_SDK = 35
     val javaCompileTarget = JavaVersion.VERSION_17
