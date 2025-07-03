@@ -6,5 +6,6 @@ plugins {
 dependencies {
     // Kotlin
     implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
 }

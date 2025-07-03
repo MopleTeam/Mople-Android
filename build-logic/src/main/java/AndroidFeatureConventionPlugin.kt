@@ -49,6 +49,7 @@ internal class AndroidFeatureConventionPlugin : Plugin<Project> {
                 // Kotlin
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.kotlinx.coroutines)
+                implementation(libs.kotlinx.datetime)
 
                 // ETC
                 implementation(libs.bundles.coil)
