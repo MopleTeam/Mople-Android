@@ -26,11 +26,6 @@ fun getDateTimeFormatZonedDate(dateTime: ZonedDateTime? = null, pattern: String)
     return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault())?.format(DateTimeFormatter.ofPattern(pattern)) ?: ""
 }
 
-fun getDateFormatLongTime(dateTime: String?): Long {
-    val zonedDateTime = dateTime?.let { ZonedDateTime.parse(dateTime) } ?: ZonedDateTime.now()
-    return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli()
-}
-
 fun getDateFormatLongTime(dateTime: ZonedDateTime?): Long {
     val zonedDateTime = dateTime ?: ZonedDateTime.now()
     return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli()

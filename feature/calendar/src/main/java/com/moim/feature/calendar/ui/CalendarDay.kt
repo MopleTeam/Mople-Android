@@ -39,17 +39,18 @@ fun CalendarDay(
     val isHoliday = day.dayOfWeek == DayOfWeek.SUNDAY || holidays.any { it == day }
 
     val textColor = when {
+        isCurrentDatePosition.not() -> MoimTheme.colors.white
         enabled && isHoliday -> MoimTheme.colors.red
         enabled.not() && isHoliday -> MoimTheme.colors.red01
-        enabled.not() && isCurrentDatePosition -> MoimTheme.colors.gray.gray07
-        enabled && isCurrentDatePosition && isSelected -> MoimTheme.colors.primary.primary
-        enabled && isCurrentDatePosition -> MoimTheme.colors.gray.gray01
-        else -> MoimTheme.colors.white
+        enabled.not() -> MoimTheme.colors.gray.gray07
+        isSelected -> MoimTheme.colors.primary.primary
+        else -> MoimTheme.colors.gray.gray01
     }
     val circleColor = when {
+        isCurrentDatePosition.not() -> MoimTheme.colors.white
         isSelected -> MoimTheme.colors.primary.primary.copy(alpha = 0.1f)
         isToday -> MoimTheme.colors.bg.primary
-        else -> Color.Transparent
+        else -> MoimTheme.colors.white
     }
 
     Box(
