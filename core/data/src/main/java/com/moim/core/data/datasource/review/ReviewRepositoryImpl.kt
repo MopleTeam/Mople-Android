@@ -2,9 +2,9 @@ package com.moim.core.data.datasource.review
 
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
+import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.ReviewResponse
-import com.moim.core.model.asItem
 import com.moim.core.network.service.ReviewApi
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

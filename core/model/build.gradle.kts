@@ -8,8 +8,6 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.dataModel)
-
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.datetime)
     implementation(libs.androidx.navigation.compose)

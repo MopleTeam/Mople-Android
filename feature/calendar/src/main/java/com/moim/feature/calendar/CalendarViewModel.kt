@@ -14,7 +14,6 @@ import com.moim.core.common.result.asResult
 import com.moim.core.common.util.default
 import com.moim.core.common.util.getDateTimeFormatZonedDate
 import com.moim.core.common.util.getZonedDateTimeDefault
-import com.moim.core.common.util.parseDateStringToZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -68,7 +67,7 @@ class CalendarViewModel @Inject constructor(
                             setUiState(
                                 CalendarUiState.Success(
                                     plans = plans,
-                                    holidays = holidays.map { it.date.parseDateStringToZonedDateTime() }
+                                    holidays = holidays.map { it.date }
                                 )
                             )
                         }
@@ -196,7 +195,7 @@ class CalendarViewModel @Inject constructor(
                             is Result.Loading -> return@collect
                             is Result.Success -> {
                                 val (newHoliday, newPlan) = result.data
-                                val newHolidays = newHoliday.map { it.date.parseDateStringToZonedDateTime() }
+                                val newHolidays = newHoliday.map { it.date }
 
                                 setUiState(
                                     copy(

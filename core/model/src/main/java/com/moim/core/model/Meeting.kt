@@ -3,7 +3,6 @@ package com.moim.core.model
 import android.os.Bundle
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavType
-import com.moim.core.datamodel.MeetingResponse
 import com.moim.core.model.util.encoding
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -19,18 +18,6 @@ data class Meeting(
     val lastPlanAt: String? = null,
     val sinceDays: Int = 0,
 )
-
-fun MeetingResponse.asItem(): Meeting {
-    return Meeting(
-        id = id,
-        creatorId = creatorId,
-        name = name,
-        imageUrl = imageUrl,
-        memberCount = memberCount,
-        lastPlanAt = lastPlanAt,
-        sinceDays = sinceDays
-    )
-}
 
 val MeetingType = object : NavType<Meeting?>(isNullableAllowed = true) {
     override fun get(bundle: Bundle, key: String): Meeting? {

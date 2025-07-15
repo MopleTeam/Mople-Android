@@ -80,7 +80,7 @@ class MeetingDetailViewModel @Inject constructor(
                                 MeetingDetailUiState.Success(
                                     userId = user.userId,
                                     meeting = meeting,
-                                    plans = plans.sortedByDescending { it.planTime },
+                                    plans = plans.sortedByDescending { it.planAt },
                                     reviews = reviews.sortedByDescending { it.reviewAt },
                                 )
                             )
@@ -113,7 +113,7 @@ class MeetingDetailViewModel @Inject constructor(
                                         withIndex()
                                             .firstOrNull {
                                                 val newPlanTime = action.planItem.planAt.parseZonedDateTime()
-                                                val currentPlanTime = it.value.planTime.parseZonedDateTime()
+                                                val currentPlanTime = it.value.planAt.parseZonedDateTime()
                                                 newPlanTime.isBefore(currentPlanTime)
                                             }
                                             ?.let { add(it.index, action.planItem.asPlan()) }
@@ -268,7 +268,7 @@ class MeetingDetailViewModel @Inject constructor(
                         meetingId = meeting.id,
                         meetingName = meeting.name,
                         meetingImageUrl = meeting.imageUrl,
-                        planTime = ZonedDateTime.now().toString()
+                        planAt = ZonedDateTime.now().toString()
                     )
                 )
             )

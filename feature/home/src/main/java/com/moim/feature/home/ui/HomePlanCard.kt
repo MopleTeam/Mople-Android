@@ -74,7 +74,7 @@ fun HomePlanCard(
             MeetingInfoText(
                 modifier = Modifier.padding(vertical = 4.dp),
                 iconRes = R.drawable.ic_clock,
-                text = getDateTimeFormatString(dateTime = plan.planTime, pattern = stringResource(R.string.regex_date_full))
+                text = getDateTimeFormatString(dateTime = plan.planAt, pattern = stringResource(R.string.regex_date_full))
             )
             MeetingInfoText(
                 iconRes = R.drawable.ic_location,
@@ -225,7 +225,7 @@ private fun HomeMeetingPlanCardPreview() {
                 planName = "술 한잔 하는 날",
                 planMemberCount = 3,
                 planAddress = "서울 강남구",
-                planTime = "2024-12-14 09:00:00",
+                planAt = "2024-12-14 09:00:00",
             ),
         )
     }

@@ -2,10 +2,10 @@ package com.moim.core.data.datasource.user
 
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
+import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datastore.PreferenceStorage
 import com.moim.core.model.User
-import com.moim.core.model.asItem
 import com.moim.core.network.service.UserApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull

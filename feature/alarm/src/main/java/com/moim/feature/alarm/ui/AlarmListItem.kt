@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.moim.core.common.util.getDateTimeFormatString
+import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
@@ -70,10 +70,7 @@ fun AlarmListItem(
                 )
 
                 MoimText(
-                    text = getDateTimeFormatString(
-                        dateTime = notification.sendAt,
-                        pattern = stringResource(R.string.regex_date_year_month_day_short)
-                    ),
+                    text = notification.sendAt.parseDateString(stringResource(R.string.regex_date_year_month_day_short)),
                     style = MoimTheme.typography.body02.medium,
                     color = MoimTheme.colors.gray.gray04,
                 )

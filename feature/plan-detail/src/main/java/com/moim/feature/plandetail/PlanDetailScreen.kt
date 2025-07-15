@@ -1,7 +1,9 @@
 package com.moim.feature.plandetail
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,16 +11,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.util.toValidUrl
 import com.moim.core.common.view.ObserveAsEvents
@@ -27,6 +38,8 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.common.PagingErrorScreen
+import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.containerScreen
@@ -127,6 +140,8 @@ fun PlanDetailScreen(
     onUiAction: OnPlanDetailUiAction
 ) {
     val screenName = if (uiState.planItem.isPlanAtBefore) "plan_detail" else "review_detail"
+    val comments = uiState.comments?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
+
     TrackScreenViewEvent(screenName = screenName)
     MoimScaffold(
         modifier = modifier
@@ -169,19 +184,70 @@ fun PlanDetailScreen(
 
                 item {
                     PlanDetailCommentHeader(
-                        commentCount = uiState.comments.size
+                        commentCount = 0
                     )
                 }
 
-                items(
-                    items = uiState.comments,
-                    key = { comment -> comment.comment.commentId }
-                ) { comment ->
-                    PlanDetailCommentItem(
-                        userId = uiState.user.userId,
-                        comment = comment,
-                        onUiAction = onUiAction
-                    )
+                if (comments != null) {
+                    items(
+                        count = comments.itemCount,
+                        key = comments.itemKey(),
+                        contentType = comments.itemContentType(),
+                    ) { index ->
+                        val comment = comments[index] ?: return@items
+                        PlanDetailCommentItem(
+                            modifier = Modifier.animateItem(),
+                            userId = uiState.user.userId,
+                            comment = comment,
+                            onUiAction = onUiAction
+                        )
+                    }
+
+                    if (comments.loadState.append is LoadState.Loading) {
+                        item(key = "LoadState At Loading") {
+                            PagingLoadingScreen(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .background(MoimTheme.colors.white)
+                                        .animateItem(),
+                            )
+                        }
+                    }
+
+                    if (comments.loadState.append is LoadState.Error) {
+                        item(key = "LoadState At Error") {
+                            PagingErrorScreen(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .background(MoimTheme.colors.white)
+                                        .animateItem(),
+                                onClickRetry = comments::retry,
+                            )
+                        }
+                    }
+
+
+                    item {
+                        AnimatedVisibility(
+                            visible = comments.loadState.refresh is LoadState.Loading,
+                        ) {
+                            PagingLoadingScreen()
+                        }
+                    }
+
+                    item {
+                        AnimatedVisibility(
+                            modifier = Modifier.fillMaxWidth(),
+                            visible = comments.loadState.refresh is LoadState.Error,
+                        ) {
+                            PagingErrorScreen(
+                                modifier = modifier,
+                                onClickRetry = comments::refresh,
+                            )
+                        }
+                    }
                 }
             }
         },

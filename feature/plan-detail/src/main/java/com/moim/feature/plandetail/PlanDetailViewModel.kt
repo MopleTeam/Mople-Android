@@ -2,6 +2,8 @@ package com.moim.feature.plandetail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.moim.core.common.delegate.PlanAction
 import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.planItemStateIn
@@ -20,6 +22,7 @@ import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
+import com.moim.core.domain.usecase.GetCommentsUseCase
 import com.moim.core.domain.usecase.GetPlanItemUseCase
 import com.moim.core.model.Comment
 import com.moim.core.model.User
@@ -27,10 +30,10 @@ import com.moim.core.model.item.PlanItem
 import com.moim.feature.plandetail.model.CommentUiModel
 import com.moim.feature.plandetail.model.createCommentUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -45,6 +48,7 @@ class PlanDetailViewModel @Inject constructor(
     private val planRepository: PlanRepository,
     private val reviewRepository: ReviewRepository,
     private val commentRepository: CommentRepository,
+    private val getCommentsUseCase: GetCommentsUseCase,
     planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(), PlanItemViewModelDelegate by planItemViewModelDelegate {
 
@@ -54,8 +58,6 @@ class PlanDetailViewModel @Inject constructor(
     private val isPlan
         get() = savedStateHandle.get<Boolean>(KEY_IS_PLAN) ?: false
 
-    private val planId = savedStateHandle.getStateFlow<String?>(KEY_PLAN_ID, null)
-
     private val planItemReceiver = planItemAction.planItemStateIn(viewModelScope)
 
     private val planResult =
@@ -63,50 +65,28 @@ class PlanDetailViewModel @Inject constructor(
             userRepository.getUser(),
             getPlanItemUseCase(GetPlanItemUseCase.Params(postId, isPlan)),
             ::Pair
-        ).asResult().restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
-
-    private val commentResult = planId
-        .filterNotNull()
-        .flatMapLatest { commentRepository.getComments(it).asResult() }
-        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+        ).mapLatest { (user, post) ->
+            val isShowApplyButton = post.planAt.parseZonedDateTime().isAfter(ZonedDateTime.now()) && user.userId != post.userId
+            PlanDetailUiState.Success(
+                user = user,
+                planItem = post,
+                isShowApplyButton = isShowApplyButton
+            )
+        }.asResult().mapLatest { result ->
+            when (result) {
+                is Result.Loading -> PlanDetailUiState.Loading
+                is Result.Success -> result.data
+                is Result.Error -> PlanDetailUiState.Error
+            }
+        }.restartableStateIn(viewModelScope, SharingStarted.Lazily, PlanDetailUiState.Loading)
 
     init {
         viewModelScope.launch {
             launch {
-                planResult.collect { result ->
-                    when (result) {
-                        is Result.Loading -> setUiState(PlanDetailUiState.Loading)
-                        is Result.Success -> {
-                            val (user, post) = result.data
-                            val isShowApplyButton = post.planAt.parseZonedDateTime().isAfter(ZonedDateTime.now()) && user.userId != post.userId
-                            val uiState = PlanDetailUiState.Success(
-                                user = user,
-                                planItem = post,
-                                isShowApplyButton = isShowApplyButton
-                            )
-                            setUiState(uiState)
-                            savedStateHandle[KEY_PLAN_ID] = uiState.planItem.commentCheckId
-                        }
-
-                        is Result.Error -> setUiState(PlanDetailUiState.Error)
-                    }
-                }
-            }
-
-            launch {
-                commentResult.collect { result ->
-                    uiState.checkState<PlanDetailUiState.Success> {
-                        when (result) {
-                            is Result.Loading -> return@collect
-
-                            is Result.Success -> {
-                                setUiState(
-                                    copy(comments = result.data.map(Comment::createCommentUiModel))
-                                )
-                            }
-
-                            is Result.Error -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.CommentErrorMessage))
-                        }
+                planResult.collect { uiState ->
+                    setUiState(uiState)
+                    if (uiState is PlanDetailUiState.Success) {
+                        getComments(uiState.planItem.commentCheckId)
                     }
                 }
             }
@@ -122,7 +102,6 @@ class PlanDetailViewModel @Inject constructor(
 
                         is PlanAction.PlanInvalidate -> {
                             planResult.restart()
-                            commentResult.restart()
                         }
 
                         else -> return@collect
@@ -154,6 +133,20 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnShowPlanReportDialog -> showPlanReportDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowCommentEditDialog -> showCommentEditDialog(uiAction.isShow, uiAction.comment)
             is PlanDetailUiAction.OnShowCommentReportDialog -> showCommentReportDialog(uiAction.isShow, uiAction.comment)
+        }
+    }
+
+    private fun getComments(planId: String) {
+        viewModelScope.launch {
+            uiState.checkState<PlanDetailUiState.Success> {
+                setUiState(
+                    copy(
+                        comments = getCommentsUseCase(GetCommentsUseCase.Params(planId)).mapLatest {
+                            it.map { comment -> comment.createCommentUiModel() }
+                        }
+                    )
+                )
+            }
         }
     }
 
@@ -256,7 +249,7 @@ class PlanDetailViewModel @Inject constructor(
 
                         is Result.Success -> setUiState(
                             copy(
-                                comments = result.data.map(Comment::createCommentUiModel),
+                                // comments = result.data.map(Comment::createCommentUiModel),
                                 selectedUpdateComment = null
                             )
                         )
@@ -280,13 +273,13 @@ class PlanDetailViewModel @Inject constructor(
                             is Result.Loading -> return@collect
 
                             is Result.Success -> {
-                                setUiState(
-                                    copy(
-                                        comments = comments
-                                            .toMutableList()
-                                            .apply { removeIf { uiModel -> uiModel.comment.commentId == comment.commentId } }
-                                    )
-                                )
+//                                setUiState(
+//                                    copy(
+//                                        comments = comments
+//                                            .toMutableList()
+//                                            .apply { removeIf { uiModel -> uiModel.comment.commentId == comment.commentId } }
+//                                    )
+//                                )
                             }
 
                             is Result.Error -> showErrorToast(result.exception)
@@ -401,7 +394,6 @@ class PlanDetailViewModel @Inject constructor(
     }
 
     companion object {
-        private const val KEY_PLAN_ID = "planId"
         private const val KEY_POST_ID = "postId"
         private const val KEY_IS_PLAN = "isPlan"
     }
@@ -413,7 +405,7 @@ sealed interface PlanDetailUiState : UiState {
     data class Success(
         val user: User,
         val planItem: PlanItem,
-        val comments: List<CommentUiModel> = emptyList(),
+        val comments: Flow<PagingData<CommentUiModel>>? = null,
         val selectedImageIndex: Int = 0,
         val selectedComment: Comment? = null,
         val selectedUpdateComment: Comment? = null,

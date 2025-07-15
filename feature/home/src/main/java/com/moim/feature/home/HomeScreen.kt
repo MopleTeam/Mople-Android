@@ -233,7 +233,7 @@ private fun HomeScreenPreview() {
                         planName = "술 한잔 하는 날",
                         planMemberCount = 3,
                         planAddress = "서울 강남구",
-                        planTime = "2023-12-14 09:00:00",
+                        planAt = "2023-12-14 09:00:00",
                     ),
                     Plan(
                         meetingId = "2",
@@ -241,7 +241,7 @@ private fun HomeScreenPreview() {
                         planName = "술 한잔 하는 날",
                         planMemberCount = 3,
                         planAddress = "서울 강남구",
-                        planTime = "2023-12-15 09:00:00",
+                        planAt = "2023-12-15 09:00:00",
                     ),
                 )
             ),

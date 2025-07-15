@@ -130,7 +130,7 @@ fun MeetingDetailPlanItem(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            MeetingDetailPlanHeader(time = plan.planTime)
+            MeetingDetailPlanHeader(time = plan.planAt)
             Spacer(Modifier.height(16.dp))
 
             Row {
@@ -159,7 +159,7 @@ fun MeetingDetailPlanItem(
             )
             Spacer(Modifier.height(16.dp))
 
-            if (plan.planTime.parseZonedDateTime().isBefore(ZonedDateTime.now())) {
+            if (plan.planAt.parseZonedDateTime().isBefore(ZonedDateTime.now())) {
                 MoimText(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -431,7 +431,7 @@ private fun MeetingDetailPlanContentPreview() {
                         planId = "1",
                         planName = "술 한 잔 하는 날1",
                         planMemberCount = 6,
-                        planTime = "2025-12-12 09:00:00",
+                        planAt = "2025-12-12 09:00:00",
                         planAddress = "서울시 강남구",
                         isParticipant = true,
                     ),
@@ -439,7 +439,7 @@ private fun MeetingDetailPlanContentPreview() {
                         planId = "2",
                         planName = "술 한 잔 하는 날2",
                         planMemberCount = 6,
-                        planTime = "2023-12-14 09:00:00",
+                        planAt = "2023-12-14 09:00:00",
                         planAddress = "서울시 강남구",
                         isParticipant = true
                     ),
@@ -447,7 +447,7 @@ private fun MeetingDetailPlanContentPreview() {
                         planId = "3",
                         planName = "술 한 잔 하는 날3",
                         planMemberCount = 6,
-                        planTime = "2023-12-15 09:00:00",
+                        planAt = "2023-12-15 09:00:00",
                         planAddress = "서울시 강남구"
                     )
                 ),

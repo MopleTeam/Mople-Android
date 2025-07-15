@@ -1,9 +1,9 @@
 package com.moim.core.data.datasource.holiday
 
+import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.HolidayResponse
 import com.moim.core.model.Holiday
-import com.moim.core.model.asItem
 import com.moim.core.network.service.HolidayApi
 import kotlinx.coroutines.flow.Flow
 import java.time.ZonedDateTime

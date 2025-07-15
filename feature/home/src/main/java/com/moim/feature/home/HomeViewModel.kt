@@ -107,7 +107,7 @@ class HomeViewModel @Inject constructor(
                                         withIndex()
                                             .firstOrNull {
                                                 val newPlanTime = action.planItem.planAt.parseZonedDateTime()
-                                                val currentPlanTime = it.value.planTime.parseZonedDateTime()
+                                                val currentPlanTime = it.value.planAt.parseZonedDateTime()
                                                 newPlanTime.isBefore(currentPlanTime)
                                             }
                                             ?.let { add(it.index, action.planItem.asPlan()) }
@@ -128,7 +128,7 @@ class HomeViewModel @Inject constructor(
                                             ?.let { index -> set(index, action.planItem.asPlan()) }
                                             ?: run { add(action.planItem.asPlan()) }
                                     }.sortedBy {
-                                        it.planTime
+                                        it.planAt
                                     }.filter {
                                         it.isParticipant
                                     }

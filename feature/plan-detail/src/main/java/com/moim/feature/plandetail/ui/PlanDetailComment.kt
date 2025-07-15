@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.moim.core.common.util.getDateTimeFormatString
+import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimText
@@ -38,10 +38,12 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Comment
+import com.moim.core.model.Writer
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
 import com.moim.feature.plandetail.model.CommentTextUiModel
 import com.moim.feature.plandetail.model.CommentUiModel
+import java.time.ZonedDateTime
 
 @Composable
 fun PlanDetailCommentHeader(
@@ -92,12 +94,12 @@ fun PlanDetailCommentItem(
                 .onSingleClick {
                     onUiAction(
                         PlanDetailUiAction.OnClickUserProfileImage(
-                            imageUrl = comment.comment.userImageUrl,
-                            userName = comment.comment.userName
+                            imageUrl = comment.comment.writer.imageUrl,
+                            userName = comment.comment.writer.nickname
                         )
                     )
                 },
-            imageUrl = comment.comment.userImageUrl,
+            imageUrl = comment.comment.writer.imageUrl,
             errorImage = painterResource(R.drawable.ic_empty_user_logo),
         )
 
@@ -112,19 +114,19 @@ fun PlanDetailCommentItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 MoimText(
-                    text = comment.comment.userName,
+                    text = comment.comment.writer.nickname,
                     style = MoimTheme.typography.body01.semiBold,
                     color = MoimTheme.colors.gray.gray01
                 )
 
                 Spacer(Modifier.width(8.dp))
 
+                comment.comment.commentAt.parseDateString()
+
+
                 MoimText(
                     modifier = Modifier.weight(1f),
-                    text = getDateTimeFormatString(
-                        dateTime = comment.comment.commentAt,
-                        pattern = stringResource(R.string.regex_date_month_day)
-                    ),
+                    text = comment.comment.commentAt.parseDateString(stringResource(R.string.regex_date_month_day)),
                     style = MoimTheme.typography.body02.regular,
                     color = MoimTheme.colors.gray.gray04
                 )
@@ -132,7 +134,7 @@ fun PlanDetailCommentItem(
                 MoimIconButton(
                     iconRes = R.drawable.ic_more,
                     onClick = {
-                        val uiAction = if (userId == comment.comment.userId) {
+                        val uiAction = if (userId == comment.comment.writer.userId) {
                             PlanDetailUiAction.OnShowCommentEditDialog(
                                 isShow = true,
                                 comment = comment.comment
@@ -225,12 +227,13 @@ private fun PlanDetailCommentItemPreview() {
     val comment = Comment(
         postId = "",
         commentId = "",
-        userId = "",
-        userName = "모닝커피클럽회원",
-        userImageUrl = "",
+        writer = Writer(
+            userId = "",
+            nickname = "모닝커피클럽회원",
+            imageUrl = "",
+        ),
         content = "이른 아침, 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 다음에 또 뵐 수 있으면 좋겠네요.\n제 인스타도 많이 방문해주세요 https://www.instagram.com",
-        commentAt = "2025-03-29 21:23:20",
-        isUpdate = false,
+        commentAt = ZonedDateTime.now()
     )
 
     MoimTheme {

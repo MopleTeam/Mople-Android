@@ -45,6 +45,15 @@ fun getDateTimeBetweenDay(startDate: ZonedDateTime? = null, endDate: ZonedDateTi
     return Duration.between(startDateTime, endDateTime).toDays().toInt()
 }
 
+fun ZonedDateTime?.parseDateString(pattern: String): String {
+    return try {
+        val formatter = DateTimeFormatter.ofPattern(pattern)
+        this?.format(formatter) ?: throw IllegalArgumentException()
+    } catch (e: Exception) {
+        this.toString()
+    }
+}
+
 fun ZonedDateTime?.parseDateString(): String {
     val zonedDateTime = this ?: ZonedDateTime.now()
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")

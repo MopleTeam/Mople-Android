@@ -1,17 +1,10 @@
 package com.moim.core.model
 
 import androidx.compose.runtime.Stable
-import com.moim.core.datamodel.HolidayResponse
+import java.time.ZonedDateTime
 
 @Stable
 data class Holiday(
     val title: String,
-    val date: String
+    val date: ZonedDateTime
 )
-
-fun HolidayResponse.asItem() : Holiday {
-    return Holiday(
-        title = title,
-        date = date
-    )
-}
