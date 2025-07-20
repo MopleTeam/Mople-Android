@@ -1,5 +1,6 @@
 package com.moim.core.data.mapper
 
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.datamodel.ReviewImageResponse
 import com.moim.core.datamodel.ReviewResponse
 import com.moim.core.model.Review
@@ -21,7 +22,7 @@ fun ReviewResponse.asItem(): Review {
         placeName = placeName,
         memberCount = memberCount,
         images = images.map(ReviewImageResponse::asItem),
-        reviewAt = reviewAt
+        reviewAt = reviewAt.parseZonedDateTime()
     )
 }
 

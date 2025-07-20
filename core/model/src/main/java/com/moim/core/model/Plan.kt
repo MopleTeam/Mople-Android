@@ -1,7 +1,9 @@
 package com.moim.core.model
 
 import androidx.compose.runtime.Stable
+import com.moim.core.model.util.KZonedDateTimeSerializer
 import kotlinx.serialization.Serializable
+import java.time.ZonedDateTime
 
 @Stable
 @Serializable
@@ -21,5 +23,6 @@ data class Plan(
     val weatherIconUrl: String = "",
     val temperature: Float = 0f,
     val isParticipant: Boolean = true,
-    val planAt: String = "",
+    @Serializable(KZonedDateTimeSerializer::class)
+    val planAt: ZonedDateTime = ZonedDateTime.now(),
 )

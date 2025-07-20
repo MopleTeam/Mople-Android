@@ -1,5 +1,6 @@
 package com.moim.core.data.mapper
 
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.datamodel.MeetingResponse
 import com.moim.core.model.Meeting
 
@@ -10,7 +11,7 @@ fun MeetingResponse.asItem(): Meeting {
         name = name,
         imageUrl = imageUrl,
         memberCount = memberCount,
-        lastPlanAt = lastPlanAt,
+        lastPlanAt = lastPlanAt?.parseZonedDateTime(),
         sinceDays = sinceDays
     )
 }

@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
-import com.moim.core.common.util.getDateFormatLongTime
-import com.moim.core.common.util.getDateTimeFormatZonedDate
+import com.moim.core.common.util.parseLongTime
+import com.moim.core.common.util.parseDateString
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -112,17 +112,18 @@ fun PlanWriteScreen(
                 planName = uiState.planName ?: "",
                 onUiAction = onUiAction
             )
+
             PlanWriteSelectedBox(
                 titleText = stringResource(R.string.plan_write_date_select),
                 hintText = stringResource(R.string.plan_write_date_select_hint),
-                valueText = if (uiState.planDate == null) null else getDateTimeFormatZonedDate(uiState.planDate, stringResource(R.string.regex_date_year_month_day)),
+                valueText = uiState.planDate?.parseDateString(stringResource(R.string.regex_date_year_month_day)),
                 iconRes = R.drawable.ic_calendar,
                 onClick = { onUiAction(PlanWriteUiAction.OnShowDatePickerDialog(true)) }
             )
             PlanWriteSelectedBox(
                 titleText = stringResource(R.string.plan_write_time_select),
                 hintText = stringResource(R.string.plan_write_time_select_hint),
-                valueText = if (uiState.planTime == null) null else getDateTimeFormatZonedDate(uiState.planTime, stringResource(R.string.regex_date_time)),
+                valueText = uiState.planTime?.parseDateString(stringResource(R.string.regex_date_time)),
                 iconRes = R.drawable.ic_clock,
                 onClick = { onUiAction(PlanWriteUiAction.OnShowTimePickerDialog(true)) }
             )
@@ -155,9 +156,10 @@ fun PlanWriteScreen(
             onUiAction = onUiAction
         )
     }
+
     if (uiState.isShowDatePickerDialog) {
         MoimDatePickerDialog(
-            date = getDateFormatLongTime(uiState.planDate),
+            date = uiState.planDate.parseLongTime(),
             onDateSelected = { onUiAction(PlanWriteUiAction.OnClickPlanDate(it)) },
             onDismiss = { onUiAction(PlanWriteUiAction.OnShowDatePickerDialog(false)) }
         )

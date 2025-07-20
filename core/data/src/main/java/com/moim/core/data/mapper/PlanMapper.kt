@@ -1,5 +1,6 @@
 package com.moim.core.data.mapper
 
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.datamodel.PlanResponse
 import com.moim.core.model.Plan
 
@@ -12,7 +13,6 @@ fun PlanResponse.asItem(): Plan {
         planId = planId,
         planName = planName,
         planMemberCount = planMemberCount,
-        planAt = planTime,
         planLatitude = planLatitude,
         planLongitude = planLongitude,
         planAddress = planAddress,
@@ -20,6 +20,7 @@ fun PlanResponse.asItem(): Plan {
         weatherAddress = weatherAddress,
         weatherIconUrl = weatherIconUrl,
         temperature = temperature,
-        isParticipant = isParticipant
+        isParticipant = isParticipant,
+        planAt = planTime.parseZonedDateTime(),
     )
 }

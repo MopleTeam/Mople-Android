@@ -32,8 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
-import com.moim.core.common.util.getDateTimeFormatString
-import com.moim.core.common.util.parseZonedDateTime
+import com.moim.core.common.util.parseDateString
 import com.moim.core.common.util.toDecimalString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
@@ -159,7 +158,7 @@ fun MeetingDetailPlanItem(
             )
             Spacer(Modifier.height(16.dp))
 
-            if (plan.planAt.parseZonedDateTime().isBefore(ZonedDateTime.now())) {
+            if (plan.planAt.isBefore(ZonedDateTime.now())) {
                 MoimText(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -312,14 +311,14 @@ private fun MyPostIcon() {
 @Composable
 private fun MeetingDetailPlanHeader(
     modifier: Modifier = Modifier,
-    time: String
+    time: ZonedDateTime
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         MoimText(
             modifier = modifier.weight(1f),
-            text = getDateTimeFormatString(time, pattern = stringResource(R.string.regex_date_year_month_day_short)),
+            text = time.parseDateString(stringResource(R.string.regex_date_year_month_day_short)),
             style = MoimTheme.typography.body02.semiBold,
             color = MoimTheme.colors.gray.gray04,
         )
@@ -431,7 +430,7 @@ private fun MeetingDetailPlanContentPreview() {
                         planId = "1",
                         planName = "술 한 잔 하는 날1",
                         planMemberCount = 6,
-                        planAt = "2025-12-12 09:00:00",
+                        planAt = ZonedDateTime.now(),
                         planAddress = "서울시 강남구",
                         isParticipant = true,
                     ),
@@ -439,7 +438,7 @@ private fun MeetingDetailPlanContentPreview() {
                         planId = "2",
                         planName = "술 한 잔 하는 날2",
                         planMemberCount = 6,
-                        planAt = "2023-12-14 09:00:00",
+                        planAt = ZonedDateTime.now().plusDays(1),
                         planAddress = "서울시 강남구",
                         isParticipant = true
                     ),
@@ -447,7 +446,7 @@ private fun MeetingDetailPlanContentPreview() {
                         planId = "3",
                         planName = "술 한 잔 하는 날3",
                         planMemberCount = 6,
-                        planAt = "2023-12-15 09:00:00",
+                        planAt = ZonedDateTime.now().plusDays(2),
                         planAddress = "서울시 강남구"
                     )
                 ),
@@ -458,7 +457,7 @@ private fun MeetingDetailPlanContentPreview() {
                         reviewId = "1",
                         reviewName = "술 한 잔 하는 날1",
                         memberCount = 6,
-                        reviewAt = "2023-12-12 09:00:00",
+                        reviewAt = ZonedDateTime.now(),
                         address = "서울시 강남구",
                         images = listOf(ReviewImage(imageId = "", imageUrl = "aaa"))
                     ),
@@ -468,7 +467,7 @@ private fun MeetingDetailPlanContentPreview() {
                         reviewId = "2",
                         reviewName = "술 한 잔 하는 날2",
                         memberCount = 6,
-                        reviewAt = "2023-12-13 09:00:00",
+                        reviewAt = ZonedDateTime.now().plusDays(1),
                         address = "서울시 강남구"
                     ),
                     Review(
@@ -477,7 +476,7 @@ private fun MeetingDetailPlanContentPreview() {
                         reviewId = "3",
                         reviewName = "술 한 잔 하는 날3",
                         memberCount = 6,
-                        reviewAt = "2023-12-14 09:00:00",
+                        reviewAt = ZonedDateTime.now().plusDays(2),
                         address = "서울시 강남구"
                     ),
                     Review(
@@ -486,7 +485,7 @@ private fun MeetingDetailPlanContentPreview() {
                         reviewId = "4",
                         reviewName = "술 한 잔 하는 날4",
                         memberCount = 6,
-                        reviewAt = "2023-12-15 09:00:00",
+                        reviewAt = ZonedDateTime.now().plusDays(3),
                         address = "서울시 강남구"
                     ),
                 ),

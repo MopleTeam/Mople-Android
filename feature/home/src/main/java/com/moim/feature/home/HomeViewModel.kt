@@ -106,8 +106,8 @@ class HomeViewModel @Inject constructor(
                                     .apply {
                                         withIndex()
                                             .firstOrNull {
-                                                val newPlanTime = action.planItem.planAt.parseZonedDateTime()
-                                                val currentPlanTime = it.value.planAt.parseZonedDateTime()
+                                                val newPlanTime = action.planItem.planAt
+                                                val currentPlanTime = it.value.planAt
                                                 newPlanTime.isBefore(currentPlanTime)
                                             }
                                             ?.let { add(it.index, action.planItem.asPlan()) }

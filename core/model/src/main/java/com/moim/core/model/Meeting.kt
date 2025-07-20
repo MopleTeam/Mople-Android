@@ -3,9 +3,11 @@ package com.moim.core.model
 import android.os.Bundle
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavType
+import com.moim.core.model.util.KZonedDateTimeSerializer
 import com.moim.core.model.util.encoding
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.time.ZonedDateTime
 
 @Stable
 @Serializable
@@ -15,8 +17,9 @@ data class Meeting(
     val name: String = "",
     val imageUrl: String = "",
     val memberCount: Int = 1,
-    val lastPlanAt: String? = null,
     val sinceDays: Int = 0,
+    @Serializable(with = KZonedDateTimeSerializer::class)
+    val lastPlanAt: ZonedDateTime? = null,
 )
 
 val MeetingType = object : NavType<Meeting?>(isNullableAllowed = true) {

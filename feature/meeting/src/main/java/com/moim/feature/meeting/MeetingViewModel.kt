@@ -9,7 +9,6 @@ import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
@@ -96,8 +95,8 @@ class MeetingViewModel @Inject constructor(
                         when (action) {
                             is PlanAction.PlanCreate -> {
                                 val meeting = meetings.withIndex().find { it.value.id == action.planItem.meetingId } ?: return@collect
-                                val currentLastAt = meeting.value.lastPlanAt.parseZonedDateTime()
-                                val newLastAt = action.planItem.planAt.parseZonedDateTime()
+                                val currentLastAt = meeting.value.lastPlanAt
+                                val newLastAt = action.planItem.planAt
 
                                 if (newLastAt.isBefore(currentLastAt)) return@collect
 
@@ -112,8 +111,8 @@ class MeetingViewModel @Inject constructor(
 
                             is PlanAction.PlanUpdate -> {
                                 val meeting = meetings.withIndex().find { it.value.id == action.planItem.meetingId } ?: return@collect
-                                val currentLastAt = meeting.value.lastPlanAt.parseZonedDateTime()
-                                val newLastAt = action.planItem.planAt.parseZonedDateTime()
+                                val currentLastAt = meeting.value.lastPlanAt
+                                val newLastAt = action.planItem.planAt
 
                                 if (newLastAt.isBefore(currentLastAt)) return@collect
                                 setUiState(

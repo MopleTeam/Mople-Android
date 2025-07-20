@@ -22,7 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import com.moim.core.common.util.getDateTimeFormatString
+import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
@@ -88,10 +88,11 @@ fun PlanDetailContent(
             text = stringResource(R.string.unit_participants_count, planItem.participantsCount),
             onClick = { onUiAction(PlanDetailUiAction.OnClickParticipants) }
         )
+
         PlanInfoItem(
             modifier = Modifier.padding(vertical = 4.dp),
             startIconRes = R.drawable.ic_clock,
-            text = getDateTimeFormatString(dateTime = planItem.planAt, pattern = stringResource(R.string.regex_date_full))
+            text = planItem.planAt.parseDateString(stringResource(R.string.regex_date_full)),
         )
         PlanInfoItem(
             startIconRes = R.drawable.ic_location,

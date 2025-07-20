@@ -46,7 +46,7 @@ fun MeetingCard(
 ) {
     val (count, comment) = meeting.lastPlanAt
         ?.let { lastDate ->
-            val day = getDateTimeBetweenDay(endDate = lastDate.parseZonedDateTime())
+            val day = getDateTimeBetweenDay(endDate = lastDate)
             when {
                 day == 0 -> stringResource(R.string.meeting_plan_today_count) to stringResource(R.string.meeting_plan_comment)
                 day > 0 -> stringResource(R.string.meeting_plan_after_count, day) to stringResource(R.string.meeting_plan_comment)

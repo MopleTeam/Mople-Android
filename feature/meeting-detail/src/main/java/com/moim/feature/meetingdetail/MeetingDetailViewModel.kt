@@ -11,7 +11,6 @@ import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -112,8 +111,8 @@ class MeetingDetailViewModel @Inject constructor(
                                     .apply {
                                         withIndex()
                                             .firstOrNull {
-                                                val newPlanTime = action.planItem.planAt.parseZonedDateTime()
-                                                val currentPlanTime = it.value.planAt.parseZonedDateTime()
+                                                val newPlanTime = action.planItem.planAt
+                                                val currentPlanTime = it.value.planAt
                                                 newPlanTime.isBefore(currentPlanTime)
                                             }
                                             ?.let { add(it.index, action.planItem.asPlan()) }
@@ -268,7 +267,7 @@ class MeetingDetailViewModel @Inject constructor(
                         meetingId = meeting.id,
                         meetingName = meeting.name,
                         meetingImageUrl = meeting.imageUrl,
-                        planAt = ZonedDateTime.now().toString()
+                        planAt = ZonedDateTime.now()
                     )
                 )
             )

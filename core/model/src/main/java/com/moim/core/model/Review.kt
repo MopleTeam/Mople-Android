@@ -1,7 +1,9 @@
 package com.moim.core.model
 
 import androidx.compose.runtime.Stable
+import com.moim.core.model.util.KZonedDateTimeSerializer
 import kotlinx.serialization.Serializable
+import java.time.ZonedDateTime
 
 @Stable
 @Serializable
@@ -19,7 +21,8 @@ data class Review(
     val placeName: String = "",
     val memberCount: Int = 1,
     val images: List<ReviewImage> = emptyList(),
-    val reviewAt: String,
+    @Serializable(KZonedDateTimeSerializer::class)
+    val reviewAt: ZonedDateTime,
 )
 
 @Stable

@@ -54,8 +54,6 @@ private fun Project.configureKotlin() {
         compilerOptions {
             jvmTarget.set(JvmTarget.fromTarget(MoimConfig.javaCompileTarget.toString()))
 
-            val warningsAsErrors: String? by project
-
             freeCompilerArgs.addAll(
                 "-Xstring-concat=inline",
                 "-opt-in=kotlin.RequiresOptIn",

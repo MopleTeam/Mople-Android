@@ -27,7 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
-import com.moim.core.common.util.getDateTimeFormatString
+import com.moim.core.common.util.parseDateString
 import com.moim.core.common.util.toDecimalString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
@@ -38,6 +38,7 @@ import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.model.Plan
 import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
+import java.time.ZonedDateTime
 
 @Composable
 fun HomePlanCard(
@@ -71,10 +72,11 @@ fun HomePlanCard(
                 iconRes = R.drawable.ic_meeting,
                 text = stringResource(R.string.unit_participants_count, plan.planMemberCount)
             )
+
             MeetingInfoText(
                 modifier = Modifier.padding(vertical = 4.dp),
                 iconRes = R.drawable.ic_clock,
-                text = getDateTimeFormatString(dateTime = plan.planAt, pattern = stringResource(R.string.regex_date_full))
+                text = plan.planAt.parseDateString(stringResource(R.string.regex_date_full)),
             )
             MeetingInfoText(
                 iconRes = R.drawable.ic_location,
@@ -225,7 +227,7 @@ private fun HomeMeetingPlanCardPreview() {
                 planName = "술 한잔 하는 날",
                 planMemberCount = 3,
                 planAddress = "서울 강남구",
-                planAt = "2024-12-14 09:00:00",
+                planAt = ZonedDateTime.now()
             ),
         )
     }

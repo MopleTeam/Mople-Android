@@ -12,8 +12,7 @@ import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.default
-import com.moim.core.common.util.getDateTimeFormatZonedDate
-import com.moim.core.common.util.getZonedDateTimeDefault
+import com.moim.core.common.util.parseDateString
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -49,7 +48,7 @@ class CalendarViewModel @Inject constructor(
     private val meetingPlanResult =
         combine(
             holidayRepository.getHolidays(ZonedDateTime.now()),
-            getPlanItemForCalendarUseCase(getDateTimeFormatZonedDate(pattern = "yyyyMM")),
+            getPlanItemForCalendarUseCase(ZonedDateTime.now().parseDateString("yyyyMM")),
             ::Pair
         ).asResult()
             .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
@@ -186,7 +185,7 @@ class CalendarViewModel @Inject constructor(
 
                 combine(
                     fetchHolidays,
-                    getPlanItemForCalendarUseCase(getDateTimeFormatZonedDate(dateTime = date, pattern = "yyyyMM")),
+                    getPlanItemForCalendarUseCase(date.parseDateString("yyyyMM")),
                     ::Pair
                 ).asResult()
                     .onEach { setLoading(it is Result.Loading) }
@@ -223,7 +222,7 @@ sealed interface CalendarUiState : UiState {
 
     data class Success(
         val plans: List<PlanItem>,
-        val selectDayOfMonth: ZonedDateTime = getZonedDateTimeDefault().default().withDayOfMonth(1),
+        val selectDayOfMonth: ZonedDateTime = ZonedDateTime.now().default().withDayOfMonth(1),
         val selectDay: ZonedDateTime? = null,
         val loadDates: List<ZonedDateTime> = listOf(selectDayOfMonth),
         val daysOfWeek: List<DayOfWeek> = daysOfWeek(),

@@ -56,6 +56,7 @@ import com.moim.feature.home.ui.HomeCreateCards
 import com.moim.feature.home.ui.HomePlanCard
 import com.moim.feature.home.ui.HomePlanMoreCard
 import com.moim.feature.home.ui.HomeTopAppbar
+import java.time.ZonedDateTime
 
 internal typealias OnHomeUiAction = (HomeUiAction) -> Unit
 
@@ -233,7 +234,7 @@ private fun HomeScreenPreview() {
                         planName = "술 한잔 하는 날",
                         planMemberCount = 3,
                         planAddress = "서울 강남구",
-                        planAt = "2023-12-14 09:00:00",
+                        planAt = ZonedDateTime.now()
                     ),
                     Plan(
                         meetingId = "2",
@@ -241,7 +242,7 @@ private fun HomeScreenPreview() {
                         planName = "술 한잔 하는 날",
                         planMemberCount = 3,
                         planAddress = "서울 강남구",
-                        planAt = "2023-12-15 09:00:00",
+                        planAt = ZonedDateTime.now()
                     ),
                 )
             ),

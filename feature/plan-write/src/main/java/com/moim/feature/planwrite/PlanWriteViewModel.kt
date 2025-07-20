@@ -8,7 +8,6 @@ import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseDateString
-import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -44,7 +43,7 @@ class PlanWriteViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             plan?.let { plan ->
-                val planDate = plan.planAt.parseZonedDateTime()
+                val planDate = plan.planAt
 
                 setUiState(
                     PlanWriteUiState.PlanWrite(

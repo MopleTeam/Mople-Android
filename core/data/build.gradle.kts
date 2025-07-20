@@ -19,7 +19,6 @@ dependencies {
     // Kotlin
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlinx.coroutines)
-    implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.okhttp.logging)

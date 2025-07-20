@@ -5,9 +5,11 @@ import androidx.navigation.NavType
 import com.moim.core.model.Plan
 import com.moim.core.model.Review
 import com.moim.core.model.ReviewImage
+import com.moim.core.model.util.KZonedDateTimeSerializer
 import com.moim.core.model.util.encoding
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.time.ZonedDateTime
 
 @Serializable
 data class PlanItem(
@@ -20,7 +22,6 @@ data class PlanItem(
     val meetingImageUrl: String = "",
     val planName: String = "",
     val participantsCount: Int = 1,
-    val planAt: String = "",
     val loadAddress: String = "",
     val weatherAddress : String = "",
     val latitude: Double = 0.0,
@@ -30,6 +31,8 @@ data class PlanItem(
     val temperature: Float = 0f,
     val isParticipant : Boolean = true,
     val reviewImages: List<ReviewImage> = emptyList(),
+    @Serializable(KZonedDateTimeSerializer::class)
+    val planAt: ZonedDateTime = ZonedDateTime.now(),
 )
 
 fun PlanItem.asPlan() : Plan {

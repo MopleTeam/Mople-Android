@@ -10,7 +10,6 @@ import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -66,7 +65,7 @@ class PlanDetailViewModel @Inject constructor(
             getPlanItemUseCase(GetPlanItemUseCase.Params(postId, isPlan)),
             ::Pair
         ).mapLatest { (user, post) ->
-            val isShowApplyButton = post.planAt.parseZonedDateTime().isAfter(ZonedDateTime.now()) && user.userId != post.userId
+            val isShowApplyButton = post.planAt.isAfter(ZonedDateTime.now()) && user.userId != post.userId
             PlanDetailUiState.Success(
                 user = user,
                 planItem = post,
