@@ -26,11 +26,15 @@ interface CommentApi {
         @Body params: JsonObject
     ): CommentResponse
 
-    @PATCH("comment/{postId}/{commentId}")
+    @PATCH("comment/{commentId}")
     suspend fun updateComment(
-        @Path("postId") postId: String,
         @Path("commentId") commentId: String,
         @Body params: JsonObject
+    ): CommentResponse
+
+    @POST("comment/{commentId}/likes")
+    suspend fun updateLikeComment(
+        @Path("commentId") commentId: String,
     ): CommentResponse
 
     @DELETE("comment/{commentId}")

@@ -23,6 +23,7 @@ data class Plan(
     val weatherIconUrl: String = "",
     val temperature: Float = 0f,
     val isParticipant: Boolean = true,
+    val commentCount : Int = 0,
     @Serializable(KZonedDateTimeSerializer::class)
     val planAt: ZonedDateTime = ZonedDateTime.now(),
 )

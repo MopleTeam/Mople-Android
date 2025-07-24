@@ -20,6 +20,7 @@ data class Review(
     val longitude: Double = 0.0, // y
     val placeName: String = "",
     val memberCount: Int = 1,
+    val commentCount: Int = 0,
     val images: List<ReviewImage> = emptyList(),
     @Serializable(KZonedDateTimeSerializer::class)
     val reviewAt: ZonedDateTime,

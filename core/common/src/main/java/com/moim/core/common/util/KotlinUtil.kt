@@ -8,6 +8,10 @@ fun Float.toDecimalFloat(index: Int = 1, roundingMode: RoundingMode = RoundingMo
     return BigDecimal(this.toDouble()).setScale(index, roundingMode).toFloat()
 }
 
-fun Float.toDecimalString(format: String = "##.#"): String {
+fun Int.decimalFormatString(format: String = "###,###"): String {
+    return DecimalFormat(format).format(this)
+}
+
+fun Float.decimalFormatString(format: String = "##.#"): String {
     return DecimalFormat(format).format(this)
 }

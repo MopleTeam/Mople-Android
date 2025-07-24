@@ -18,10 +18,11 @@ interface CommentRepository {
     ): Flow<Comment>
 
     fun updateComment(
-        postId: String,
         commentId: String,
         content: String,
     ): Flow<Comment>
+
+    fun updateLikeComment(commentId: String): Flow<Comment>
 
     fun deleteComment(commentId: String): Flow<Unit>
 

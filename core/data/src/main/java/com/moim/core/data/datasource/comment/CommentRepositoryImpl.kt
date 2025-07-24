@@ -42,14 +42,20 @@ internal class CommentRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun updateComment(postId: String, commentId: String, content: String): Flow<Comment> = catchFlow {
+    override fun updateComment(commentId: String, content: String): Flow<Comment> = catchFlow {
         emit(
             commentApi.updateComment(
-                postId = postId,
                 commentId = commentId,
-                params = jsonOf(KEY_CONTENTS to content)
+                params = jsonOf(
+                    KEY_CONTENTS to content,
+                    KEY_MENTIONS to listOf<String>()
+                )
             ).asItem()
         )
+    }
+
+    override fun updateLikeComment(commentId: String): Flow<Comment> = catchFlow {
+        emit(commentApi.updateLikeComment(commentId).asItem())
     }
 
     override fun deleteComment(commentId: String): Flow<Unit> = catchFlow {
@@ -63,6 +69,7 @@ internal class CommentRepositoryImpl @Inject constructor(
     companion object {
         private const val KEY_COMMENT_ID = "commentId"
         private const val KEY_CONTENTS = "contents"
+        private const val KEY_MENTIONS = "mentions"
         private const val KEY_REASON = "reason"
     }
 }

@@ -31,6 +31,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
+import com.moim.core.common.util.decimalFormatString
 import com.moim.core.common.util.toValidUrl
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
@@ -184,7 +185,7 @@ fun PlanDetailScreen(
 
                 item {
                     PlanDetailCommentHeader(
-                        commentCount = 0
+                        commentCount = uiState.planItem.commentCount
                     )
                 }
 

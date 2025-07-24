@@ -7,19 +7,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -27,9 +34,11 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton
@@ -66,7 +75,7 @@ fun PlanDetailCommentHeader(
         Spacer(Modifier.weight(1f))
 
         MoimText(
-            text = stringResource(R.string.unit_count, commentCount),
+            text = stringResource(R.string.unit_count, commentCount.decimalFormatString()),
             style = MoimTheme.typography.title03.semiBold,
             color = MoimTheme.colors.gray.gray04
         )
@@ -109,51 +118,18 @@ fun PlanDetailCommentItem(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Top
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                MoimText(
-                    text = comment.comment.writer.nickname,
-                    style = MoimTheme.typography.body01.semiBold,
-                    color = MoimTheme.colors.gray.gray01
-                )
-
-                Spacer(Modifier.width(8.dp))
-
-                comment.comment.commentAt.parseDateString()
-
-
-                MoimText(
-                    modifier = Modifier.weight(1f),
-                    text = comment.comment.commentAt.parseDateString(stringResource(R.string.regex_date_month_day)),
-                    style = MoimTheme.typography.body02.regular,
-                    color = MoimTheme.colors.gray.gray04
-                )
-
-                MoimIconButton(
-                    iconRes = R.drawable.ic_more,
-                    onClick = {
-                        val uiAction = if (userId == comment.comment.writer.userId) {
-                            PlanDetailUiAction.OnShowCommentEditDialog(
-                                isShow = true,
-                                comment = comment.comment
-                            )
-                        } else {
-                            PlanDetailUiAction.OnShowCommentReportDialog(
-                                isShow = true,
-                                comment = comment.comment
-                            )
-                        }
-
-                        onUiAction(uiAction)
-                    }
-                )
-            }
-
+            CommentHeader(
+                userId = userId,
+                comment = comment.comment,
+                onUiAction = onUiAction
+            )
             Spacer(Modifier.height(8.dp))
             CommentText(
                 texts = comment.texts,
+                onUiAction = onUiAction
+            )
+            CommentFooter(
+                comment = comment.comment,
                 onUiAction = onUiAction
             )
         }
@@ -163,6 +139,54 @@ fun PlanDetailCommentItem(
         thickness = 1.dp,
         color = MoimTheme.colors.stroke
     )
+}
+
+@Composable
+private fun CommentHeader(
+    modifier: Modifier = Modifier,
+    userId: String,
+    comment: Comment,
+    onUiAction: OnPlanDetailUiAction
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        MoimText(
+            text = comment.writer.nickname,
+            style = MoimTheme.typography.body01.semiBold,
+            color = MoimTheme.colors.gray.gray01
+        )
+
+        Spacer(Modifier.width(8.dp))
+
+        MoimText(
+            modifier = Modifier.weight(1f),
+            text = comment.commentAt.parseDateString(stringResource(R.string.regex_date_month_day)),
+            style = MoimTheme.typography.body02.regular,
+            color = MoimTheme.colors.gray.gray04
+        )
+
+        MoimIconButton(
+            iconRes = R.drawable.ic_more,
+            onClick = {
+                val uiAction = if (userId == comment.writer.userId) {
+                    PlanDetailUiAction.OnShowCommentEditDialog(
+                        isShow = true,
+                        comment = comment
+                    )
+                } else {
+                    PlanDetailUiAction.OnShowCommentReportDialog(
+                        isShow = true,
+                        comment = comment
+                    )
+                }
+
+                onUiAction(uiAction)
+            }
+        )
+    }
+
 }
 
 @Composable
@@ -220,6 +244,93 @@ private fun CommentText(
     )
 }
 
+@Composable
+private fun CommentFooter(
+    comment: Comment,
+    onUiAction: OnPlanDetailUiAction
+) {
+    val likeResource = if (comment.isLike) {
+        R.drawable.ic_thumb_up_fill
+    } else {
+        R.drawable.ic_thumb_up
+    }
+
+    Column {
+        Row(
+            modifier = Modifier.padding(top = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Row(
+                modifier = Modifier
+                    .defaultMinSize(minWidth = 56.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .onSingleClick {
+                        onUiAction(
+                            PlanDetailUiAction.OnClickCommentLike(
+                                comment = comment
+                            )
+                        )
+                    }
+                    .padding(end = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(likeResource),
+                    contentDescription = "",
+                    tint = Color.Unspecified
+                )
+
+                if (comment.likeCount > 0) {
+                    Text(
+                        text = comment.likeCount.decimalFormatString(),
+                        style = MoimTheme.typography.body02.medium,
+                        color = MoimTheme.colors.gray.gray04,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+
+            Icon(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .onSingleClick { onUiAction(PlanDetailUiAction.OnClickCommentAddReply(comment)) },
+                imageVector = ImageVector.vectorResource(R.drawable.ic_chat_add),
+                contentDescription = "",
+                tint = Color.Unspecified
+            )
+        }
+
+        if (comment.replayCount > 0) {
+            Row(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .onSingleClick {
+                        //::TODO click add
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.plan_detail_comment_reply_show, comment.replayCount.decimalFormatString()),
+                    style = MoimTheme.typography.body02.semiBold,
+                    color = MoimTheme.colors.gray.gray04
+                )
+
+                Icon(
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_chevron_down),
+                    contentDescription = "",
+                    tint = Color.Unspecified
+                )
+            }
+        }
+    }
+}
+
 
 @Preview
 @Composable
@@ -232,6 +343,9 @@ private fun PlanDetailCommentItemPreview() {
             nickname = "모닝커피클럽회원",
             imageUrl = "",
         ),
+        isLike = true,
+        likeCount = 1000,
+        replayCount = 100,
         content = "이른 아침, 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 다음에 또 뵐 수 있으면 좋겠네요.\n제 인스타도 많이 방문해주세요 https://www.instagram.com",
         commentAt = ZonedDateTime.now()
     )

@@ -17,6 +17,10 @@ data class Comment(
     val commentAt: ZonedDateTime,
 )
 
+fun Comment.isChild(): Boolean {
+    return parentId != null
+}
+
 @Stable
 data class Writer(
     val userId: String,

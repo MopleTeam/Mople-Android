@@ -7,15 +7,23 @@ import androidx.paging.PagingState
 import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.model.Comment
 import timber.log.Timber
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 class GetCommentsUseCase @Inject constructor(
     private val commentRepository: CommentRepository,
 ) {
+    var loadedAt: ZonedDateTime = ZonedDateTime.now()
+
     operator fun invoke(params: Params) = Pager(
         config = PagingConfig(pageSize = params.size)
     ) {
         object : PagingSource<String, Comment>() {
+
+            init {
+                loadedAt = ZonedDateTime.now()
+            }
+
             override fun getRefreshKey(state: PagingState<String, Comment>): String? = null
 
             override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, Comment> {

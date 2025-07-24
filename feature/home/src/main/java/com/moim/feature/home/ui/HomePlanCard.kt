@@ -28,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.util.parseDateString
-import com.moim.core.common.util.toDecimalString
+import com.moim.core.common.util.decimalFormatString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
@@ -202,7 +202,7 @@ private fun MeetingWeatherInfo(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 12.dp),
-                text = stringResource(R.string.unit_weather, temperature.toDecimalString()),
+                text = stringResource(R.string.unit_weather, temperature.decimalFormatString()),
                 style = MoimTheme.typography.body01.semiBold,
                 color = MoimTheme.colors.gray.gray01
             )

@@ -29,6 +29,8 @@ data class ReviewResponse(
     val placeName: String = "",
     @SerialName("participantsCount")
     val memberCount: Int = 1,
+    @SerialName("commentCount")
+    val commentCount: Int = 0,
     @SerialName("images")
     val images: List<ReviewImageResponse> = emptyList(),
     @SerialName("reviewTime")
@@ -38,7 +40,7 @@ data class ReviewResponse(
 @Serializable
 data class ReviewImageResponse(
     @SerialName("imageId")
-    val imageId :String,
+    val imageId: String,
     @SerialName("reviewImg")
     val reviewImageUrl: String
 )

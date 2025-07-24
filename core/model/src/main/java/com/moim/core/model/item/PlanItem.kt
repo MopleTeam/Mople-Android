@@ -23,19 +23,20 @@ data class PlanItem(
     val planName: String = "",
     val participantsCount: Int = 1,
     val loadAddress: String = "",
-    val weatherAddress : String = "",
+    val weatherAddress: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
     val placeName: String = "",
     val weatherIconUrl: String = "",
     val temperature: Float = 0f,
-    val isParticipant : Boolean = true,
+    val isParticipant: Boolean = true,
+    val commentCount: Int = 0,
     val reviewImages: List<ReviewImage> = emptyList(),
     @Serializable(KZonedDateTimeSerializer::class)
     val planAt: ZonedDateTime = ZonedDateTime.now(),
 )
 
-fun PlanItem.asPlan() : Plan {
+fun PlanItem.asPlan(): Plan {
     return Plan(
         userId = userId,
         meetingId = meetingId,
@@ -53,10 +54,11 @@ fun PlanItem.asPlan() : Plan {
         weatherIconUrl = weatherIconUrl,
         isParticipant = isParticipant,
         temperature = temperature,
+        commentCount = commentCount,
     )
 }
 
-fun PlanItem.asReview() : Review {
+fun PlanItem.asReview(): Review {
     return Review(
         userId = userId,
         meetingId = meetingId,
@@ -72,8 +74,10 @@ fun PlanItem.asReview() : Review {
         latitude = latitude,
         placeName = placeName,
         images = reviewImages,
+        commentCount = commentCount,
     )
 }
+
 fun Plan.asPlanItem(): PlanItem {
     return PlanItem(
         isPlanAtBefore = true,
@@ -94,7 +98,8 @@ fun Plan.asPlanItem(): PlanItem {
         weatherAddress = weatherAddress,
         weatherIconUrl = weatherIconUrl,
         isParticipant = isParticipant,
-        reviewImages = emptyList()
+        reviewImages = emptyList(),
+        commentCount = commentCount,
     )
 }
 
@@ -114,7 +119,8 @@ fun Review.asPlanItem(): PlanItem {
         latitude = latitude,
         longitude = longitude,
         placeName = placeName,
-        reviewImages = images
+        reviewImages = images,
+        commentCount = commentCount,
     )
 }
 

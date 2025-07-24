@@ -21,6 +21,7 @@ fun ReviewResponse.asItem(): Review {
         longitude = longitude,
         placeName = placeName,
         memberCount = memberCount,
+        commentCount = commentCount,
         images = images.map(ReviewImageResponse::asItem),
         reviewAt = reviewAt.parseZonedDateTime()
     )

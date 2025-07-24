@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
+import com.moim.core.common.util.decimalFormatString
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
@@ -127,7 +128,7 @@ fun AlarmCount(
         )
 
         MoimText(
-            text = stringResource(R.string.unit_count, alarmCount),
+            text = stringResource(R.string.unit_count, alarmCount.decimalFormatString()),
             style = MoimTheme.typography.body01.medium,
             color = MoimTheme.colors.gray.gray01
         )

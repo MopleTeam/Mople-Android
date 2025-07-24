@@ -21,6 +21,7 @@ fun PlanResponse.asItem(): Plan {
         weatherIconUrl = weatherIconUrl,
         temperature = temperature,
         isParticipant = isParticipant,
+        commentCount = commentCount,
         planAt = planTime.parseZonedDateTime(),
     )
 }
