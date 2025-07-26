@@ -1,30 +1,32 @@
 package com.moim.feature.meeting
 
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
+import androidx.paging.filter
+import androidx.paging.insertSeparators
+import androidx.paging.map
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.PlanAction
 import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.delegate.planItemStateIn
-import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
-import com.moim.core.common.view.checkState
-import com.moim.core.common.view.restartableStateIn
-import com.moim.core.data.datasource.meeting.MeetingRepository
+import com.moim.core.common.view.checkedActionedAtIsBeforeLoadedAt
+import com.moim.core.domain.usecase.GetMeetingsUseCase
 import com.moim.core.model.Meeting
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.retry
 import javax.inject.Inject
 
 @HiltViewModel
 class MeetingViewModel @Inject constructor(
-    meetingRepository: MeetingRepository,
+    private val getMeetingsUseCase: GetMeetingsUseCase,
     private val meetingViewModelDelegate: MeetingViewModelDelegate,
     private val planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(),
@@ -34,118 +36,142 @@ class MeetingViewModel @Inject constructor(
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
     private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
-    private val meetingsResult = meetingRepository.getMeetings()
-        .asResult()
-        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private var _meetings = getMeetingsUseCase().cachedIn(viewModelScope)
+    val meetings = merge(
+        meetingActionReceiver.flatMapLatest { receiver ->
+            when (receiver) {
+                is MeetingAction.None -> _meetings
 
-    init {
-        viewModelScope.launch {
-            launch {
-                meetingsResult.collect { result ->
-                    when (result) {
-                        is Result.Loading -> setUiState(MeetingUiState.Loading)
-                        is Result.Success -> setUiState(MeetingUiState.Success(result.data))
-                        is Result.Error -> setUiState(MeetingUiState.Error)
-                    }
-                }
-            }
-
-            launch {
-                meetingActionReceiver.collect { action ->
-                    uiState.checkState<MeetingUiState.Success> {
-                        when (action) {
-                            is MeetingAction.MeetingCreate -> {
-                                val meeting = meetings.toMutableList().apply { add(0, action.meeting) }
-                                setUiState(copy(meetings = meeting))
-                            }
-
-                            is MeetingAction.MeetingUpdate -> {
-                                val meeting = meetings.toMutableList().apply {
-                                    withIndex()
-                                        .firstOrNull { action.meeting.id == it.value.id }
-                                        ?.index
-                                        ?.let { index -> set(index, action.meeting) }
+                is MeetingAction.MeetingCreate -> {
+                    _meetings.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getMeetingsUseCase.loadedAt
+                        ) {
+                            pagingData.insertSeparators { before: Meeting?, after: Meeting? ->
+                                if (before == null) {
+                                    return@insertSeparators receiver.meeting
+                                } else {
+                                    null
                                 }
-
-                                setUiState(copy(meetings = meeting))
                             }
-
-                            is MeetingAction.MeetingDelete -> {
-                                val meeting = meetings.toMutableList().apply {
-                                    withIndex()
-                                        .firstOrNull { action.meetId == it.value.id }
-                                        ?.index
-                                        ?.let { index -> removeAt(index) }
-                                }
-
-                                setUiState(copy(meetings = meeting))
-                            }
-
-                            is MeetingAction.MeetingInvalidate -> meetingsResult.restart()
-
-                            else -> return@collect
                         }
                     }
                 }
-            }
 
-            launch {
-                planActionReceiver.collect { action ->
-                    uiState.checkState<MeetingUiState.Success> {
-                        when (action) {
-                            is PlanAction.PlanCreate -> {
-                                val meeting = meetings.withIndex().find { it.value.id == action.planItem.meetingId } ?: return@collect
-                                val currentLastAt = meeting.value.lastPlanAt
-                                val newLastAt = action.planItem.planAt
-
-                                if (newLastAt.isBefore(currentLastAt)) return@collect
-
-                                setUiState(
-                                    copy(
-                                        meetings = meetings
-                                            .toMutableList()
-                                            .apply { set(meeting.index, meeting.value.copy(lastPlanAt = action.planItem.planAt)) }
-                                    )
-                                )
+                is MeetingAction.MeetingUpdate -> {
+                    _meetings.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getMeetingsUseCase.loadedAt
+                        ) {
+                            pagingData.map { meeting ->
+                                if (meeting.id == receiver.meeting.id) {
+                                    receiver.meeting
+                                } else {
+                                    meeting
+                                }
                             }
+                        }
 
-                            is PlanAction.PlanUpdate -> {
-                                val meeting = meetings.withIndex().find { it.value.id == action.planItem.meetingId } ?: return@collect
-                                val currentLastAt = meeting.value.lastPlanAt
-                                val newLastAt = action.planItem.planAt
+                    }
+                }
 
-                                if (newLastAt.isBefore(currentLastAt)) return@collect
-                                setUiState(
-                                    copy(
-                                        meetings = meetings
-                                            .toMutableList()
-                                            .apply { set(meeting.index, meeting.value.copy(lastPlanAt = action.planItem.planAt)) }
-                                    )
-                                )
-                            }
-
-                            is PlanAction.PlanDelete, is PlanAction.PlanInvalidate -> meetingsResult.restart()
-                            is PlanAction.None -> return@collect
+                is MeetingAction.MeetingDelete -> {
+                    _meetings.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getMeetingsUseCase.loadedAt
+                        ) {
+                            pagingData
+                                .map { meeting ->
+                                    if (meeting.id == receiver.meetId) {
+                                        meeting.apply { isDeleted = true }
+                                    } else {
+                                        meeting
+                                    }
+                                }
+                                .filter { it.isDeleted.not() }
                         }
                     }
                 }
+
+                is MeetingAction.MeetingInvalidate -> {
+                    setUiEvent(MeetingUiEvent.RefreshPagingData)
+                    _meetings
+                }
+            }.also {
+                _meetings = it
             }
+        },
+        planActionReceiver.flatMapLatest { receiver ->
+            when (receiver) {
+                is PlanAction.None -> _meetings
+
+                is PlanAction.PlanCreate -> {
+                    _meetings.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getMeetingsUseCase.loadedAt
+                        ) {
+                            pagingData.map { meeting ->
+                                if (meeting.id == receiver.planItem.meetingId) {
+                                    val currentLastAt = meeting.lastPlanAt
+                                    val newLastAt = receiver.planItem.planAt
+
+                                    if (newLastAt.isBefore(currentLastAt)) {
+                                        meeting
+                                    } else {
+                                        meeting.copy(lastPlanAt = newLastAt)
+                                    }
+                                } else {
+                                    meeting
+                                }
+                            }
+                        }
+                    }
+                }
+
+                is PlanAction.PlanUpdate -> {
+                    _meetings.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getMeetingsUseCase.loadedAt
+                        ) {
+                            pagingData.map { meeting ->
+                                if (meeting.id == receiver.planItem.meetingId) {
+                                    val currentLastAt = meeting.lastPlanAt
+                                    val newLastAt = receiver.planItem.planAt
+
+                                    if (newLastAt.isBefore(currentLastAt)) {
+                                        meeting
+                                    } else {
+                                        meeting.copy(lastPlanAt = newLastAt)
+                                    }
+                                } else {
+                                    meeting
+                                }
+                            }
+                        }
+                    }
+                }
+
+                is PlanAction.PlanInvalidate,
+                is PlanAction.PlanDelete -> {
+                    setUiEvent(MeetingUiEvent.RefreshPagingData)
+                    _meetings
+                }
+            }.also { _meetings = it }
         }
-    }
+    ).cachedIn(viewModelScope)
 
     fun onUiAction(uiAction: MeetingUiAction) {
         when (uiAction) {
             is MeetingUiAction.OnClickMeetingWrite -> setUiEvent(MeetingUiEvent.NavigateToMeetingWrite)
             is MeetingUiAction.OnClickMeeting -> setUiEvent(MeetingUiEvent.NavigateToMeetingDetail(uiAction.meetingId))
-            is MeetingUiAction.OnClickRefresh -> meetingsResult.restart()
+            is MeetingUiAction.OnClickRefresh -> setUiEvent(MeetingUiEvent.RefreshPagingData)
         }
     }
-}
-
-sealed interface MeetingUiState : UiState {
-    data object Loading : MeetingUiState
-    data class Success(val meetings: List<Meeting>) : MeetingUiState
-    data object Error : MeetingUiState
 }
 
 sealed interface MeetingUiAction : UiAction {
@@ -157,4 +183,5 @@ sealed interface MeetingUiAction : UiAction {
 sealed interface MeetingUiEvent : UiEvent {
     data object NavigateToMeetingWrite : MeetingUiEvent
     data class NavigateToMeetingDetail(val meetingId: String) : MeetingUiEvent
+    data object RefreshPagingData : MeetingUiEvent
 }

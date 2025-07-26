@@ -20,7 +20,9 @@ data class Meeting(
     val sinceDays: Int = 0,
     @Serializable(with = KZonedDateTimeSerializer::class)
     val lastPlanAt: ZonedDateTime? = null,
-)
+) {
+    var isDeleted : Boolean = false
+}
 
 val MeetingType = object : NavType<Meeting?>(isNullableAllowed = true) {
     override fun get(bundle: Bundle, key: String): Meeting? {

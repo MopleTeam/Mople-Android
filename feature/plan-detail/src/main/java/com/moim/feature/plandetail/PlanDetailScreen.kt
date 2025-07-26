@@ -3,7 +3,6 @@ package com.moim.feature.plandetail
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,13 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -26,14 +21,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
-import com.moim.core.common.util.decimalFormatString
 import com.moim.core.common.util.toValidUrl
 import com.moim.core.common.view.ObserveAsEvents
+import com.moim.core.common.view.PAGING_ERROR
+import com.moim.core.common.view.PAGING_LOADING
+import com.moim.core.common.view.isAppendError
+import com.moim.core.common.view.isAppendLoading
+import com.moim.core.common.view.isError
+import com.moim.core.common.view.isLoading
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
@@ -204,8 +203,8 @@ fun PlanDetailScreen(
                         )
                     }
 
-                    if (comments.loadState.append is LoadState.Loading) {
-                        item(key = "LoadState At Loading") {
+                    if (comments.loadState.isAppendLoading()) {
+                        item(key = PAGING_LOADING) {
                             PagingLoadingScreen(
                                 modifier =
                                     Modifier
@@ -216,8 +215,8 @@ fun PlanDetailScreen(
                         }
                     }
 
-                    if (comments.loadState.append is LoadState.Error) {
-                        item(key = "LoadState At Error") {
+                    if (comments.loadState.isAppendError()) {
+                        item(key = PAGING_ERROR) {
                             PagingErrorScreen(
                                 modifier =
                                     Modifier
@@ -232,7 +231,7 @@ fun PlanDetailScreen(
 
                     item {
                         AnimatedVisibility(
-                            visible = comments.loadState.refresh is LoadState.Loading,
+                            visible = comments.loadState.isLoading()
                         ) {
                             PagingLoadingScreen()
                         }
@@ -241,7 +240,7 @@ fun PlanDetailScreen(
                     item {
                         AnimatedVisibility(
                             modifier = Modifier.fillMaxWidth(),
-                            visible = comments.loadState.refresh is LoadState.Error,
+                            visible = comments.loadState.isError()
                         ) {
                             PagingErrorScreen(
                                 modifier = modifier,

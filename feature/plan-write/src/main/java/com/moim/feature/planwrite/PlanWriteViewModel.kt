@@ -3,6 +3,9 @@ package com.moim.feature.planwrite
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
@@ -14,14 +17,20 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
-import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
+import com.moim.core.domain.usecase.GetMeetingsUseCase
 import com.moim.core.model.Meeting
 import com.moim.core.model.Place
 import com.moim.core.model.item.asPlanItem
 import com.moim.core.route.DetailRoute
+import com.moim.feature.planwrite.model.MeetingUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okio.IOException
 import java.time.ZonedDateTime
@@ -31,7 +40,7 @@ import javax.inject.Inject
 class PlanWriteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val planRepository: PlanRepository,
-    private val meetingRepository: MeetingRepository,
+    getMeetingsUseCase: GetMeetingsUseCase,
     planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(), PlanItemViewModelDelegate by planItemViewModelDelegate {
 
@@ -40,17 +49,24 @@ class PlanWriteViewModel @Inject constructor(
             .toRoute<DetailRoute.PlanWrite>(DetailRoute.PlanWrite.typeMap)
             .plan
 
+    private val selectedMeetingId = MutableStateFlow<String?>(null)
+
+    private val meetings = getMeetingsUseCase()
+        .mapLatest { it.map { meeting -> MeetingUiModel(meeting) } }
+        .cachedIn(viewModelScope)
+        .combine(selectedMeetingId) { meetings, selectedMeetingId ->
+            meetings.map { pagingData -> pagingData.copy(isSelected = pagingData.meeting.id == selectedMeetingId) }
+        }.cachedIn(viewModelScope)
+
     init {
         viewModelScope.launch {
             plan?.let { plan ->
-                val planDate = plan.planAt
-
                 setUiState(
                     PlanWriteUiState.PlanWrite(
                         planId = plan.postId,
                         planName = plan.planName,
-                        planDate = planDate,
-                        planTime = planDate,
+                        planDate = plan.planAt,
+                        planTime = plan.planAt,
                         planLoadAddress = plan.loadAddress,
                         planWeatherAddress = plan.weatherAddress,
                         planPlaceName = plan.planName,
@@ -62,6 +78,7 @@ class PlanWriteViewModel @Inject constructor(
                         enabledSubmit = plan.postId.isNotEmpty()
                     )
                 )
+                selectedMeetingId.update { plan.meetingId }
             } ?: run { setUiState(PlanWriteUiState.PlanWrite()) }
         }
     }
@@ -140,13 +157,8 @@ class PlanWriteViewModel @Inject constructor(
 
     private fun setPlanMeeting(meeting: Meeting) {
         uiState.checkState<PlanWriteUiState.PlanWrite> {
-            val dialogState = if (meetingDialogUiState is PlanWriteDialogUiState.Success) {
-                meetingDialogUiState.copy(selectedMeeting = meeting)
-            } else {
-                meetingDialogUiState
-            }
-
-            setUiState(copy(selectMeetingId = meeting.id, selectMeetingName = meeting.name, meetingDialogUiState = dialogState))
+            selectedMeetingId.update { meeting.id }
+            setUiState(copy(selectMeetingId = meeting.id, selectMeetingName = meeting.name))
             setPlanCreateEnabled()
         }
     }
@@ -285,38 +297,12 @@ class PlanWriteViewModel @Inject constructor(
     private fun showMeetingsDialog(isShow: Boolean) {
         viewModelScope.launch {
             uiState.checkState<PlanWriteUiState.PlanWrite> {
-                if (isShow && meetingDialogUiState !is PlanWriteDialogUiState.Success) {
-                    meetingRepository.getMeetings()
-                        .asResult()
-                        .collect { result ->
-                            when (result) {
-                                is Result.Loading -> setUiState(copy(isShowMeetingDialog = true, meetingDialogUiState = PlanWriteDialogUiState.Loading))
-                                is Result.Success -> {
-                                    val meetings = result.data
-
-                                    setUiState(
-                                        copy(
-                                            isShowMeetingDialog = true,
-                                            meetingDialogUiState = PlanWriteDialogUiState.Success(
-                                                meetings = meetings,
-                                                selectedMeeting = meetings.find { selectMeetingId == it.id }
-                                            )
-                                        )
-                                    )
-                                }
-
-                                is Result.Error -> {
-                                    setUiState(copy(isShowMeetingDialog = false))
-                                    when (result.exception) {
-                                        is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                        is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                                    }
-                                }
-                            }
-                        }
-                } else {
-                    setUiState(copy(isShowMeetingDialog = isShow))
-                }
+                setUiState(
+                    copy(
+                        isShowMeetingDialog = isShow,
+                        meetings = if (isShow) this@PlanWriteViewModel.meetings else null
+                    )
+                )
             }
         }
     }
@@ -343,14 +329,14 @@ sealed interface PlanWriteUiState : UiState {
         val planDate: ZonedDateTime? = null,
         val planTime: ZonedDateTime? = null,
         val planLoadAddress: String? = null,
-        val planWeatherAddress : String? = null,
+        val planWeatherAddress: String? = null,
         val planPlaceName: String? = null,
         val planLongitude: Double = 0.0,
         val planLatitude: Double = 0.0,
         val selectMeetingId: String? = null,
         val selectMeetingName: String? = null,
         val selectedPlace: Place? = null,
-        val meetingDialogUiState: PlanWriteDialogUiState = PlanWriteDialogUiState.Loading,
+        val meetings: Flow<PagingData<MeetingUiModel>>? = null,
         val searchKeyword: String? = null,
         val searchPlaces: List<Place> = emptyList(),
         val isShowDatePickerDialog: Boolean = false,
@@ -362,14 +348,6 @@ sealed interface PlanWriteUiState : UiState {
         val enableMeetingSelected: Boolean = true,
         val enabledSubmit: Boolean = false,
     ) : PlanWriteUiState
-}
-
-sealed interface PlanWriteDialogUiState : UiState {
-    data object Loading : PlanWriteDialogUiState
-    data class Success(
-        val meetings: List<Meeting>,
-        val selectedMeeting: Meeting? = null,
-    ) : PlanWriteDialogUiState
 }
 
 sealed interface PlanWriteUiAction : UiAction {

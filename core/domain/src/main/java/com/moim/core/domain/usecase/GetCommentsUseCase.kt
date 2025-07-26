@@ -43,7 +43,7 @@ class GetCommentsUseCase @Inject constructor(
                         nextKey = if (commentContainer.cursorPage.isNext && commentContainer.cursorPage.size >= params.size) nextCursor else null
                     )
                 } catch (e: Exception) {
-                    Timber.e("error $e")
+                    Timber.e("[GetCommentsUseCase] error $e")
                     LoadResult.Error(e)
                 }
             }
