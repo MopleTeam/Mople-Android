@@ -5,7 +5,10 @@ import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.ReviewResponse
+import com.moim.core.model.PaginationContainer
+import com.moim.core.model.Review
 import com.moim.core.network.service.ReviewApi
+import com.moim.core.network.util.converterException
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -14,8 +17,22 @@ internal class ReviewRepositoryImpl @Inject constructor(
     private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource
 ) : ReviewRepository {
 
-    override fun getReviews(meetingId: String) = catchFlow {
-        emit(reviewApi.getReviews(meetingId).map(ReviewResponse::asItem))
+    override suspend fun getReviews(
+        meetingId: String,
+        cursor: String,
+        size: Int
+    ): PaginationContainer<List<Review>> {
+        return try {
+            reviewApi.getReviews(
+                id = meetingId,
+                cursor = cursor,
+                size = size
+            ).asItem {
+                it.map(ReviewResponse::asItem)
+            }
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
     }
 
     override fun getReview(reviewId: String) = catchFlow {

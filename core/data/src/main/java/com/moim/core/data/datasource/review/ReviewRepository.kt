@@ -1,13 +1,17 @@
 package com.moim.core.data.datasource.review
 
+import com.moim.core.model.PaginationContainer
 import com.moim.core.model.Participant
 import com.moim.core.model.Review
-import com.moim.core.model.ReviewImage
 import kotlinx.coroutines.flow.Flow
 
 interface ReviewRepository {
 
-    fun getReviews(meetingId: String): Flow<List<Review>>
+    suspend fun getReviews(
+        meetingId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<Review>>
 
     fun getReview(reviewId: String): Flow<Review>
 

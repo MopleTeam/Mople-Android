@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -29,11 +28,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import com.moim.core.common.consts.WEATHER_ICON_URL
-import com.moim.core.common.util.parseDateString
 import com.moim.core.common.util.decimalFormatString
+import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimPrimaryButton
@@ -42,21 +43,18 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.model.Plan
-import com.moim.core.model.Review
-import com.moim.core.model.ReviewImage
+import com.moim.core.model.item.PlanItem
 import com.moim.feature.meetingdetail.MeetingDetailUiAction
-import com.moim.feature.meetingdetail.OnMeetingDetailUiAction
 import java.time.ZonedDateTime
 
 @Composable
 fun MeetingDetailPlanContent(
     modifier: Modifier = Modifier,
     userId: String,
-    plans: List<Plan>,
-    reviews: List<Review>,
     isPlanSelected: Boolean,
-    onUiAction: OnMeetingDetailUiAction
+    plans: LazyPagingItems<PlanItem>,
+    reviews: LazyPagingItems<PlanItem>,
+    onUiAction: (MeetingDetailUiAction) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
@@ -81,7 +79,7 @@ fun MeetingDetailPlanContent(
                 )
 
                 MoimText(
-                    text = stringResource(R.string.unit_count, (if (isPlanSelected) plans.size else reviews.size).decimalFormatString()),
+                    text = stringResource(R.string.unit_count, 0),
                     style = MoimTheme.typography.body01.medium,
                     color = MoimTheme.colors.gray.gray04
                 )
@@ -91,23 +89,28 @@ fun MeetingDetailPlanContent(
 
         if (isPlanSelected) {
             items(
-                items = plans,
-                key = { it.planId }
-            ) {
+                count = plans.itemCount,
+                key = plans.itemKey(),
+                contentType = plans.itemContentType()
+            ) { index ->
+                val plan = plans[index] ?: return@items
+
                 MeetingDetailPlanItem(
                     userId = userId,
-                    plan = it,
+                    plan = plan,
                     onUiAction = onUiAction
                 )
             }
         } else {
             items(
-                items = reviews,
-                key = { it.reviewId }
-            ) {
+                count = reviews.itemCount,
+                key = reviews.itemKey(),
+                contentType = reviews.itemContentType()
+            ) { index ->
+                val review = reviews[index] ?: return@items
                 MeetingDetailReviewItem(
                     userId = userId,
-                    review = it,
+                    review = review,
                     onUiAction = onUiAction
                 )
             }
@@ -119,12 +122,12 @@ fun MeetingDetailPlanContent(
 fun MeetingDetailPlanItem(
     modifier: Modifier = Modifier,
     userId: String,
-    plan: Plan,
-    onUiAction: OnMeetingDetailUiAction
+    plan: PlanItem,
+    onUiAction: (MeetingDetailUiAction) -> Unit,
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(plan.planId, true)) }
+        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(plan.postId, true)) }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -147,7 +150,7 @@ fun MeetingDetailPlanItem(
             Spacer(Modifier.height(4.dp))
 
             PlanParticipantCount(
-                count = plan.planMemberCount
+                count = plan.participantsCount
             )
             Spacer(Modifier.height(16.dp))
 
@@ -181,7 +184,7 @@ fun MeetingDetailPlanItem(
                             onUiAction(
                                 MeetingDetailUiAction.OnShowPlanApplyCancelDialog(
                                     isShow = true,
-                                    cancelPlanId = plan.planId
+                                    cancelPlanItem = plan
                                 )
                             )
                         }
@@ -195,7 +198,7 @@ fun MeetingDetailPlanItem(
                             onUiAction(
                                 MeetingDetailUiAction.OnClickPlanApply(
                                     isApply = true,
-                                    planId = plan.planId,
+                                    planItem = plan
                                 )
                             )
                         }
@@ -210,17 +213,17 @@ fun MeetingDetailPlanItem(
 fun MeetingDetailReviewItem(
     modifier: Modifier = Modifier,
     userId: String,
-    review: Review,
-    onUiAction: OnMeetingDetailUiAction
+    review: PlanItem,
+    onUiAction: (MeetingDetailUiAction) -> Unit,
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(review.reviewId, false)) }
+        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(review.postId, false)) }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            MeetingDetailPlanHeader(time = review.reviewAt)
+            MeetingDetailPlanHeader(time = review.planAt)
             Spacer(Modifier.height(10.dp))
 
             Row(
@@ -237,7 +240,7 @@ fun MeetingDetailReviewItem(
                         }
 
                         MoimText(
-                            text = review.reviewName,
+                            text = review.planName,
                             style = MoimTheme.typography.title03.semiBold,
                             color = MoimTheme.colors.gray.gray01
                         )
@@ -245,11 +248,11 @@ fun MeetingDetailReviewItem(
                     Spacer(Modifier.height(4.dp))
 
                     PlanParticipantCount(
-                        count = review.memberCount
+                        count = review.participantsCount
                     )
                 }
 
-                if (review.images.isNotEmpty()) {
+                if (review.reviewImages.isNotEmpty()) {
                     Spacer(Modifier.width(16.dp))
 
                     Box {
@@ -259,7 +262,7 @@ fun MeetingDetailReviewItem(
                                 .clip(RoundedCornerShape(6.dp))
                                 .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
                                 .size(50.dp),
-                            imageUrl = review.images.first().imageUrl,
+                            imageUrl = review.reviewImages.first().imageUrl,
                             errorImage = painterResource(R.drawable.ic_empty_image)
                         )
 
@@ -273,7 +276,7 @@ fun MeetingDetailReviewItem(
                             horizontalArrangement = Arrangement.Center
                         ) {
                             MoimText(
-                                text = review.images.size.toString(),
+                                text = review.reviewImages.size.toString(),
                                 textAlign = TextAlign.Center,
                                 style = MoimTheme.typography.body01.medium,
                                 color = MoimTheme.colors.primary.primary
@@ -407,89 +410,6 @@ private fun MeetingWeatherInfo(
                 text = address,
                 style = MoimTheme.typography.body02.medium,
                 color = MoimTheme.colors.gray.gray04
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun MeetingDetailPlanContentPreview() {
-    MoimTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MoimTheme.colors.bg.primary),
-        ) {
-            MeetingDetailPlanContent(
-                userId = "",
-                isPlanSelected = false,
-                plans = listOf(
-                    Plan(
-                        userId = "100",
-                        planId = "1",
-                        planName = "술 한 잔 하는 날1",
-                        planMemberCount = 6,
-                        planAt = ZonedDateTime.now(),
-                        planAddress = "서울시 강남구",
-                        isParticipant = true,
-                    ),
-                    Plan(
-                        planId = "2",
-                        planName = "술 한 잔 하는 날2",
-                        planMemberCount = 6,
-                        planAt = ZonedDateTime.now().plusDays(1),
-                        planAddress = "서울시 강남구",
-                        isParticipant = true
-                    ),
-                    Plan(
-                        planId = "3",
-                        planName = "술 한 잔 하는 날3",
-                        planMemberCount = 6,
-                        planAt = ZonedDateTime.now().plusDays(2),
-                        planAddress = "서울시 강남구"
-                    )
-                ),
-                reviews = listOf(
-                    Review(
-                        postId = "1",
-                        meetingId = "1",
-                        reviewId = "1",
-                        reviewName = "술 한 잔 하는 날1",
-                        memberCount = 6,
-                        reviewAt = ZonedDateTime.now(),
-                        address = "서울시 강남구",
-                        images = listOf(ReviewImage(imageId = "", imageUrl = "aaa"))
-                    ),
-                    Review(
-                        postId = "1",
-                        meetingId = "1",
-                        reviewId = "2",
-                        reviewName = "술 한 잔 하는 날2",
-                        memberCount = 6,
-                        reviewAt = ZonedDateTime.now().plusDays(1),
-                        address = "서울시 강남구"
-                    ),
-                    Review(
-                        postId = "1",
-                        meetingId = "1",
-                        reviewId = "3",
-                        reviewName = "술 한 잔 하는 날3",
-                        memberCount = 6,
-                        reviewAt = ZonedDateTime.now().plusDays(2),
-                        address = "서울시 강남구"
-                    ),
-                    Review(
-                        postId = "1",
-                        meetingId = "1",
-                        reviewId = "4",
-                        reviewName = "술 한 잔 하는 날4",
-                        memberCount = 6,
-                        reviewAt = ZonedDateTime.now().plusDays(3),
-                        address = "서울시 강남구"
-                    ),
-                ),
-                onUiAction = {}
             )
         }
     }

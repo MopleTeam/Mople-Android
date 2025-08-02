@@ -1,6 +1,7 @@
 package com.moim.core.data.datasource.plan
 
 import com.moim.core.model.MeetingPlanContainer
+import com.moim.core.model.PaginationContainer
 import com.moim.core.model.Participant
 import com.moim.core.model.Place
 import com.moim.core.model.Plan
@@ -13,7 +14,11 @@ interface PlanRepository {
 
     fun getPlan(planId: String): Flow<Plan>
 
-    fun getPlans(meetingId: String): Flow<List<Plan>>
+    suspend fun getPlans(
+        meetingId: String,
+        cursor: String,
+        size: Int
+    ): PaginationContainer<List<Plan>>
 
     fun getPlansForCalendar(date: String): Flow<PlanReviewContainer>
 

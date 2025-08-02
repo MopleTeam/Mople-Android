@@ -1,15 +1,20 @@
 package com.moim.core.network.service
 
 import com.moim.core.datamodel.NotificationResponse
+import com.moim.core.datamodel.PaginationContainerResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Query
 
 interface NotificationApi {
     @GET("notification/list")
-    suspend fun getNotifications(): List<NotificationResponse>
+    suspend fun getNotifications(
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<NotificationResponse>>
 
     @GET("notification/subscribe")
     suspend fun getNotificationSubscribes(): List<String>

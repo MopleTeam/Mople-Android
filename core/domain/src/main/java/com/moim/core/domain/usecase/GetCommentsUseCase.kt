@@ -4,14 +4,18 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.moim.core.common.di.IoDispatcher
 import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.model.Comment
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.flowOn
 import timber.log.Timber
 import java.time.ZonedDateTime
 import javax.inject.Inject
 
 class GetCommentsUseCase @Inject constructor(
     private val commentRepository: CommentRepository,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
     var loadedAt: ZonedDateTime = ZonedDateTime.now()
 
@@ -48,7 +52,7 @@ class GetCommentsUseCase @Inject constructor(
                 }
             }
         }
-    }.flow
+    }.flow.flowOn(ioDispatcher)
 
     data class Params(
         val postId: String,

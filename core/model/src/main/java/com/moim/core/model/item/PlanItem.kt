@@ -34,7 +34,9 @@ data class PlanItem(
     val reviewImages: List<ReviewImage> = emptyList(),
     @Serializable(KZonedDateTimeSerializer::class)
     val planAt: ZonedDateTime = ZonedDateTime.now(),
-)
+) {
+    var isDeleted: Boolean = false
+}
 
 fun PlanItem.asPlan(): Plan {
     return Plan(

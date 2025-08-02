@@ -5,47 +5,41 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.moim.core.common.di.IoDispatcher
-import com.moim.core.data.datasource.meeting.MeetingRepository
-import com.moim.core.model.Meeting
+import com.moim.core.data.datasource.notification.NotificationRepository
+import com.moim.core.model.Notification
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.flowOn
 import timber.log.Timber
-import java.time.ZonedDateTime
 import javax.inject.Inject
 
-class GetMeetingsUseCase @Inject constructor(
-    private val meetingRepository: MeetingRepository,
+class GetNotificationsUseCase @Inject constructor(
+    private val notificationRepository: NotificationRepository,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
-    var loadedAt: ZonedDateTime = ZonedDateTime.now()
 
     operator fun invoke(params: Params = Params()) = Pager(
         config = PagingConfig(pageSize = params.size)
     ) {
-        object : PagingSource<String, Meeting>() {
+        object : PagingSource<String, Notification>() {
+            override fun getRefreshKey(state: PagingState<String, Notification>): String? = null
 
-            init {
-                loadedAt = ZonedDateTime.now()
-            }
-
-            override fun getRefreshKey(state: PagingState<String, Meeting>): String? = null
-
-            override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, Meeting> {
+            override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, Notification> {
                 val page = loadParams.key ?: ""
+
                 return try {
-                    val meetingContainer = meetingRepository.getMeetings(
+                    val notificationContainer = notificationRepository.getNotifications(
                         cursor = page,
                         size = params.size
                     )
-                    val nextCursor = meetingContainer.cursorPage.nextCursor
+                    val nextCursor = notificationContainer.cursorPage.nextCursor
 
                     LoadResult.Page(
-                        data = meetingContainer.content,
+                        data = notificationContainer.content,
                         prevKey = null,
-                        nextKey = if (meetingContainer.cursorPage.isNext && meetingContainer.cursorPage.size >= params.size) nextCursor else null
+                        nextKey = if (notificationContainer.cursorPage.isNext && notificationContainer.cursorPage.size >= params.size) nextCursor else null
                     )
                 } catch (e: Exception) {
-                    Timber.e("[GetMeetingsUseCase] error $e")
+                    Timber.e("[GetNotificationsUseCase] error $e")
                     LoadResult.Error(e)
                 }
             }

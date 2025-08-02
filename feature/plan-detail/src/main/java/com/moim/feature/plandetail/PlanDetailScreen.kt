@@ -2,6 +2,8 @@ package com.moim.feature.plandetail
 
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -231,7 +233,9 @@ fun PlanDetailScreen(
 
                     item {
                         AnimatedVisibility(
-                            visible = comments.loadState.isLoading()
+                            enter = fadeIn(),
+                            exit = fadeOut(),
+                            visible = comments.loadState.isLoading(),
                         ) {
                             PagingLoadingScreen()
                         }
@@ -240,6 +244,8 @@ fun PlanDetailScreen(
                     item {
                         AnimatedVisibility(
                             modifier = Modifier.fillMaxWidth(),
+                            enter = fadeIn(),
+                            exit = fadeOut(),
                             visible = comments.loadState.isError()
                         ) {
                             PagingErrorScreen(

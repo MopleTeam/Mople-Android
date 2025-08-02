@@ -100,9 +100,7 @@ class MeetingViewModel @Inject constructor(
                     setUiEvent(MeetingUiEvent.RefreshPagingData)
                     _meetings
                 }
-            }.also {
-                _meetings = it
-            }
+            }.also { _meetings = it }
         },
         planActionReceiver.flatMapLatest { receiver ->
             when (receiver) {

@@ -45,9 +45,7 @@ fun MeetingDetailPlanEmpty(
 
 @Preview
 @Composable
-fun MeetingDetailPlanEmptyPreview(
-    modifier: Modifier = Modifier
-) {
+fun MeetingDetailPlanEmptyPreview() {
     MoimTheme {
         MeetingDetailPlanEmpty(
             modifier = Modifier.background(MoimTheme.colors.bg.primary)

@@ -1,6 +1,7 @@
 package com.moim.core.network.service
 
 import com.moim.core.datamodel.MeetingPlanContainerResponse
+import com.moim.core.datamodel.PaginationContainerResponse
 import com.moim.core.datamodel.ParticipantContainerResponse
 import com.moim.core.datamodel.PlanResponse
 import com.moim.core.datamodel.PlanReviewContainerResponse
@@ -19,7 +20,11 @@ interface PlanApi {
     suspend fun getCurrentPlan(): MeetingPlanContainerResponse
 
     @GET("plan/list/{meetId}")
-    suspend fun getPlans(@Path("meetId") id: String): List<PlanResponse>
+    suspend fun getPlans(
+        @Path("meetId") id: String,
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<PlanResponse>>
 
     @GET("plan/page")
     suspend fun getPlansForCalendar(

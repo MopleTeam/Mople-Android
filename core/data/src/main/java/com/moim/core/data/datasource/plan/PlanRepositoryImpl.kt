@@ -5,9 +5,12 @@ import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.datamodel.PlanResponse
+import com.moim.core.model.PaginationContainer
+import com.moim.core.model.Plan
 import com.moim.core.model.PlanReviewContainer
 import com.moim.core.network.service.LocationApi
 import com.moim.core.network.service.PlanApi
+import com.moim.core.network.util.converterException
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -20,8 +23,20 @@ internal class PlanRepositoryImpl @Inject constructor(
         emit(planApi.getCurrentPlan().asItem())
     }
 
-    override fun getPlans(meetingId: String) = catchFlow {
-        emit(planApi.getPlans(meetingId).map(PlanResponse::asItem))
+    override suspend fun getPlans(
+        meetingId: String,
+        cursor: String,
+        size: Int
+    ): PaginationContainer<List<Plan>> {
+        return try {
+            planApi.getPlans(
+                id = meetingId,
+                cursor = cursor,
+                size = size
+            ).asItem { it.map(PlanResponse::asItem) }
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
     }
 
     override fun getPlan(planId: String) = catchFlow {
