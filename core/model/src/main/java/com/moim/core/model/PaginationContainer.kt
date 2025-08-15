@@ -2,7 +2,7 @@ package com.moim.core.model
 
 data class PaginationContainer<T>(
     val content: T,
-    val cursorPage: CursorPage
+    val page: CursorPage
 )
 
 data class CursorPage(

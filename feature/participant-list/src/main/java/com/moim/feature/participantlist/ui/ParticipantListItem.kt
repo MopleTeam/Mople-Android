@@ -27,14 +27,14 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.Participant
+import com.moim.core.model.User
 import com.moim.feature.participantlist.ParticipantListUiAction
 
 @Composable
 fun ParticipantListItem(
     modifier: Modifier = Modifier,
     isMeeting: Boolean,
-    participant: Participant,
+    participant: User,
     onUiAction: (ParticipantListUiAction) -> Unit,
 ) {
     Row(
@@ -44,18 +44,17 @@ fun ParticipantListItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box {
-
             NetworkImage(
                 modifier = Modifier
                     .clip(shape = CircleShape)
                     .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = CircleShape)
                     .size(40.dp)
-                    .onSingleClick { onUiAction(ParticipantListUiAction.OnClickUserImage(userImage = participant.imageUrl, userName = participant.nickname)) },
-                imageUrl = participant.imageUrl,
+                    .onSingleClick { onUiAction(ParticipantListUiAction.OnClickUserImage(userImage = participant.profileUrl, userName = participant.nickname)) },
+                imageUrl = participant.profileUrl,
                 errorImage = painterResource(R.drawable.ic_empty_user_logo),
             )
 
-            if (participant.isCreator) {
+            if (participant.userRole == "CREATOR" || participant.userRole == "HOST") {
                 CreatorIcon(
                     modifier = Modifier.align(Alignment.BottomEnd),
                     isMeeting = isMeeting
@@ -97,10 +96,9 @@ private fun ParticipantListItemPreview() {
                 .fillMaxWidth()
                 .background(MoimTheme.colors.white),
             isMeeting = true,
-            participant = Participant(
-                isCreator = true,
-                memberId = "",
-                imageUrl = "",
+            participant = User(
+                userId = "",
+                profileUrl = "",
                 nickname = "퉁퉁이",
             ),
             onUiAction = {}

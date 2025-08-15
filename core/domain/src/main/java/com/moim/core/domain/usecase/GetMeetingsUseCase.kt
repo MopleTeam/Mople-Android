@@ -37,12 +37,12 @@ class GetMeetingsUseCase @Inject constructor(
                         cursor = page,
                         size = params.size
                     )
-                    val nextCursor = meetingContainer.cursorPage.nextCursor
+                    val nextCursor = meetingContainer.page.nextCursor
 
                     LoadResult.Page(
                         data = meetingContainer.content,
                         prevKey = null,
-                        nextKey = if (meetingContainer.cursorPage.isNext && meetingContainer.cursorPage.size >= params.size) nextCursor else null
+                        nextKey = if (meetingContainer.page.isNext && meetingContainer.page.size >= params.size) nextCursor else null
                     )
                 } catch (e: Exception) {
                     Timber.e("[GetMeetingsUseCase] error $e")

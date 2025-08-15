@@ -1,8 +1,8 @@
 package com.moim.core.network.service
 
 import com.moim.core.datamodel.PaginationContainerResponse
-import com.moim.core.datamodel.ParticipantContainerResponse
 import com.moim.core.datamodel.ReviewResponse
+import com.moim.core.datamodel.UserResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -25,7 +25,11 @@ interface ReviewApi {
     suspend fun getReview(@Path("reviewId") id: String): ReviewResponse
 
     @GET("review/participant/{reviewId}")
-    suspend fun getReviewParticipant(@Path("reviewId") id: String): ParticipantContainerResponse
+    suspend fun getReviewParticipant(
+        @Path("reviewId") id: String,
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<UserResponse>>
 
     @HTTP(method = "DELETE", path = "review/images/{reviewId}", hasBody = true)
     suspend fun deleteReviewImage(@Path("reviewId") id: String, @Body params: JsonObject)

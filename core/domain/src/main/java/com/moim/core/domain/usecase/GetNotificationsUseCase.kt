@@ -31,12 +31,12 @@ class GetNotificationsUseCase @Inject constructor(
                         cursor = page,
                         size = params.size
                     )
-                    val nextCursor = notificationContainer.cursorPage.nextCursor
+                    val nextCursor = notificationContainer.page.nextCursor
 
                     LoadResult.Page(
                         data = notificationContainer.content,
                         prevKey = null,
-                        nextKey = if (notificationContainer.cursorPage.isNext && notificationContainer.cursorPage.size >= params.size) nextCursor else null
+                        nextKey = if (notificationContainer.page.isNext && notificationContainer.page.size >= params.size) nextCursor else null
                     )
                 } catch (e: Exception) {
                     Timber.e("[GetNotificationsUseCase] error $e")

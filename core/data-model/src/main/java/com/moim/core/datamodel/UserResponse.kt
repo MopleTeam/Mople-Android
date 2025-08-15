@@ -13,4 +13,6 @@ data class UserResponse(
     val profileUrl: String = "",
     @SerialName("badgeCount")
     val badgeCount: Int = 0,
+    @SerialName("userRole")
+    val userRole: String = "",
 )

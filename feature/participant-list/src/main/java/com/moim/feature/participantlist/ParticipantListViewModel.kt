@@ -2,6 +2,8 @@ package com.moim.feature.participantlist
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
@@ -10,13 +12,11 @@ import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
-import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.meeting.MeetingRepository
-import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.data.datasource.review.ReviewRepository
-import com.moim.core.model.Participant
+import com.moim.core.domain.usecase.GetParticipantsUseCase
+import com.moim.core.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -26,8 +26,7 @@ import javax.inject.Inject
 class ParticipantListViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val meetingRepository: MeetingRepository,
-    planRepository: PlanRepository,
-    reviewRepository: ReviewRepository,
+    getParticipantsUseCase: GetParticipantsUseCase,
 ) : BaseViewModel() {
 
     private val isMeeting
@@ -39,29 +38,26 @@ class ParticipantListViewModel @Inject constructor(
     private val id
         get() = savedStateHandle.get<String>(KEY_ID) ?: ""
 
-    private val participantListResult =
-        when {
-            isMeeting -> meetingRepository.getMeetingParticipants(id)
-            isPlan -> planRepository.getPlanParticipants(id)
-            else -> reviewRepository.getReviewParticipants(id)
-        }.asResult().restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val participants = getParticipantsUseCase(
+        params = GetParticipantsUseCase.Params(
+            id = id,
+            isMeeting = isMeeting,
+            isPlan = isPlan
+        )
+    ).cachedIn(viewModelScope)
 
     init {
-        viewModelScope.launch {
-            participantListResult.collect { result ->
-                when (result) {
-                    is Result.Loading -> setUiState(ParticipantListUiState.Loading)
-                    is Result.Success -> setUiState(ParticipantListUiState.Success(isMeeting, result.data))
-                    is Result.Error -> setUiState(ParticipantListUiState.Error)
-                }
-            }
-        }
+        setUiState(
+            ParticipantListUiState(
+                isMeeting = isMeeting,
+                participant = participants
+            )
+        )
     }
 
     fun onUiAction(uiAction: ParticipantListUiAction) {
         when (uiAction) {
             is ParticipantListUiAction.OnClickBack -> setUiEvent(ParticipantListUiEvent.NavigateToBack)
-            is ParticipantListUiAction.OnClickRefresh -> participantListResult.restart()
             is ParticipantListUiAction.OnClickUserImage -> setUiEvent(ParticipantListUiEvent.NavigateToImageViewer(uiAction.userImage, uiAction.userName))
             is ParticipantListUiAction.OnClickMeetingInvite -> getInviteLink()
         }
@@ -93,21 +89,13 @@ class ParticipantListViewModel @Inject constructor(
     }
 }
 
-sealed interface ParticipantListUiState : UiState {
-    data object Loading : ParticipantListUiState
-
-    data class Success(
-        val isMeeting: Boolean,
-        val participant: List<Participant>
-    ) : ParticipantListUiState
-
-    data object Error : ParticipantListUiState
-}
+data class ParticipantListUiState(
+    val isMeeting: Boolean,
+    val participant: Flow<PagingData<User>>? = null,
+) : UiState
 
 sealed interface ParticipantListUiAction : UiAction {
     data object OnClickBack : ParticipantListUiAction
-
-    data object OnClickRefresh : ParticipantListUiAction
 
     data object OnClickMeetingInvite : ParticipantListUiAction
 

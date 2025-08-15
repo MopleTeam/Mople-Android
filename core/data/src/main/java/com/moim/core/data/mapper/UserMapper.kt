@@ -10,5 +10,6 @@ fun UserResponse.asItem(): User {
         nickname = nickname,
         profileUrl = profileUrl,
         badgeCount = badgeCount,
+        userRole = userRole
     )
 }

@@ -1,6 +1,11 @@
 package com.moim.feature.participantlist
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -19,14 +23,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.util.externalShareForUrl
 import com.moim.core.common.view.ObserveAsEvents
+import com.moim.core.common.view.PAGING_ERROR
+import com.moim.core.common.view.PAGING_LOADING
+import com.moim.core.common.view.isAppendLoading
+import com.moim.core.common.view.isError
+import com.moim.core.common.view.isLoading
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
-import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.common.PagingErrorScreen
+import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
@@ -78,18 +93,12 @@ fun ParticipantListRoute(
         }
     }
 
-    when (val uiState = participantListUiState) {
-        is ParticipantListUiState.Loading -> LoadingScreen(modifier = modifier)
 
-        is ParticipantListUiState.Success -> ParticipantListScreen(
+    (participantListUiState as? ParticipantListUiState)?.let { uiState ->
+        ParticipantListScreen(
             modifier = modifier,
             uiState = uiState,
             onUiAction = viewModel::onUiAction
-        )
-
-        is ParticipantListUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(ParticipantListUiAction.OnClickRefresh) }
         )
     }
 }
@@ -97,60 +106,119 @@ fun ParticipantListRoute(
 @Composable
 fun ParticipantListScreen(
     modifier: Modifier = Modifier,
-    uiState: ParticipantListUiState.Success,
+    uiState: ParticipantListUiState,
     onUiAction: (ParticipantListUiAction) -> Unit
 ) {
+    val participants = uiState.participant
+        ?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
+        ?: return
+
     TrackScreenViewEvent(screenName = "participant_list")
-    Column(
+    Box(
         modifier = modifier
     ) {
-        MoimTopAppbar(
-            title = stringResource(R.string.participant_list_title),
-            onClickNavigate = { onUiAction(ParticipantListUiAction.OnClickBack) }
-        )
-        Spacer(Modifier.height(28.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            MoimText(
-                modifier = Modifier.weight(1f),
-                text = stringResource(R.string.participant_list_title),
-                style = MoimTheme.typography.body01.medium,
-                color = MoimTheme.colors.gray.gray04
+            MoimTopAppbar(
+                title = stringResource(R.string.participant_list_title),
+                onClickNavigate = { onUiAction(ParticipantListUiAction.OnClickBack) }
             )
-            MoimText(
-                text = stringResource(R.string.unit_participants_count_short, uiState.participant.size),
-                style = MoimTheme.typography.body01.medium,
-                color = MoimTheme.colors.gray.gray04
-            )
-        }
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
+            Spacer(Modifier.height(28.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                MoimText(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(R.string.participant_list_title),
+                    style = MoimTheme.typography.body01.medium,
+                    color = MoimTheme.colors.gray.gray04
+                )
+                MoimText(
+                    text = stringResource(R.string.unit_participants_count_short, 0),
+                    style = MoimTheme.typography.body01.medium,
+                    color = MoimTheme.colors.gray.gray04
+                )
+            }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
 
-            if (uiState.isMeeting) {
-                item {
-                    ParticipantMeetingInviteItem(
+                if (uiState.isMeeting) {
+                    item {
+                        ParticipantMeetingInviteItem(
+                            onUiAction = onUiAction
+                        )
+                    }
+                }
+
+                items(
+                    count = participants.itemCount,
+                    key = participants.itemKey(),
+                    contentType = participants.itemContentType()
+                ) { index ->
+                    val participant = participants[index] ?: return@items
+                    ParticipantListItem(
+                        modifier = Modifier.animateItem(),
+                        isMeeting = uiState.isMeeting,
+                        participant = participant,
                         onUiAction = onUiAction
                     )
                 }
-            }
 
-            items(
-                items = uiState.participant,
-                key = { it.memberId }
-            ) {
-                ParticipantListItem(
-                    isMeeting = uiState.isMeeting,
-                    participant = it,
-                    onUiAction = onUiAction
-                )
+                if (participants.loadState.isAppendLoading()) {
+                    item(key = PAGING_LOADING) {
+                        PagingLoadingScreen(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .background(MoimTheme.colors.white)
+                                    .animateItem(),
+                        )
+                    }
+                }
+
+                if (participants.loadState.isAppendLoading()) {
+                    item(key = PAGING_ERROR) {
+                        PagingErrorScreen(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .background(MoimTheme.colors.white)
+                                    .animateItem(),
+                            onClickRetry = participants::retry,
+                        )
+                    }
+                }
             }
+        }
+
+        AnimatedVisibility(
+            modifier = Modifier.fillMaxSize(),
+            enter = fadeIn(),
+            exit = fadeOut(),
+            visible = participants.loadState.isLoading()
+        ) {
+            PagingLoadingScreen(modifier = Modifier.fillMaxSize())
+        }
+
+        AnimatedVisibility(
+            modifier = Modifier.fillMaxSize(),
+            enter = fadeIn(),
+            exit = fadeOut(),
+            visible = participants.loadState.isError()
+        ) {
+            ErrorScreen(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MoimTheme.colors.white),
+                onClickRefresh = { participants.refresh() },
+            )
         }
     }
 }

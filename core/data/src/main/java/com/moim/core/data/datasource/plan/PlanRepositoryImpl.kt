@@ -5,9 +5,11 @@ import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.PlaceResponse
 import com.moim.core.datamodel.PlanResponse
+import com.moim.core.datamodel.UserResponse
 import com.moim.core.model.PaginationContainer
 import com.moim.core.model.Plan
 import com.moim.core.model.PlanReviewContainer
+import com.moim.core.model.User
 import com.moim.core.network.service.LocationApi
 import com.moim.core.network.service.PlanApi
 import com.moim.core.network.util.converterException
@@ -59,9 +61,22 @@ internal class PlanRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getPlanParticipants(planId: String) = catchFlow {
-        val planParticipants = planApi.getPlanParticipants(planId)
-        emit(planParticipants.members.map { it.asItem(planParticipants.creatorId == it.memberId) })
+    override suspend fun getPlanParticipants(
+        planId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<User>> {
+        return try {
+            planApi.getPlanParticipants(
+                planId =  planId,
+                cursor = cursor,
+                size = size,
+            ).asItem {
+                it.map(UserResponse::asItem)
+            }
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
     }
 
     override fun joinPlan(planId: String) = catchFlow {

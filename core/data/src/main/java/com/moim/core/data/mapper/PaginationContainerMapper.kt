@@ -9,7 +9,7 @@ import com.moim.core.model.PaginationContainer
 fun <T, R> PaginationContainerResponse<T>.asItem(transform: (T) -> R): PaginationContainer<R> =
     PaginationContainer(
         content = content.let(transform),
-        cursorPage = cursorPage.asItem()
+        page = page.asItem()
     )
 
 fun CursorPagerResponse.asItem(): CursorPage {

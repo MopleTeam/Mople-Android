@@ -7,8 +7,8 @@ import kotlinx.serialization.Serializable
 data class PaginationContainerResponse<T>(
     @SerialName("content")
     val content: T,
-    @SerialName("cursorPage")
-    val cursorPage: CursorPagerResponse
+    @SerialName("page")
+    val page: CursorPagerResponse
 )
 
 @Serializable

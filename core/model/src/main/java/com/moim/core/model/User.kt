@@ -8,4 +8,5 @@ data class User(
     val nickname: String = "",
     val profileUrl: String = "",
     val badgeCount: Int = 0,
+    val userRole: String = ""
 )

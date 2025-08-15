@@ -5,8 +5,10 @@ import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.MeetingResponse
+import com.moim.core.datamodel.UserResponse
 import com.moim.core.model.Meeting
 import com.moim.core.model.PaginationContainer
+import com.moim.core.model.User
 import com.moim.core.network.service.MeetingApi
 import com.moim.core.network.util.converterException
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +26,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
         return try {
             meetingApi.getMeetings(
                 cursor = cursor,
-                size  = size
+                size = size
             ).asItem {
                 it.map(MeetingResponse::asItem)
             }
@@ -41,9 +43,22 @@ internal class MeetingRepositoryImpl @Inject constructor(
         emit(meetingApi.getMeetingInviteCode(meetingId))
     }
 
-    override fun getMeetingParticipants(meetingId: String) = catchFlow {
-        val meetingParticipants = meetingApi.getMeetingParticipants(meetingId)
-        emit(meetingParticipants.members.map { it.asItem(meetingParticipants.creatorId == it.memberId) })
+    override suspend fun getMeetingParticipants(
+        meetingId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<User>> {
+        return try {
+            meetingApi.getMeetingParticipants(
+                id =  meetingId,
+                cursor = cursor,
+                size = size
+            ).asItem {
+                it.map(UserResponse::asItem)
+            }
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
     }
 
     override fun createMeeting(meetingName: String, meetingImageUrl: String?): Flow<Meeting> = catchFlow {

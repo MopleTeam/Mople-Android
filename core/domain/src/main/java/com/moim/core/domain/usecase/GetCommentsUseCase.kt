@@ -39,12 +39,12 @@ class GetCommentsUseCase @Inject constructor(
                         cursor = page,
                         size = params.size
                     )
-                    val nextCursor = commentContainer.cursorPage.nextCursor
+                    val nextCursor = commentContainer.page.nextCursor
 
                     LoadResult.Page(
                         data = commentContainer.content,
                         prevKey = null,
-                        nextKey = if (commentContainer.cursorPage.isNext && commentContainer.cursorPage.size >= params.size) nextCursor else null
+                        nextKey = if (commentContainer.page.isNext && commentContainer.page.size >= params.size) nextCursor else null
                     )
                 } catch (e: Exception) {
                     Timber.e("[GetCommentsUseCase] error $e")

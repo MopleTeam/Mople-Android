@@ -43,13 +43,13 @@ class GetPlanItemsUseCase @Inject constructor(
                         cursor = page,
                         size = params.size
                     )
-                    val nextCursor = planContainer.cursorPage.nextCursor
+                    val nextCursor = planContainer.page.nextCursor
 
                     return try {
                         LoadResult.Page(
                             data = planContainer.content.map(Plan::asPlanItem),
                             prevKey = null,
-                            nextKey = if (planContainer.cursorPage.isNext && planContainer.cursorPage.size >= params.size) nextCursor else null
+                            nextKey = if (planContainer.page.isNext && planContainer.page.size >= params.size) nextCursor else null
                         )
                     } catch (e: Exception) {
                         LoadResult.Error(e)
@@ -60,13 +60,13 @@ class GetPlanItemsUseCase @Inject constructor(
                         cursor = page,
                         size = params.size
                     )
-                    val nextCursor = reviewContainer.cursorPage.nextCursor
+                    val nextCursor = reviewContainer.page.nextCursor
 
                     return try {
                         LoadResult.Page(
                             data = reviewContainer.content.map(Review::asPlanItem),
                             prevKey = null,
-                            nextKey = if (reviewContainer.cursorPage.isNext && reviewContainer.cursorPage.size >= params.size) nextCursor else null
+                            nextKey = if (reviewContainer.page.isNext && reviewContainer.page.size >= params.size) nextCursor else null
                         )
                     } catch (e: Exception) {
                         LoadResult.Error(e)
