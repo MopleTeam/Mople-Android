@@ -1,5 +1,6 @@
 package com.moim.core.common.util
 
+import kotlinx.coroutines.Job
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -14,4 +15,10 @@ fun Int.decimalFormatString(format: String = "###,###"): String {
 
 fun Float.decimalFormatString(format: String = "##.#"): String {
     return DecimalFormat(format).format(this)
+}
+
+fun Job?.cancelIfActive() {
+    if (this?.isActive == true) {
+        cancel()
+    }
 }

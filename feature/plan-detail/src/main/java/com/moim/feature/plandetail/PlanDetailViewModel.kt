@@ -13,6 +13,7 @@ import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.util.cancelIfActive
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -22,6 +23,7 @@ import com.moim.core.common.view.checkState
 import com.moim.core.common.view.checkedActionedAtIsBeforeLoadedAt
 import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.comment.CommentRepository
+import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
@@ -36,6 +38,8 @@ import com.moim.feature.plandetail.util.PlanDetailCommentAction
 import com.moim.feature.plandetail.util.PlanDetailCommentViewModelDelegate
 import com.moim.feature.plandetail.util.planDetailCommentStateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -44,6 +48,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.ZonedDateTime
@@ -55,6 +60,7 @@ class PlanDetailViewModel @Inject constructor(
     userRepository: UserRepository,
     getPlanItemUseCase: GetPlanItemUseCase,
     private val planRepository: PlanRepository,
+    private val meetingRepository: MeetingRepository,
     private val reviewRepository: ReviewRepository,
     private val commentRepository: CommentRepository,
     private val getCommentsUseCase: GetCommentsUseCase,
@@ -71,6 +77,9 @@ class PlanDetailViewModel @Inject constructor(
         get() = savedStateHandle.get<Boolean>(KEY_IS_PLAN) ?: false
 
     private val planId = savedStateHandle.getStateFlow<String?>(KEY_PLAN_ID, null)
+    private val meetId = savedStateHandle.getStateFlow<String?>(KEY_MEET_ID, null)
+
+    private var searchJob: Job? = null
 
     private val planItemReceiver = planItemAction.planItemStateIn(viewModelScope)
     private val commentActionReceiver = commentAction.planDetailCommentStateIn(viewModelScope)
@@ -142,6 +151,22 @@ class PlanDetailViewModel @Inject constructor(
         }
     }.cachedIn(viewModelScope)
 
+    private val meetingParticipants = meetId
+        .filterNotNull()
+        .mapLatest {
+            meetingRepository.getMeetingParticipants(
+                meetingId = it,
+                cursor = "",
+                size = 100
+            ).content
+        }.asResult().mapLatest {
+            if (it is Result.Success) {
+                it.data
+            } else {
+                null
+            }
+        }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
     private val planDetailUiState =
         combine(
             userRepository.getUser(),
@@ -169,7 +194,16 @@ class PlanDetailViewModel @Inject constructor(
                     setUiState(uiState)
                     if (uiState is PlanDetailUiState.Success) {
                         savedStateHandle[KEY_PLAN_ID] = uiState.planItem.commentCheckId
+                        savedStateHandle[KEY_MEET_ID] = uiState.planItem.meetingId
                         setUiState(uiState.copy(comments = comments))
+                    }
+                }
+            }
+
+            launch {
+                meetingParticipants.filterNotNull().collect {
+                    uiState.checkState<PlanDetailUiState.Success> {
+                        setUiState(uiState = copy(meetingParticipants = it))
                     }
                 }
             }
@@ -213,6 +247,7 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickCommentWebLink -> setUiEvent(PlanDetailUiEvent.NavigateToWebBrowser(uiAction.webLink))
             is PlanDetailUiAction.OnClickReviewImage -> navigateToImageViewerForReview(uiAction.selectedImageIndex)
             is PlanDetailUiAction.OnClickUserProfileImage -> navigateToImageViewerForUser(uiAction.imageUrl, uiAction.userName)
+            is PlanDetailUiAction.OnShowUserList -> showUserList(uiAction.keyword)
             is PlanDetailUiAction.OnShowPlanApplyCancelDialog -> showApplyCancelDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanEditDialog -> showPlanEditDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanReportDialog -> showPlanReportDialog(uiAction.isShow)
@@ -396,6 +431,22 @@ class PlanDetailViewModel @Inject constructor(
         }
     }
 
+    private fun showUserList(keyword: String) {
+        searchJob.cancelIfActive()
+        searchJob = viewModelScope.launch {
+            delay(400)
+            uiState.checkState<PlanDetailUiState.Success> {
+                val userList = if (keyword.isNotEmpty()) {
+                    meetingParticipants.filter { it.nickname.contains(keyword) }
+                } else {
+                    emptyList()
+                }
+
+                setUiState(copy(searchMentions = userList))
+            }
+        }
+    }
+
     private fun showApplyCancelDialog(isShow: Boolean) {
         uiState.checkState<PlanDetailUiState.Success> {
             setUiState(copy(isShowApplyCancelDialog = isShow))
@@ -485,6 +536,7 @@ class PlanDetailViewModel @Inject constructor(
     companion object {
         private const val KEY_POST_ID = "postId"
         private const val KEY_PLAN_ID = "planId"
+        private const val KEY_MEET_ID = "meetId"
         private const val KEY_IS_PLAN = "isPlan"
     }
 }
@@ -496,6 +548,9 @@ sealed interface PlanDetailUiState : UiState {
         val user: User,
         val planItem: PlanItem,
         val comments: Flow<PagingData<CommentUiModel>>? = null,
+        val meetingParticipants: List<User> = emptyList(),
+        val searchMentions: List<User> = emptyList(),
+        val selectedMentions: List<User> = emptyList(),
         val selectedImageIndex: Int = 0,
         val selectedComment: Comment? = null,
         val selectedUpdateComment: Comment? = null,
@@ -528,6 +583,7 @@ sealed interface PlanDetailUiAction : UiAction {
     data class OnClickCommentWebLink(val webLink: String) : PlanDetailUiAction
     data class OnClickReviewImage(val selectedImageIndex: Int) : PlanDetailUiAction
     data class OnClickUserProfileImage(val imageUrl: String, val userName: String) : PlanDetailUiAction
+    data class OnShowUserList(val keyword: String) : PlanDetailUiAction
     data class OnShowPlanApplyCancelDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowPlanEditDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowPlanReportDialog(val isShow: Boolean) : PlanDetailUiAction

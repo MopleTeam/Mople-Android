@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -156,105 +157,111 @@ fun PlanDetailScreen(
             )
         },
         content = {
-            LazyColumn(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
             ) {
-                item {
-                    PlanDetailContent(
-                        planItem = uiState.planItem,
-                        isShowApplyButton = uiState.isShowApplyButton,
-                        onUiAction = onUiAction
-                    )
-                }
-
-                item {
-                    PlanDetailSpacer()
-                }
-
-                item {
-                    PlanDetailReviewImages(
-                        images = uiState.planItem.reviewImages,
-                        onUiAction = onUiAction
-                    )
-                }
-
-                item {
-                    PlanDetailSpacer()
-                }
-
-                item {
-                    PlanDetailCommentHeader(
-                        commentCount = uiState.planItem.commentCount
-                    )
-                }
-
-                if (comments != null) {
-                    items(
-                        count = comments.itemCount,
-                        key = comments.itemKey(),
-                        contentType = comments.itemContentType(),
-                    ) { index ->
-                        val comment = comments[index] ?: return@items
-                        PlanDetailCommentItem(
-                            modifier = Modifier.animateItem(),
-                            userId = uiState.user.userId,
-                            comment = comment,
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    item {
+                        PlanDetailContent(
+                            planItem = uiState.planItem,
+                            isShowApplyButton = uiState.isShowApplyButton,
                             onUiAction = onUiAction
                         )
                     }
 
-                    if (comments.loadState.isAppendLoading()) {
-                        item(key = PAGING_LOADING) {
-                            PagingLoadingScreen(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .background(MoimTheme.colors.white)
-                                        .animateItem(),
-                            )
-                        }
-                    }
-
-                    if (comments.loadState.isAppendError()) {
-                        item(key = PAGING_ERROR) {
-                            PagingErrorScreen(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .background(MoimTheme.colors.white)
-                                        .animateItem(),
-                                onClickRetry = comments::retry,
-                            )
-                        }
-                    }
-
-
                     item {
-                        AnimatedVisibility(
-                            enter = fadeIn(),
-                            exit = fadeOut(),
-                            visible = comments.loadState.isLoading(),
-                        ) {
-                            PagingLoadingScreen()
-                        }
+                        PlanDetailSpacer()
                     }
 
                     item {
-                        AnimatedVisibility(
-                            modifier = Modifier.fillMaxWidth(),
-                            enter = fadeIn(),
-                            exit = fadeOut(),
-                            visible = comments.loadState.isError()
-                        ) {
-                            PagingErrorScreen(
-                                modifier = modifier,
-                                onClickRetry = comments::refresh,
+                        PlanDetailReviewImages(
+                            images = uiState.planItem.reviewImages,
+                            onUiAction = onUiAction
+                        )
+                    }
+
+                    item {
+                        PlanDetailSpacer()
+                    }
+
+                    item {
+                        PlanDetailCommentHeader(
+                            commentCount = uiState.planItem.commentCount
+                        )
+                    }
+
+                    if (comments != null) {
+                        items(
+                            count = comments.itemCount,
+                            key = comments.itemKey(),
+                            contentType = comments.itemContentType(),
+                        ) { index ->
+                            val comment = comments[index] ?: return@items
+                            PlanDetailCommentItem(
+                                modifier = Modifier.animateItem(),
+                                userId = uiState.user.userId,
+                                comment = comment,
+                                onUiAction = onUiAction
                             )
+                        }
+
+                        if (comments.loadState.isAppendLoading()) {
+                            item(key = PAGING_LOADING) {
+                                PagingLoadingScreen(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .background(MoimTheme.colors.white)
+                                            .animateItem(),
+                                )
+                            }
+                        }
+
+                        if (comments.loadState.isAppendError()) {
+                            item(key = PAGING_ERROR) {
+                                PagingErrorScreen(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .background(MoimTheme.colors.white)
+                                            .animateItem(),
+                                    onClickRetry = comments::retry,
+                                )
+                            }
+                        }
+
+
+                        item {
+                            AnimatedVisibility(
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                                visible = comments.loadState.isLoading(),
+                            ) {
+                                PagingLoadingScreen()
+                            }
+                        }
+
+                        item {
+                            AnimatedVisibility(
+                                modifier = Modifier.fillMaxWidth(),
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                                visible = comments.loadState.isError()
+                            ) {
+                                PagingErrorScreen(
+                                    modifier = modifier,
+                                    onClickRetry = comments::refresh,
+                                )
+                            }
                         }
                     }
                 }
+
+                //::TODO User Card 노출
             }
         },
         bottomBar = {

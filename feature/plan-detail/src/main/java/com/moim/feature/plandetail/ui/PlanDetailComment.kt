@@ -293,17 +293,19 @@ private fun CommentFooter(
                 }
             }
 
-            Icon(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .onSingleClick { onUiAction(PlanDetailUiAction.OnClickCommentAddReply(comment)) },
-                imageVector = ImageVector.vectorResource(R.drawable.ic_chat_add),
-                contentDescription = "",
-                tint = Color.Unspecified
-            )
+            if (false) {
+                Icon(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .onSingleClick { onUiAction(PlanDetailUiAction.OnClickCommentAddReply(comment)) },
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_chat_add),
+                    contentDescription = "",
+                    tint = Color.Unspecified
+                )
+            }
         }
 
-        if (comment.replayCount > 0) {
+        if (false) {
             Row(
                 modifier = Modifier
                     .padding(top = 8.dp)

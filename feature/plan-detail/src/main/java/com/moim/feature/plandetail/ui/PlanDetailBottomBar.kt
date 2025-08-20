@@ -53,6 +53,17 @@ fun PlanDetailBottomBar(
         commentText = TextFieldValue(commentContent, TextRange(commentContent.length))
     }
 
+//    LaunchedEffect(commentText) {
+//        if (commentText.text.isEmpty()) return@LaunchedEffect
+//        val textUntilCursor = commentText.text.substring(0, commentText.selection.end)
+//        val lastAtIndex = textUntilCursor.lastIndexOf("@")
+//
+//        if (lastAtIndex != -1) {
+//            val mentionText = textUntilCursor.substring(lastAtIndex + 1)
+//            onUiAction(PlanDetailUiAction.OnShowUserList(mentionText))
+//        }
+//    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()

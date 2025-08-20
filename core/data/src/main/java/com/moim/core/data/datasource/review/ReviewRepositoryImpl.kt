@@ -82,7 +82,7 @@ internal class ReviewRepositoryImpl @Inject constructor(
         reviewId: String,
         uploadImages: List<String>,
     ) = catchFlow {
-        emit(imageUploadRemoteDataSource.uploadReviewImages(reviewId, uploadImages, "review_image"))
+        emit(imageUploadRemoteDataSource.uploadReviewImages(reviewId, uploadImages, "review"))
     }
 
     companion object {

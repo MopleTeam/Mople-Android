@@ -62,12 +62,12 @@ internal class MeetingRepositoryImpl @Inject constructor(
     }
 
     override fun createMeeting(meetingName: String, meetingImageUrl: String?): Flow<Meeting> = catchFlow {
-        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meeting")
+        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
         emit(meetingApi.createMeeting(jsonOf(KEY_NAME to meetingName, KEY_IMAGE to uploadImageUrl)).asItem())
     }
 
     override fun updateMeeting(meetingId: String, meetingName: String, meetingImageUrl: String?): Flow<Meeting> = catchFlow {
-        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meeting")
+        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
 
         emit(
             meetingApi.updateMeeting(
