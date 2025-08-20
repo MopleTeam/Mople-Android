@@ -24,7 +24,7 @@ interface ReviewApi {
     @GET("review/{reviewId}")
     suspend fun getReview(@Path("reviewId") id: String): ReviewResponse
 
-    @GET("review/participant/{reviewId}")
+    @GET("review/participants/{reviewId}")
     suspend fun getReviewParticipant(
         @Path("reviewId") id: String,
         @Query("cursor") cursor: String,
