@@ -8,6 +8,7 @@ import com.moim.core.model.PaginationContainer
 
 fun <T, R> PaginationContainerResponse<T>.asItem(transform: (T) -> R): PaginationContainer<R> =
     PaginationContainer(
+        totalCount = totalCount,
         content = content.let(transform),
         page = page.asItem()
     )

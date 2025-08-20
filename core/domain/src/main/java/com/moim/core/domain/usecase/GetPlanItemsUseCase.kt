@@ -38,14 +38,15 @@ class GetPlanItemsUseCase @Inject constructor(
                 val page = loadParams.key ?: ""
 
                 if (params.isPlanAtBefore) {
-                    val planContainer = planRepository.getPlans(
-                        meetingId = params.meetId,
-                        cursor = page,
-                        size = params.size
-                    )
-                    val nextCursor = planContainer.page.nextCursor
-
                     return try {
+                        val planContainer = planRepository.getPlans(
+                            meetingId = params.meetId,
+                            cursor = page,
+                            size = params.size
+                        )
+                        val nextCursor = planContainer.page.nextCursor
+
+
                         LoadResult.Page(
                             data = planContainer.content.map(Plan::asPlanItem),
                             prevKey = null,
@@ -55,14 +56,14 @@ class GetPlanItemsUseCase @Inject constructor(
                         LoadResult.Error(e)
                     }
                 } else {
-                    val reviewContainer = reviewRepository.getReviews(
-                        meetingId = params.meetId,
-                        cursor = page,
-                        size = params.size
-                    )
-                    val nextCursor = reviewContainer.page.nextCursor
-
                     return try {
+                        val reviewContainer = reviewRepository.getReviews(
+                            meetingId = params.meetId,
+                            cursor = page,
+                            size = params.size
+                        )
+                        val nextCursor = reviewContainer.page.nextCursor
+
                         LoadResult.Page(
                             data = reviewContainer.content.map(Review::asPlanItem),
                             prevKey = null,

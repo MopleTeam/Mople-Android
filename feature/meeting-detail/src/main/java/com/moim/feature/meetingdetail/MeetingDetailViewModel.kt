@@ -26,12 +26,15 @@ import com.moim.core.common.view.checkedActionedAtIsBeforeLoadedAt
 import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
+import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.domain.usecase.GetPlanItemsUseCase
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
 import com.moim.core.model.item.PlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -52,6 +55,7 @@ class MeetingDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getPlanItemsUseCase: GetPlanItemsUseCase,
     private val planRepository: PlanRepository,
+    private val reviewRepository: ReviewRepository,
     private val meetingRepository: MeetingRepository,
     userRepository: UserRepository,
     meetingViewModelDelegate: MeetingViewModelDelegate,
@@ -72,11 +76,9 @@ class MeetingDetailViewModel @Inject constructor(
         emitAll(pagingRefreshSignal)
     }
 
-    private var _plans = loadDataSignal.flatMapLatest {
-        getPlanItemsUseCase(
-            GetPlanItemsUseCase.Params(meetId = meetingId, isPlanAtBefore = true)
-        ).cachedIn(viewModelScope)
-    }
+    private var _plans = loadDataSignal
+        .flatMapLatest { getPlanItemsUseCase(GetPlanItemsUseCase.Params(meetId = meetingId, isPlanAtBefore = true)) }
+        .cachedIn(viewModelScope)
     private val plans = planActionReceiver.flatMapLatest { receiver ->
         when (receiver) {
             is PlanAction.None -> _plans
@@ -146,11 +148,9 @@ class MeetingDetailViewModel @Inject constructor(
         }
     }.cachedIn(viewModelScope)
 
-    private var _review = loadDataSignal.flatMapLatest {
-        getPlanItemsUseCase(
-            GetPlanItemsUseCase.Params(meetId = meetingId, isPlanAtBefore = false)
-        ).cachedIn(viewModelScope)
-    }
+    private var _review = loadDataSignal
+        .flatMapLatest { getPlanItemsUseCase(GetPlanItemsUseCase.Params(meetId = meetingId, isPlanAtBefore = false)) }
+        .cachedIn(viewModelScope)
     private val reviews = planActionReceiver.flatMapLatest { receiver ->
         when (receiver) {
             is PlanAction.None,
@@ -200,17 +200,25 @@ class MeetingDetailViewModel @Inject constructor(
         combine(
             userRepository.getUser(),
             meetingRepository.getMeeting(meetingId),
-            ::Pair
+            getPlanAndReviewTotalCount(),
+            ::Triple
         )
             .asResult()
             .mapLatest { result ->
                 when (result) {
                     is Result.Loading -> MeetingDetailUiState.Loading
 
-                    is Result.Success -> MeetingDetailUiState.Success(
-                        userId = result.data.first.userId,
-                        meeting = result.data.second
-                    )
+                    is Result.Success -> {
+                        val (user, meeting, counts) = result.data
+                        val (planCount, reviewCount) = counts
+
+                        MeetingDetailUiState.Success(
+                            userId = user.userId,
+                            meeting = meeting,
+                            planTotalCount = planCount,
+                            reviewTotalCount = reviewCount,
+                        )
+                    }
 
                     is Result.Error -> MeetingDetailUiState.Error
                 }
@@ -260,6 +268,14 @@ class MeetingDetailViewModel @Inject constructor(
             is MeetingDetailUiAction.OnClickMeetingImage -> setUiEvent(MeetingDetailUiEvent.NavigateToImageViewer(uiAction.imageUrl, uiAction.meetingName))
             is MeetingDetailUiAction.OnClickMeetingInvite -> getInviteLink()
             is MeetingDetailUiAction.OnShowPlanApplyCancelDialog -> showApplyCancelDialog(uiAction.isShow, uiAction.cancelPlanItem)
+        }
+    }
+
+    private fun getPlanAndReviewTotalCount() = flow {
+        coroutineScope {
+            val plans = async { planRepository.getPlans(meetingId, "", 1) }
+            val reviews = async { reviewRepository.getReviews(meetingId, "", 1) }
+            emit(plans.await().totalCount to reviews.await().totalCount)
         }
     }
 
@@ -377,6 +393,8 @@ sealed interface MeetingDetailUiState : UiState {
         val cancelPlanItem: PlanItem? = null,
         val plans: Flow<PagingData<PlanItem>>? = null,
         val reviews: Flow<PagingData<PlanItem>>? = null,
+        val planTotalCount: Int = 0,
+        val reviewTotalCount: Int = 0,
     ) : MeetingDetailUiState
 
     data object Error : MeetingDetailUiState

@@ -138,7 +138,7 @@ fun ParticipantListScreen(
                     color = MoimTheme.colors.gray.gray04
                 )
                 MoimText(
-                    text = stringResource(R.string.unit_participants_count_short, 0),
+                    text = stringResource(R.string.unit_participants_count_short, uiState.totalCount),
                     style = MoimTheme.typography.body01.medium,
                     color = MoimTheme.colors.gray.gray04
                 )

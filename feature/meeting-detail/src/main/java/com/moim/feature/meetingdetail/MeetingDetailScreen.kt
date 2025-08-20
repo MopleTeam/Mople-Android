@@ -137,13 +137,15 @@ fun MeetingDetailScreen(
                 modifier = Modifier.fillMaxSize(),
                 enter = fadeIn(),
                 exit = fadeOut(),
-                visible = plans.loadState.isSuccess() && plans.itemCount > 0
+                visible = plans.loadState.isSuccess() && reviews.loadState.isSuccess()
             ) {
                 MeetingDetailPlanContent(
                     userId = uiState.userId,
                     plans = plans,
                     reviews = reviews,
                     isPlanSelected = uiState.isPlanSelected,
+                    planTotalCount = uiState.planTotalCount,
+                    reviewTotalCount = uiState.reviewTotalCount,
                     onUiAction = onUiAction
                 )
             }

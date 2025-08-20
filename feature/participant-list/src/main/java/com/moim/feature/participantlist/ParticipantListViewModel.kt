@@ -13,6 +13,8 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.data.datasource.meeting.MeetingRepository
+import com.moim.core.data.datasource.plan.PlanRepository
+import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.domain.usecase.GetParticipantsUseCase
 import com.moim.core.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +28,8 @@ import javax.inject.Inject
 class ParticipantListViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val meetingRepository: MeetingRepository,
+    private val planRepository: PlanRepository,
+    private val reviewRepository: ReviewRepository,
     getParticipantsUseCase: GetParticipantsUseCase,
 ) : BaseViewModel() {
 
@@ -47,12 +51,15 @@ class ParticipantListViewModel @Inject constructor(
     ).cachedIn(viewModelScope)
 
     init {
-        setUiState(
-            ParticipantListUiState(
-                isMeeting = isMeeting,
-                participant = participants
+        viewModelScope.launch {
+            setUiState(
+                ParticipantListUiState(
+                    isMeeting = isMeeting,
+                    participant = participants,
+                    totalCount = getParticipantTotalCount()
+                )
             )
-        )
+        }
     }
 
     fun onUiAction(uiAction: ParticipantListUiAction) {
@@ -82,6 +89,32 @@ class ParticipantListViewModel @Inject constructor(
         }
     }
 
+    private suspend fun getParticipantTotalCount(): Int {
+        val totalCount = runCatching {
+            when {
+                isMeeting -> meetingRepository.getMeetingParticipants(
+                    meetingId = id,
+                    cursor = "",
+                    size = 1
+                )
+
+                isPlan -> planRepository.getPlanParticipants(
+                    planId = id,
+                    cursor = "",
+                    size = 1
+                )
+
+                else -> reviewRepository.getReviewParticipants(
+                    reviewId = id,
+                    cursor = "",
+                    size = 1
+                )
+            }.totalCount
+        }.getOrElse { 0 }
+
+        return totalCount
+    }
+
     companion object {
         private const val KEY_IS_MEETING = "isMeeting"
         private const val KEY_IS_PLAN = "isPlan"
@@ -92,6 +125,7 @@ class ParticipantListViewModel @Inject constructor(
 data class ParticipantListUiState(
     val isMeeting: Boolean,
     val participant: Flow<PagingData<User>>? = null,
+    val totalCount: Int = 0,
 ) : UiState
 
 sealed interface ParticipantListUiAction : UiAction {

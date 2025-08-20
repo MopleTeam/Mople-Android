@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -53,6 +55,7 @@ fun AlarmRoute(
     navigateToBack: () -> Unit,
 ) {
     val notifications = viewModel.notifications.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
+    val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
@@ -72,6 +75,7 @@ fun AlarmRoute(
 
     AlarmScreen(
         modifier = modifier,
+        totalCount = totalCount,
         notifications = notifications,
         onUiAction = viewModel::onUiAction
     )
@@ -80,6 +84,7 @@ fun AlarmRoute(
 @Composable
 fun AlarmScreen(
     modifier: Modifier = Modifier,
+    totalCount: Int,
     notifications: LazyPagingItems<Notification>,
     onUiAction: (AlarmUiAction) -> Unit
 ) {
@@ -93,7 +98,7 @@ fun AlarmScreen(
             onClickNavigate = { onUiAction(AlarmUiAction.OnClickBack) }
         )
 
-        AlarmCount(alarmCount = 0)
+        AlarmCount(alarmCount = totalCount)
 
         AnimatedVisibility(
             modifier = Modifier.fillMaxSize(),

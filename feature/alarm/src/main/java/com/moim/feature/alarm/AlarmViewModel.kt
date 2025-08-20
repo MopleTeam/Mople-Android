@@ -2,6 +2,8 @@ package com.moim.feature.alarm
 
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.moim.core.common.result.Result
+import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
@@ -10,7 +12,12 @@ import com.moim.core.domain.usecase.GetNotificationsUseCase
 import com.moim.core.model.Notification
 import com.moim.core.model.NotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,6 +28,10 @@ class AlarmViewModel @Inject constructor(
 ) : BaseViewModel() {
 
     val notifications = getNotificationsUseCase().cachedIn(viewModelScope)
+    val totalCount = getNotificationTotalCount()
+        .filterIsInstance<Result.Success<Int>>()
+        .mapLatest { it.data }
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
 
     fun onUiAction(uiAction: AlarmUiAction) {
         when (uiAction) {
@@ -38,6 +49,15 @@ class AlarmViewModel @Inject constructor(
             }
         }
     }
+
+    private fun getNotificationTotalCount() = flow<Int> {
+        emit(
+            notificationRepository.getNotifications(
+                cursor = "",
+                size = 1,
+            ).totalCount
+        )
+    }.asResult()
 
     private fun navigateToNotifyTarget(notification: Notification) {
         when (notification.type) {

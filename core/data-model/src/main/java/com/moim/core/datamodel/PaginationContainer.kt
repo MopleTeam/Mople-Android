@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PaginationContainerResponse<T>(
+    @SerialName("totalCount")
+    val totalCount: Int = 0,
     @SerialName("content")
     val content: T,
     @SerialName("page")

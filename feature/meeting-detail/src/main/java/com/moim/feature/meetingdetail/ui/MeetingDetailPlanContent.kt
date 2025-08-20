@@ -54,6 +54,8 @@ fun MeetingDetailPlanContent(
     isPlanSelected: Boolean,
     plans: LazyPagingItems<PlanItem>,
     reviews: LazyPagingItems<PlanItem>,
+    planTotalCount: Int,
+    reviewTotalCount: Int,
     onUiAction: (MeetingDetailUiAction) -> Unit,
 ) {
     LazyColumn(
@@ -79,7 +81,7 @@ fun MeetingDetailPlanContent(
                 )
 
                 MoimText(
-                    text = stringResource(R.string.unit_count, 0),
+                    text = stringResource(R.string.unit_count, if (isPlanSelected) planTotalCount else reviewTotalCount),
                     style = MoimTheme.typography.body01.medium,
                     color = MoimTheme.colors.gray.gray04
                 )
