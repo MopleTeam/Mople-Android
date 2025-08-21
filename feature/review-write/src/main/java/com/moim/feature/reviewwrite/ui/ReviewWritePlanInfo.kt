@@ -22,7 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import com.moim.core.common.util.getDateTimeFormatString
+import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
@@ -86,7 +86,7 @@ fun ReviewWritePlanInfo(
         PlanInfoItem(
             modifier = Modifier.padding(vertical = 4.dp),
             startIconRes = R.drawable.ic_clock,
-            text = getDateTimeFormatString(dateTime = review.reviewAt, pattern = stringResource(R.string.regex_date_full))
+            text = review.reviewAt.parseDateString(stringResource(R.string.regex_date_full)),
         )
         PlanInfoItem(
             startIconRes = R.drawable.ic_location,

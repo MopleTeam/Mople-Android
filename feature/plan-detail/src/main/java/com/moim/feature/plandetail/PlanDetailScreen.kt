@@ -1,7 +1,11 @@
 package com.moim.feature.plandetail
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -18,15 +21,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.util.toValidUrl
 import com.moim.core.common.view.ObserveAsEvents
+import com.moim.core.common.view.PAGING_ERROR
+import com.moim.core.common.view.PAGING_LOADING
+import com.moim.core.common.view.isAppendError
+import com.moim.core.common.view.isAppendLoading
+import com.moim.core.common.view.isError
+import com.moim.core.common.view.isLoading
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.common.PagingErrorScreen
+import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.containerScreen
@@ -127,6 +143,8 @@ fun PlanDetailScreen(
     onUiAction: OnPlanDetailUiAction
 ) {
     val screenName = if (uiState.planItem.isPlanAtBefore) "plan_detail" else "review_detail"
+    val comments = uiState.comments?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
+
     TrackScreenViewEvent(screenName = screenName)
     MoimScaffold(
         modifier = modifier
@@ -139,50 +157,111 @@ fun PlanDetailScreen(
             )
         },
         content = {
-            LazyColumn(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
             ) {
-                item {
-                    PlanDetailContent(
-                        planItem = uiState.planItem,
-                        isShowApplyButton = uiState.isShowApplyButton,
-                        onUiAction = onUiAction
-                    )
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    item {
+                        PlanDetailContent(
+                            planItem = uiState.planItem,
+                            isShowApplyButton = uiState.isShowApplyButton,
+                            onUiAction = onUiAction
+                        )
+                    }
+
+                    item {
+                        PlanDetailSpacer()
+                    }
+
+                    item {
+                        PlanDetailReviewImages(
+                            images = uiState.planItem.reviewImages,
+                            onUiAction = onUiAction
+                        )
+                    }
+
+                    item {
+                        PlanDetailSpacer()
+                    }
+
+                    item {
+                        PlanDetailCommentHeader(
+                            commentCount = uiState.planItem.commentCount
+                        )
+                    }
+
+                    if (comments != null) {
+                        items(
+                            count = comments.itemCount,
+                            key = comments.itemKey(),
+                            contentType = comments.itemContentType(),
+                        ) { index ->
+                            val comment = comments[index] ?: return@items
+                            PlanDetailCommentItem(
+                                modifier = Modifier.animateItem(),
+                                userId = uiState.user.userId,
+                                comment = comment,
+                                onUiAction = onUiAction
+                            )
+                        }
+
+                        if (comments.loadState.isAppendLoading()) {
+                            item(key = PAGING_LOADING) {
+                                PagingLoadingScreen(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .background(MoimTheme.colors.white)
+                                            .animateItem(),
+                                )
+                            }
+                        }
+
+                        if (comments.loadState.isAppendError()) {
+                            item(key = PAGING_ERROR) {
+                                PagingErrorScreen(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .background(MoimTheme.colors.white)
+                                            .animateItem(),
+                                    onClickRetry = comments::retry,
+                                )
+                            }
+                        }
+
+
+                        item {
+                            AnimatedVisibility(
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                                visible = comments.loadState.isLoading(),
+                            ) {
+                                PagingLoadingScreen()
+                            }
+                        }
+
+                        item {
+                            AnimatedVisibility(
+                                modifier = Modifier.fillMaxWidth(),
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                                visible = comments.loadState.isError()
+                            ) {
+                                PagingErrorScreen(
+                                    modifier = modifier,
+                                    onClickRetry = comments::refresh,
+                                )
+                            }
+                        }
+                    }
                 }
 
-                item {
-                    PlanDetailSpacer()
-                }
-
-                item {
-                    PlanDetailReviewImages(
-                        images = uiState.planItem.reviewImages,
-                        onUiAction = onUiAction
-                    )
-                }
-
-                item {
-                    PlanDetailSpacer()
-                }
-
-                item {
-                    PlanDetailCommentHeader(
-                        commentCount = uiState.comments.size
-                    )
-                }
-
-                items(
-                    items = uiState.comments,
-                    key = { comment -> comment.comment.commentId }
-                ) { comment ->
-                    PlanDetailCommentItem(
-                        userId = uiState.user.userId,
-                        comment = comment,
-                        onUiAction = onUiAction
-                    )
-                }
+                //::TODO User Card 노출
             }
         },
         bottomBar = {

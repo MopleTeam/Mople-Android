@@ -5,8 +5,11 @@ import com.moim.core.model.Comment
 
 data class CommentUiModel(
     val comment: Comment,
-    val texts: List<CommentTextUiModel>
-)
+    val texts: List<CommentTextUiModel>,
+    val replays: List<Comment> = emptyList()
+) {
+    var isDeleted: Boolean = false
+}
 
 sealed class CommentTextUiModel(
     open val content: String

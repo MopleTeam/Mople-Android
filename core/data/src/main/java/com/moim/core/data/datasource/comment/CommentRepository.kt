@@ -1,22 +1,28 @@
 package com.moim.core.data.datasource.comment
 
 import com.moim.core.model.Comment
+import com.moim.core.model.PaginationContainer
 import kotlinx.coroutines.flow.Flow
 
 interface CommentRepository {
 
-    fun getComments(postId: String): Flow<List<Comment>>
+    suspend fun getComments(
+        postId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<Comment>>
 
     fun createComment(
         postId: String,
         content: String
-    ): Flow<List<Comment>>
+    ): Flow<Comment>
 
     fun updateComment(
-        postId: String,
         commentId: String,
         content: String,
-    ): Flow<List<Comment>>
+    ): Flow<Comment>
+
+    fun updateLikeComment(commentId: String): Flow<Comment>
 
     fun deleteComment(commentId: String): Flow<Unit>
 

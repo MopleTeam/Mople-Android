@@ -1,18 +1,33 @@
 package com.moim.core.data.datasource.notification
 
 import com.moim.core.common.util.JsonUtil.jsonOf
+import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
 import com.moim.core.datamodel.NotificationResponse
-import com.moim.core.model.asItem
+import com.moim.core.model.Notification
+import com.moim.core.model.PaginationContainer
 import com.moim.core.network.service.NotificationApi
+import com.moim.core.network.util.converterException
 import javax.inject.Inject
 
 internal class NotificationRepositoryImpl @Inject constructor(
     private val notificationApi: NotificationApi,
 ) : NotificationRepository {
 
-    override fun getNotifications() = catchFlow {
-        emit(notificationApi.getNotifications().map(NotificationResponse::asItem))
+    override suspend fun getNotifications(
+        cursor: String,
+        size: Int
+    ): PaginationContainer<List<Notification>> {
+        return try {
+            notificationApi.getNotifications(
+                cursor = cursor,
+                size= size
+            ).asItem {
+                it.map(NotificationResponse::asItem)
+            }
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
     }
 
     override fun getNotificationSubscribes() = catchFlow {

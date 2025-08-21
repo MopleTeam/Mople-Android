@@ -12,8 +12,7 @@ import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.default
-import com.moim.core.common.util.getDateTimeFormatZonedDate
-import com.moim.core.common.util.getZonedDateTimeDefault
+import com.moim.core.common.util.parseDateString
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -21,10 +20,13 @@ import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.common.view.restartableStateIn
+import com.moim.core.data.datasource.holiday.HolidayRepository
 import com.moim.core.domain.usecase.GetPlanItemForCalendarUseCase
 import com.moim.core.model.item.PlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import okio.IOException
@@ -34,6 +36,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
+    private val holidayRepository: HolidayRepository,
     private val getPlanItemForCalendarUseCase: GetPlanItemForCalendarUseCase,
     private val planItemViewModelDelegate: PlanItemViewModelDelegate,
     private val meetingViewModelDelegate: MeetingViewModelDelegate,
@@ -42,9 +45,13 @@ class CalendarViewModel @Inject constructor(
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
     private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
-    private val meetingPlanResult = getPlanItemForCalendarUseCase(getDateTimeFormatZonedDate(pattern = "yyyyMM"))
-        .asResult()
-        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val meetingPlanResult =
+        combine(
+            holidayRepository.getHolidays(ZonedDateTime.now()),
+            getPlanItemForCalendarUseCase(ZonedDateTime.now().parseDateString("yyyyMM")),
+            ::Pair
+        ).asResult()
+            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -52,7 +59,18 @@ class CalendarViewModel @Inject constructor(
                 meetingPlanResult.collect { result ->
                     when (result) {
                         is Result.Loading -> setUiState(CalendarUiState.Loading)
-                        is Result.Success -> setUiState(CalendarUiState.Success(plans = result.data))
+
+                        is Result.Success -> {
+                            val (holidays, plans) = result.data
+
+                            setUiState(
+                                CalendarUiState.Success(
+                                    plans = plans,
+                                    holidays = holidays.map { it.date }
+                                )
+                            )
+                        }
+
                         is Result.Error -> setUiState(CalendarUiState.Error)
                     }
                 }
@@ -143,12 +161,8 @@ class CalendarViewModel @Inject constructor(
 
     private fun setSelectDay(date: ZonedDateTime) {
         uiState.checkState<CalendarUiState.Success> {
-            setUiState(
-                copy(
-                    selectDay = if (selectDay == date) null else date,
-                    isExpandable = false
-                )
-            )
+            if (selectDay == date) return
+            setUiState(copy(selectDay = date, isExpandable = false))
         }
     }
 
@@ -162,26 +176,41 @@ class CalendarViewModel @Inject constructor(
         viewModelScope.launch {
             uiState.checkState<CalendarUiState.Success> {
                 if (loadDates.any { it == date }) return@launch
+                val isHolidayFetch = loadDates.any { it.year != date.year }
+                val fetchHolidays = if (isHolidayFetch) {
+                    holidayRepository.getHolidays(date)
+                } else {
+                    flowOf(emptyList())
+                }
 
-                getPlanItemForCalendarUseCase(
-                    date = getDateTimeFormatZonedDate(dateTime = date, pattern = "yyyyMM"),
+                combine(
+                    fetchHolidays,
+                    getPlanItemForCalendarUseCase(date.parseDateString("yyyyMM")),
+                    ::Pair
                 ).asResult()
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
                         when (result) {
                             is Result.Loading -> return@collect
-                            is Result.Success -> setUiState(
-                                copy(
-                                    plans = plans + result.data,
-                                    loadDates = loadDates.toMutableList().apply { add(date) }
+                            is Result.Success -> {
+                                val (newHoliday, newPlan) = result.data
+                                val newHolidays = newHoliday.map { it.date }
+
+                                setUiState(
+                                    copy(
+                                        plans = plans + newPlan,
+                                        holidays = holidays + newHolidays,
+                                        loadDates = loadDates.toMutableList().apply { add(date) }
+                                    )
                                 )
-                            )
+                            }
 
                             is Result.Error -> when (result.exception) {
                                 is IOException -> setUiEvent(CalendarUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
                                 is NetworkException -> setUiEvent(CalendarUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
                             }
                         }
+
                     }
             }
         }
@@ -193,10 +222,11 @@ sealed interface CalendarUiState : UiState {
 
     data class Success(
         val plans: List<PlanItem>,
-        val selectDayOfMonth: ZonedDateTime = getZonedDateTimeDefault().default().withDayOfMonth(1),
+        val selectDayOfMonth: ZonedDateTime = ZonedDateTime.now().default().withDayOfMonth(1),
         val selectDay: ZonedDateTime? = null,
         val loadDates: List<ZonedDateTime> = listOf(selectDayOfMonth),
         val daysOfWeek: List<DayOfWeek> = daysOfWeek(),
+        val holidays: List<ZonedDateTime> = emptyList(),
         val isExpandable: Boolean = true,
         val isShowDatePickerDialog: Boolean = false
     ) : CalendarUiState

@@ -1,7 +1,8 @@
 package com.moim.core.network.service
 
 import com.moim.core.datamodel.MeetingResponse
-import com.moim.core.datamodel.ParticipantContainerResponse
+import com.moim.core.datamodel.PaginationContainerResponse
+import com.moim.core.datamodel.UserResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -9,11 +10,15 @@ import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface MeetingApi {
 
     @GET("meet/list")
-    suspend fun getMeetings(): List<MeetingResponse>
+    suspend fun getMeetings(
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<MeetingResponse>>
 
     @GET("meet/{meetId}")
     suspend fun getMeeting(@Path("meetId") id: String): MeetingResponse
@@ -22,7 +27,11 @@ interface MeetingApi {
     suspend fun getMeetingInviteCode(@Path("meetId") id: String): String
 
     @GET("/meet/members/{meetId}")
-    suspend fun getMeetingParticipants(@Path("meetId") id: String): ParticipantContainerResponse
+    suspend fun getMeetingParticipants(
+        @Path("meetId") id: String,
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<UserResponse>>
 
     @POST("meet/create")
     suspend fun createMeeting(

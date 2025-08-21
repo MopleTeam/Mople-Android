@@ -37,4 +37,6 @@ data class PlanResponse(
     val temperature: Float = 0f,
     @SerialName("participant")
     val isParticipant: Boolean = false,
+    @SerialName("commentCount")
+    val commentCount: Int = 0,
 )

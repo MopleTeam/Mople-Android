@@ -54,8 +54,6 @@ private fun Project.configureKotlin() {
         compilerOptions {
             jvmTarget.set(JvmTarget.fromTarget(MoimConfig.javaCompileTarget.toString()))
 
-            val warningsAsErrors: String? by project
-
             freeCompilerArgs.addAll(
                 "-Xstring-concat=inline",
                 "-opt-in=kotlin.RequiresOptIn",
@@ -67,6 +65,9 @@ private fun Project.configureKotlin() {
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
                 "-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi",
                 "-opt-in=androidx.lifecycle.compose.ExperimentalLifecycleComposeApi",
+
+                // Enable Annotation API
+                "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode",
             )
         }
     }

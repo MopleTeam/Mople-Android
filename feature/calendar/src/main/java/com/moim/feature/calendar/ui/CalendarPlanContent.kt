@@ -29,8 +29,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
-import com.moim.core.common.util.getDateTimeFormatZonedDate
-import com.moim.core.common.util.toDecimalString
+import com.moim.core.common.util.parseDateString
+import com.moim.core.common.util.decimalFormatString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
@@ -61,7 +61,7 @@ fun CalendarPlanContent(
             Column {
                 MoimText(
                     modifier = Modifier.fillMaxWidth(),
-                    text = getDateTimeFormatZonedDate(selectDate, stringResource(R.string.regex_date_year_month_day)),
+                    text = selectDate.parseDateString(stringResource(R.string.regex_date_year_month_day)),
                     textAlign = TextAlign.Center,
                     style = MoimTheme.typography.body01.medium,
                     color = MoimTheme.colors.gray.gray05,
@@ -223,7 +223,7 @@ private fun MeetingWeatherInfo(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 12.dp),
-                text = stringResource(R.string.unit_weather, temperature.toDecimalString()),
+                text = stringResource(R.string.unit_weather, temperature.decimalFormatString()),
                 singleLine = false,
                 style = MoimTheme.typography.body01.semiBold,
                 color = MoimTheme.colors.gray.gray01

@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.util.default
-import com.moim.core.common.util.getLongFormatZonedDateTime
+import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.theme.MoimTheme
 import java.time.ZonedDateTime
@@ -34,7 +34,7 @@ fun MoimDatePickerDialog(
         initialSelectedDateMillis = date,
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val selectableDate = getLongFormatZonedDateTime(utcTimeMillis).default()
+                val selectableDate = utcTimeMillis.parseZonedDateTime().default()
                 return selectableDate.isEqual(currentTime) || selectableDate.isAfter(currentTime)
             }
         }
@@ -47,7 +47,7 @@ fun MoimDatePickerDialog(
             TextButton(
                 onClick = {
                     val longTime = datePickerState.selectedDateMillis ?: System.currentTimeMillis()
-                    onDateSelected(getLongFormatZonedDateTime(longTime).default())
+                    onDateSelected(longTime.parseZonedDateTime().default())
                     onDismiss()
                 }
             ) {

@@ -1,48 +1,42 @@
 package com.moim.feature.alarm
 
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
-import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.notification.NotificationRepository
+import com.moim.core.domain.usecase.GetNotificationsUseCase
 import com.moim.core.model.Notification
 import com.moim.core.model.NotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
+    getNotificationsUseCase: GetNotificationsUseCase,
 ) : BaseViewModel() {
 
-    private val notificationResult = notificationRepository
-        .getNotifications()
-        .asResult()
-        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
-
-    init {
-        viewModelScope.launch {
-            notificationResult.collect { result ->
-                when (result) {
-                    is Result.Loading -> setUiState(AlarmUiState.Loading)
-                    is Result.Success -> setUiState(AlarmUiState.Success(result.data.sortedByDescending { it.sendAt }))
-                    is Result.Error -> setUiState(AlarmUiState.Error)
-                }
-            }
-        }
-    }
+    val notifications = getNotificationsUseCase().cachedIn(viewModelScope)
+    val totalCount = getNotificationTotalCount()
+        .filterIsInstance<Result.Success<Int>>()
+        .mapLatest { it.data }
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
 
     fun onUiAction(uiAction: AlarmUiAction) {
         when (uiAction) {
             is AlarmUiAction.OnClickBack -> setUiEvent(AlarmUiEvent.NavigateToBack)
-            is AlarmUiAction.OnClickRefresh -> notificationResult.restart()
+            is AlarmUiAction.OnClickRefresh -> setUiEvent(AlarmUiEvent.RefreshPagingData)
             is AlarmUiAction.OnUpdateNotificationCount -> clearNotificationCount()
             is AlarmUiAction.OnClickAlarm -> navigateToNotifyTarget(uiAction.notification)
         }
@@ -55,6 +49,15 @@ class AlarmViewModel @Inject constructor(
             }
         }
     }
+
+    private fun getNotificationTotalCount() = flow<Int> {
+        emit(
+            notificationRepository.getNotifications(
+                cursor = "",
+                size = 1,
+            ).totalCount
+        )
+    }.asResult()
 
     private fun navigateToNotifyTarget(notification: Notification) {
         when (notification.type) {
@@ -78,14 +81,6 @@ class AlarmViewModel @Inject constructor(
     }
 }
 
-sealed interface AlarmUiState : UiState {
-    data object Loading : AlarmUiState
-
-    data class Success(val notifications: List<Notification> = emptyList()) : AlarmUiState
-
-    data object Error : AlarmUiState
-}
-
 sealed interface AlarmUiAction : UiAction {
     data object OnClickBack : AlarmUiAction
     data object OnClickRefresh : AlarmUiAction
@@ -97,4 +92,5 @@ sealed interface AlarmUiEvent : UiEvent {
     data object NavigateToBack : AlarmUiEvent
     data class NavigateToMeetingDetail(val meetingId: String) : AlarmUiEvent
     data class NavigateToPlanDetail(val postId: String, val isPlan: Boolean) : AlarmUiEvent
+    data object RefreshPagingData : AlarmUiEvent
 }

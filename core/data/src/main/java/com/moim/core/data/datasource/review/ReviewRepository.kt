@@ -1,17 +1,25 @@
 package com.moim.core.data.datasource.review
 
-import com.moim.core.model.Participant
+import com.moim.core.model.PaginationContainer
 import com.moim.core.model.Review
-import com.moim.core.model.ReviewImage
+import com.moim.core.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface ReviewRepository {
 
-    fun getReviews(meetingId: String): Flow<List<Review>>
+    suspend fun getReviews(
+        meetingId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<Review>>
 
     fun getReview(reviewId: String): Flow<Review>
 
-    fun getReviewParticipants(reviewId: String): Flow<List<Participant>>
+    suspend fun getReviewParticipants(
+        reviewId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<User>>
 
     fun deleteReviewImage(reviewId: String, images: List<String>): Flow<Unit>
 

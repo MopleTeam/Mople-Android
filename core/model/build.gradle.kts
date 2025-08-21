@@ -8,8 +8,6 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.dataModel)
-
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.timber)

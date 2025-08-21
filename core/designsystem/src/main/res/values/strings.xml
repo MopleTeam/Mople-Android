@@ -123,9 +123,12 @@
     <string name="plan_detail_report">신고하기</string>
     <string name="plan_detail_report_completed">신고 접수가 완료되었습니다.</string>
     <string name="plan_detail_comment">댓글</string>
+    <string name="plan_detail_comment_update_typing">댓글 수정중</string>
     <string name="plan_detail_comment_hint">댓글을 입력해주세요</string>
     <string name="plan_detail_comment_error">댓글을 불러오지 못했어요\n잠시 후 다시 시도해주세요</string>
     <string name="plan_detail_comment_empty">아직 댓글이 없어요</string>
+    <string name="plan_detail_comment_reply_show">답글 %s건 더보기</string>
+    <string name="plan_detail_comment_reply_hide">답글 숨기기</string>
     <string name="plan_detail_image">함께한 순간</string>
     <string name="plan_detail_plan_apply">약속 참여하기</string>
     <string name="plan_detail_plan_apply_done">약속 참여중</string>
@@ -191,7 +194,7 @@
     <string name="unit_participants_count">%d명 참여</string>
     <string name="unit_participants_count_short">%d명</string>
     <string name="unit_weather">%s°C</string>
-    <string name="unit_count">%d개</string>
+    <string name="unit_count">%s개</string>
     <string name="unit_dot">·</string>
 
     <!-- Regex -->

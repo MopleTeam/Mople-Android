@@ -1,5 +1,6 @@
 package com.moim.feature.planwrite.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,12 +9,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -25,8 +24,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
+import com.moim.core.common.view.PAGING_ERROR
+import com.moim.core.common.view.PAGING_LOADING
+import com.moim.core.common.view.isAppendError
+import com.moim.core.common.view.isAppendLoading
+import com.moim.core.common.view.isError
+import com.moim.core.common.view.isLoading
 import com.moim.core.designsystem.R
-import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.common.PagingErrorScreen
+import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimBottomSheetDialog
 import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimText
@@ -35,14 +48,15 @@ import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Meeting
 import com.moim.feature.planwrite.OnPlanWriteUiAction
-import com.moim.feature.planwrite.PlanWriteDialogUiState
 import com.moim.feature.planwrite.PlanWriteUiAction
+import com.moim.feature.planwrite.model.MeetingUiModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 @Composable
 fun PlanWriteMeetingsDialog(
     modifier: Modifier = Modifier,
-    uiState: PlanWriteDialogUiState,
+    meetings: LazyPagingItems<MeetingUiModel>,
     onUiAction: OnPlanWriteUiAction
 ) {
     val dismissAction = PlanWriteUiAction.OnShowMeetingsDialog(false)
@@ -61,18 +75,10 @@ fun PlanWriteMeetingsDialog(
             onClick = { onUiAction(dismissAction) }
         )
 
-        when (uiState) {
-            is PlanWriteDialogUiState.Loading -> LoadingScreen(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-            )
-
-            is PlanWriteDialogUiState.Success -> PlanWriteMeetingsScreen(
-                uiState = uiState,
-                onUiAction = onUiAction
-            )
-        }
+        PlanWriteMeetingsScreen(
+            meetings = meetings,
+            onUiAction = onUiAction
+        )
     }
 }
 
@@ -104,7 +110,7 @@ fun PlanWriteMeetingsTopAppbar(
 @Composable
 fun PlanWriteMeetingsScreen(
     modifier: Modifier = Modifier,
-    uiState: PlanWriteDialogUiState.Success,
+    meetings: LazyPagingItems<MeetingUiModel>,
     onUiAction: OnPlanWriteUiAction
 ) {
     Column(
@@ -115,14 +121,61 @@ fun PlanWriteMeetingsScreen(
             contentPadding = PaddingValues(bottom = 60.dp)
         ) {
             items(
-                items = uiState.meetings,
-                key = { it.id }
-            ) {
+                count = meetings.itemCount,
+                key = meetings.itemKey(),
+                contentType = meetings.itemContentType()
+            ) { index ->
+                val meetingUiModel = meetings[index] ?: return@items
                 PlanWriteMeetingInfo(
-                    meeting = it,
-                    isSelected = uiState.selectedMeeting == it,
+                    meeting = meetingUiModel.meeting,
+                    isSelected = meetingUiModel.isSelected,
                     onUiAction = onUiAction
                 )
+            }
+
+            if (meetings.loadState.isAppendLoading()) {
+                item(key = PAGING_LOADING) {
+                    PagingLoadingScreen(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .background(MoimTheme.colors.white)
+                                .animateItem(),
+                    )
+                }
+            }
+
+            if (meetings.loadState.isAppendError()) {
+                item(key = PAGING_ERROR) {
+                    PagingErrorScreen(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .background(MoimTheme.colors.white)
+                                .animateItem(),
+                        onClickRetry = meetings::retry,
+                    )
+                }
+            }
+
+            item {
+                AnimatedVisibility(
+                    visible = meetings.loadState.isLoading()
+                ) {
+                    PagingLoadingScreen()
+                }
+            }
+
+            item {
+                AnimatedVisibility(
+                    modifier = Modifier.fillMaxWidth(),
+                    visible = meetings.loadState.isError()
+                ) {
+                    PagingErrorScreen(
+                        modifier = modifier,
+                        onClickRetry = meetings::refresh,
+                    )
+                }
             }
         }
     }

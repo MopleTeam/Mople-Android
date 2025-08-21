@@ -2,6 +2,11 @@ package com.moim.feature.meetingdetail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.filter
+import androidx.paging.insertSeparators
+import androidx.paging.map
 import com.moim.core.common.delegate.MeetingAction
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.PlanAction
@@ -11,28 +16,34 @@ import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
+import com.moim.core.common.view.checkedActionedAtIsBeforeLoadedAt
 import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
+import com.moim.core.domain.usecase.GetPlanItemsUseCase
 import com.moim.core.model.Meeting
 import com.moim.core.model.Plan
-import com.moim.core.model.Review
-import com.moim.core.model.item.asPlan
-import com.moim.core.model.item.asPlanItem
-import com.moim.core.model.item.asReview
+import com.moim.core.model.item.PlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -42,10 +53,11 @@ import javax.inject.Inject
 @HiltViewModel
 class MeetingDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val userRepository: UserRepository,
+    private val getPlanItemsUseCase: GetPlanItemsUseCase,
     private val planRepository: PlanRepository,
+    private val reviewRepository: ReviewRepository,
     private val meetingRepository: MeetingRepository,
-    reviewRepository: ReviewRepository,
+    userRepository: UserRepository,
     meetingViewModelDelegate: MeetingViewModelDelegate,
     planItemViewModelDelegate: PlanItemViewModelDelegate
 ) : BaseViewModel(),
@@ -58,35 +70,174 @@ class MeetingDetailViewModel @Inject constructor(
     private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
     private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
 
-    private val meetingDetailResult =
+    private val pagingRefreshSignal = MutableSharedFlow<Unit>()
+    private val loadDataSignal: Flow<Unit> = flow {
+        emit(Unit)
+        emitAll(pagingRefreshSignal)
+    }
+
+    private var _plans = loadDataSignal
+        .flatMapLatest { getPlanItemsUseCase(GetPlanItemsUseCase.Params(meetId = meetingId, isPlanAtBefore = true)) }
+        .cachedIn(viewModelScope)
+    private val plans = planActionReceiver.flatMapLatest { receiver ->
+        when (receiver) {
+            is PlanAction.None -> _plans
+
+            is PlanAction.PlanCreate -> {
+                _plans.map { pagingData ->
+                    pagingData.checkedActionedAtIsBeforeLoadedAt(
+                        actionedAt = receiver.actionAt,
+                        loadedAt = getPlanItemsUseCase.loadedAt
+                    ) {
+                        pagingData.insertSeparators { before: PlanItem?, aftet: PlanItem? ->
+                            if (before == null) {
+                                return@insertSeparators receiver.planItem
+                            } else {
+                                null
+                            }
+                        }
+                    }
+                }
+            }
+
+            is PlanAction.PlanUpdate -> {
+                _plans.map { pagingData ->
+                    pagingData.checkedActionedAtIsBeforeLoadedAt(
+                        actionedAt = receiver.actionAt,
+                        loadedAt = getPlanItemsUseCase.loadedAt
+                    ) {
+                        if (receiver.planItem.isPlanAtBefore.not()) {
+                            pagingData
+                        } else {
+                            pagingData.map { planItem ->
+                                if (planItem.postId == receiver.planItem.postId) {
+                                    receiver.planItem
+                                } else {
+                                    planItem
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            is PlanAction.PlanDelete -> {
+                _plans.map { pagingData ->
+                    pagingData.checkedActionedAtIsBeforeLoadedAt(
+                        actionedAt = receiver.actionAt,
+                        loadedAt = getPlanItemsUseCase.loadedAt
+                    ) {
+                        pagingData
+                            .map { planItem ->
+                                if (planItem.postId == receiver.postId) {
+                                    planItem.apply { isDeleted = true }
+                                } else {
+                                    planItem
+                                }
+                            }.filter { it.isDeleted.not() }
+                    }
+                }
+            }
+
+            is PlanAction.PlanInvalidate -> {
+                onRefresh()
+                _plans
+            }
+        }.also {
+            _plans = it
+        }
+    }.cachedIn(viewModelScope)
+
+    private var _review = loadDataSignal
+        .flatMapLatest { getPlanItemsUseCase(GetPlanItemsUseCase.Params(meetId = meetingId, isPlanAtBefore = false)) }
+        .cachedIn(viewModelScope)
+    private val reviews = planActionReceiver.flatMapLatest { receiver ->
+        when (receiver) {
+            is PlanAction.None,
+            is PlanAction.PlanCreate,
+            is PlanAction.PlanInvalidate -> _review
+
+            is PlanAction.PlanUpdate -> _review.map { pagingData ->
+                pagingData.checkedActionedAtIsBeforeLoadedAt(
+                    actionedAt = receiver.actionAt,
+                    loadedAt = getPlanItemsUseCase.loadedAt
+                ) {
+                    if (receiver.planItem.isPlanAtBefore) {
+                        pagingData
+                    } else {
+                        pagingData.map { planItem ->
+                            if (planItem.postId == receiver.planItem.postId) {
+                                receiver.planItem
+                            } else {
+                                planItem
+                            }
+                        }
+                    }
+                }
+            }
+
+            is PlanAction.PlanDelete -> _review.map { pagingData ->
+                pagingData.checkedActionedAtIsBeforeLoadedAt(
+                    actionedAt = receiver.actionAt,
+                    loadedAt = getPlanItemsUseCase.loadedAt
+                ) {
+                    pagingData
+                        .map { planItem ->
+                            if (planItem.postId == receiver.postId) {
+                                planItem.apply { isDeleted = true }
+                            } else {
+                                planItem
+                            }
+                        }.filter { it.isDeleted.not() }
+                }
+            }
+        }.also {
+            _review = it
+        }
+    }.cachedIn(viewModelScope)
+
+    private val meetingDetailUiState =
         combine(
+            userRepository.getUser(),
             meetingRepository.getMeeting(meetingId),
-            planRepository.getPlans(meetingId),
-            reviewRepository.getReviews(meetingId),
+            getPlanAndReviewTotalCount(),
             ::Triple
-        ).asResult().restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+        )
+            .asResult()
+            .mapLatest { result ->
+                when (result) {
+                    is Result.Loading -> MeetingDetailUiState.Loading
+
+                    is Result.Success -> {
+                        val (user, meeting, counts) = result.data
+                        val (planCount, reviewCount) = counts
+
+                        MeetingDetailUiState.Success(
+                            userId = user.userId,
+                            meeting = meeting,
+                            planTotalCount = planCount,
+                            reviewTotalCount = reviewCount,
+                        )
+                    }
+
+                    is Result.Error -> MeetingDetailUiState.Error
+                }
+            }
+            .restartableStateIn(viewModelScope, SharingStarted.Lazily, MeetingDetailUiState.Loading)
 
     init {
         viewModelScope.launch {
             launch {
-                meetingDetailResult.collect { result ->
-                    when (result) {
-                        is Result.Loading -> setUiState(MeetingDetailUiState.Loading)
-                        is Result.Success -> {
-                            val user = userRepository.getUser().first()
-                            val (meeting, plans, reviews) = result.data
-
-                            setUiState(
-                                MeetingDetailUiState.Success(
-                                    userId = user.userId,
-                                    meeting = meeting,
-                                    plans = plans.sortedByDescending { it.planTime },
-                                    reviews = reviews.sortedByDescending { it.reviewAt },
-                                )
+                meetingDetailUiState.collect { uiState ->
+                    if (uiState is MeetingDetailUiState.Success) {
+                        setUiState(
+                            uiState.copy(
+                                plans = plans,
+                                reviews = reviews
                             )
-                        }
-
-                        is Result.Error -> setUiState(MeetingDetailUiState.Error)
+                        )
+                    } else {
+                        setUiState(uiState)
                     }
                 }
             }
@@ -96,76 +247,8 @@ class MeetingDetailViewModel @Inject constructor(
                     uiState.checkState<MeetingDetailUiState.Success> {
                         when (action) {
                             is MeetingAction.MeetingUpdate -> setUiState(copy(meeting = action.meeting))
-                            is MeetingAction.MeetingInvalidate -> meetingDetailResult.restart()
+                            is MeetingAction.MeetingInvalidate -> meetingDetailUiState.restart()
                             else -> return@collect
-                        }
-                    }
-                }
-            }
-
-            launch {
-                planActionReceiver.collect { action ->
-                    uiState.checkState<MeetingDetailUiState.Success> {
-                        when (action) {
-                            is PlanAction.PlanCreate -> {
-                                val plans = plans.toMutableList()
-                                    .apply {
-                                        withIndex()
-                                            .firstOrNull {
-                                                val newPlanTime = action.planItem.planAt.parseZonedDateTime()
-                                                val currentPlanTime = it.value.planTime.parseZonedDateTime()
-                                                newPlanTime.isBefore(currentPlanTime)
-                                            }
-                                            ?.let { add(it.index, action.planItem.asPlan()) }
-                                            ?: run { add(action.planItem.asPlan()) }
-                                    }
-
-                                setUiState(copy(plans = plans))
-                            }
-
-                            is PlanAction.PlanUpdate -> {
-                                if (action.planItem.isPlanAtBefore) {
-                                    val plans = plans.toMutableList().apply {
-                                        val index = withIndex()
-                                            .find { it.value.planId == action.planItem.postId }
-                                            ?.index
-                                            ?: return@collect
-
-
-                                        set(index, action.planItem.asPlan())
-                                    }
-
-                                    setUiState(copy(plans = plans))
-                                } else {
-                                    val reviews = reviews.toMutableList().apply {
-                                        val index = withIndex()
-                                            .find { it.value.reviewId == action.planItem.postId }
-                                            ?.index
-                                            ?: return@collect
-
-                                        set(index, action.planItem.asReview())
-                                    }
-
-                                    setUiState(copy(reviews = reviews))
-                                }
-                            }
-
-                            is PlanAction.PlanDelete -> setUiState(
-                                copy(
-                                    plans = plans.toMutableList().apply {
-                                        val removePlan = find { it.planId == action.postId } ?: return@apply
-                                        remove(removePlan)
-                                    },
-                                    reviews = reviews.toMutableList().apply {
-                                        val removeReview = find { it.reviewId == action.postId } ?: return@apply
-                                        remove(removeReview)
-                                    },
-                                )
-                            )
-
-                            is PlanAction.PlanInvalidate -> meetingDetailResult.restart()
-
-                            is PlanAction.None -> return@collect
                         }
                     }
                 }
@@ -176,37 +259,44 @@ class MeetingDetailViewModel @Inject constructor(
     fun onUiAction(uiAction: MeetingDetailUiAction) {
         when (uiAction) {
             is MeetingDetailUiAction.OnClickBack -> setUiEvent(MeetingDetailUiEvent.NavigateToBack)
-            is MeetingDetailUiAction.OnClickRefresh -> meetingDetailResult.restart()
+            is MeetingDetailUiAction.OnClickRefresh -> meetingDetailUiState.restart()
             is MeetingDetailUiAction.OnClickPlanWrite -> navigateToPlanWrite()
             is MeetingDetailUiAction.OnClickMeetingSetting -> navigateToMeetingSetting()
             is MeetingDetailUiAction.OnClickPlanTab -> setPlanTab(uiAction.isBefore)
-            is MeetingDetailUiAction.OnClickPlanApply -> setPlanApply(uiAction.planId, uiAction.isApply)
+            is MeetingDetailUiAction.OnClickPlanApply -> setPlanApply(uiAction.planItem, uiAction.isApply)
             is MeetingDetailUiAction.OnClickPlanDetail -> setUiEvent(MeetingDetailUiEvent.NavigateToPlanDetail(uiAction.postId, uiAction.isPlan))
             is MeetingDetailUiAction.OnClickMeetingImage -> setUiEvent(MeetingDetailUiEvent.NavigateToImageViewer(uiAction.imageUrl, uiAction.meetingName))
             is MeetingDetailUiAction.OnClickMeetingInvite -> getInviteLink()
-            is MeetingDetailUiAction.OnShowPlanApplyCancelDialog -> showApplyCancelDialog(uiAction.isShow, uiAction.cancelPlanId)
+            is MeetingDetailUiAction.OnShowPlanApplyCancelDialog -> showApplyCancelDialog(uiAction.isShow, uiAction.cancelPlanItem)
+        }
+    }
+
+    private fun getPlanAndReviewTotalCount() = flow {
+        coroutineScope {
+            val plans = async { planRepository.getPlans(meetingId, "", 1) }
+            val reviews = async { reviewRepository.getReviews(meetingId, "", 1) }
+            emit(plans.await().totalCount to reviews.await().totalCount)
         }
     }
 
     private fun setPlanApply(
-        planId: String,
+        planItem: PlanItem,
         isApply: Boolean
     ) {
         viewModelScope.launch {
             if (isApply) {
-                planRepository.joinPlan(planId)
+                planRepository.joinPlan(planItem.postId)
             } else {
-                planRepository.leavePlan(planId)
+                planRepository.leavePlan(planItem.postId)
             }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                 uiState.checkState<MeetingDetailUiState.Success> {
                     when (result) {
                         is Result.Loading -> return@collect
                         is Result.Success -> {
-                            val plan = plans.first { plan -> plan.planId == planId }
-                            updatePlanItem(ZonedDateTime.now(), plan.copy(isParticipant = !plan.isParticipant).asPlanItem())
+                            updatePlanItem(ZonedDateTime.now(), planItem.copy(isParticipant = !planItem.isParticipant))
 
                             if (isApply.not()) {
-                                setUiState(copy(cancelPlanId = null, isShowApplyCancelDialog = false))
+                                setUiState(copy(cancelPlanItem = null, isShowApplyCancelDialog = false))
                             }
                         }
 
@@ -241,13 +331,12 @@ class MeetingDetailViewModel @Inject constructor(
         }
     }
 
-
-    private fun showApplyCancelDialog(isShow: Boolean, cancelPlanId: String?) {
+    private fun showApplyCancelDialog(isShow: Boolean, cancelPlanItem: PlanItem?) {
         uiState.checkState<MeetingDetailUiState.Success> {
             setUiState(
                 copy(
                     isShowApplyCancelDialog = isShow,
-                    cancelPlanId = cancelPlanId
+                    cancelPlanItem = cancelPlanItem
                 )
             )
         }
@@ -268,7 +357,7 @@ class MeetingDetailViewModel @Inject constructor(
                         meetingId = meeting.id,
                         meetingName = meeting.name,
                         meetingImageUrl = meeting.imageUrl,
-                        planTime = ZonedDateTime.now().toString()
+                        planAt = ZonedDateTime.now()
                     )
                 )
             )
@@ -278,6 +367,12 @@ class MeetingDetailViewModel @Inject constructor(
     private fun navigateToMeetingSetting() {
         uiState.checkState<MeetingDetailUiState.Success> {
             setUiEvent(MeetingDetailUiEvent.NavigateToMeetingSetting(meeting))
+        }
+    }
+
+    private fun onRefresh() {
+        viewModelScope.launch {
+            pagingRefreshSignal.emit(Unit)
         }
     }
 
@@ -293,11 +388,13 @@ sealed interface MeetingDetailUiState : UiState {
     data class Success(
         val userId: String = "",
         val meeting: Meeting = Meeting(),
-        val plans: List<Plan> = emptyList(),
-        val reviews: List<Review> = emptyList(),
-        val cancelPlanId: String? = null,
         val isShowApplyCancelDialog: Boolean = false,
         val isPlanSelected: Boolean = true,
+        val cancelPlanItem: PlanItem? = null,
+        val plans: Flow<PagingData<PlanItem>>? = null,
+        val reviews: Flow<PagingData<PlanItem>>? = null,
+        val planTotalCount: Int = 0,
+        val reviewTotalCount: Int = 0,
     ) : MeetingDetailUiState
 
     data object Error : MeetingDetailUiState
@@ -319,7 +416,7 @@ sealed interface MeetingDetailUiAction : UiAction {
     ) : MeetingDetailUiAction
 
     data class OnClickPlanApply(
-        val planId: String,
+        val planItem: PlanItem,
         val isApply: Boolean
     ) : MeetingDetailUiAction
 
@@ -335,7 +432,7 @@ sealed interface MeetingDetailUiAction : UiAction {
 
     data class OnShowPlanApplyCancelDialog(
         val isShow: Boolean,
-        val cancelPlanId: String?,
+        val cancelPlanItem: PlanItem?,
     ) : MeetingDetailUiAction
 }
 

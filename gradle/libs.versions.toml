@@ -1,37 +1,37 @@
 [versions]
 # Project
-androidGradlePlugin = "8.9.2"
-playservicesGradlePlugin = "4.4.2"
-firebaseCrashlyticsGradlePlugin = "3.0.3"
+androidGradlePlugin = "8.11.0"
+playservicesGradlePlugin = "4.4.3"
+firebaseCrashlyticsGradlePlugin = "3.0.4"
 
 # AndroidX
 androidxCore = "1.16.0"
-androidxComposeBom = "2025.04.01"
+androidxComposeBom = "2025.06.01"
 androidxStartUp = "1.2.0"
-androidxLifecycle = "2.8.7"
+androidxLifecycle = "2.9.1"
 androidxHilt = "1.2.0"
 androidxCoreSplashScreen = "1.0.1"
 androidxActivity = "1.10.1"
-androidxNavigation = "2.8.9"
-androidxDataStore = "1.1.1"
-androidxRoom = "2.7.1"
-androidxAppcompat = "1.7.0"
+androidxNavigation = "2.9.1"
+androidxDataStore = "1.1.7"
+androidxRoom = "2.7.2"
+androidxAppcompat = "1.7.1"
 androidxPaging = "3.3.6"
 
 # Android
 androidPlayServicesLocation = "21.3.0"
 
 # Kotlin
-kotlin = "2.1.0"
-kotlinxCoroutines = "1.10.1"
-kotlinxSerializationJson = "1.7.3"
-ksp = "2.1.0-1.0.29"
+kotlin = "2.2.0"
+kotlinxCoroutines = "1.10.2"
+kotlinxSerializationJson = "1.9.0"
+ksp = "2.2.0-2.0.2"
 
 # Firebase
-firebaseBom = "33.13.0"
+firebaseBom = "33.16.0"
 
 # hilt
-hilt = "2.55"
+hilt = "2.56.2"
 
 # Coil
 coil = "2.7.0"
@@ -45,16 +45,16 @@ androidx-test-ext-junit = "1.2.1"
 espresso-core = "3.6.1"
 
 # ETC
-retrofit = "2.11.0"
-okhttp = "4.12.0"
-lottie = "6.6.3"
+retrofit = "3.0.0"
+okhttp = "5.1.0"
+lottie = "6.6.7"
 timber = "5.0.1"
 leakCanary = "2.14"
 compressor = "3.0.1"
-calendarCompose = "2.6.0"
-composeStableMarker = "1.0.5"
-kakaoCore = "2.21.1"
-zoomable = "2.6.0"
+calendarCompose = "2.7.0"
+composeStableMarker = "1.0.6"
+kakaoCore = "2.21.4"
+zoomable = "2.8.1"
 naverMapCompose = "1.8.2"
 naverMapLocation = "21.0.2"
 tedClusteringNaver = "1.0.2"

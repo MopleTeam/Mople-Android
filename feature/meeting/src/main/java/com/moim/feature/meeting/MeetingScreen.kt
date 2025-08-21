@@ -1,32 +1,48 @@
 package com.moim.feature.meeting
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.view.ObserveAsEvents
+import com.moim.core.common.view.PAGING_ERROR
+import com.moim.core.common.view.PAGING_LOADING
+import com.moim.core.common.view.isAppendError
+import com.moim.core.common.view.isAppendLoading
+import com.moim.core.common.view.isError
+import com.moim.core.common.view.isLoading
+import com.moim.core.common.view.isSuccess
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
-import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.common.PagingErrorScreen
+import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimFloatingActionButton
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.MoimText
@@ -36,8 +52,6 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Meeting
 import com.moim.feature.meeting.ui.MeetingCard
 
-internal typealias OnMeetingUiAction = (MeetingUiAction) -> Unit
-
 @Composable
 fun MeetingRoute(
     viewModel: MeetingViewModel = hiltViewModel(),
@@ -45,37 +59,29 @@ fun MeetingRoute(
     navigateToMeetingWrite: () -> Unit,
     navigateToMeetingDetail: (String) -> Unit
 ) {
-    val meetingUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(padding)
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
+    val meetings = viewModel.meetings.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is MeetingUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite()
             is MeetingUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
+            is MeetingUiEvent.RefreshPagingData -> meetings.refresh()
         }
     }
 
-    when (val uiState = meetingUiState) {
-        is MeetingUiState.Loading -> LoadingScreen(modifier = modifier)
-
-        is MeetingUiState.Success -> MeetingScreen(
-            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding),
-            uiState = uiState,
-            onUiAction = viewModel::onUiAction
-        )
-
-        is MeetingUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(MeetingUiAction.OnClickRefresh) }
-        )
-    }
+    MeetingScreen(
+        modifier = modifier,
+        meetings = meetings,
+        onUiAction = viewModel::onUiAction
+    )
 }
 
 @Composable
 fun MeetingScreen(
     modifier: Modifier = Modifier,
-    uiState: MeetingUiState.Success,
-    onUiAction: OnMeetingUiAction = {}
+    meetings: LazyPagingItems<Meeting>,
+    onUiAction: (MeetingUiAction) -> Unit = {}
 ) {
     TrackScreenViewEvent(screenName = "meet_list")
     MoimScaffold(
@@ -92,16 +98,59 @@ fun MeetingScreen(
                 .fillMaxSize()
                 .padding(padding)
 
-            if (uiState.meetings.isNotEmpty()) {
-                MeetingContent(
-                    modifier = contentModifier,
-                    meetings = uiState.meetings,
-                    onUiAction = onUiAction
-                )
-            } else {
-                MeetingEmptyScreen(
-                    modifier =  contentModifier
-                )
+            Box(
+                modifier = contentModifier,
+            ) {
+                AnimatedVisibility(
+                    modifier = Modifier.fillMaxSize(),
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    visible = meetings.loadState.isSuccess() && meetings.itemCount > 0
+                ) {
+                    MeetingContent(
+                        meetings = meetings,
+                        onUiAction = onUiAction
+                    )
+                }
+
+                AnimatedVisibility(
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    visible = meetings.loadState.isLoading(),
+                ) {
+                    PagingLoadingScreen(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.Center)
+                    )
+                }
+
+                AnimatedVisibility(
+                    modifier = Modifier.fillMaxSize(),
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    visible = meetings.loadState.isError()
+                ) {
+                    ErrorScreen(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MoimTheme.colors.bg.primary),
+                        onClickRefresh = { onUiAction(MeetingUiAction.OnClickRefresh) },
+                    )
+                }
+
+                AnimatedVisibility(
+                    modifier = Modifier.fillMaxSize(),
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    visible = meetings.loadState.isSuccess() && meetings.itemCount == 0
+                ) {
+                    MeetingEmptyScreen(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MoimTheme.colors.bg.primary)
+                    )
+                }
             }
         },
         floatingActionButton = {
@@ -122,22 +171,50 @@ fun MeetingScreen(
 @Composable
 fun MeetingContent(
     modifier: Modifier = Modifier,
-    meetings: List<Meeting>,
-    onUiAction: OnMeetingUiAction
+    meetings: LazyPagingItems<Meeting>,
+    onUiAction: (MeetingUiAction) -> Unit
 ) {
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(vertical = 28.dp, horizontal = 20.dp)
     ) {
         items(
-            items = meetings,
-            key = { it.id },
-        ) {
+            count = meetings.itemCount,
+            key = meetings.itemKey(),
+            contentType = meetings.itemContentType()
+        ) { index ->
+            val meeting = meetings[index] ?: return@items
             MeetingCard(
-                meeting = it,
+                modifier = Modifier.animateItem(),
+                meeting = meeting,
                 onUiAction = onUiAction
             )
+        }
+
+        if (meetings.loadState.isAppendLoading()) {
+            item(key = PAGING_LOADING) {
+                PagingLoadingScreen(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(MoimTheme.colors.white)
+                            .animateItem(),
+                )
+            }
+        }
+
+        if (meetings.loadState.isAppendError()) {
+            item(key = PAGING_ERROR) {
+                PagingErrorScreen(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(MoimTheme.colors.white)
+                            .animateItem(),
+                    onClickRetry = meetings::retry,
+                )
+            }
         }
     }
 }
@@ -147,7 +224,7 @@ fun MeetingEmptyScreen(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -163,16 +240,6 @@ fun MeetingEmptyScreen(
             singleLine = false,
             style = MoimTheme.typography.body01.medium,
             color = MoimTheme.colors.gray.gray06
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun MeetingScreenPreview() {
-    MoimTheme {
-        MeetingScreen(
-            uiState = MeetingUiState.Success(meetings = emptyList())
         )
     }
 }

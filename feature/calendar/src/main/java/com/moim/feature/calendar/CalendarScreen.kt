@@ -199,11 +199,12 @@ fun CalendarMonth(
             state = monthState,
             dayContent = { day ->
                 val dayForZonedDateTime = day.date.parseZonedDateTime().default()
-                val enabled = uiState.plans.find { it.planAt.parseZonedDateTime().default() == dayForZonedDateTime } != null
+                val enabled = uiState.plans.find { it.planAt.default() == dayForZonedDateTime } != null
 
                 CalendarDay(
                     day = dayForZonedDateTime,
                     selectedDay = uiState.selectDay,
+                    holidays = uiState.holidays.filter { it.year == day.date.year && it.month == day.date.month },
                     isCurrentDatePosition = day.position == DayPosition.MonthDate,
                     enabled = enabled,
                     onUiAction = onUiAction
@@ -221,7 +222,7 @@ fun CalendarWeek(
     onUiAction: OnCalendarUiAction
 ) {
     val selectedDatePlans = uiState.plans.filter {
-        it.planAt.parseZonedDateTime().dayOfMonth == (uiState.selectDay ?: ZonedDateTime.now()).dayOfMonth
+        it.planAt.dayOfMonth == (uiState.selectDay ?: ZonedDateTime.now()).dayOfMonth
     }
 
     Column(
@@ -235,11 +236,12 @@ fun CalendarWeek(
             state = weekState,
             dayContent = { day ->
                 val dayForZonedDateTime = day.date.parseZonedDateTime().default()
-                val enabled = uiState.plans.find { it.planAt.parseZonedDateTime().default() == dayForZonedDateTime } != null
+                val enabled = uiState.plans.find { it.planAt.default() == dayForZonedDateTime } != null
 
                 CalendarDay(
                     day = dayForZonedDateTime,
                     selectedDay = uiState.selectDay,
+                    holidays = uiState.holidays.filter { it.year == day.date.year && it.month == day.date.month },
                     isCurrentDatePosition = day.position == WeekDayPosition.RangeDate,
                     enabled = enabled,
                     onUiAction = onUiAction

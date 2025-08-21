@@ -4,6 +4,7 @@ import com.moim.core.network.di.qualifiers.MoimApi
 import com.moim.core.network.di.qualifiers.NormalApi
 import com.moim.core.network.service.AuthApi
 import com.moim.core.network.service.CommentApi
+import com.moim.core.network.service.HolidayApi
 import com.moim.core.network.service.ImageApi
 import com.moim.core.network.service.LocationApi
 import com.moim.core.network.service.MeetingApi
@@ -89,4 +90,10 @@ internal object ApiModule {
     fun provideLocationApi(
         @MoimApi retrofit: Retrofit
     ): LocationApi = retrofit.create(LocationApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideHolidayApi(
+        @MoimApi retrofit: Retrofit
+    ): HolidayApi = retrofit.create(HolidayApi::class.java)
 }

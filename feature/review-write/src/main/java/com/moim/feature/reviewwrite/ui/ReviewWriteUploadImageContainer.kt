@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.util.decimalFormatString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
@@ -62,7 +63,7 @@ fun ReviewWriteUploadImageContainer(
             )
 
             MoimText(
-                text = stringResource(R.string.unit_count, images.size),
+                text = stringResource(R.string.unit_count, images.size.decimalFormatString()),
                 style = MoimTheme.typography.title03.semiBold,
                 color = MoimTheme.colors.gray.gray04,
             )

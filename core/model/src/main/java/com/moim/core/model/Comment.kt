@@ -1,29 +1,29 @@
 package com.moim.core.model
 
 import androidx.compose.runtime.Stable
-import com.moim.core.datamodel.CommentResponse
+import java.time.ZonedDateTime
 
 @Stable
 data class Comment(
     val postId: String = "",
     val commentId: String = "",
-    val userId: String = "",
-    val userName: String = "",
-    val userImageUrl: String = "",
     val content: String = "",
-    val commentAt: String = "",
-    val isUpdate: Boolean = false
+    val parentId: String? = null,
+    val replayCount: Int = 0,
+    val likeCount: Int = 0,
+    val isLike: Boolean = false,
+    val writer: Writer,
+    val mentions: List<Writer> = emptyList(),
+    val commentAt: ZonedDateTime,
 )
 
-fun CommentResponse.asItem(): Comment {
-    return Comment(
-        postId = postId,
-        commentId = commentId,
-        userId = userId,
-        userName = userName,
-        userImageUrl = userImageUrl ?: "",
-        content = content,
-        commentAt = commentAt,
-        isUpdate = isUpdate
-    )
+fun Comment.isChild(): Boolean {
+    return parentId != null
 }
+
+@Stable
+data class Writer(
+    val userId: String,
+    val nickname: String,
+    val imageUrl: String,
+)

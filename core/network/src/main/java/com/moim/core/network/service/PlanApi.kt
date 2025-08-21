@@ -1,9 +1,10 @@
 package com.moim.core.network.service
 
 import com.moim.core.datamodel.MeetingPlanContainerResponse
-import com.moim.core.datamodel.ParticipantContainerResponse
+import com.moim.core.datamodel.PaginationContainerResponse
 import com.moim.core.datamodel.PlanResponse
 import com.moim.core.datamodel.PlanReviewContainerResponse
+import com.moim.core.datamodel.UserResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -19,7 +20,11 @@ interface PlanApi {
     suspend fun getCurrentPlan(): MeetingPlanContainerResponse
 
     @GET("plan/list/{meetId}")
-    suspend fun getPlans(@Path("meetId") id: String): List<PlanResponse>
+    suspend fun getPlans(
+        @Path("meetId") id: String,
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<PlanResponse>>
 
     @GET("plan/page")
     suspend fun getPlansForCalendar(
@@ -30,7 +35,11 @@ interface PlanApi {
     suspend fun getPlan(@Path("planId") planId: String): PlanResponse
 
     @GET("plan/participants/{planId}")
-    suspend fun getPlanParticipants(@Path("planId") planId: String) : ParticipantContainerResponse
+    suspend fun getPlanParticipants(
+        @Path("planId") planId: String,
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ) : PaginationContainerResponse<List<UserResponse>>
 
     @POST("plan/join/{planId}")
     suspend fun joinPlan(@Path("planId") id: String)

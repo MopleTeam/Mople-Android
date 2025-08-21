@@ -4,6 +4,8 @@ import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.auth.AuthRepositoryImpl
 import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.comment.CommentRepositoryImpl
+import com.moim.core.data.datasource.holiday.HolidayRepository
+import com.moim.core.data.datasource.holiday.HolidayRepositoryImpl
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSourceImpl
 import com.moim.core.data.datasource.meeting.MeetingRepository
@@ -76,6 +78,11 @@ internal abstract class DataModule {
     @Singleton
     @Binds
     abstract fun bindNotificationRepository(notificationRepositoryImpl: NotificationRepositoryImpl): NotificationRepository
+
+    //================================ Holiday ============================================//
+    @Singleton
+    @Binds
+    abstract fun bindHolidayRepository(holidayRepositoryImpl: HolidayRepositoryImpl) : HolidayRepository
 
     //================================ Image ============================================//
     @Singleton
