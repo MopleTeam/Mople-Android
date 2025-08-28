@@ -53,16 +53,19 @@ fun PlanDetailBottomBar(
         commentText = TextFieldValue(commentContent, TextRange(commentContent.length))
     }
 
-//    LaunchedEffect(commentText) {
-//        if (commentText.text.isEmpty()) return@LaunchedEffect
-//        val textUntilCursor = commentText.text.substring(0, commentText.selection.end)
-//        val lastAtIndex = textUntilCursor.lastIndexOf("@")
-//
-//        if (lastAtIndex != -1) {
-//            val mentionText = textUntilCursor.substring(lastAtIndex + 1)
-//            onUiAction(PlanDetailUiAction.OnShowUserList(mentionText))
-//        }
-//    }
+    LaunchedEffect(commentText) {
+        if (commentText.text.isEmpty()) {
+            onUiAction(PlanDetailUiAction.OnShowMentionDialog(null))
+            return@LaunchedEffect
+        }
+        val textUntilCursor = commentText.text.substring(0, commentText.selection.end)
+        val lastAtIndex = textUntilCursor.lastIndexOf("@")
+
+        if (lastAtIndex != -1) {
+            val mentionText = textUntilCursor.substring(lastAtIndex + 1)
+            onUiAction(PlanDetailUiAction.OnShowMentionDialog(mentionText))
+        }
+    }
 
     Column(
         modifier = Modifier

@@ -247,7 +247,9 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickCommentWebLink -> setUiEvent(PlanDetailUiEvent.NavigateToWebBrowser(uiAction.webLink))
             is PlanDetailUiAction.OnClickReviewImage -> navigateToImageViewerForReview(uiAction.selectedImageIndex)
             is PlanDetailUiAction.OnClickUserProfileImage -> navigateToImageViewerForUser(uiAction.imageUrl, uiAction.userName)
-            is PlanDetailUiAction.OnShowUserList -> showUserList(uiAction.keyword)
+            is PlanDetailUiAction.OnClickMentionUser -> setSelectedUser(uiAction.user)
+            is PlanDetailUiAction.OnChangeCommentContent -> setCommentContent(uiAction.content)
+            is PlanDetailUiAction.OnShowMentionDialog -> showMentionDialog(uiAction.keyword)
             is PlanDetailUiAction.OnShowPlanApplyCancelDialog -> showApplyCancelDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanEditDialog -> showPlanEditDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanReportDialog -> showPlanReportDialog(uiAction.isShow)
@@ -350,6 +352,12 @@ class PlanDetailViewModel @Inject constructor(
         }
     }
 
+    private fun setCommentContent(content: String) {
+        uiState.checkState<PlanDetailUiState.Success> {
+            setUiState(copy(inputContent = content))
+        }
+    }
+
     private fun uploadComment(
         content: String,
         updateComment: Comment?
@@ -431,18 +439,35 @@ class PlanDetailViewModel @Inject constructor(
         }
     }
 
-    private fun showUserList(keyword: String) {
+    private fun setSelectedUser(user: User) {
+        uiState.checkState<PlanDetailUiState.Success> {
+            setUiState(
+                copy(
+                    selectedMentions = selectedMentions.toMutableList().apply { add(user) }.distinct(),
+                    searchMentions = emptyList(),
+                    isShowMentionDialog = false
+                )
+            )
+        }
+    }
+
+    private fun showMentionDialog(keyword: String?) {
         searchJob.cancelIfActive()
         searchJob = viewModelScope.launch {
             delay(400)
             uiState.checkState<PlanDetailUiState.Success> {
-                val userList = if (keyword.isNotEmpty()) {
+                val userList = if (keyword != null) {
                     meetingParticipants.filter { it.nickname.contains(keyword) }
                 } else {
                     emptyList()
                 }
 
-                setUiState(copy(searchMentions = userList))
+                setUiState(
+                    copy(
+                        searchMentions = userList,
+                        isShowMentionDialog = userList.isNotEmpty()
+                    )
+                )
             }
         }
     }
@@ -547,6 +572,7 @@ sealed interface PlanDetailUiState : UiState {
     data class Success(
         val user: User,
         val planItem: PlanItem,
+        val inputContent: String = "",
         val comments: Flow<PagingData<CommentUiModel>>? = null,
         val meetingParticipants: List<User> = emptyList(),
         val searchMentions: List<User> = emptyList(),
@@ -554,12 +580,13 @@ sealed interface PlanDetailUiState : UiState {
         val selectedImageIndex: Int = 0,
         val selectedComment: Comment? = null,
         val selectedUpdateComment: Comment? = null,
-        val isShowApplyCancelDialog: Boolean = false,
         val isShowApplyButton: Boolean = false,
+        val isShowApplyCancelDialog: Boolean = false,
         val isShowPlanEditDialog: Boolean = false,
         val isShowPlanReportDialog: Boolean = false,
         val isShowCommentEditDialog: Boolean = false,
         val isShowCommentReportDialog: Boolean = false,
+        val isShowMentionDialog: Boolean = false,
     ) : PlanDetailUiState
 
     data object Error : PlanDetailUiState
@@ -583,7 +610,9 @@ sealed interface PlanDetailUiAction : UiAction {
     data class OnClickCommentWebLink(val webLink: String) : PlanDetailUiAction
     data class OnClickReviewImage(val selectedImageIndex: Int) : PlanDetailUiAction
     data class OnClickUserProfileImage(val imageUrl: String, val userName: String) : PlanDetailUiAction
-    data class OnShowUserList(val keyword: String) : PlanDetailUiAction
+    data class OnClickMentionUser(val user: User) : PlanDetailUiAction
+    data class OnChangeCommentContent(val content: String): PlanDetailUiAction
+    data class OnShowMentionDialog(val keyword: String?) : PlanDetailUiAction
     data class OnShowPlanApplyCancelDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowPlanEditDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowPlanReportDialog(val isShow: Boolean) : PlanDetailUiAction

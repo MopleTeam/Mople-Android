@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -56,6 +57,7 @@ import com.moim.feature.plandetail.ui.PlanDetailCommentItem
 import com.moim.feature.plandetail.ui.PlanDetailCommentReportDialog
 import com.moim.feature.plandetail.ui.PlanDetailContent
 import com.moim.feature.plandetail.ui.PlanDetailEditDialog
+import com.moim.feature.plandetail.ui.PlanDetailMentionDialog
 import com.moim.feature.plandetail.ui.PlanDetailReportDialog
 import com.moim.feature.plandetail.ui.PlanDetailReviewImages
 import com.moim.feature.plandetail.ui.PlanDetailTopAppbar
@@ -261,7 +263,15 @@ fun PlanDetailScreen(
                     }
                 }
 
-                //::TODO User Card 노출
+                if (uiState.isShowMentionDialog) {
+                    PlanDetailMentionDialog(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                        userList = uiState.searchMentions,
+                        onUiAction = onUiAction
+                    )
+                }
             }
         },
         bottomBar = {

@@ -293,19 +293,17 @@ private fun CommentFooter(
                 }
             }
 
-            if (false) {
-                Icon(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .onSingleClick { onUiAction(PlanDetailUiAction.OnClickCommentAddReply(comment)) },
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_chat_add),
-                    contentDescription = "",
-                    tint = Color.Unspecified
-                )
-            }
+            Icon(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .onSingleClick { onUiAction(PlanDetailUiAction.OnClickCommentAddReply(comment)) },
+                imageVector = ImageVector.vectorResource(R.drawable.ic_chat_add),
+                contentDescription = "",
+                tint = Color.Unspecified
+            )
         }
 
-        if (false) {
+        if (comment.replayCount > 0) {
             Row(
                 modifier = Modifier
                     .padding(top = 8.dp)
@@ -317,16 +315,10 @@ private fun CommentFooter(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
+                    modifier = Modifier.padding(vertical = 4.dp),
                     text = stringResource(R.string.plan_detail_comment_reply_show, comment.replayCount.decimalFormatString()),
                     style = MoimTheme.typography.body02.semiBold,
                     color = MoimTheme.colors.gray.gray04
-                )
-
-                Icon(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_chevron_down),
-                    contentDescription = "",
-                    tint = Color.Unspecified
                 )
             }
         }
@@ -347,7 +339,7 @@ private fun PlanDetailCommentItemPreview() {
         ),
         isLike = true,
         likeCount = 1000,
-        replayCount = 100,
+        replayCount = 0,
         content = "이른 아침, 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 다음에 또 뵐 수 있으면 좋겠네요.\n제 인스타도 많이 방문해주세요 https://www.instagram.com",
         commentAt = ZonedDateTime.now()
     )
