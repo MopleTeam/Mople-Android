@@ -53,6 +53,7 @@ data class MoimColor(
     val stroke: Color = color_F2F2F2,
     val icon: Color = color_D9D9D9,
     val blueGray: Color = color_EBF0FF,
+    val transparent : Color = Color.Transparent
 )
 
 @Immutable

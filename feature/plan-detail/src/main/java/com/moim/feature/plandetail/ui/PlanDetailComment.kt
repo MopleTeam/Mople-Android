@@ -195,42 +195,41 @@ private fun CommentText(
     texts: List<CommentTextUiModel>,
     onUiAction: OnPlanDetailUiAction
 ) {
+    val text = texts.joinToString("") { it.content }
+    val spanStyle = SpanStyle(
+        color = MoimTheme.colors.gray.gray03,
+        fontFamily = FontFamily(Font(R.font.pretendard_medium, FontWeight.W600)),
+        fontWeight = FontWeight.W600,
+        textDecoration = TextDecoration.None
+    )
     val annotatedText = buildAnnotatedString {
         texts.forEach { uiModel ->
             when (uiModel) {
                 is CommentTextUiModel.PlainText -> {
-                    withStyle(
-                        style = SpanStyle(
-                            color = MoimTheme.colors.gray.gray03,
-                            fontFamily = FontFamily(Font(R.font.pretendard_medium, FontWeight.W600)),
-                            fontWeight = FontWeight.W600,
-                            textDecoration = TextDecoration.None
-                        )
-                    ) {
+                    withStyle(style = spanStyle) {
+                        append(uiModel.content)
+                    }
+                }
+
+                is CommentTextUiModel.MentionText -> {
+                    withStyle(style = spanStyle) {
                         append(uiModel.content)
                     }
                 }
 
                 is CommentTextUiModel.HyperLinkText -> {
-                    withStyle(
-                        style = SpanStyle(
-                            color = MoimTheme.colors.primary.primary,
-                            fontFamily = FontFamily(Font(R.font.pretendard_medium, FontWeight.W600)),
-                            fontWeight = FontWeight.W600,
-                            textDecoration = TextDecoration.Underline
-                        )
-                    ) {
+                    val startIndex = text.indexOf(uiModel.content)
+
+                    withStyle(style = spanStyle.copy(textDecoration = TextDecoration.Underline)) {
                         append(uiModel.content)
                     }
                     addLink(
                         clickable = LinkAnnotation.Clickable(
                             tag = "URL",
-                            linkInteractionListener = {
-                                onUiAction(PlanDetailUiAction.OnClickCommentWebLink(uiModel.content))
-                            }
+                            linkInteractionListener = { onUiAction(PlanDetailUiAction.OnClickCommentWebLink(uiModel.content)) }
                         ),
-                        start = uiModel.startIndex,
-                        end = uiModel.endIndex
+                        start = startIndex,
+                        end = startIndex + uiModel.content.length
                     )
                 }
             }
@@ -356,12 +355,22 @@ private fun PlanDetailCommentItemPreview() {
                     comment = comment,
                     texts = listOf(
                         CommentTextUiModel.PlainText(
-                            content = "이른 아침, 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 다음에 또 뵐 수 있으면 좋겠네요.\n제 인스타도 많이 방문해주세요! "
+                            content = "이른 아침, "
+                        ),
+                        CommentTextUiModel.MentionText(
+                            content = "@카카루"
+                        ),
+                        CommentTextUiModel.PlainText(
+                            content = "님과 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. "
+                        ),
+                        CommentTextUiModel.MentionText(
+                            content = "@바나나에스프레소"
+                        ),
+                        CommentTextUiModel.PlainText(
+                            content = "님도 다음에 뵐 수 있으면 좋겠네요 제 인스타도 많이 방문해주세요! ",
                         ),
                         CommentTextUiModel.HyperLinkText(
                             content = "instagram.com",
-                            startIndex = 0,
-                            endIndex = 0
                         ),
                     )
                 ),

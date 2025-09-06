@@ -33,22 +33,33 @@ internal class CommentRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun createComment(postId: String, content: String): Flow<Comment> = catchFlow {
+    override fun createComment(
+        postId: String,
+        content: String,
+        mentionIds: List<String>,
+    ): Flow<Comment> = catchFlow {
         emit(
             commentApi.createComment(
                 postId = postId,
-                params = jsonOf(KEY_CONTENTS to content)
+                params = jsonOf(
+                    KEY_CONTENTS to content,
+                    KEY_MENTIONS to mentionIds,
+                )
             ).asItem()
         )
     }
 
-    override fun updateComment(commentId: String, content: String): Flow<Comment> = catchFlow {
+    override fun updateComment(
+        commentId: String,
+        content: String,
+        mentionIds: List<String>,
+    ): Flow<Comment> = catchFlow {
         emit(
             commentApi.updateComment(
                 commentId = commentId,
                 params = jsonOf(
                     KEY_CONTENTS to content,
-                    KEY_MENTIONS to listOf<String>()
+                    KEY_MENTIONS to mentionIds,
                 )
             ).asItem()
         )

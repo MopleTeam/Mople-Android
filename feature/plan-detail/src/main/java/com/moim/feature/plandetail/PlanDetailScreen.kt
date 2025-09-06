@@ -277,6 +277,8 @@ fun PlanDetailScreen(
         bottomBar = {
             PlanDetailBottomBar(
                 updateComment = uiState.selectedUpdateComment,
+                commentState = uiState.commentState,
+                selectedMentions = uiState.selectedMentions,
                 onUiAction = onUiAction
             )
         }

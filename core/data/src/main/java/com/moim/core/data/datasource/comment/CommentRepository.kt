@@ -14,12 +14,14 @@ interface CommentRepository {
 
     fun createComment(
         postId: String,
-        content: String
+        content: String,
+        mentionIds: List<String>,
     ): Flow<Comment>
 
     fun updateComment(
         commentId: String,
         content: String,
+        mentionIds: List<String>,
     ): Flow<Comment>
 
     fun updateLikeComment(commentId: String): Flow<Comment>

@@ -1,5 +1,8 @@
 package com.moim.feature.plandetail
 
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.insert
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -14,6 +17,8 @@ import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.cancelIfActive
+import com.moim.core.common.util.createMentionTagMessage
+import com.moim.core.common.util.parseMentionTagMessage
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -31,6 +36,7 @@ import com.moim.core.domain.usecase.GetCommentsUseCase
 import com.moim.core.domain.usecase.GetPlanItemUseCase
 import com.moim.core.model.Comment
 import com.moim.core.model.User
+import com.moim.core.model.Writer
 import com.moim.core.model.item.PlanItem
 import com.moim.feature.plandetail.model.CommentUiModel
 import com.moim.feature.plandetail.model.createCommentUiModel
@@ -100,7 +106,7 @@ class PlanDetailViewModel @Inject constructor(
                         actionedAt = receiver.actionAt,
                         loadedAt = getCommentsUseCase.loadedAt
                     ) {
-                        pagingData.insertSeparators { before: CommentUiModel?, after: CommentUiModel? ->
+                        pagingData.insertSeparators { before: CommentUiModel?, _: CommentUiModel? ->
                             if (before == null) {
                                 return@insertSeparators receiver.commentUiModel
                             } else {
@@ -240,7 +246,7 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickMapDetail -> navigateToMapDetail()
             is PlanDetailUiAction.OnClickCommentLike -> setLikeComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentAddReply -> {}
-            is PlanDetailUiAction.OnClickCommentUpload -> uploadComment(uiAction.commentText, uiAction.updateComment)
+            is PlanDetailUiAction.OnClickCommentUpload -> uploadComment(uiAction.updateComment)
             is PlanDetailUiAction.OnClickCommentReport -> reportComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentUpdate -> updateComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentDelete -> deleteComment(uiAction.comment)
@@ -248,7 +254,6 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickReviewImage -> navigateToImageViewerForReview(uiAction.selectedImageIndex)
             is PlanDetailUiAction.OnClickUserProfileImage -> navigateToImageViewerForUser(uiAction.imageUrl, uiAction.userName)
             is PlanDetailUiAction.OnClickMentionUser -> setSelectedUser(uiAction.user)
-            is PlanDetailUiAction.OnChangeCommentContent -> setCommentContent(uiAction.content)
             is PlanDetailUiAction.OnShowMentionDialog -> showMentionDialog(uiAction.keyword)
             is PlanDetailUiAction.OnShowPlanApplyCancelDialog -> showApplyCancelDialog(uiAction.isShow)
             is PlanDetailUiAction.OnShowPlanEditDialog -> showPlanEditDialog(uiAction.isShow)
@@ -260,7 +265,26 @@ class PlanDetailViewModel @Inject constructor(
 
     private fun updateComment(comment: Comment) {
         uiState.checkState<PlanDetailUiState.Success> {
-            setUiState(copy(selectedUpdateComment = comment))
+            val message = parseMentionTagMessage(
+                mentionNames = comment.mentions.map { it.nickname },
+                message = comment.content
+            )
+            val selectedMentions = comment.mentions.map {
+                User(
+                    userId = it.userId,
+                    nickname = it.nickname,
+                    profileUrl = it.imageUrl
+                )
+            }
+
+            commentState.clearText()
+            commentState.edit { insert(0, message) }
+            setUiState(
+                copy(
+                    selectedUpdateComment = comment,
+                    selectedMentions = selectedMentions
+                )
+            )
         }
     }
 
@@ -352,28 +376,27 @@ class PlanDetailViewModel @Inject constructor(
         }
     }
 
-    private fun setCommentContent(content: String) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiState(copy(inputContent = content))
-        }
-    }
-
     private fun uploadComment(
-        content: String,
         updateComment: Comment?
     ) {
         viewModelScope.launch {
             uiState.checkState<PlanDetailUiState.Success> {
+                val tagMessage = createMentionTagMessage(
+                    mentionNames = selectedMentions.map { it.nickname },
+                    message = commentState.text.toString()
+                )
+
                 if (updateComment == null) {
                     commentRepository.createComment(
                         postId = planItem.commentCheckId,
-                        content = content.trim()
+                        content = tagMessage.trim(),
+                        mentionIds = selectedMentions.map { it.userId },
                     )
-
                 } else {
                     commentRepository.updateComment(
                         commentId = updateComment.commentId,
-                        content = content.trim()
+                        content = tagMessage.trim(),
+                        mentionIds = selectedMentions.map { it.userId },
                     )
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                     uiState.checkState<PlanDetailUiState.Success> {
@@ -383,10 +406,22 @@ class PlanDetailViewModel @Inject constructor(
                             is Result.Success -> {
                                 if (updateComment == null) {
                                     createPlanDetailComment(commentUiModel = result.data.createCommentUiModel())
-                                    setUiState(copy(planItem = planItem.copy(commentCount = planItem.commentCount.plus(1))))
+                                    commentState.clearText()
+                                    setUiState(
+                                        copy(
+                                            planItem = planItem.copy(commentCount = planItem.commentCount.plus(1)),
+                                            selectedMentions = emptyList(),
+                                        )
+                                    )
                                 } else {
                                     updatePlanDetailComment(commentUiModel = result.data.createCommentUiModel())
-                                    setUiState(copy(selectedUpdateComment = null))
+                                    commentState.clearText()
+                                    setUiState(
+                                        copy(
+                                            selectedUpdateComment = null,
+                                            selectedMentions = emptyList(),
+                                        )
+                                    )
                                 }
                             }
 
@@ -411,7 +446,15 @@ class PlanDetailViewModel @Inject constructor(
 
                             is Result.Success -> {
                                 deletePlanDetailComment(commentId = comment.commentId)
-                                setUiState(copy(planItem = planItem.copy(commentCount = planItem.commentCount.minus(1))))
+                                if (selectedUpdateComment != null) {
+                                    commentState.clearText()
+                                }
+                                setUiState(
+                                    copy(
+                                        planItem = planItem.copy(commentCount = planItem.commentCount.minus(1)),
+                                        selectedUpdateComment = null,
+                                    ),
+                                )
                             }
 
                             is Result.Error -> showErrorToast(result.exception)
@@ -441,13 +484,50 @@ class PlanDetailViewModel @Inject constructor(
 
     private fun setSelectedUser(user: User) {
         uiState.checkState<PlanDetailUiState.Success> {
+            val selectMentions = selectedMentions.toMutableList().apply { add(user) }.distinct()
+            val mentionText = insertTextAtCursor(
+                inputKeyword = user.nickname,
+                currentMessage = commentState.text.toString(),
+                currentSelection = commentState.selection.start
+            )
+
+            commentState.clearText()
+            commentState.edit { insert(0, mentionText) }
+
             setUiState(
                 copy(
-                    selectedMentions = selectedMentions.toMutableList().apply { add(user) }.distinct(),
+                    selectedMentions = selectMentions,
                     searchMentions = emptyList(),
                     isShowMentionDialog = false
                 )
             )
+        }
+    }
+
+    private fun insertTextAtCursor(
+        inputKeyword: String,
+        currentMessage: String,
+        currentSelection: Int,
+    ): String {
+        val insertPosition = currentSelection.coerceIn(0, currentMessage.length)
+        var matchLength = 0
+        for (i in 1..minOf(insertPosition, inputKeyword.length)) {
+            val startPos = insertPosition - i
+            val substring = currentMessage.substring(startPos, insertPosition)
+
+            if (inputKeyword.startsWith(substring)) {
+                matchLength = i
+            }
+        }
+
+        return if (matchLength > 0) {
+            val beforeMatch = currentMessage.substring(0, insertPosition - matchLength)
+            val afterCursor = currentMessage.substring(insertPosition)
+            "$beforeMatch$inputKeyword $afterCursor"
+        } else {
+            currentMessage.substring(0, insertPosition) +
+                    inputKeyword + " " +
+                    currentMessage.substring(insertPosition)
         }
     }
 
@@ -572,7 +652,7 @@ sealed interface PlanDetailUiState : UiState {
     data class Success(
         val user: User,
         val planItem: PlanItem,
-        val inputContent: String = "",
+        val commentState: TextFieldState = TextFieldState(),
         val comments: Flow<PagingData<CommentUiModel>>? = null,
         val meetingParticipants: List<User> = emptyList(),
         val searchMentions: List<User> = emptyList(),
@@ -606,12 +686,11 @@ sealed interface PlanDetailUiAction : UiAction {
     data class OnClickCommentReport(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentUpdate(val comment: Comment) : PlanDetailUiAction
     data class OnClickCommentDelete(val comment: Comment) : PlanDetailUiAction
-    data class OnClickCommentUpload(val commentText: String, val updateComment: Comment?) : PlanDetailUiAction
+    data class OnClickCommentUpload(val updateComment: Comment?) : PlanDetailUiAction
     data class OnClickCommentWebLink(val webLink: String) : PlanDetailUiAction
     data class OnClickReviewImage(val selectedImageIndex: Int) : PlanDetailUiAction
     data class OnClickUserProfileImage(val imageUrl: String, val userName: String) : PlanDetailUiAction
     data class OnClickMentionUser(val user: User) : PlanDetailUiAction
-    data class OnChangeCommentContent(val content: String): PlanDetailUiAction
     data class OnShowMentionDialog(val keyword: String?) : PlanDetailUiAction
     data class OnShowPlanApplyCancelDialog(val isShow: Boolean) : PlanDetailUiAction
     data class OnShowPlanEditDialog(val isShow: Boolean) : PlanDetailUiAction
