@@ -127,8 +127,6 @@
     <string name="plan_detail_comment_hint">댓글을 입력해주세요</string>
     <string name="plan_detail_comment_error">댓글을 불러오지 못했어요\n잠시 후 다시 시도해주세요</string>
     <string name="plan_detail_comment_empty">아직 댓글이 없어요</string>
-    <string name="plan_detail_comment_reply_show">답글 %s건 더보기</string>
-    <string name="plan_detail_comment_reply_hide">답글 숨기기</string>
     <string name="plan_detail_image">함께한 순간</string>
     <string name="plan_detail_plan_apply">약속 참여하기</string>
     <string name="plan_detail_plan_apply_done">약속 참여중</string>

@@ -1,5 +1,6 @@
 package com.moim.feature.plandetail.ui
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -212,7 +213,7 @@ private fun CommentText(
                 }
 
                 is CommentTextUiModel.MentionText -> {
-                    withStyle(style = spanStyle) {
+                    withStyle(style = spanStyle.copy(color = MoimTheme.colors.primary.primary)) {
                         append(uiModel.content)
                     }
                 }
@@ -220,7 +221,12 @@ private fun CommentText(
                 is CommentTextUiModel.HyperLinkText -> {
                     val startIndex = text.indexOf(uiModel.content)
 
-                    withStyle(style = spanStyle.copy(textDecoration = TextDecoration.Underline)) {
+                    withStyle(
+                        style = spanStyle.copy(
+                            color = MoimTheme.colors.primary.primary,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    ) {
                         append(uiModel.content)
                     }
                     addLink(
@@ -253,6 +259,11 @@ private fun CommentFooter(
     } else {
         R.drawable.ic_thumb_up
     }
+    val replyResource = if (comment.replayCount > 0) {
+        R.drawable.ic_chat_add_fill
+    } else {
+        R.drawable.ic_chat_add
+    }
 
     Column {
         Row(
@@ -260,66 +271,51 @@ private fun CommentFooter(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            Row(
-                modifier = Modifier
-                    .defaultMinSize(minWidth = 56.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .onSingleClick {
-                        onUiAction(
-                            PlanDetailUiAction.OnClickCommentLike(
-                                comment = comment
-                            )
-                        )
-                    }
-                    .padding(end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(likeResource),
-                    contentDescription = "",
-                    tint = Color.Unspecified
-                )
+            CommentIcon(
+                modifier = Modifier.padding(end = 8.dp),
+                iconRes = likeResource,
+                iconCount = comment.likeCount,
+                onClick = { onUiAction(PlanDetailUiAction.OnClickCommentLike(comment = comment)) }
+            )
 
-                if (comment.likeCount > 0) {
-                    Text(
-                        text = comment.likeCount.decimalFormatString(),
-                        style = MoimTheme.typography.body02.medium,
-                        color = MoimTheme.colors.gray.gray04,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-
-            Icon(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .onSingleClick { onUiAction(PlanDetailUiAction.OnClickCommentAddReply(comment)) },
-                imageVector = ImageVector.vectorResource(R.drawable.ic_chat_add),
-                contentDescription = "",
-                tint = Color.Unspecified
+            CommentIcon(
+                iconRes = replyResource,
+                iconCount = comment.replayCount,
+                onClick = { onUiAction(PlanDetailUiAction.OnClickCommentAddReply(comment)) }
             )
         }
+    }
+}
 
-        if (comment.replayCount > 0) {
-            Row(
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .onSingleClick {
-                        //::TODO click add
-                    },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    text = stringResource(R.string.plan_detail_comment_reply_show, comment.replayCount.decimalFormatString()),
-                    style = MoimTheme.typography.body02.semiBold,
-                    color = MoimTheme.colors.gray.gray04
-                )
-            }
+@Composable
+private fun CommentIcon(
+    modifier: Modifier = Modifier,
+    @DrawableRes iconRes: Int,
+    iconCount: Int,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .defaultMinSize(minWidth = 56.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .onSingleClick(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Icon(
+            imageVector = ImageVector.vectorResource(iconRes),
+            contentDescription = "",
+            tint = Color.Unspecified
+        )
+
+        if (iconCount > 0) {
+            Text(
+                text = iconCount.decimalFormatString(),
+                style = MoimTheme.typography.body02.medium,
+                color = MoimTheme.colors.gray.gray04,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
@@ -338,8 +334,11 @@ private fun PlanDetailCommentItemPreview() {
         ),
         isLike = true,
         likeCount = 1000,
-        replayCount = 0,
-        content = "이른 아침, 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 다음에 또 뵐 수 있으면 좋겠네요.\n제 인스타도 많이 방문해주세요 https://www.instagram.com",
+        replayCount = 10,
+        content = """
+            이른 아침, @카카루님과 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 
+            @바나나에스프레소님도 다음에 뵐 수 있으면 좋겠네요 제 인스타도 많이 방문해주세요! 제 인스타도 많이 방문해주세요 instagram.com
+        """.trimIndent(),
         commentAt = ZonedDateTime.now()
     )
 

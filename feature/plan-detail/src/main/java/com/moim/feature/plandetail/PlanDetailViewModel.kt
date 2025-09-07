@@ -18,6 +18,7 @@ import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.cancelIfActive
 import com.moim.core.common.util.createMentionTagMessage
+import com.moim.core.common.util.filterMentionedUsers
 import com.moim.core.common.util.parseMentionTagMessage
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
@@ -36,7 +37,6 @@ import com.moim.core.domain.usecase.GetCommentsUseCase
 import com.moim.core.domain.usecase.GetPlanItemUseCase
 import com.moim.core.model.Comment
 import com.moim.core.model.User
-import com.moim.core.model.Writer
 import com.moim.core.model.item.PlanItem
 import com.moim.feature.plandetail.model.CommentUiModel
 import com.moim.feature.plandetail.model.createCommentUiModel
@@ -265,10 +265,6 @@ class PlanDetailViewModel @Inject constructor(
 
     private fun updateComment(comment: Comment) {
         uiState.checkState<PlanDetailUiState.Success> {
-            val message = parseMentionTagMessage(
-                mentionNames = comment.mentions.map { it.nickname },
-                message = comment.content
-            )
             val selectedMentions = comment.mentions.map {
                 User(
                     userId = it.userId,
@@ -276,6 +272,10 @@ class PlanDetailViewModel @Inject constructor(
                     profileUrl = it.imageUrl
                 )
             }
+            val message = parseMentionTagMessage(
+                mentionUsers = selectedMentions,
+                message = comment.content
+            )
 
             commentState.clearText()
             commentState.edit { insert(0, message) }
@@ -382,21 +382,25 @@ class PlanDetailViewModel @Inject constructor(
         viewModelScope.launch {
             uiState.checkState<PlanDetailUiState.Success> {
                 val tagMessage = createMentionTagMessage(
-                    mentionNames = selectedMentions.map { it.nickname },
+                    mentionUsers = selectedMentions,
                     message = commentState.text.toString()
+                )
+                val selectedMentionUsers = filterMentionedUsers(
+                    mentionUsers = selectedMentions,
+                    message = tagMessage
                 )
 
                 if (updateComment == null) {
                     commentRepository.createComment(
                         postId = planItem.commentCheckId,
                         content = tagMessage.trim(),
-                        mentionIds = selectedMentions.map { it.userId },
+                        mentionIds = selectedMentionUsers.map { it.userId },
                     )
                 } else {
                     commentRepository.updateComment(
                         commentId = updateComment.commentId,
                         content = tagMessage.trim(),
-                        mentionIds = selectedMentions.map { it.userId },
+                        mentionIds = selectedMentionUsers.map { it.userId },
                     )
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                     uiState.checkState<PlanDetailUiState.Success> {
