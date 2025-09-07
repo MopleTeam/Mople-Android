@@ -152,6 +152,18 @@ fun AlarmSettingScreen(
             isChecked = uiState.isSubscribeForPlanNotify,
             onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangePlanNotify(it)) }
         )
+        AlarmSettingSwitchItem(
+            title = stringResource(R.string.alarm_setting_comment_notify),
+            description = stringResource(R.string.alarm_setting_comment_notify_description),
+            isChecked = uiState.isSubscribeForCommentNotify,
+            onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangeCommentNotify(it)) }
+        )
+        AlarmSettingSwitchItem(
+            title = stringResource(R.string.alarm_setting_mention_notify),
+            description = stringResource(R.string.alarm_setting_mention_notify_description),
+            isChecked = uiState.isSubscribeForMentionNotify,
+            onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangeMentionNotify(it)) }
+        )
     }
 
     LoadingDialog(isLoading)
@@ -230,7 +242,9 @@ private fun AlarmSettingScreenPreview() {
             modifier = modifier,
             uiState = AlarmSettingUiState.Success(
                 isSubscribeForMeetingNotify = true,
-                isSubscribeForPlanNotify = false
+                isSubscribeForPlanNotify = false,
+                isSubscribeForCommentNotify = false,
+                isSubscribeForMentionNotify = false,
             ),
             isPostNotificationPermission = false,
             isLoading = false,

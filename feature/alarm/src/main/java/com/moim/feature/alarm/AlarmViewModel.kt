@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -72,7 +73,7 @@ class AlarmViewModel @Inject constructor(
             NotificationType.REVIEW_REMIND,
             NotificationType.REVIEW_UPDATE -> {
                 val postId = notification.planId ?: notification.reviewId ?: return
-                val isPlan = notification.planId != null
+                val isPlan = notification.planId != null && notification.sendAt.toLocalDate().isAfter(LocalDate.now())
                 setUiEvent(AlarmUiEvent.NavigateToPlanDetail(postId, isPlan))
             }
 
