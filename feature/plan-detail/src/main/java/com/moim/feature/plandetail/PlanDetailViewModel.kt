@@ -10,13 +10,17 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.insertSeparators
 import androidx.paging.map
+import com.moim.core.common.delegate.CommentAction
+import com.moim.core.common.delegate.CommentViewModelDelegate
 import com.moim.core.common.delegate.PlanAction
 import com.moim.core.common.delegate.PlanItemViewModelDelegate
+import com.moim.core.common.delegate.commentStateIn
 import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.cancelIfActive
+import com.moim.core.common.util.createCommentUiModel
 import com.moim.core.common.util.createMentionTagMessage
 import com.moim.core.common.util.filterMentionedUsers
 import com.moim.core.common.util.parseMentionTagMessage
@@ -37,12 +41,9 @@ import com.moim.core.domain.usecase.GetCommentsUseCase
 import com.moim.core.domain.usecase.GetPlanItemUseCase
 import com.moim.core.model.Comment
 import com.moim.core.model.User
+import com.moim.core.model.isChild
+import com.moim.core.model.item.CommentUiModel
 import com.moim.core.model.item.PlanItem
-import com.moim.feature.plandetail.model.CommentUiModel
-import com.moim.feature.plandetail.model.createCommentUiModel
-import com.moim.feature.plandetail.util.PlanDetailCommentAction
-import com.moim.feature.plandetail.util.PlanDetailCommentViewModelDelegate
-import com.moim.feature.plandetail.util.planDetailCommentStateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -71,10 +72,10 @@ class PlanDetailViewModel @Inject constructor(
     private val commentRepository: CommentRepository,
     private val getCommentsUseCase: GetCommentsUseCase,
     planItemViewModelDelegate: PlanItemViewModelDelegate,
-    planDetailCommentViewModelDelegate: PlanDetailCommentViewModelDelegate,
+    commentViewModelDelegate: CommentViewModelDelegate,
 ) : BaseViewModel(),
     PlanItemViewModelDelegate by planItemViewModelDelegate,
-    PlanDetailCommentViewModelDelegate by planDetailCommentViewModelDelegate {
+    CommentViewModelDelegate by commentViewModelDelegate {
 
     private val postId
         get() = savedStateHandle.get<String>(KEY_POST_ID) ?: ""
@@ -88,7 +89,7 @@ class PlanDetailViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     private val planItemReceiver = planItemAction.planItemStateIn(viewModelScope)
-    private val commentActionReceiver = commentAction.planDetailCommentStateIn(viewModelScope)
+    private val commentActionReceiver = commentAction.commentStateIn(viewModelScope)
 
     private var _comments = planId
         .filterNotNull()
@@ -98,16 +99,18 @@ class PlanDetailViewModel @Inject constructor(
 
     private val comments = commentActionReceiver.flatMapLatest { receiver ->
         when (receiver) {
-            is PlanDetailCommentAction.None -> _comments
+            is CommentAction.None -> _comments
 
-            is PlanDetailCommentAction.CommentCreate -> {
+            is CommentAction.CommentCreate -> {
                 _comments.map { pagingData ->
                     pagingData.checkedActionedAtIsBeforeLoadedAt(
                         actionedAt = receiver.actionAt,
                         loadedAt = getCommentsUseCase.loadedAt
                     ) {
                         pagingData.insertSeparators { before: CommentUiModel?, _: CommentUiModel? ->
-                            if (before == null) {
+                            if (receiver.commentUiModel.comment.isChild()) {
+                                return@insertSeparators null
+                            } else if (before == null) {
                                 return@insertSeparators receiver.commentUiModel
                             } else {
                                 null
@@ -117,7 +120,7 @@ class PlanDetailViewModel @Inject constructor(
                 }
             }
 
-            is PlanDetailCommentAction.CommentUpdate -> {
+            is CommentAction.CommentUpdate -> {
                 _comments.map { pagingData ->
                     pagingData.checkedActionedAtIsBeforeLoadedAt(
                         actionedAt = receiver.actionAt,
@@ -134,7 +137,7 @@ class PlanDetailViewModel @Inject constructor(
                 }
             }
 
-            is PlanDetailCommentAction.CommentDelete -> {
+            is CommentAction.CommentDelete -> {
                 _comments.map { pagingData ->
                     pagingData.checkedActionedAtIsBeforeLoadedAt(
                         actionedAt = receiver.actionAt,
@@ -245,7 +248,7 @@ class PlanDetailViewModel @Inject constructor(
             is PlanDetailUiAction.OnClickPlanApply -> planApply(uiAction.isApply)
             is PlanDetailUiAction.OnClickMapDetail -> navigateToMapDetail()
             is PlanDetailUiAction.OnClickCommentLike -> setLikeComment(uiAction.comment)
-            is PlanDetailUiAction.OnClickCommentAddReply -> {}
+            is PlanDetailUiAction.OnClickCommentAddReply -> navigateToCommentDetail(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentUpload -> uploadComment(uiAction.updateComment)
             is PlanDetailUiAction.OnClickCommentReport -> reportComment(uiAction.comment)
             is PlanDetailUiAction.OnClickCommentUpdate -> updateComment(uiAction.comment)
@@ -369,7 +372,7 @@ class PlanDetailViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Result.Loading -> return@collect
-                        is Result.Success -> updatePlanDetailComment(commentUiModel = result.data.createCommentUiModel())
+                        is Result.Success -> updatePlanComment(commentUiModel = result.data.createCommentUiModel())
                         is Result.Error -> showErrorToast(result.exception)
                     }
                 }
@@ -409,7 +412,7 @@ class PlanDetailViewModel @Inject constructor(
 
                             is Result.Success -> {
                                 if (updateComment == null) {
-                                    createPlanDetailComment(commentUiModel = result.data.createCommentUiModel())
+                                    createPlanComment(commentUiModel = result.data.createCommentUiModel())
                                     commentState.clearText()
                                     setUiState(
                                         copy(
@@ -418,7 +421,7 @@ class PlanDetailViewModel @Inject constructor(
                                         )
                                     )
                                 } else {
-                                    updatePlanDetailComment(commentUiModel = result.data.createCommentUiModel())
+                                    updatePlanComment(commentUiModel = result.data.createCommentUiModel())
                                     commentState.clearText()
                                     setUiState(
                                         copy(
@@ -449,7 +452,7 @@ class PlanDetailViewModel @Inject constructor(
                             is Result.Loading -> return@collect
 
                             is Result.Success -> {
-                                deletePlanDetailComment(commentId = comment.commentId)
+                                deletePlanComment(commentId = comment.commentId)
                                 if (selectedUpdateComment != null) {
                                     commentState.clearText()
                                 }
@@ -642,6 +645,25 @@ class PlanDetailViewModel @Inject constructor(
         )
     }
 
+    private fun navigateToCommentDetail(comment: Comment) {
+        uiState.checkState<PlanDetailUiState.Success> {
+            setUiState(
+                copy(
+                    selectedUpdateComment = null,
+                    selectedComment = null
+                )
+            )
+
+            setUiEvent(
+                PlanDetailUiEvent.NavigateToCommentDetail(
+                    meetId = planItem.meetingId,
+                    postId = postId,
+                    comment = comment
+                )
+            )
+        }
+    }
+
     companion object {
         private const val KEY_POST_ID = "postId"
         private const val KEY_PLAN_ID = "planId"
@@ -738,6 +760,12 @@ sealed interface PlanDetailUiEvent : UiEvent {
 
     data class NavigateToWebBrowser(
         val webLink: String
+    ) : PlanDetailUiEvent
+
+    data class NavigateToCommentDetail(
+        val meetId: String,
+        val postId: String,
+        val comment: Comment,
     ) : PlanDetailUiEvent
 
     data class ShowToastMessage(

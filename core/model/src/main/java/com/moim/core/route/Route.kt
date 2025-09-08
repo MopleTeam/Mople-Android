@@ -1,6 +1,8 @@
 package com.moim.core.route
 
 import androidx.annotation.DrawableRes
+import com.moim.core.model.Comment
+import com.moim.core.model.CommentType
 import com.moim.core.model.Meeting
 import com.moim.core.model.MeetingType
 import com.moim.core.model.item.PlanItem
@@ -72,6 +74,17 @@ sealed interface DetailRoute : Route {
         val postId: String,
         val isPlan: Boolean
     ) : DetailRoute
+
+    @Serializable
+    data class CommentDetail(
+        val meetId: String,
+        val postId: String,
+        val comment : Comment? = null,
+    ) : DetailRoute {
+        companion object{
+            val typeMap = mapOf(typeOf<Comment?>() to CommentType)
+        }
+    }
 
     @Serializable
     data class PlanWrite(val plan: PlanItem? = null) : DetailRoute {

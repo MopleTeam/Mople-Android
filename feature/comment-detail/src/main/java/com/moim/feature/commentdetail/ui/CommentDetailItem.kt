@@ -1,8 +1,7 @@
-package com.moim.feature.plandetail.ui
+package com.moim.feature.commentdetail.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
@@ -48,62 +45,36 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.model.Comment
-import com.moim.core.model.Writer
+import com.moim.core.model.isChild
 import com.moim.core.model.item.CommentTextUiModel
 import com.moim.core.model.item.CommentUiModel
-import com.moim.feature.plandetail.OnPlanDetailUiAction
-import com.moim.feature.plandetail.PlanDetailUiAction
-import java.time.ZonedDateTime
+import com.moim.feature.commentdetail.CommentDetailAction
+import timber.log.Timber
 
 @Composable
-fun PlanDetailCommentHeader(
+fun CommentDetailItem(
     modifier: Modifier = Modifier,
-    commentCount: Int
+    userId: String,
+    comment: CommentUiModel,
+    onUiAction: (CommentDetailAction) -> Unit
 ) {
+    Timber.e("comment= ${comment.comment.isChild()}")
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .padding(top = 28.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        MoimText(
-            text = stringResource(R.string.plan_detail_comment),
-            style = MoimTheme.typography.title03.semiBold,
-            color = MoimTheme.colors.gray.gray01
-        )
-
-        Spacer(Modifier.weight(1f))
-
-        MoimText(
-            text = stringResource(R.string.unit_count, commentCount.decimalFormatString()),
-            style = MoimTheme.typography.title03.semiBold,
-            color = MoimTheme.colors.gray.gray04
-        )
-    }
-}
-
-@Composable
-fun PlanDetailCommentItem(
-    modifier: Modifier = Modifier,
-    userId: String,
-    comment: CommentUiModel,
-    onUiAction: OnPlanDetailUiAction
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(20.dp)
+            .padding(vertical = if (comment.comment.isChild()) 24.dp else 20.dp)
     ) {
         NetworkImage(
             modifier = Modifier
+                .padding(start = if (comment.comment.isChild()) 40.dp else 0.dp)
                 .padding(top = 4.dp)
                 .size(32.dp)
                 .clip(CircleShape)
                 .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
                 .onSingleClick {
                     onUiAction(
-                        PlanDetailUiAction.OnClickUserProfileImage(
+                        CommentDetailAction.OnClickUserProfileImage(
                             imageUrl = comment.comment.writer.imageUrl,
                             userName = comment.comment.writer.nickname
                         )
@@ -135,11 +106,6 @@ fun PlanDetailCommentItem(
             )
         }
     }
-
-    HorizontalDivider(
-        thickness = 1.dp,
-        color = MoimTheme.colors.stroke
-    )
 }
 
 @Composable
@@ -147,7 +113,7 @@ private fun CommentHeader(
     modifier: Modifier = Modifier,
     userId: String,
     comment: Comment,
-    onUiAction: OnPlanDetailUiAction
+    onUiAction: (CommentDetailAction) -> Unit
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -172,12 +138,12 @@ private fun CommentHeader(
             iconRes = R.drawable.ic_more,
             onClick = {
                 val uiAction = if (userId == comment.writer.userId) {
-                    PlanDetailUiAction.OnShowCommentEditDialog(
+                    CommentDetailAction.OnShowCommentEditDialog(
                         isShow = true,
                         comment = comment
                     )
                 } else {
-                    PlanDetailUiAction.OnShowCommentReportDialog(
+                    CommentDetailAction.OnShowCommentReportDialog(
                         isShow = true,
                         comment = comment
                     )
@@ -193,7 +159,7 @@ private fun CommentHeader(
 private fun CommentText(
     modifier: Modifier = Modifier,
     texts: List<CommentTextUiModel>,
-    onUiAction: OnPlanDetailUiAction
+    onUiAction: (CommentDetailAction) -> Unit
 ) {
     val text = texts.joinToString("") { it.content }
     val spanStyle = SpanStyle(
@@ -231,7 +197,7 @@ private fun CommentText(
                     addLink(
                         clickable = LinkAnnotation.Clickable(
                             tag = "URL",
-                            linkInteractionListener = { onUiAction(PlanDetailUiAction.OnClickCommentWebLink(uiModel.content)) }
+                            linkInteractionListener = { onUiAction(CommentDetailAction.OnClickCommentWebLink(uiModel.content)) }
                         ),
                         start = startIndex,
                         end = startIndex + uiModel.content.length
@@ -251,17 +217,12 @@ private fun CommentText(
 @Composable
 private fun CommentFooter(
     comment: Comment,
-    onUiAction: OnPlanDetailUiAction
+    onUiAction: (CommentDetailAction) -> Unit
 ) {
     val likeResource = if (comment.isLike) {
         R.drawable.ic_thumb_up_fill
     } else {
         R.drawable.ic_thumb_up
-    }
-    val replyResource = if (comment.replayCount > 0) {
-        R.drawable.ic_chat_add_fill
-    } else {
-        R.drawable.ic_chat_add
     }
 
     Column {
@@ -274,17 +235,12 @@ private fun CommentFooter(
                 modifier = Modifier.padding(end = 8.dp),
                 iconRes = likeResource,
                 iconCount = comment.likeCount,
-                onClick = { onUiAction(PlanDetailUiAction.OnClickCommentLike(comment = comment)) }
-            )
-
-            CommentIcon(
-                iconRes = replyResource,
-                iconCount = comment.replayCount,
-                onClick = { onUiAction(PlanDetailUiAction.OnClickCommentAddReply(comment)) }
+                onClick = { onUiAction(CommentDetailAction.OnClickCommentLike(comment = comment)) }
             )
         }
     }
 }
+
 
 @Composable
 private fun CommentIcon(
@@ -314,65 +270,6 @@ private fun CommentIcon(
                 color = MoimTheme.colors.gray.gray04,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
-}
-
-
-@Preview
-@Composable
-private fun PlanDetailCommentItemPreview() {
-    val comment = Comment(
-        postId = "",
-        commentId = "",
-        writer = Writer(
-            userId = "",
-            nickname = "모닝커피클럽회원",
-            imageUrl = "",
-        ),
-        isLike = true,
-        likeCount = 1000,
-        replayCount = 10,
-        content = """
-            이른 아침, @카카루님과 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. 
-            @바나나에스프레소님도 다음에 뵐 수 있으면 좋겠네요 제 인스타도 많이 방문해주세요! 제 인스타도 많이 방문해주세요 instagram.com
-        """.trimIndent(),
-        commentAt = ZonedDateTime.now()
-    )
-
-    MoimTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.bg.primary)
-        ) {
-            PlanDetailCommentItem(
-                userId = "",
-                comment = CommentUiModel(
-                    comment = comment,
-                    texts = listOf(
-                        CommentTextUiModel.PlainText(
-                            content = "이른 아침, "
-                        ),
-                        CommentTextUiModel.MentionText(
-                            content = "@카카루"
-                        ),
-                        CommentTextUiModel.PlainText(
-                            content = "님과 커피 한 잔과 함께 프로젝트를 시작할 수 있어서 즐거웠어요. "
-                        ),
-                        CommentTextUiModel.MentionText(
-                            content = "@바나나에스프레소"
-                        ),
-                        CommentTextUiModel.PlainText(
-                            content = "님도 다음에 뵐 수 있으면 좋겠네요 제 인스타도 많이 방문해주세요! ",
-                        ),
-                        CommentTextUiModel.HyperLinkText(
-                            content = "instagram.com",
-                        ),
-                    )
-                ),
-                onUiAction = {}
             )
         }
     }

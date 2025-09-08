@@ -21,6 +21,8 @@ data class NotificationResponse(
     val type: String,
     @SerialName("payload")
     val payload: PayloadResponse,
+    @SerialName("planDate")
+    val planDate: String?,
     @SerialName("sendAt")
     val sendAt: String,
 )

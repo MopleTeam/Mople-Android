@@ -12,8 +12,22 @@ interface CommentRepository {
         size: Int,
     ): PaginationContainer<List<Comment>>
 
+    suspend fun getReplyComments(
+        postId: String,
+        commentId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<Comment>>
+
     fun createComment(
         postId: String,
+        content: String,
+        mentionIds: List<String>,
+    ): Flow<Comment>
+
+    fun createReplyComment(
+        postId: String,
+        commentId: String,
         content: String,
         mentionIds: List<String>,
     ): Flow<Comment>

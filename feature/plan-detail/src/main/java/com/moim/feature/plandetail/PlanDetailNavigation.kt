@@ -8,17 +8,40 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.moim.core.model.Comment
 import com.moim.core.model.item.PlanItem
 import com.moim.core.route.DetailRoute
 
 fun NavGraphBuilder.planDetailScreen(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToMapDetail: (placeName: String, address: String, latitude: Double, longitude: Double) -> Unit,
-    navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
+    navigateToMapDetail: (
+        placeName: String,
+        address: String,
+        latitude: Double,
+        longitude: Double
+    ) -> Unit,
+    navigateToParticipants: (
+        isMeeting: Boolean,
+        isPlan: Boolean,
+        id: String
+    ) -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
-    navigateToReviewWrite: (id: String, isUpdated: Boolean) -> Unit,
-    navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit
+    navigateToCommentDetail: (
+        meetId: String,
+        postId: String,
+        comment: Comment
+    ) -> Unit,
+    navigateToReviewWrite: (
+        id: String,
+        isUpdated: Boolean
+    ) -> Unit,
+    navigateToImageViewer: (
+        title: String,
+        images: List<String>,
+        position: Int,
+        defaultImage: Int
+    ) -> Unit
 ) {
     composable<DetailRoute.PlanDetail>(
         enterTransition = { fadeIn(animationSpec = tween(500)) },
@@ -30,6 +53,7 @@ fun NavGraphBuilder.planDetailScreen(
             navigateToMapDetail = navigateToMapDetail,
             navigateToParticipants = navigateToParticipants,
             navigateToPlanWrite = navigateToPlanWrite,
+            navigateToCommentDetail = navigateToCommentDetail,
             navigateToReviewWrite = navigateToReviewWrite,
             navigateToImageViewer = navigateToImageViewer
         )

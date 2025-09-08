@@ -1,33 +1,59 @@
-package com.moim.feature.plandetail.model
+package com.moim.core.common.util
 
-import com.moim.core.common.util.parseMentionTagMessage
-import com.moim.core.common.util.parseTextWithLinks
 import com.moim.core.model.Comment
 import com.moim.core.model.User
+import com.moim.core.model.item.CommentTextUiModel
+import com.moim.core.model.item.CommentUiModel
 
-data class CommentUiModel(
-    val comment: Comment,
-    val texts: List<CommentTextUiModel>,
-    val replays: List<Comment> = emptyList()
-) {
-    var isDeleted: Boolean = false
+fun createMentionTagMessage(
+    mentionUsers: List<User>,
+    message: String
+): String {
+    var result = message
+    mentionUsers.forEach { user ->
+        val mentionPattern = "@${user.nickname}"
+        result = result.replace(mentionPattern, "<mention id=${user.userId}>$mentionPattern</mention>")
+    }
+
+    return result
 }
 
-sealed class CommentTextUiModel(
-    open val content: String
-) {
-    data class PlainText(
-        override val content: String
-    ) : CommentTextUiModel(content)
+fun parseMentionTagMessage(
+    mentionUsers: List<User>,
+    message: String
+): String {
+    val userMap = mentionUsers.associateBy { it.userId }
+    val mentionPattern = Regex("""<mention id=(\d+)>@[^<]+</mention>""")
 
-    data class MentionText(
-        override val content: String
-    ) : CommentTextUiModel(content)
+    return mentionPattern.replace(message) { matchResult ->
+        val userId = matchResult.groupValues.getOrNull(1)
 
-    data class HyperLinkText(
-        override val content: String,
-    ) : CommentTextUiModel(content)
+        userMap[userId]
+            ?.let { user -> "@${user.nickname}" }
+            ?: matchResult.value
+    }
 }
+
+fun filterMentionedUsers(
+    mentionUsers: List<User>,
+    message: String
+): List<User> {
+    if (mentionUsers.isEmpty() || message.isEmpty()) {
+        return emptyList()
+    }
+
+    // 메시지에서 멘션된 사용자 ID들 추출
+    val mentionPattern = Regex("""<mention id=(\d+)>@[^<]+</mention>""")
+    val mentionedUserIds = mentionPattern.findAll(message)
+        .map { it.groupValues[1] }
+        .toSet() // 중복 제거
+
+    // 실제로 멘션된 사용자들만 필터링
+    return mentionUsers.filter { user ->
+        user.userId in mentionedUserIds
+    }
+}
+
 
 fun Comment.createCommentUiModel(): CommentUiModel {
     val commentTextUiModel = content

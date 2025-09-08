@@ -10,6 +10,7 @@ enum class NotificationType {
     PLAN_REMIND,
     REVIEW_REMIND,
     REVIEW_UPDATE,
+    COMMENT_MENTION,
     NONE
 }
 
@@ -22,6 +23,7 @@ data class Notification(
     val reviewId: String?,
     val type: NotificationType,
     val payload: Payload,
+    val planDate: ZonedDateTime?,
     val sendAt: ZonedDateTime,
 )
 

@@ -33,6 +33,26 @@ internal class CommentRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getReplyComments(
+        postId: String,
+        commentId: String,
+        cursor: String,
+        size: Int
+    ): PaginationContainer<List<Comment>> {
+        return try {
+            commentApi
+                .getReplyComments(
+                    postId = postId,
+                    commentId = commentId,
+                    cursor = cursor,
+                    size = size
+                )
+                .asItem { it.map(CommentResponse::asItem) }
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+    }
+
     override fun createComment(
         postId: String,
         content: String,
@@ -41,6 +61,24 @@ internal class CommentRepositoryImpl @Inject constructor(
         emit(
             commentApi.createComment(
                 postId = postId,
+                params = jsonOf(
+                    KEY_CONTENTS to content,
+                    KEY_MENTIONS to mentionIds,
+                )
+            ).asItem()
+        )
+    }
+
+    override fun createReplyComment(
+        postId: String,
+        commentId: String,
+        content: String,
+        mentionIds: List<String>
+    ): Flow<Comment> = catchFlow {
+        emit(
+            commentApi.createReplyComment(
+                postId = postId,
+                commentId = commentId,
                 params = jsonOf(
                     KEY_CONTENTS to content,
                     KEY_MENTIONS to mentionIds,
