@@ -46,6 +46,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.feature.alarm.ui.AlarmEmptyScreen
 import com.moim.feature.alarm.ui.AlarmListItem
 
 @Composable
@@ -183,6 +184,19 @@ fun AlarmScreen(
                     .fillMaxSize()
                     .background(MoimTheme.colors.bg.primary),
                 onClickRefresh = { onUiAction(AlarmUiAction.OnClickRefresh) },
+            )
+        }
+
+        AnimatedVisibility(
+            modifier = Modifier.fillMaxSize(),
+            enter = fadeIn(),
+            exit = fadeOut(),
+            visible = notifications.loadState.isSuccess() && notifications.itemCount == 0
+        ) {
+            AlarmEmptyScreen(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MoimTheme.colors.bg.primary)
             )
         }
     }

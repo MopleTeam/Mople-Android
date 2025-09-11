@@ -13,11 +13,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.model.Meeting
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.common.model.Meeting
 import com.moim.feature.meetingsetting.MeetingSettingUiAction
 import com.moim.feature.meetingsetting.OnMeetingSettingUiAction
 

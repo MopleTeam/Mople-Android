@@ -2,11 +2,11 @@ package com.moim.feature.plandetail.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import com.moim.core.common.model.Comment
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.common.model.Comment
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
 

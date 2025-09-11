@@ -21,12 +21,12 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.model.Place
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.common.model.Place
 import com.moim.feature.planwrite.OnPlanWriteUiAction
 import com.moim.feature.planwrite.PlanWriteUiAction
 

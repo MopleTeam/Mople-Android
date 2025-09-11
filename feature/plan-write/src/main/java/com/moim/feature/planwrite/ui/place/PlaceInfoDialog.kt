@@ -14,13 +14,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.model.Place
+import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimBottomSheetDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.common.model.Place
 import com.moim.feature.planwrite.PlanWriteUiAction
-import com.moim.core.designsystem.R
 import kotlinx.coroutines.launch
 
 @Composable

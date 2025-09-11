@@ -24,13 +24,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import com.moim.core.common.model.Meeting
 import com.moim.core.common.view.PAGING_ERROR
 import com.moim.core.common.view.PAGING_LOADING
 import com.moim.core.common.view.isAppendError
@@ -46,11 +43,9 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.common.model.Meeting
 import com.moim.feature.planwrite.OnPlanWriteUiAction
 import com.moim.feature.planwrite.PlanWriteUiAction
 import com.moim.feature.planwrite.model.MeetingUiModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 @Composable

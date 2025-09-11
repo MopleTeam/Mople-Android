@@ -39,6 +39,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.model.Comment
+import com.moim.core.common.model.Writer
+import com.moim.core.common.model.item.CommentTextUiModel
+import com.moim.core.common.model.item.CommentUiModel
 import com.moim.core.common.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
@@ -47,10 +51,6 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.common.model.Comment
-import com.moim.core.common.model.Writer
-import com.moim.core.common.model.item.CommentTextUiModel
-import com.moim.core.common.model.item.CommentUiModel
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
 import java.time.ZonedDateTime

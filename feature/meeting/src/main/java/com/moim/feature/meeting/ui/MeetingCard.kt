@@ -26,13 +26,13 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.moim.core.common.model.Meeting
 import com.moim.core.common.util.getDateTimeBetweenDay
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.common.model.Meeting
 import com.moim.feature.meeting.MeetingUiAction
 import kotlin.math.absoluteValue
 
