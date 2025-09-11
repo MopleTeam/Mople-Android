@@ -1,5 +1,7 @@
 package com.moim.core.common.di
 
+import com.moim.core.common.delegate.CommentViewModelDelegate
+import com.moim.core.common.delegate.CommentViewModelDelegateImpl
 import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.MeetingViewModelDelegateImpl
 import com.moim.core.common.delegate.PlanItemViewModelDelegate
@@ -23,4 +25,9 @@ internal abstract class DelegateModule {
     @Singleton
     @Binds
     abstract fun bindPlanItemViewModelDelegate(planItemViewModelDelegateImpl: PlanItemViewModelDelegateImpl): PlanItemViewModelDelegate
+
+    //================================ CommentViewModelDelegate ============================================//
+    @Singleton
+    @Binds
+    abstract fun bindCommentViewModelDelegate(commentViewModelDelegateImpl: CommentViewModelDelegateImpl) : CommentViewModelDelegate
 }

@@ -15,6 +15,8 @@ import com.moim.feature.alarm.navigateToAlarm
 import com.moim.feature.alarmsetting.alarmSettingScreen
 import com.moim.feature.alarmsetting.navigateToAlarmSetting
 import com.moim.feature.calendar.calendarScreen
+import com.moim.feature.commentdetail.commentDetailScreen
+import com.moim.feature.commentdetail.navigateToCommentDetail
 import com.moim.feature.home.homeScreen
 import com.moim.feature.imageviewer.imageViewerScreen
 import com.moim.feature.imageviewer.navigateToImageViewer
@@ -122,6 +124,12 @@ fun MainScreen(
                     navigateToParticipants = navigator.navController::navigateToParticipantList,
                     navigateToPlanWrite = navigator.navController::navigateToPlanWrite,
                     navigateToReviewWrite = navigator.navController::navigateToReviewWrite,
+                    navigateToCommentDetail = navigator.navController::navigateToCommentDetail,
+                    navigateToImageViewer = navigator.navController::navigateToImageViewer
+                )
+                commentDetailScreen(
+                    padding = innerPadding,
+                    navigateToBack = navigator.navController::popBackStack,
                     navigateToImageViewer = navigator.navController::navigateToImageViewer
                 )
                 mapDetailScreen(

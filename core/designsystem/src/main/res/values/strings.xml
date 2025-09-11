@@ -126,14 +126,25 @@
     <string name="plan_detail_comment_update_typing">댓글 수정중</string>
     <string name="plan_detail_comment_hint">댓글을 입력해주세요</string>
     <string name="plan_detail_comment_error">댓글을 불러오지 못했어요\n잠시 후 다시 시도해주세요</string>
-    <string name="plan_detail_comment_empty">아직 댓글이 없어요</string>
-    <string name="plan_detail_comment_reply_show">답글 %s건 더보기</string>
-    <string name="plan_detail_comment_reply_hide">답글 숨기기</string>
     <string name="plan_detail_image">함께한 순간</string>
     <string name="plan_detail_plan_apply">약속 참여하기</string>
     <string name="plan_detail_plan_apply_done">약속 참여중</string>
     <string name="plan_detail_plan_disable">해당 약속은 마감되었어요</string>
     <string name="plan_detail_plan_cancel">약속참여를 취소할까요?</string>
+
+    <!-- CommentDetail -->
+    <string name="comment_detail_title">답글</string>
+    <string name="comment_detail_edit">편집하기</string>
+    <string name="comment_detail_update_title">댓글을 수정 또는 삭제할 수 있습니다.</string>
+    <string name="comment_detail_update">수정하기</string>
+    <string name="comment_detail_delete">삭제하기</string>
+    <string name="comment_detail_report_title">댓글을 신고할까요?</string>
+    <string name="comment_detail_report_description">모플 이용수칙에 맞지 않는 경우 신고해주세요</string>
+    <string name="comment_detail_report">신고하기</string>
+    <string name="comment_detail_hint">댓글을 입력해주세요</string>
+    <string name="comment_detail_update_typing">댓글 수정중</string>
+    <string name="comment_detail_error">댓글을 불러오지 못했어요\n잠시 후 다시 시도해주세요</string>
+    <string name="comment_detail_empty">아직 댓글이 없어요</string>
 
     <!-- MapDetail -->
     <string name="map_detail_title">상세 지도</string>
@@ -181,6 +192,7 @@
     <string name="alarm_title">알람</string>
     <string name="alarm_empty">새로운 알림이 없어요.</string>
     <string name="alarm_new">새로운 알림</string>
+    <string name="alarm_deadline_description">최근 30일 이내 알림 내역만 확인할 수 있어요</string>
 
     <!-- AlarmSetting -->
     <string name="alarm_setting_title">알림 관리</string>
@@ -189,6 +201,10 @@
     <string name="alarm_setting_meeting_notify_description">모임에 관련된 알림</string>
     <string name="alarm_setting_plan_notify">일정 알림</string>
     <string name="alarm_setting_plan_notify_description">다가오는 일정이나 변동사항에 대한 알림</string>
+    <string name="alarm_setting_comment_notify">댓글 알림</string>
+    <string name="alarm_setting_comment_notify_description">나의 댓글에 답글이 달리면 알림</string>
+    <string name="alarm_setting_mention_notify">멘션 알림</string>
+    <string name="alarm_setting_mention_notify_description">나를 멘션시 알림</string>
 
     <!-- Unit -->
     <string name="unit_participants_count">%d명 참여</string>

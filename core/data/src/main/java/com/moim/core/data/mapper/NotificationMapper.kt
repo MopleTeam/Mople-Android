@@ -17,6 +17,7 @@ fun NotificationResponse.asItem(): Notification {
         reviewId = reviewId,
         type = NotificationType.entries.find { it.name == type } ?: NotificationType.NONE,
         payload = payload.asItem(),
+        planDate = planDate.parseZonedDateTime(),
         sendAt = sendAt.parseZonedDateTime(),
     )
 }

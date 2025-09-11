@@ -20,9 +20,24 @@ interface CommentApi {
         @Query("size") size: Int,
     ): PaginationContainerResponse<List<CommentResponse>>
 
+    @GET("comment/{postId}/{commentId}")
+    suspend fun getReplyComments(
+        @Path("postId") postId: String,
+        @Path("commentId") commentId: String,
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<CommentResponse>>
+
     @POST("comment/{postId}")
     suspend fun createComment(
         @Path("postId") postId: String,
+        @Body params: JsonObject
+    ): CommentResponse
+
+    @POST("comment/{postId}/{commentId}")
+    suspend fun createReplyComment(
+        @Path("postId") postId: String,
+        @Path("commentId") commentId: String,
         @Body params: JsonObject
     ): CommentResponse
 

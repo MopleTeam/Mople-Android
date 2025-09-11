@@ -15,6 +15,7 @@ dependencies {
     implementation(projects.feature.reviewWrite)
     implementation(projects.feature.planWrite)
     implementation(projects.feature.planDetail)
+    implementation(projects.feature.commentDetail)
     implementation(projects.feature.participantList)
     implementation(projects.feature.calendar)
     implementation(projects.feature.mapDetail)

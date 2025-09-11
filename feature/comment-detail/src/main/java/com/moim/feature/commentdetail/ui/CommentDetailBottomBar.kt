@@ -1,4 +1,4 @@
-package com.moim.feature.plandetail.ui
+package com.moim.feature.commentdetail.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton
@@ -34,16 +33,15 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimTextFieldColors
 import com.moim.core.model.Comment
 import com.moim.core.model.User
-import com.moim.feature.plandetail.OnPlanDetailUiAction
-import com.moim.feature.plandetail.PlanDetailUiAction
+import com.moim.feature.commentdetail.CommentDetailAction
 
 @Composable
-fun PlanDetailBottomBar(
+fun CommentDetailBottomBar(
     modifier: Modifier = Modifier,
     updateComment: Comment? = null,
     commentState: TextFieldState = TextFieldState(),
     selectedMentions: List<User>,
-    onUiAction: OnPlanDetailUiAction = {}
+    onUiAction: (CommentDetailAction) -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -56,7 +54,7 @@ fun PlanDetailBottomBar(
 
     LaunchedEffect(commentState.text) {
         if (commentState.text.isEmpty()) {
-            onUiAction(PlanDetailUiAction.OnShowMentionDialog(null))
+            onUiAction(CommentDetailAction.OnShowMentionDialog(null))
             return@LaunchedEffect
         }
 
@@ -65,11 +63,12 @@ fun PlanDetailBottomBar(
 
         if (lastAtIndex != -1) {
             val mentionText = textUntilCursor.substring(lastAtIndex + 1)
-            onUiAction(PlanDetailUiAction.OnShowMentionDialog(mentionText))
+            onUiAction(CommentDetailAction.OnShowMentionDialog(mentionText))
         } else {
-            onUiAction(PlanDetailUiAction.OnShowMentionDialog(null))
+            onUiAction(CommentDetailAction.OnShowMentionDialog(null))
         }
     }
+
 
     Column(
         modifier = Modifier
@@ -128,7 +127,7 @@ fun PlanDetailBottomBar(
                 onClick = {
                     keyboardController?.hide()
                     focusManager.clearFocus()
-                    onUiAction(PlanDetailUiAction.OnClickCommentUpload(updateComment))
+                    onUiAction(CommentDetailAction.OnClickCommentUpload(updateComment))
                 }
             )
         }
@@ -204,31 +203,4 @@ fun HighlightTextView(
         style = MoimTheme.typography.body01.regular,
         color = textColor,
     )
-}
-
-
-@Preview(showBackground = true)
-@Composable
-private fun PlanDetailBottomBarPreview() {
-    MoimTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.white)
-        ) {
-            PlanDetailBottomBar(
-                commentState = TextFieldState(
-                    """
-                        hello @kim
-                    """.trimIndent()
-                ),
-                selectedMentions = listOf(
-                    User(
-                        userId = "0",
-                        nickname = "kim"
-                    )
-                )
-            )
-        }
-    }
 }

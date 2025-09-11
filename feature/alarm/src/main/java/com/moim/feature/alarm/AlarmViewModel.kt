@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -66,13 +67,14 @@ class AlarmViewModel @Inject constructor(
                 setUiEvent(AlarmUiEvent.NavigateToMeetingDetail(requireNotNull(notification.meetId)))
             }
 
+            NotificationType.COMMENT_MENTION,
             NotificationType.PLAN_CREATE,
             NotificationType.PLAN_UPDATE,
             NotificationType.PLAN_REMIND,
             NotificationType.REVIEW_REMIND,
             NotificationType.REVIEW_UPDATE -> {
                 val postId = notification.planId ?: notification.reviewId ?: return
-                val isPlan = notification.planId != null
+                val isPlan = notification.planId != null && (notification.planDate?.toLocalDate()?.isAfter(LocalDate.now()) == true)
                 setUiEvent(AlarmUiEvent.NavigateToPlanDetail(postId, isPlan))
             }
 

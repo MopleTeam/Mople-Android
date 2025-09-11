@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.util.parseDateString
@@ -42,7 +43,8 @@ fun AlarmListItem(
                 .clip(RoundedCornerShape(10.dp))
                 .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(10.dp))
                 .size(40.dp),
-            imageUrl = notification.meetImgUrl
+            imageUrl = notification.meetImgUrl,
+            errorImage = painterResource(R.drawable.ic_empty_meeting)
         )
         Spacer(Modifier.size(16.dp))
 

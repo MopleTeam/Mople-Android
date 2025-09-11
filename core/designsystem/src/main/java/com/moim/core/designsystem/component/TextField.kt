@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
@@ -45,6 +46,61 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.component.internal.MoimOutlinedTextField
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimTextFieldColors
+
+@Composable
+fun MoimTextField(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    hintText: String,
+    textFieldState: TextFieldState,
+    textStyle: TextStyle = MoimTheme.typography.body01.regular,
+    textFieldColors: TextFieldColors = moimTextFieldColors(),
+    supportText: String? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    isError: Boolean = false,
+    errorMessage: String? = null,
+    singleLine: Boolean = true,
+    maxLine: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    shape: Shape = RoundedCornerShape(6),
+    paddingValues: PaddingValues = PaddingValues(16.dp),
+    unfocusedBorderThickness: Dp = 1.dp,
+    focusedBorderThickness: Dp = 2.dp,
+    minWidth: Dp = OutlinedTextFieldDefaults.MinWidth,
+    minHeight: Dp = OutlinedTextFieldDefaults.MinHeight,
+) {
+    MoimOutlinedTextField(
+        modifier = modifier,
+        textFieldState = textFieldState,
+        textStyle = textStyle,
+        colors = textFieldColors,
+        enabled = enabled,
+        supportingText = if (isError && errorMessage != null) errorMessage else supportText,
+        keyboardOptions = keyboardOptions,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        placeholder = {
+            Text(
+                text = hintText,
+                style = textStyle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        visualTransformation = visualTransformation,
+        isError = isError,
+        shape = shape,
+        maxLines = maxLine,
+        singleLine = singleLine,
+        paddingValues = paddingValues,
+        minWidth = minWidth,
+        minHeight = minHeight,
+        focusedBorderThickness = focusedBorderThickness,
+        unfocusedBorderThickness = unfocusedBorderThickness,
+    )
+}
 
 @Composable
 fun MoimTextField(
@@ -246,6 +302,16 @@ private fun MoimTextFieldPreview() {
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            MoimTextField(
+                modifier = Modifier.fillMaxWidth(),
+                textFieldState = TextFieldState(initialText = "This is TextFiledState"),
+                hintText = "This is Basic",
+                singleLine = false,
+                supportText = "dummy support message",
+                errorMessage = "dummy error message",
+                isError = true
+            )
+
             MoimTextField(
                 modifier = Modifier.fillMaxWidth(),
                 text = "This is Multi Line\nThis is Multi Line",
