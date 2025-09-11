@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -29,6 +29,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
+import com.moim.core.common.model.Comment
+import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.util.toValidUrl
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.PAGING_ERROR
@@ -49,8 +51,6 @@ import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.common.model.Comment
-import com.moim.core.common.model.item.PlanItem
 import com.moim.feature.plandetail.ui.PlanDetailBottomBar
 import com.moim.feature.plandetail.ui.PlanDetailCommentEditDialog
 import com.moim.feature.plandetail.ui.PlanDetailCommentHeader

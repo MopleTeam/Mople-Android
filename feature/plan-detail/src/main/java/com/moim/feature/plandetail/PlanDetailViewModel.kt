@@ -17,6 +17,11 @@ import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.commentStateIn
 import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
+import com.moim.core.common.model.Comment
+import com.moim.core.common.model.User
+import com.moim.core.common.model.isChild
+import com.moim.core.common.model.item.CommentUiModel
+import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.cancelIfActive
@@ -39,11 +44,6 @@ import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.domain.usecase.GetCommentsUseCase
 import com.moim.core.domain.usecase.GetPlanItemUseCase
-import com.moim.core.common.model.Comment
-import com.moim.core.common.model.User
-import com.moim.core.common.model.isChild
-import com.moim.core.common.model.item.CommentUiModel
-import com.moim.core.common.model.item.PlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

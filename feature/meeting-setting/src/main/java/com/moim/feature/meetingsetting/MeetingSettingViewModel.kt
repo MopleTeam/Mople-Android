@@ -8,8 +8,10 @@ import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.exception.NetworkException
+import com.moim.core.common.model.Meeting
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.route.DetailRoute
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -18,8 +20,6 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.common.model.Meeting
-import com.moim.core.common.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first

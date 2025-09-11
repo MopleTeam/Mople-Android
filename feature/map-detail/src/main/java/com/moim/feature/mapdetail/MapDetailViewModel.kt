@@ -1,12 +1,12 @@
 package com.moim.feature.mapdetail
 
 import androidx.lifecycle.SavedStateHandle
+import com.moim.core.common.model.MapType
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
-import com.moim.core.common.model.MapType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

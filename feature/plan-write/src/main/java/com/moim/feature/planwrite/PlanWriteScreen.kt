@@ -18,13 +18,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.util.parseDateString
@@ -37,14 +35,12 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.planwrite.model.MeetingUiModel
 import com.moim.feature.planwrite.ui.MoimDatePickerDialog
 import com.moim.feature.planwrite.ui.MoimTimePickerDialog
 import com.moim.feature.planwrite.ui.PlanWriteMeetingsDialog
 import com.moim.feature.planwrite.ui.PlanWriteSelectedBox
 import com.moim.feature.planwrite.ui.PlanWriteTextField
 import com.moim.feature.planwrite.ui.place.PlaceContainerScreen
-import kotlinx.coroutines.flow.Flow
 import java.time.ZonedDateTime
 
 internal typealias OnPlanWriteUiAction = (PlanWriteUiAction) -> Unit

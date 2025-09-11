@@ -19,12 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.moim.core.analytics.TrackScreenViewEvent
+import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.item.PlanItem
+import com.moim.core.common.model.item.asPlanItem
 import com.moim.core.common.util.externalShareForUrl
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.isError
@@ -43,9 +46,6 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.common.model.Meeting
-import com.moim.core.common.model.item.PlanItem
-import com.moim.core.common.model.item.asPlanItem
 import com.moim.feature.meetingdetail.ui.MeetingDetailHeader
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanContent
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanEmpty

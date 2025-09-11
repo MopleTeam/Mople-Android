@@ -2,6 +2,8 @@ package com.moim.feature.alarm
 
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.moim.core.common.model.Notification
+import com.moim.core.common.model.NotificationType
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
@@ -9,8 +11,6 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.data.datasource.notification.NotificationRepository
 import com.moim.core.domain.usecase.GetNotificationsUseCase
-import com.moim.core.common.model.Notification
-import com.moim.core.common.model.NotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterIsInstance

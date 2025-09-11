@@ -1,6 +1,7 @@
 package com.moim.feature.profile
 
 import androidx.lifecycle.viewModelScope
+import com.moim.core.common.model.User
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
@@ -12,7 +13,6 @@ import com.moim.core.common.view.checkState
 import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.common.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onEach

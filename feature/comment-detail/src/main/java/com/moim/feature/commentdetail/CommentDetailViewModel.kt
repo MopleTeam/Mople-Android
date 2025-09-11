@@ -16,8 +16,13 @@ import com.moim.core.common.delegate.CommentAction
 import com.moim.core.common.delegate.CommentViewModelDelegate
 import com.moim.core.common.delegate.commentStateIn
 import com.moim.core.common.exception.NetworkException
+import com.moim.core.common.model.Comment
+import com.moim.core.common.model.User
+import com.moim.core.common.model.isChild
+import com.moim.core.common.model.item.CommentUiModel
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.route.DetailRoute
 import com.moim.core.common.util.cancelIfActive
 import com.moim.core.common.util.createCommentUiModel
 import com.moim.core.common.util.createMentionTagMessage
@@ -35,11 +40,6 @@ import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.domain.usecase.GetReplyCommentUseCase
-import com.moim.core.common.model.Comment
-import com.moim.core.common.model.User
-import com.moim.core.common.model.isChild
-import com.moim.core.common.model.item.CommentUiModel
-import com.moim.core.common.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

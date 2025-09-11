@@ -14,6 +14,9 @@ import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
+import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.Plan
+import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
@@ -29,9 +32,6 @@ import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.domain.usecase.GetPlanItemsUseCase
-import com.moim.core.common.model.Meeting
-import com.moim.core.common.model.Plan
-import com.moim.core.common.model.item.PlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

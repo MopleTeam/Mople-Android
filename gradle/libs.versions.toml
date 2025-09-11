@@ -1,20 +1,20 @@
 [versions]
 # Project
-androidGradlePlugin = "8.11.0"
+androidGradlePlugin = "8.12.3"
 playservicesGradlePlugin = "4.4.3"
-firebaseCrashlyticsGradlePlugin = "3.0.4"
+firebaseCrashlyticsGradlePlugin = "3.0.6"
 
 # AndroidX
-androidxCore = "1.16.0"
-androidxComposeBom = "2025.06.01"
+androidxCore = "1.17.0"
+androidxComposeBom = "2025.09.00"
 androidxStartUp = "1.2.0"
-androidxLifecycle = "2.9.1"
-androidxHilt = "1.2.0"
+androidxLifecycle = "2.9.3"
+androidxHilt = "1.3.0"
 androidxCoreSplashScreen = "1.0.1"
-androidxActivity = "1.10.1"
-androidxNavigation = "2.9.1"
+androidxActivity = "1.11.0"
+androidxNavigation = "2.9.4"
 androidxDataStore = "1.1.7"
-androidxRoom = "2.7.2"
+androidxRoom = "2.8.0"
 androidxAppcompat = "1.7.1"
 androidxPaging = "3.3.6"
 
@@ -22,27 +22,22 @@ androidxPaging = "3.3.6"
 androidPlayServicesLocation = "21.3.0"
 
 # Kotlin
-kotlin = "2.2.0"
+kotlin = "2.2.20"
 kotlinxCoroutines = "1.10.2"
 kotlinxSerializationJson = "1.9.0"
-ksp = "2.2.0-2.0.2"
+ksp = "2.2.20-2.0.2"
 
 # Firebase
 firebaseBom = "33.16.0"
 
 # hilt
-hilt = "2.56.2"
+hilt = "2.57.1"
 
 # Coil
 coil = "2.7.0"
 
 # coreDseugar
 androidDesugarJdkLibs = "2.1.5"
-
-# Test
-junit = "4.13.2"
-androidx-test-ext-junit = "1.2.1"
-espresso-core = "3.6.1"
 
 # ETC
 retrofit = "3.0.0"
@@ -51,14 +46,14 @@ lottie = "6.6.7"
 timber = "5.0.1"
 leakCanary = "2.14"
 compressor = "3.0.1"
-calendarCompose = "2.7.0"
-composeStableMarker = "1.0.6"
-kakaoCore = "2.21.4"
+calendarCompose = "2.8.0"
+composeStableMarker = "1.0.7"
+kakaoCore = "2.21.7"
 zoomable = "2.8.1"
 naverMapCompose = "1.8.2"
 naverMapLocation = "21.0.2"
 tedClusteringNaver = "1.0.2"
-material = "1.12.0"
+material = "1.13.0"
 
 [libraries]
 # AndroidX
@@ -114,11 +109,6 @@ hilt-core = { group = "com.google.dagger", name = "hilt-core", version.ref = "hi
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-
-# Android Test
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 
 # Android ETC
 android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" } # coreLibraryDesugaring
