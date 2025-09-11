@@ -1,7 +1,7 @@
 package com.moim.core.common.delegate
 
 import com.moim.core.common.di.ApplicationScope
-import com.moim.core.model.item.PlanItem
+import com.moim.core.common.model.item.PlanItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow

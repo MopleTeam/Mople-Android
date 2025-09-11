@@ -1,9 +1,9 @@
 package com.moim.core.common.util
 
-import com.moim.core.model.Comment
-import com.moim.core.model.User
-import com.moim.core.model.item.CommentTextUiModel
-import com.moim.core.model.item.CommentUiModel
+import com.moim.core.common.model.Comment
+import com.moim.core.common.model.User
+import com.moim.core.common.model.item.CommentTextUiModel
+import com.moim.core.common.model.item.CommentUiModel
 
 fun createMentionTagMessage(
     mentionUsers: List<User>,

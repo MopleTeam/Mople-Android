@@ -12,7 +12,6 @@ android {
 dependencies {
     implementation(projects.core.common)
     implementation(projects.core.data)
-    implementation(projects.core.model)
 
     // Kotlin
     implementation(libs.kotlin.stdlib)

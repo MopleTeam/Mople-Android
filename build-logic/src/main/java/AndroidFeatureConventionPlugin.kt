@@ -26,7 +26,6 @@ internal class AndroidFeatureConventionPlugin : Plugin<Project> {
                 implementation(project(":core:common"))
                 implementation(project(":core:domain"))
                 implementation(project(":core:designsystem"))
-                implementation(project(":core:model"))
                 implementation(project(":core:analytics"))
 
                 // AndroidX

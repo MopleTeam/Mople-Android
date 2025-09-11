@@ -27,7 +27,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.Place
+import com.moim.core.common.model.Place
 import com.moim.feature.planwrite.OnPlanWriteUiAction
 import com.moim.feature.planwrite.PlanWriteUiAction
 

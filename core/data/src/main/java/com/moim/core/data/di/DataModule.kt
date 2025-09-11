@@ -23,7 +23,7 @@ import com.moim.core.data.datasource.token.TokenRepositoryImpl
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.data.datasource.user.UserRepositoryImpl
 import com.moim.core.data.util.UserDataUtilImpl
-import com.moim.core.network.util.UserDataUtil
+import com.moim.core.remote.util.UserDataUtil
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

@@ -67,8 +67,6 @@ android {
 
 dependencies {
     implementation(projects.core.designsystem)
-    implementation(projects.core.model)
-    implementation(projects.core.dataModel)
     implementation(projects.core.data)
     implementation(projects.core.domain)
     implementation(projects.core.common)

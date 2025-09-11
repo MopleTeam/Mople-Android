@@ -1,13 +1,13 @@
 package com.moim.core.data.datasource.comment
 
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
-import com.moim.core.datamodel.CommentResponse
-import com.moim.core.model.Comment
-import com.moim.core.model.PaginationContainer
-import com.moim.core.network.service.CommentApi
-import com.moim.core.network.util.converterException
+import com.moim.core.common.model.Comment
+import com.moim.core.common.model.PaginationContainer
+import com.moim.core.remote.model.CommentResponse
+import com.moim.core.remote.model.asItem
+import com.moim.core.remote.service.CommentApi
+import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

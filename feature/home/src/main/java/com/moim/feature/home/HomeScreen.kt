@@ -51,7 +51,7 @@ import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.Plan
+import com.moim.core.common.model.Plan
 import com.moim.feature.home.ui.HomeCreateCards
 import com.moim.feature.home.ui.HomePlanCard
 import com.moim.feature.home.ui.HomePlanMoreCard

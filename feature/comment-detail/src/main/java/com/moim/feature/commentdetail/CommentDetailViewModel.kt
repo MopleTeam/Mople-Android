@@ -35,11 +35,11 @@ import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.domain.usecase.GetReplyCommentUseCase
-import com.moim.core.model.Comment
-import com.moim.core.model.User
-import com.moim.core.model.isChild
-import com.moim.core.model.item.CommentUiModel
-import com.moim.core.route.DetailRoute
+import com.moim.core.common.model.Comment
+import com.moim.core.common.model.User
+import com.moim.core.common.model.isChild
+import com.moim.core.common.model.item.CommentUiModel
+import com.moim.core.common.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

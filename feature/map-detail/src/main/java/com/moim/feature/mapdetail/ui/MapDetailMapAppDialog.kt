@@ -29,7 +29,7 @@ import com.moim.core.designsystem.component.MoimBottomSheetDialog
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.MapType
+import com.moim.core.common.model.MapType
 import com.moim.feature.mapdetail.MapDetailUiAction
 import kotlinx.coroutines.launch
 

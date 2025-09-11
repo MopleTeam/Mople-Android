@@ -1,16 +1,15 @@
 package com.moim.core.data.datasource.user
 
+import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
-import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
-import com.moim.core.datastore.PreferenceStorage
-import com.moim.core.model.User
-import com.moim.core.network.service.UserApi
+import com.moim.core.local.PreferenceStorage
+import com.moim.core.remote.model.asItem
+import com.moim.core.remote.service.UserApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
@@ -23,12 +22,11 @@ internal class UserRepositoryImpl @Inject constructor(
     override fun getUser(): Flow<User> {
         return preferenceStorage.user
             .onEach { if (it == null) fetchUser().first() }
-            .map { it?.asItem() }
             .filterNotNull()
     }
 
     override fun fetchUser(): Flow<User> = catchFlow {
-        emit(userApi.getUser().also { preferenceStorage.saveUser(it) }.asItem())
+        emit(userApi.getUser().asItem().also { preferenceStorage.saveUser(it) })
     }
 
     override fun updateUser(profileUrl: String?, nickname: String): Flow<User> = catchFlow {
@@ -39,7 +37,7 @@ internal class UserRepositoryImpl @Inject constructor(
                     KEY_IMAGE to uploadImageUrl,
                     KEY_NICKNAME to nickname
                 )
-            ).also { preferenceStorage.saveUser(it) }.asItem()
+            ).asItem().also { preferenceStorage.saveUser(it) }
         )
     }
 

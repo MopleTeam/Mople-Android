@@ -1,0 +1,24 @@
+package com.moim.core.remote.service
+
+import com.moim.core.remote.model.UserResponse
+import kotlinx.serialization.json.JsonObject
+import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.GET
+import retrofit2.http.PATCH
+import retrofit2.http.Query
+
+interface UserApi {
+
+    @GET("user/info")
+    suspend fun getUser(): UserResponse
+
+    @PATCH("user/info")
+    suspend fun updateUser(@Body params: JsonObject): UserResponse
+
+    @DELETE("user/remove")
+    suspend fun deleteUser()
+
+    @GET("user/nickname/duplicate")
+    suspend fun checkedNickname(@Query("nickname") nickname: String): Boolean
+}

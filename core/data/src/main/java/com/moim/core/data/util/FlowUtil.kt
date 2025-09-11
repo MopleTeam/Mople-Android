@@ -1,6 +1,6 @@
 package com.moim.core.data.util
 
-import com.moim.core.network.util.converterException
+import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.AbstractFlow
 import kotlinx.coroutines.flow.Flow

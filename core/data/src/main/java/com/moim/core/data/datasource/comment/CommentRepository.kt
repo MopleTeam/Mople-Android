@@ -1,7 +1,7 @@
 package com.moim.core.data.datasource.comment
 
-import com.moim.core.model.Comment
-import com.moim.core.model.PaginationContainer
+import com.moim.core.common.model.Comment
+import com.moim.core.common.model.PaginationContainer
 import kotlinx.coroutines.flow.Flow
 
 interface CommentRepository {

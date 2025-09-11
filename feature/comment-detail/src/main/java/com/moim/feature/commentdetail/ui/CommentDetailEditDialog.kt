@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimAlertDialog
-import com.moim.core.model.Comment
+import com.moim.core.common.model.Comment
 import com.moim.feature.commentdetail.CommentDetailAction
 
 @Composable

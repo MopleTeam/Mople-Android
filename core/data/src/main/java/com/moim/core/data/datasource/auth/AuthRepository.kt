@@ -1,6 +1,6 @@
 package com.moim.core.data.datasource.auth
 
-import com.moim.core.model.Token
+import com.moim.core.common.model.Token
 import kotlinx.coroutines.flow.Flow
 
 interface AuthRepository {

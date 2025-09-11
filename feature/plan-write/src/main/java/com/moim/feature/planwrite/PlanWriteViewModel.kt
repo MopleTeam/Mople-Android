@@ -19,10 +19,10 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.domain.usecase.GetMeetingsUseCase
-import com.moim.core.model.Meeting
-import com.moim.core.model.Place
-import com.moim.core.model.item.asPlanItem
-import com.moim.core.route.DetailRoute
+import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.Place
+import com.moim.core.common.model.item.asPlanItem
+import com.moim.core.common.route.DetailRoute
 import com.moim.feature.planwrite.model.MeetingUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow

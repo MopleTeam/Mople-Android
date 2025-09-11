@@ -1,17 +1,16 @@
 package com.moim.core.data.datasource.auth
 
 import com.moim.core.common.consts.DEVICE_TYPE_ANDROID
+import com.moim.core.common.model.Token
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
-import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
-import com.moim.core.datastore.PreferenceStorage
-import com.moim.core.model.Token
-import com.moim.core.network.service.AuthApi
-import com.moim.core.network.util.convertToToken
+import com.moim.core.local.PreferenceStorage
+import com.moim.core.remote.model.asItem
+import com.moim.core.remote.service.AuthApi
+import com.moim.core.remote.util.convertToToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 internal class AuthRepositoryImpl @Inject constructor(
@@ -21,7 +20,7 @@ internal class AuthRepositoryImpl @Inject constructor(
 ) : AuthRepository {
 
     override fun getToken(): Flow<Token?> {
-        return preferenceStorage.token.map { it?.asItem() }
+        return preferenceStorage.token
     }
 
     override fun signUp(socialType: String, token: String, email: String, nickname: String, profileUrl: String?) = catchFlow {
@@ -35,7 +34,7 @@ internal class AuthRepositoryImpl @Inject constructor(
                 KEY_IMAGE to uploadProfileUrl,
                 KEY_DEVICE_TYPE to DEVICE_TYPE_ANDROID
             )
-        ).also { preferenceStorage.saveUserToken(it) }.asItem()
+        ).asItem().also { preferenceStorage.saveUserToken(it) }
 
         emit(authToken)
     }
@@ -47,7 +46,7 @@ internal class AuthRepositoryImpl @Inject constructor(
                 KEY_PROVIDER_TOKEN to token,
                 KEY_EMAIL to email
             )
-        ).also { preferenceStorage.saveUserToken(it) }.asItem()
+        ).asItem().also { preferenceStorage.saveUserToken(it) }
 
         emit(authToken)
     }

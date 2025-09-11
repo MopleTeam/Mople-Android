@@ -21,7 +21,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.MapType
+import com.moim.core.common.model.MapType
 import com.moim.feature.mapdetail.ui.MapContainer
 import com.moim.feature.mapdetail.ui.MapDetailMapAppDialog
 import com.moim.feature.mapdetail.ui.MapDetailPlaceInfoDialog

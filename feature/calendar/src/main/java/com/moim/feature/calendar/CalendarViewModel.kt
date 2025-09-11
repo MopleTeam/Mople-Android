@@ -9,6 +9,7 @@ import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
+import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.default
@@ -22,7 +23,6 @@ import com.moim.core.common.view.checkState
 import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.holiday.HolidayRepository
 import com.moim.core.domain.usecase.GetPlanItemForCalendarUseCase
-import com.moim.core.model.item.PlanItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine

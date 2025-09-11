@@ -18,8 +18,8 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.model.Meeting
-import com.moim.core.route.DetailRoute
+import com.moim.core.common.model.Meeting
+import com.moim.core.common.route.DetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first

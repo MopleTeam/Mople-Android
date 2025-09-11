@@ -5,8 +5,8 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.moim.core.common.di.IoDispatcher
+import com.moim.core.common.model.Meeting
 import com.moim.core.data.datasource.meeting.MeetingRepository
-import com.moim.core.model.Meeting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.flowOn
 import timber.log.Timber

@@ -1,16 +1,16 @@
 package com.moim.core.data.datasource.meeting
 
+import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.PaginationContainer
+import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
-import com.moim.core.data.mapper.asItem
 import com.moim.core.data.util.catchFlow
-import com.moim.core.datamodel.MeetingResponse
-import com.moim.core.datamodel.UserResponse
-import com.moim.core.model.Meeting
-import com.moim.core.model.PaginationContainer
-import com.moim.core.model.User
-import com.moim.core.network.service.MeetingApi
-import com.moim.core.network.util.converterException
+import com.moim.core.remote.model.MeetingResponse
+import com.moim.core.remote.model.UserResponse
+import com.moim.core.remote.model.asItem
+import com.moim.core.remote.service.MeetingApi
+import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

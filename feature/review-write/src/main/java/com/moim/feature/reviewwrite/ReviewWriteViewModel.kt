@@ -14,8 +14,8 @@ import com.moim.core.common.view.checkState
 import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.domain.usecase.UpdateReviewImagesUseCase
-import com.moim.core.model.Review
-import com.moim.core.model.ReviewImage
+import com.moim.core.common.model.Review
+import com.moim.core.common.model.ReviewImage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onEach

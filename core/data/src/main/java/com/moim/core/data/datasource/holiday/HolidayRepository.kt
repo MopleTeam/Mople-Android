@@ -1,6 +1,6 @@
 package com.moim.core.data.datasource.holiday
 
-import com.moim.core.model.Holiday
+import com.moim.core.common.model.Holiday
 import kotlinx.coroutines.flow.Flow
 import java.time.ZonedDateTime
 

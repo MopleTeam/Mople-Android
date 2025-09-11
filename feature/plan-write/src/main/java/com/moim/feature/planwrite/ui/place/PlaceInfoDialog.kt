@@ -18,7 +18,7 @@ import com.moim.core.designsystem.component.MoimBottomSheetDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.Place
+import com.moim.core.common.model.Place
 import com.moim.feature.planwrite.PlanWriteUiAction
 import com.moim.core.designsystem.R
 import kotlinx.coroutines.launch

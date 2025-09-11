@@ -49,7 +49,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.Meeting
+import com.moim.core.common.model.Meeting
 import com.moim.feature.meeting.ui.MeetingCard
 
 @Composable

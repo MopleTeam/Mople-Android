@@ -17,7 +17,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.Meeting
+import com.moim.core.common.model.Meeting
 import com.moim.feature.meetingsetting.MeetingSettingUiAction
 import com.moim.feature.meetingsetting.OnMeetingSettingUiAction
 

@@ -1,7 +1,7 @@
 package com.moim.core.data.datasource.notification
 
-import com.moim.core.model.Notification
-import com.moim.core.model.PaginationContainer
+import com.moim.core.common.model.Notification
+import com.moim.core.common.model.PaginationContainer
 import kotlinx.coroutines.flow.Flow
 
 interface NotificationRepository {

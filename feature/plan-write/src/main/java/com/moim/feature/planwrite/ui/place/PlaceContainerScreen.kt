@@ -26,7 +26,7 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.Place
+import com.moim.core.common.model.Place
 import com.moim.feature.planwrite.OnPlanWriteUiAction
 import com.moim.feature.planwrite.PlanWriteUiAction
 

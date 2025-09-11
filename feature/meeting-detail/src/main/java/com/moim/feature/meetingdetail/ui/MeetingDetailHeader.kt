@@ -30,7 +30,7 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.model.Meeting
+import com.moim.core.common.model.Meeting
 import com.moim.feature.meetingdetail.MeetingDetailUiAction
 
 @Composable

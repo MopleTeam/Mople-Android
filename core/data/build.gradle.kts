@@ -11,10 +11,8 @@ android {
 
 dependencies {
     implementation(projects.core.common)
-    implementation(projects.core.network)
-    implementation(projects.core.datastore)
-    implementation(projects.core.dataModel)
-    implementation(projects.core.model)
+    implementation(projects.core.dataLocal)
+    implementation(projects.core.dataRemote)
 
     // Kotlin
     implementation(libs.kotlin.stdlib)

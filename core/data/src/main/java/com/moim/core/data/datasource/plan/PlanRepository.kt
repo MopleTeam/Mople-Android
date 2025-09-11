@@ -1,11 +1,11 @@
 package com.moim.core.data.datasource.plan
 
-import com.moim.core.model.MeetingPlanContainer
-import com.moim.core.model.PaginationContainer
-import com.moim.core.model.Place
-import com.moim.core.model.Plan
-import com.moim.core.model.PlanReviewContainer
-import com.moim.core.model.User
+import com.moim.core.common.model.MeetingPlanContainer
+import com.moim.core.common.model.PaginationContainer
+import com.moim.core.common.model.Place
+import com.moim.core.common.model.Plan
+import com.moim.core.common.model.PlanReviewContainer
+import com.moim.core.common.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface PlanRepository {

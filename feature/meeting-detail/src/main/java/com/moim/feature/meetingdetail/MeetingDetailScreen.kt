@@ -43,9 +43,9 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.model.Meeting
-import com.moim.core.model.item.PlanItem
-import com.moim.core.model.item.asPlanItem
+import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.item.PlanItem
+import com.moim.core.common.model.item.asPlanItem
 import com.moim.feature.meetingdetail.ui.MeetingDetailHeader
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanContent
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanEmpty

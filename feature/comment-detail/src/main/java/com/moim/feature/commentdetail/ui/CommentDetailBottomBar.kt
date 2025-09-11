@@ -31,8 +31,8 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimTextFieldColors
-import com.moim.core.model.Comment
-import com.moim.core.model.User
+import com.moim.core.common.model.Comment
+import com.moim.core.common.model.User
 import com.moim.feature.commentdetail.CommentDetailAction
 
 @Composable

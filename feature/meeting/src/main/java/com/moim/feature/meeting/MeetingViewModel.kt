@@ -16,7 +16,7 @@ import com.moim.core.common.view.UiAction
 import com.moim.core.common.view.UiEvent
 import com.moim.core.common.view.checkedActionedAtIsBeforeLoadedAt
 import com.moim.core.domain.usecase.GetMeetingsUseCase
-import com.moim.core.model.Meeting
+import com.moim.core.common.model.Meeting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map

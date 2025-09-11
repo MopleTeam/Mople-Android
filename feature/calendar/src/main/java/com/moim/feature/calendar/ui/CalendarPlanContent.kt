@@ -37,7 +37,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_F6F8FA
-import com.moim.core.model.item.PlanItem
+import com.moim.core.common.model.item.PlanItem
 import com.moim.feature.calendar.CalendarUiAction
 import com.moim.feature.calendar.OnCalendarUiAction
 import java.time.ZonedDateTime

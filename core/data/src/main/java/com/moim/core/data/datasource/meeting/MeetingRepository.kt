@@ -1,8 +1,8 @@
 package com.moim.core.data.datasource.meeting
 
-import com.moim.core.model.Meeting
-import com.moim.core.model.PaginationContainer
-import com.moim.core.model.User
+import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.PaginationContainer
+import com.moim.core.common.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface MeetingRepository {

@@ -32,7 +32,7 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.model.Meeting
+import com.moim.core.common.model.Meeting
 import com.moim.feature.meetingsetting.ui.MeetingSettingParticipantsInfo
 import com.moim.feature.meetingsetting.ui.MeetingSettingProfile
 import com.moim.feature.meetingsetting.ui.MeetingSettingTopAppbar

@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.route.IntroRoute
+import com.moim.core.common.route.IntroRoute
 import com.moim.feature.intro.screen.signin.navigateToSignIn
 import com.moim.feature.intro.screen.signin.signInNavigation
 import com.moim.feature.intro.screen.signup.navigateToSignUp

@@ -47,10 +47,10 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.model.Comment
-import com.moim.core.model.Writer
-import com.moim.core.model.item.CommentTextUiModel
-import com.moim.core.model.item.CommentUiModel
+import com.moim.core.common.model.Comment
+import com.moim.core.common.model.Writer
+import com.moim.core.common.model.item.CommentTextUiModel
+import com.moim.core.common.model.item.CommentUiModel
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
 import java.time.ZonedDateTime

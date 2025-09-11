@@ -28,7 +28,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.route.IntroRoute
+import com.moim.core.common.route.IntroRoute
 
 @Composable
 fun SplashRoute(

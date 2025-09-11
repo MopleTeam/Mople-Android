@@ -1,6 +1,6 @@
 package com.moim.core.data.datasource.policy
 
-import com.moim.core.model.ForceUpdateInfo
+import com.moim.core.common.model.ForceUpdateInfo
 import kotlinx.coroutines.flow.Flow
 
 interface PolicyRepository {

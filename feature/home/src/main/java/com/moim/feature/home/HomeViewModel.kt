@@ -18,9 +18,9 @@ import com.moim.core.common.view.UiState
 import com.moim.core.common.view.checkState
 import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.model.Meeting
-import com.moim.core.model.Plan
-import com.moim.core.model.item.asPlan
+import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.Plan
+import com.moim.core.common.model.item.asPlan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch

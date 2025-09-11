@@ -5,8 +5,8 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.moim.core.common.di.IoDispatcher
+import com.moim.core.common.model.Comment
 import com.moim.core.data.datasource.comment.CommentRepository
-import com.moim.core.model.Comment
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.flowOn
 import timber.log.Timber

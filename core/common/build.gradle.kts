@@ -10,10 +10,10 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.model)
     implementation(projects.core.designsystem)
 
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.material3)

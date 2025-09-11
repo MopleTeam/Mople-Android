@@ -8,9 +8,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.moim.core.model.Meeting
-import com.moim.core.model.item.PlanItem
-import com.moim.core.route.DetailRoute
+import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.item.PlanItem
+import com.moim.core.common.route.DetailRoute
 
 fun NavGraphBuilder.meetingDetailScreen(
     padding: PaddingValues,

@@ -38,7 +38,7 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_FEE500
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.route.IntroRoute
+import com.moim.core.common.route.IntroRoute
 
 internal typealias OnSignInUiAction = (SignInUiAction) -> Unit
 
