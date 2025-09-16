@@ -37,7 +37,7 @@ data class WriterResponse(
     @SerialName("nickname")
     val nickname: String,
     @SerialName("image")
-    val image: String,
+    val image: String? = null,
 )
 
 fun CommentResponse.asItem(): Comment {
@@ -59,6 +59,6 @@ fun WriterResponse.asItem(): Writer {
     return Writer(
         userId = userId,
         nickname = nickname,
-        imageUrl = image
+        imageUrl = image ?: ""
     )
 }
