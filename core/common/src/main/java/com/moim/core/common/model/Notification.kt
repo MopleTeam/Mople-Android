@@ -11,6 +11,7 @@ enum class NotificationType {
     REVIEW_REMIND,
     REVIEW_UPDATE,
     COMMENT_MENTION,
+    COMMENT_REPLY,
     NONE
 }
 

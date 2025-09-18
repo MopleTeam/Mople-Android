@@ -67,6 +67,7 @@ class AlarmViewModel @Inject constructor(
                 setUiEvent(AlarmUiEvent.NavigateToMeetingDetail(requireNotNull(notification.meetId)))
             }
 
+            NotificationType.COMMENT_REPLY,
             NotificationType.COMMENT_MENTION,
             NotificationType.PLAN_CREATE,
             NotificationType.PLAN_UPDATE,
