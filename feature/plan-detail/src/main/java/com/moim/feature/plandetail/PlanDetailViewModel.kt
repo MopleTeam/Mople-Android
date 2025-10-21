@@ -657,7 +657,7 @@ class PlanDetailViewModel @Inject constructor(
             setUiEvent(
                 PlanDetailUiEvent.NavigateToCommentDetail(
                     meetId = planItem.meetingId,
-                    postId = postId,
+                    postId = planItem.commentCheckId,
                     comment = comment
                 )
             )
