@@ -5,6 +5,7 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.insert
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
@@ -19,11 +20,13 @@ import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.User
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.isChild
 import com.moim.core.common.model.item.CommentUiModel
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.route.DetailRoute
 import com.moim.core.common.util.cancelIfActive
 import com.moim.core.common.util.createCommentUiModel
 import com.moim.core.common.util.createMentionTagMessage
@@ -77,13 +80,11 @@ class PlanDetailViewModel @Inject constructor(
     PlanItemViewModelDelegate by planItemViewModelDelegate,
     CommentViewModelDelegate by commentViewModelDelegate {
 
-    private val postId
-        get() = savedStateHandle.get<String>(KEY_POST_ID) ?: ""
+    private val viewIdType
+        get() = savedStateHandle
+            .toRoute<DetailRoute.PlanDetail>(DetailRoute.PlanDetail.typeMap)
+            .viewIdType
 
-    private val isPlan
-        get() = savedStateHandle.get<Boolean>(KEY_IS_PLAN) ?: false
-
-    private val planId = savedStateHandle.getStateFlow<String?>(KEY_PLAN_ID, null)
     private val meetId = savedStateHandle.getStateFlow<String?>(KEY_MEET_ID, null)
 
     private var searchJob: Job? = null
@@ -91,11 +92,10 @@ class PlanDetailViewModel @Inject constructor(
     private val planItemReceiver = planItemAction.planItemStateIn(viewModelScope)
     private val commentActionReceiver = commentAction.commentStateIn(viewModelScope)
 
-    private var _comments = planId
-        .filterNotNull()
-        .flatMapLatest { planId -> getCommentsUseCase(GetCommentsUseCase.Params(planId)) }
-        .mapLatest { it.map { comment -> comment.createCommentUiModel() } }
-        .cachedIn(viewModelScope)
+    private var _comments =
+        getCommentsUseCase(GetCommentsUseCase.Params(viewIdType.id))
+            .mapLatest { it.map { comment -> comment.createCommentUiModel() } }
+            .cachedIn(viewModelScope)
 
     private val comments = commentActionReceiver.flatMapLatest { receiver ->
         when (receiver) {
@@ -179,7 +179,7 @@ class PlanDetailViewModel @Inject constructor(
     private val planDetailUiState =
         combine(
             userRepository.getUser(),
-            getPlanItemUseCase(GetPlanItemUseCase.Params(postId, isPlan)),
+            getPlanItemUseCase(GetPlanItemUseCase.Params(viewIdType)),
             ::Pair
         ).mapLatest { (user, post) ->
             val isShowApplyButton = post.planAt.isAfter(ZonedDateTime.now()) && user.userId != post.userId
@@ -295,9 +295,9 @@ class PlanDetailViewModel @Inject constructor(
         viewModelScope.launch {
             uiState.checkState<PlanDetailUiState.Success> {
                 if (isApply) {
-                    planRepository.joinPlan(postId)
+                    planRepository.joinPlan(viewIdType.id)
                 } else {
-                    planRepository.leavePlan(postId)
+                    planRepository.leavePlan(viewIdType.id)
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                     when (result) {
                         is Result.Loading -> return@collect
@@ -621,7 +621,13 @@ class PlanDetailViewModel @Inject constructor(
 
     private fun navigateToParticipants() {
         uiState.checkState<PlanDetailUiState.Success> {
-            setUiEvent(PlanDetailUiEvent.NavigateToParticipants(planItem.postId, planItem.isPlanAtBefore))
+            val viewIdType = if (planItem.isPlanAtBefore) {
+                ViewIdType.PlanId(planItem.postId)
+            } else {
+                ViewIdType.ReviewId(planItem.postId)
+            }
+
+            setUiEvent(PlanDetailUiEvent.NavigateToParticipants(viewIdType))
         }
     }
 
@@ -665,10 +671,8 @@ class PlanDetailViewModel @Inject constructor(
     }
 
     companion object {
-        private const val KEY_POST_ID = "postId"
         private const val KEY_PLAN_ID = "planId"
         private const val KEY_MEET_ID = "meetId"
-        private const val KEY_IS_PLAN = "isPlan"
     }
 }
 
@@ -729,8 +733,7 @@ sealed interface PlanDetailUiEvent : UiEvent {
     data object NavigateToBack : PlanDetailUiEvent
 
     data class NavigateToParticipants(
-        val postId: String,
-        val isPlan: Boolean
+        val viewIdType: ViewIdType,
     ) : PlanDetailUiEvent
 
     data class NavigateToPlanWrite(

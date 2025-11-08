@@ -30,6 +30,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Comment
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.util.toValidUrl
 import com.moim.core.common.view.ObserveAsEvents
@@ -76,11 +77,7 @@ fun PlanDetailRoute(
         latitude: Double,
         longitude: Double
     ) -> Unit,
-    navigateToParticipants: (
-        isMeeting: Boolean,
-        isPlan: Boolean,
-        id: String
-    ) -> Unit,
+    navigateToParticipants: (ViewIdType) -> Unit,
     navigateToPlanWrite: (
         planItem: PlanItem
     ) -> Unit,
@@ -108,7 +105,7 @@ fun PlanDetailRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is PlanDetailUiEvent.NavigateToBack -> navigateToBack()
-            is PlanDetailUiEvent.NavigateToParticipants -> navigateToParticipants(false, event.isPlan, event.postId)
+            is PlanDetailUiEvent.NavigateToParticipants -> navigateToParticipants(event.viewIdType)
             is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.planItem)
             is PlanDetailUiEvent.NavigateToReviewWrite -> navigateToReviewWrite(event.postId, true)
             is PlanDetailUiEvent.NavigateToCommentDetail -> navigateToCommentDetail(event.meetId, event.postId, event.comment)

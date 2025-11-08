@@ -5,6 +5,8 @@ import com.moim.core.common.model.Comment
 import com.moim.core.common.model.CommentType
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.MeetingType
+import com.moim.core.common.model.ViewIdNavType
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.PlanItemType
 import kotlinx.serialization.Serializable
@@ -45,17 +47,23 @@ sealed interface MainRoute : Route {
 sealed interface DetailRoute : Route {
 
     @Serializable
-    data class MeetingDetail(val meetingId: String) : DetailRoute
+    data class MeetingDetail(
+        val meetingId: String
+    ) : DetailRoute
 
     @Serializable
-    data class MeetingWrite(val meeting: Meeting? = null) : DetailRoute {
+    data class MeetingWrite(
+        val meeting: Meeting? = null
+    ) : DetailRoute {
         companion object {
             val typeMap = mapOf(typeOf<Meeting?>() to MeetingType)
         }
     }
 
     @Serializable
-    data class MeetingSetting(val meeting: Meeting) : DetailRoute {
+    data class MeetingSetting(
+        val meeting: Meeting
+    ) : DetailRoute {
         companion object {
             val typeMap = mapOf(typeOf<Meeting>() to MeetingType)
         }
@@ -71,17 +79,20 @@ sealed interface DetailRoute : Route {
 
     @Serializable
     data class PlanDetail(
-        val postId: String,
-        val isPlan: Boolean
-    ) : DetailRoute
+        val viewIdType: ViewIdType,
+    ) : DetailRoute {
+        companion object {
+            val typeMap = mapOf(typeOf<ViewIdType>() to ViewIdNavType)
+        }
+    }
 
     @Serializable
     data class CommentDetail(
         val meetId: String,
         val postId: String,
-        val comment : Comment? = null,
+        val comment: Comment? = null,
     ) : DetailRoute {
-        companion object{
+        companion object {
             val typeMap = mapOf(typeOf<Comment?>() to CommentType)
         }
     }
@@ -101,10 +112,12 @@ sealed interface DetailRoute : Route {
 
     @Serializable
     data class ParticipantList(
-        val isMeeting: Boolean,
-        val isPlan: Boolean,
-        val id: String,
-    ) : DetailRoute
+        val viewIdType: ViewIdType,
+    ) : DetailRoute {
+        companion object {
+            val typeMap = mapOf(typeOf<ViewIdType>() to ViewIdNavType)
+        }
+    }
 
     @Serializable
     data class ImageViewer(

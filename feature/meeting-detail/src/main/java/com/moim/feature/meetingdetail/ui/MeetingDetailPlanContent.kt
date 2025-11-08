@@ -33,6 +33,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.moim.core.common.consts.WEATHER_ICON_URL
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
@@ -129,7 +130,7 @@ fun MeetingDetailPlanItem(
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(plan.postId, true)) }
+        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(ViewIdType.PlanId(plan.postId))) }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -220,7 +221,7 @@ fun MeetingDetailReviewItem(
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(review.postId, false)) }
+        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(ViewIdType.ReviewId(review.postId))) }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

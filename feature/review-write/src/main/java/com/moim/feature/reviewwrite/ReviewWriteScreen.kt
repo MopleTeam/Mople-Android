@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -41,7 +42,7 @@ fun ReviewWriteRoute(
     viewModel: ReviewWriteViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToBack: () -> Unit,
-    navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
+    navigateToParticipants: (ViewIdType) -> Unit,
 ) {
     val context = LocalContext.current
     val reviewWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -55,7 +56,7 @@ fun ReviewWriteRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is ReviewWriteUiEvent.NavigateToBack -> navigateToBack()
-            is ReviewWriteUiEvent.NavigateToParticipants -> navigateToParticipants(false, false, event.postId)
+            is ReviewWriteUiEvent.NavigateToParticipants -> navigateToParticipants(event.viewIdType)
             is ReviewWriteUiEvent.NavigateToPhotoPicker -> multiPhotoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             is ReviewWriteUiEvent.ShowToastMessage -> showToast(context, event.toastMessage)
         }

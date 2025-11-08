@@ -9,6 +9,7 @@ import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
@@ -154,7 +155,7 @@ class CalendarViewModel @Inject constructor(
             is CalendarUiAction.OnClickRefresh -> meetingPlanResult.restart()
             is CalendarUiAction.OnClickDateDay -> setSelectDay(uiAction.date)
             is CalendarUiAction.OnClickExpandable -> setExpandable(uiAction.date)
-            is CalendarUiAction.OnClickMeetingPlan -> setUiEvent(CalendarUiEvent.NavigateToPlanDetail(uiAction.postId, uiAction.isPlan))
+            is CalendarUiAction.OnClickMeetingPlan -> setUiEvent(CalendarUiEvent.NavigateToPlanDetail(uiAction.viewIdType))
             is CalendarUiAction.OnChangeDate -> getSelectDatePlan(uiAction.date)
         }
     }
@@ -238,11 +239,11 @@ sealed interface CalendarUiAction : UiAction {
     data object OnClickRefresh : CalendarUiAction
     data class OnClickDateDay(val date: ZonedDateTime) : CalendarUiAction
     data class OnClickExpandable(val date: ZonedDateTime) : CalendarUiAction
-    data class OnClickMeetingPlan(val postId: String, val isPlan: Boolean) : CalendarUiAction
+    data class OnClickMeetingPlan(val viewIdType: ViewIdType) : CalendarUiAction
     data class OnChangeDate(val date: ZonedDateTime) : CalendarUiAction
 }
 
 sealed interface CalendarUiEvent : UiEvent {
-    data class NavigateToPlanDetail(val postId: String, val isPlan: Boolean) : CalendarUiEvent
+    data class NavigateToPlanDetail(val viewIdType: ViewIdType) : CalendarUiEvent
     data class ShowToastMessage(val message: ToastMessage) : CalendarUiEvent
 }

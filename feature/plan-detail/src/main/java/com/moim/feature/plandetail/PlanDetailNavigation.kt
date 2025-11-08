@@ -9,6 +9,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.moim.core.common.model.Comment
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.route.DetailRoute
 
@@ -21,11 +22,7 @@ fun NavGraphBuilder.planDetailScreen(
         latitude: Double,
         longitude: Double
     ) -> Unit,
-    navigateToParticipants: (
-        isMeeting: Boolean,
-        isPlan: Boolean,
-        id: String
-    ) -> Unit,
+    navigateToParticipants: (ViewIdType) -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToCommentDetail: (
         meetId: String,
@@ -44,6 +41,7 @@ fun NavGraphBuilder.planDetailScreen(
     ) -> Unit
 ) {
     composable<DetailRoute.PlanDetail>(
+        typeMap = DetailRoute.PlanDetail.typeMap,
         enterTransition = { fadeIn(animationSpec = tween(500)) },
         exitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
@@ -61,9 +59,8 @@ fun NavGraphBuilder.planDetailScreen(
 }
 
 fun NavController.navigateToPlanDetail(
-    postId: String,
-    isPlan: Boolean,
+    viewIdType: ViewIdType,
     navOptions: NavOptions? = null
 ) {
-    this.navigate(DetailRoute.PlanDetail(postId, isPlan), navOptions)
+    this.navigate(DetailRoute.PlanDetail(viewIdType), navOptions)
 }

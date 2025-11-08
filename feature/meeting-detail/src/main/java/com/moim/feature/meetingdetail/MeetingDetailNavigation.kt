@@ -9,6 +9,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.route.DetailRoute
 
@@ -16,7 +17,7 @@ fun NavGraphBuilder.meetingDetailScreen(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
-    navigateToPlanDetail: (String, Boolean) -> Unit,
+    navigateToPlanDetail: (ViewIdType) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit,
     navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit,
 ) {

@@ -57,8 +57,7 @@ fun MainScreen(
 ) {
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is MainUiEvent.NavigateToPlanDetail -> navigator.navController.navigateToPlanDetail(event.planId, true)
-            is MainUiEvent.NavigateToReviewDetail -> navigator.navController.navigateToPlanDetail(event.reviewId, false)
+            is MainUiEvent.NavigateToPlanDetail -> navigator.navController.navigateToPlanDetail(event.viewIdType)
             is MainUiEvent.NavigateToMeetingDetail -> navigator.navController.navigateToMeetingDetail(event.meetingId)
         }
     }

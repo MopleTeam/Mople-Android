@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.model.Review
 import com.moim.core.common.model.ReviewImage
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.view.BaseViewModel
@@ -76,7 +77,7 @@ class ReviewWriteViewModel @Inject constructor(
             is ReviewWriteUiAction.OnClickImageUpload -> setUiEvent(ReviewWriteUiEvent.NavigateToPhotoPicker)
             is ReviewWriteUiAction.OnClickAddImages -> addUploadImages(uiAction.imageUrls)
             is ReviewWriteUiAction.OnClickRemoveImage -> removeImages(uiAction.reviewImage)
-            is ReviewWriteUiAction.OnClickParticipants -> setUiEvent(ReviewWriteUiEvent.NavigateToParticipants(postId))
+            is ReviewWriteUiAction.OnClickParticipants -> setUiEvent(ReviewWriteUiEvent.NavigateToParticipants(ViewIdType.ReviewId(postId)))
             is ReviewWriteUiAction.OnClickSubmit -> submitReviewImages()
         }
     }
@@ -177,6 +178,6 @@ sealed interface ReviewWriteUiAction : UiAction {
 sealed interface ReviewWriteUiEvent : UiEvent {
     data object NavigateToBack : ReviewWriteUiEvent
     data object NavigateToPhotoPicker : ReviewWriteUiEvent
-    data class NavigateToParticipants(val postId: String) : ReviewWriteUiEvent
+    data class NavigateToParticipants(val viewIdType: ViewIdType) : ReviewWriteUiEvent
     data class ShowToastMessage(val toastMessage: ToastMessage) : ReviewWriteUiEvent
 }

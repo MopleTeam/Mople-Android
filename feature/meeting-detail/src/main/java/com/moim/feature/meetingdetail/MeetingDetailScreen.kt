@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.asPlanItem
 import com.moim.core.common.util.externalShareForUrl
@@ -56,7 +57,7 @@ fun MeetingDetailRoute(
     viewModel: MeetingDetailViewModel = hiltViewModel(),
     navigateToBack: () -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
-    navigateToPlanDetail: (String, Boolean) -> Unit,
+    navigateToPlanDetail: (ViewIdType) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit,
     navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit,
 ) {
@@ -69,7 +70,7 @@ fun MeetingDetailRoute(
         when (event) {
             is MeetingDetailUiEvent.NavigateToBack -> navigateToBack()
             is MeetingDetailUiEvent.NavigateToMeetingSetting -> navigateToMeetingSetting(event.meeting)
-            is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
+            is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.viewIdType)
             is MeetingDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan.asPlanItem())
             is MeetingDetailUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.meetingName, listOf(event.imageUrl), 0, R.drawable.ic_empty_meeting)
             is MeetingDetailUiEvent.NavigateToExternalShareUrl -> context.externalShareForUrl(event.url)

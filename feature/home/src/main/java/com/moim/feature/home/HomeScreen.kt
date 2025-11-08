@@ -43,6 +43,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Plan
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -68,7 +69,7 @@ fun HomeRoute(
     navigateToMeetingWrite: () -> Unit = {},
     navigateToPlanWrite: () -> Unit = {},
     navigateToCalendar: () -> Unit = {},
-    navigateToPlanDetail: (String, Boolean) -> Unit,
+    navigateToPlanDetail: (ViewIdType) -> Unit,
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -92,7 +93,7 @@ fun HomeRoute(
             is HomeUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite()
             is HomeUiEvent.NavigateToPlanWrite -> navigateToPlanWrite()
             is HomeUiEvent.NavigateToCalendar -> navigateToCalendar()
-            is HomeUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.planId, event.isPlan)
+            is HomeUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.viewIdType)
             is HomeUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }

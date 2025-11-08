@@ -2,12 +2,15 @@ package com.moim.feature.participantlist
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.User
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.route.DetailRoute
 import com.moim.core.common.view.BaseViewModel
 import com.moim.core.common.view.ToastMessage
 import com.moim.core.common.view.UiAction
@@ -33,20 +36,16 @@ class ParticipantListViewModel @Inject constructor(
     getParticipantsUseCase: GetParticipantsUseCase,
 ) : BaseViewModel() {
 
-    private val isMeeting
-        get() = savedStateHandle.get<Boolean>(KEY_IS_MEETING) ?: false
-
-    private val isPlan
-        get() = savedStateHandle.get<Boolean>(KEY_IS_PLAN) ?: false
-
-    private val id
-        get() = savedStateHandle.get<String>(KEY_ID) ?: ""
+    private val viewIdType
+        get() = savedStateHandle
+            .toRoute<DetailRoute.ParticipantList>(DetailRoute.PlanDetail.typeMap)
+            .viewIdType
 
     private val participants = getParticipantsUseCase(
         params = GetParticipantsUseCase.Params(
-            id = id,
-            isMeeting = isMeeting,
-            isPlan = isPlan
+            id = viewIdType.id,
+            isMeeting = viewIdType is ViewIdType.MeetId,
+            isPlan = viewIdType is ViewIdType.PlanId,
         )
     ).cachedIn(viewModelScope)
 
@@ -54,7 +53,7 @@ class ParticipantListViewModel @Inject constructor(
         viewModelScope.launch {
             setUiState(
                 ParticipantListUiState(
-                    isMeeting = isMeeting,
+                    isMeeting = viewIdType is ViewIdType.MeetId,
                     participant = participants,
                     totalCount = getParticipantTotalCount()
                 )
@@ -73,7 +72,7 @@ class ParticipantListViewModel @Inject constructor(
     private fun getInviteLink() {
         viewModelScope.launch {
             meetingRepository
-                .getMeetingInviteCode(id)
+                .getMeetingInviteCode(viewIdType.id)
                 .asResult()
                 .onEach { setLoading(it is Result.Loading) }
                 .collect { result ->
@@ -91,34 +90,30 @@ class ParticipantListViewModel @Inject constructor(
 
     private suspend fun getParticipantTotalCount(): Int {
         val totalCount = runCatching {
-            when {
-                isMeeting -> meetingRepository.getMeetingParticipants(
-                    meetingId = id,
+            when(viewIdType) {
+                 is ViewIdType.MeetId -> meetingRepository.getMeetingParticipants(
+                    meetingId = viewIdType.id,
                     cursor = "",
                     size = 1
                 )
 
-                isPlan -> planRepository.getPlanParticipants(
-                    planId = id,
+                is ViewIdType.PlanId -> planRepository.getPlanParticipants(
+                    planId = viewIdType.id,
                     cursor = "",
                     size = 1
                 )
 
-                else -> reviewRepository.getReviewParticipants(
-                    reviewId = id,
+                is ViewIdType.ReviewId -> reviewRepository.getReviewParticipants(
+                    reviewId = viewIdType.id,
                     cursor = "",
                     size = 1
                 )
+
+                else -> throw IllegalStateException("this ViewTypeId is not allowed")
             }.totalCount
         }.getOrElse { 0 }
 
         return totalCount
-    }
-
-    companion object {
-        private const val KEY_IS_MEETING = "isMeeting"
-        private const val KEY_IS_PLAN = "isPlan"
-        private const val KEY_ID = "id"
     }
 }
 

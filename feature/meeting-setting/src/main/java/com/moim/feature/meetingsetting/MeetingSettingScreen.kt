@@ -23,6 +23,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
@@ -44,7 +45,7 @@ fun MeetingSettingRoute(
     viewModel: MeetingSettingViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToBack: (Boolean) -> Unit,
-    navigateToParticipants: (isMeeting: Boolean, isPlan: Boolean, id: String) -> Unit,
+    navigateToParticipants: (ViewIdType) -> Unit,
     navigateToMeetingWrite: (Meeting) -> Unit,
 ) {
     val context = LocalContext.current
@@ -56,7 +57,7 @@ fun MeetingSettingRoute(
             is MeetingSettingUiEvent.NavigateToBack -> navigateToBack(false)
             is MeetingSettingUiEvent.NavigateToBackForDelete -> navigateToBack(true)
             is MeetingSettingUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite(event.meeting)
-            is MeetingSettingUiEvent.NavigateToMeetingParticipants -> navigateToParticipants(true, false, event.meetingId)
+            is MeetingSettingUiEvent.NavigateToMeetingParticipants -> navigateToParticipants(event.viewIdType)
             is MeetingSettingUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }

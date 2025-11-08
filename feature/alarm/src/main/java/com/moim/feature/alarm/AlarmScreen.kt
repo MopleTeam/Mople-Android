@@ -29,6 +29,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Notification
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.util.decimalFormatString
 import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.common.view.PAGING_ERROR
@@ -54,7 +55,7 @@ fun AlarmRoute(
     padding: PaddingValues,
     viewModel: AlarmViewModel = hiltViewModel(),
     navigateToMeetingDetail: (String) -> Unit,
-    navigateToPlanDetail: (String, Boolean) -> Unit,
+    navigateToPlanDetail: (ViewIdType) -> Unit,
     navigateToBack: () -> Unit,
 ) {
     val notifications = viewModel.notifications.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
@@ -65,7 +66,7 @@ fun AlarmRoute(
         when (event) {
             is AlarmUiEvent.NavigateToBack -> navigateToBack()
             is AlarmUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
-            is AlarmUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
+            is AlarmUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.viewIdType)
             is AlarmUiEvent.RefreshPagingData -> notifications.refresh()
         }
     }

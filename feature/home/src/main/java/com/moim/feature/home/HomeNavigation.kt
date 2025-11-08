@@ -5,6 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.route.MainRoute
 
 fun NavGraphBuilder.homeScreen(
@@ -13,7 +14,7 @@ fun NavGraphBuilder.homeScreen(
     navigateToMeetingWrite: () -> Unit = {},
     navigateToPlanWrite: () -> Unit = {},
     navigateToCalendar: () -> Unit = {},
-    navigateToPlanDetail: (String, Boolean) -> Unit,
+    navigateToPlanDetail: (ViewIdType) -> Unit,
 ) {
     composable<MainRoute.Home> {
         HomeRoute(

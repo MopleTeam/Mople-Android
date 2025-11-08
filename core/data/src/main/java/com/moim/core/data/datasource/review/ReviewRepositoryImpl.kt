@@ -41,6 +41,10 @@ internal class ReviewRepositoryImpl @Inject constructor(
         emit(reviewApi.getReview(reviewId).asItem())
     }
 
+    override fun getReviewForPostId(postId: String) = catchFlow {
+        emit(reviewApi.gerReviewForPostId(postId).asItem())
+    }
+
     override suspend fun getReviewParticipants(
         reviewId: String,
         cursor: String,

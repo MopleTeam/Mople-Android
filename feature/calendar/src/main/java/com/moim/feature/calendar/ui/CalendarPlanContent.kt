@@ -29,6 +29,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
@@ -89,9 +90,20 @@ fun CalendarPlanItem(
     onUiAction: OnCalendarUiAction = {}
 ) {
 
+
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(CalendarUiAction.OnClickMeetingPlan(postId = plan.postId, isPlan = plan.isPlanAtBefore)) }
+        onClick = {
+            onUiAction(
+                CalendarUiAction.OnClickMeetingPlan(
+                    if (plan.isPlanAtBefore) {
+                        ViewIdType.PlanId(plan.postId)
+                    } else {
+                        ViewIdType.ReviewId(plan.postId)
+                    }
+                )
+            )
+        }
     ) {
         Column(
             modifier = Modifier

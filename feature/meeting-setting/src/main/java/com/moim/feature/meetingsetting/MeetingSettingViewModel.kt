@@ -9,6 +9,7 @@ import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.route.DetailRoute
@@ -77,7 +78,7 @@ class MeetingSettingViewModel @Inject constructor(
             is MeetingSettingUiAction.OnClickBack -> setUiEvent(MeetingSettingUiEvent.NavigateToBack)
             is MeetingSettingUiAction.OnClickMeetingEdit -> setUiEvent(MeetingSettingUiEvent.NavigateToMeetingWrite(uiAction.meeting))
             is MeetingSettingUiAction.OnClickMeetingExit -> deleteMeeting()
-            is MeetingSettingUiAction.OnClickMeetingParticipants -> setUiEvent(MeetingSettingUiEvent.NavigateToMeetingParticipants(uiAction.meetingId))
+            is MeetingSettingUiAction.OnClickMeetingParticipants -> setUiEvent(MeetingSettingUiEvent.NavigateToMeetingParticipants(uiAction.viewIdType))
             is MeetingSettingUiAction.OnShowMeetingExitDialog -> showMeetingExitDialog(uiAction.isShow)
             is MeetingSettingUiAction.OnShowMeetingDeleteDialog -> showMeetingDeleteDialog(uiAction.isShow)
         }
@@ -137,7 +138,7 @@ sealed interface MeetingSettingUiState : UiState {
 sealed interface MeetingSettingUiAction : UiAction {
     data object OnClickBack : MeetingSettingUiAction
     data object OnClickMeetingExit : MeetingSettingUiAction
-    data class OnClickMeetingParticipants(val meetingId: String) : MeetingSettingUiAction
+    data class OnClickMeetingParticipants(val viewIdType: ViewIdType) : MeetingSettingUiAction
     data class OnClickMeetingEdit(val meeting: Meeting) : MeetingSettingUiAction
     data class OnShowMeetingExitDialog(val isShow: Boolean) : MeetingSettingUiAction
     data class OnShowMeetingDeleteDialog(val isShow: Boolean) : MeetingSettingUiAction
@@ -147,6 +148,6 @@ sealed interface MeetingSettingUiEvent : UiEvent {
     data object NavigateToBack : MeetingSettingUiEvent
     data object NavigateToBackForDelete : MeetingSettingUiEvent
     data class NavigateToMeetingWrite(val meeting: Meeting) : MeetingSettingUiEvent
-    data class NavigateToMeetingParticipants(val meetingId: String) : MeetingSettingUiEvent
+    data class NavigateToMeetingParticipants(val viewIdType: ViewIdType) : MeetingSettingUiEvent
     data class ShowToastMessage(val message: ToastMessage) : MeetingSettingUiEvent
 }
