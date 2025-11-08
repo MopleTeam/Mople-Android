@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -170,7 +168,7 @@ private fun MoimTopAppbarPreview() {
             actions = {
                 IconButton(onClick = {}) {
                     Icon(
-                        imageVector = Icons.Default.Person,
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
                         contentDescription = ""
                     )
                 }

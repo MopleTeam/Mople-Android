@@ -38,10 +38,9 @@ import com.kizitonwose.calendar.core.WeekDayPosition
 import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
 import com.moim.core.analytics.TrackScreenViewEvent
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.util.default
 import com.moim.core.common.util.parseZonedDateTime
-import com.moim.core.common.view.ObserveAsEvents
-import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -49,6 +48,8 @@ import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.core.ui.view.showToast
 import com.moim.feature.calendar.ui.CalendarDay
 import com.moim.feature.calendar.ui.CalendarDayOfWeekHeader
 import com.moim.feature.calendar.ui.CalendarMonthCard
@@ -65,7 +66,7 @@ internal typealias OnCalendarUiAction = (CalendarUiAction) -> Unit
 fun CalendarRoute(
     viewModel: CalendarViewModel = hiltViewModel(),
     padding: PaddingValues,
-    navigateToPlanDetail: (String, Boolean) -> Unit
+    navigateToPlanDetail: (ViewIdType) -> Unit
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -74,7 +75,7 @@ fun CalendarRoute(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is CalendarUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
+            is CalendarUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.viewIdType)
             is CalendarUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }

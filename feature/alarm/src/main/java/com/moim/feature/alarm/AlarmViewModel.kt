@@ -4,13 +4,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.moim.core.common.model.Notification
 import com.moim.core.common.model.NotificationType
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
 import com.moim.core.data.datasource.notification.NotificationRepository
 import com.moim.core.domain.usecase.GetNotificationsUseCase
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterIsInstance
@@ -74,9 +75,21 @@ class AlarmViewModel @Inject constructor(
             NotificationType.PLAN_REMIND,
             NotificationType.REVIEW_REMIND,
             NotificationType.REVIEW_UPDATE -> {
-                val postId = notification.planId ?: notification.reviewId ?: return
-                val isPlan = notification.planId != null && (notification.planDate?.toLocalDate()?.isAfter(LocalDate.now()) == true)
-                setUiEvent(AlarmUiEvent.NavigateToPlanDetail(postId, isPlan))
+                val viewIdType = if (notification.planId != null) {
+                    ViewIdType.PlanId(requireNotNull(notification.planId))
+                } else if (notification.reviewId != null) {
+                    ViewIdType.ReviewId(requireNotNull(notification.reviewId))
+                } else {
+                    return
+                }
+
+                val isPlan = (notification.planDate?.toLocalDate()?.isAfter(LocalDate.now()) == true)
+
+                if (!isPlan && viewIdType is ViewIdType.PlanId) {
+                    setUiEvent(AlarmUiEvent.NavigateToPlanDetail(ViewIdType.PostId(viewIdType.id)))
+                } else {
+                    setUiEvent(AlarmUiEvent.NavigateToPlanDetail(viewIdType))
+                }
             }
 
             NotificationType.NONE -> return
@@ -94,6 +107,6 @@ sealed interface AlarmUiAction : UiAction {
 sealed interface AlarmUiEvent : UiEvent {
     data object NavigateToBack : AlarmUiEvent
     data class NavigateToMeetingDetail(val meetingId: String) : AlarmUiEvent
-    data class NavigateToPlanDetail(val postId: String, val isPlan: Boolean) : AlarmUiEvent
+    data class NavigateToPlanDetail(val viewIdType: ViewIdType) : AlarmUiEvent
     data object RefreshPagingData : AlarmUiEvent
 }

@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
-import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.feature.alarm.alarmScreen
 import com.moim.feature.alarm.navigateToAlarm
 import com.moim.feature.alarmsetting.alarmSettingScreen
@@ -57,8 +57,7 @@ fun MainScreen(
 ) {
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is MainUiEvent.NavigateToPlanDetail -> navigator.navController.navigateToPlanDetail(event.planId, true)
-            is MainUiEvent.NavigateToReviewDetail -> navigator.navController.navigateToPlanDetail(event.reviewId, false)
+            is MainUiEvent.NavigateToPlanDetail -> navigator.navController.navigateToPlanDetail(event.viewIdType)
             is MainUiEvent.NavigateToMeetingDetail -> navigator.navController.navigateToMeetingDetail(event.meetingId)
         }
     }

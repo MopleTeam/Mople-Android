@@ -1,4 +1,4 @@
-package com.moim.core.common.util
+package com.moim.core.ui.util
 
 import android.annotation.SuppressLint
 import android.content.Context

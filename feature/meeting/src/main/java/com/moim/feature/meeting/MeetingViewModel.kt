@@ -5,18 +5,16 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.insertSeparators
 import androidx.paging.map
-import com.moim.core.common.delegate.MeetingAction
-import com.moim.core.common.delegate.MeetingViewModelDelegate
-import com.moim.core.common.delegate.PlanAction
-import com.moim.core.common.delegate.PlanItemViewModelDelegate
-import com.moim.core.common.delegate.meetingStateIn
-import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.model.Meeting
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.checkedActionedAtIsBeforeLoadedAt
 import com.moim.core.domain.usecase.GetMeetingsUseCase
+import com.moim.core.ui.eventbus.EventBus
+import com.moim.core.ui.eventbus.MeetingAction
+import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.eventbus.actionStateIn
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.checkedActionedAtIsBeforeLoadedAt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -25,15 +23,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MeetingViewModel @Inject constructor(
+    meetingEventBus: EventBus<MeetingAction>,
+    planEventBus: EventBus<PlanAction>,
     private val getMeetingsUseCase: GetMeetingsUseCase,
-    private val meetingViewModelDelegate: MeetingViewModelDelegate,
-    private val planItemViewModelDelegate: PlanItemViewModelDelegate
-) : BaseViewModel(),
-    MeetingViewModelDelegate by meetingViewModelDelegate,
-    PlanItemViewModelDelegate by planItemViewModelDelegate {
+) : BaseViewModel() {
 
-    private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
-    private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
+    private val meetingActionReceiver = meetingEventBus
+        .action
+        .actionStateIn(viewModelScope, MeetingAction.None)
+    private val planActionReceiver = planEventBus
+        .action
+        .actionStateIn(viewModelScope, PlanAction.None)
 
     private var _meetings = getMeetingsUseCase().cachedIn(viewModelScope)
     val meetings = merge(

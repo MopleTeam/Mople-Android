@@ -2,26 +2,27 @@ package com.moim.feature.reviewwrite
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.moim.core.common.delegate.PlanItemViewModelDelegate
 import com.moim.core.common.model.Review
 import com.moim.core.common.model.ReviewImage
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.ToastMessage
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
-import com.moim.core.common.view.checkState
-import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.domain.usecase.UpdateReviewImagesUseCase
+import com.moim.core.ui.eventbus.EventBus
+import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.ToastMessage
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
+import com.moim.core.ui.view.checkState
+import com.moim.core.ui.view.restartableStateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,8 +30,8 @@ class ReviewWriteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     reviewRepository: ReviewRepository,
     private val updateReviewImagesUseCase: UpdateReviewImagesUseCase,
-    private val planItemViewModelDelegate: PlanItemViewModelDelegate,
-) : BaseViewModel(), PlanItemViewModelDelegate by planItemViewModelDelegate {
+    private val planEventBus: EventBus<PlanAction>,
+) : BaseViewModel() {
 
     private val postId
         get() = savedStateHandle.get<String>(KEY_POST_ID) ?: ""
@@ -76,7 +77,7 @@ class ReviewWriteViewModel @Inject constructor(
             is ReviewWriteUiAction.OnClickImageUpload -> setUiEvent(ReviewWriteUiEvent.NavigateToPhotoPicker)
             is ReviewWriteUiAction.OnClickAddImages -> addUploadImages(uiAction.imageUrls)
             is ReviewWriteUiAction.OnClickRemoveImage -> removeImages(uiAction.reviewImage)
-            is ReviewWriteUiAction.OnClickParticipants -> setUiEvent(ReviewWriteUiEvent.NavigateToParticipants(postId))
+            is ReviewWriteUiAction.OnClickParticipants -> setUiEvent(ReviewWriteUiEvent.NavigateToParticipants(ViewIdType.ReviewId(postId)))
             is ReviewWriteUiAction.OnClickSubmit -> submitReviewImages()
         }
     }
@@ -130,7 +131,7 @@ class ReviewWriteViewModel @Inject constructor(
                         when (result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> {
-                                invalidatePlanItem(ZonedDateTime.now())
+                                planEventBus.send(PlanAction.PlanInvalidate())
                                 setUiEvent(ReviewWriteUiEvent.NavigateToBack)
                             }
 
@@ -177,6 +178,6 @@ sealed interface ReviewWriteUiAction : UiAction {
 sealed interface ReviewWriteUiEvent : UiEvent {
     data object NavigateToBack : ReviewWriteUiEvent
     data object NavigateToPhotoPicker : ReviewWriteUiEvent
-    data class NavigateToParticipants(val postId: String) : ReviewWriteUiEvent
+    data class NavigateToParticipants(val viewIdType: ViewIdType) : ReviewWriteUiEvent
     data class ShowToastMessage(val toastMessage: ToastMessage) : ReviewWriteUiEvent
 }

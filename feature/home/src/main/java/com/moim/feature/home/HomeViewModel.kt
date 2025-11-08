@@ -1,25 +1,24 @@
 package com.moim.feature.home
 
 import androidx.lifecycle.viewModelScope
-import com.moim.core.common.delegate.MeetingAction
-import com.moim.core.common.delegate.MeetingViewModelDelegate
-import com.moim.core.common.delegate.PlanAction
-import com.moim.core.common.delegate.PlanItemViewModelDelegate
-import com.moim.core.common.delegate.meetingStateIn
-import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.Plan
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.asPlan
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.ToastMessage
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
-import com.moim.core.common.view.checkState
-import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.plan.PlanRepository
+import com.moim.core.ui.eventbus.EventBus
+import com.moim.core.ui.eventbus.MeetingAction
+import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.eventbus.actionStateIn
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.ToastMessage
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
+import com.moim.core.ui.view.checkState
+import com.moim.core.ui.view.restartableStateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
@@ -28,14 +27,16 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     planRepository: PlanRepository,
-    meetingViewModelDelegate: MeetingViewModelDelegate,
-    planItemViewModelDelegate: PlanItemViewModelDelegate
-) : BaseViewModel(),
-    MeetingViewModelDelegate by meetingViewModelDelegate,
-    PlanItemViewModelDelegate by planItemViewModelDelegate {
+    meetingEventBus: EventBus<MeetingAction>,
+    planEventBus: EventBus<PlanAction>,
+) : BaseViewModel() {
 
-    private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
-    private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
+    private val meetingActionReceiver = meetingEventBus
+        .action
+        .actionStateIn(viewModelScope, MeetingAction.None)
+    private val planActionReceiver = planEventBus
+        .action
+        .actionStateIn(viewModelScope, PlanAction.None)
 
     private val meetingPlansResult = planRepository.getCurrentPlans()
         .asResult()
@@ -164,7 +165,7 @@ class HomeViewModel @Inject constructor(
             is HomeUiAction.OnClickMeetingWrite -> setUiEvent(HomeUiEvent.NavigateToMeetingWrite)
             is HomeUiAction.OnClickPlanWrite -> navigateToPlanWrite()
             is HomeUiAction.OnClickPlanMore -> setUiEvent(HomeUiEvent.NavigateToCalendar)
-            is HomeUiAction.OnClickPlan -> setUiEvent(HomeUiEvent.NavigateToPlanDetail(uiAction.planId, uiAction.isPlan))
+            is HomeUiAction.OnClickPlan -> setUiEvent(HomeUiEvent.NavigateToPlanDetail(ViewIdType.PlanId(uiAction.planId)))
             is HomeUiAction.OnUpdatePermissionCheck -> setPermissionCheck()
         }
     }
@@ -213,6 +214,6 @@ sealed interface HomeUiEvent : UiEvent {
     data object NavigateToMeetingWrite : HomeUiEvent
     data object NavigateToPlanWrite : HomeUiEvent
     data object NavigateToCalendar : HomeUiEvent
-    data class NavigateToPlanDetail(val planId: String, val isPlan: Boolean) : HomeUiEvent
+    data class NavigateToPlanDetail(val viewIdType: ViewIdType) : HomeUiEvent
     data class ShowToastMessage(val message: ToastMessage) : HomeUiEvent
 }

@@ -15,6 +15,8 @@ interface ReviewRepository {
 
     fun getReview(reviewId: String): Flow<Review>
 
+    fun getReviewForPostId(postId: String): Flow<Review>
+
     suspend fun getReviewParticipants(
         reviewId: String,
         cursor: String,

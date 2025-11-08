@@ -17,8 +17,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,12 +29,12 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.ReviewImage
-import com.moim.core.common.util.decimalFormatString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.util.decimalFormatString
 import com.moim.feature.reviewwrite.ReviewWriteUiAction
 
 @Composable
@@ -114,7 +112,7 @@ private fun ImageUploadBox(
             modifier = Modifier
                 .align(Alignment.Center)
                 .size(48.dp),
-            imageVector = Icons.Default.Add,
+            imageVector = ImageVector.vectorResource(R.drawable.ic_add),
             contentDescription = "",
             tint = MoimTheme.colors.icon,
         )

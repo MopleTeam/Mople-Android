@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
@@ -30,7 +31,7 @@ fun MeetingSettingParticipantsInfo(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .onSingleClick { onUiAction(MeetingSettingUiAction.OnClickMeetingParticipants(meeting.id)) }
+            .onSingleClick { onUiAction(MeetingSettingUiAction.OnClickMeetingParticipants(ViewIdType.MeetId(meeting.id))) }
             .padding(vertical = 16.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

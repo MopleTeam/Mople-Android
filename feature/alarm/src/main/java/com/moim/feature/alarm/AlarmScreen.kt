@@ -29,15 +29,8 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Notification
-import com.moim.core.common.util.decimalFormatString
-import com.moim.core.common.view.ObserveAsEvents
-import com.moim.core.common.view.PAGING_ERROR
-import com.moim.core.common.view.PAGING_LOADING
-import com.moim.core.common.view.isAppendError
-import com.moim.core.common.view.isAppendLoading
-import com.moim.core.common.view.isError
-import com.moim.core.common.view.isLoading
-import com.moim.core.common.view.isSuccess
+import com.moim.core.common.model.ViewIdType
+import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.PagingErrorScreen
@@ -46,6 +39,14 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.core.ui.view.PAGING_ERROR
+import com.moim.core.ui.view.PAGING_LOADING
+import com.moim.core.ui.view.isAppendError
+import com.moim.core.ui.view.isAppendLoading
+import com.moim.core.ui.view.isError
+import com.moim.core.ui.view.isLoading
+import com.moim.core.ui.view.isSuccess
 import com.moim.feature.alarm.ui.AlarmEmptyScreen
 import com.moim.feature.alarm.ui.AlarmListItem
 
@@ -54,7 +55,7 @@ fun AlarmRoute(
     padding: PaddingValues,
     viewModel: AlarmViewModel = hiltViewModel(),
     navigateToMeetingDetail: (String) -> Unit,
-    navigateToPlanDetail: (String, Boolean) -> Unit,
+    navigateToPlanDetail: (ViewIdType) -> Unit,
     navigateToBack: () -> Unit,
 ) {
     val notifications = viewModel.notifications.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
@@ -65,7 +66,7 @@ fun AlarmRoute(
         when (event) {
             is AlarmUiEvent.NavigateToBack -> navigateToBack()
             is AlarmUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
-            is AlarmUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
+            is AlarmUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.viewIdType)
             is AlarmUiEvent.RefreshPagingData -> notifications.refresh()
         }
     }

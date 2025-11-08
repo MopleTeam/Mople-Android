@@ -30,16 +30,9 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Comment
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
-import com.moim.core.common.util.toValidUrl
-import com.moim.core.common.view.ObserveAsEvents
-import com.moim.core.common.view.PAGING_ERROR
-import com.moim.core.common.view.PAGING_LOADING
-import com.moim.core.common.view.isAppendError
-import com.moim.core.common.view.isAppendLoading
-import com.moim.core.common.view.isError
-import com.moim.core.common.view.isLoading
-import com.moim.core.common.view.showToast
+import com.moim.core.ui.util.toValidUrl
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -51,6 +44,14 @@ import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
+import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.core.ui.view.PAGING_ERROR
+import com.moim.core.ui.view.PAGING_LOADING
+import com.moim.core.ui.view.isAppendError
+import com.moim.core.ui.view.isAppendLoading
+import com.moim.core.ui.view.isError
+import com.moim.core.ui.view.isLoading
+import com.moim.core.ui.view.showToast
 import com.moim.feature.plandetail.ui.PlanDetailBottomBar
 import com.moim.feature.plandetail.ui.PlanDetailCommentEditDialog
 import com.moim.feature.plandetail.ui.PlanDetailCommentHeader
@@ -76,11 +77,7 @@ fun PlanDetailRoute(
         latitude: Double,
         longitude: Double
     ) -> Unit,
-    navigateToParticipants: (
-        isMeeting: Boolean,
-        isPlan: Boolean,
-        id: String
-    ) -> Unit,
+    navigateToParticipants: (ViewIdType) -> Unit,
     navigateToPlanWrite: (
         planItem: PlanItem
     ) -> Unit,
@@ -108,7 +105,7 @@ fun PlanDetailRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is PlanDetailUiEvent.NavigateToBack -> navigateToBack()
-            is PlanDetailUiEvent.NavigateToParticipants -> navigateToParticipants(false, event.isPlan, event.postId)
+            is PlanDetailUiEvent.NavigateToParticipants -> navigateToParticipants(event.viewIdType)
             is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.planItem)
             is PlanDetailUiEvent.NavigateToReviewWrite -> navigateToReviewWrite(event.postId, true)
             is PlanDetailUiEvent.NavigateToCommentDetail -> navigateToCommentDetail(event.meetId, event.postId, event.comment)

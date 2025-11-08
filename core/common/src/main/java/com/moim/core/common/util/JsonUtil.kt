@@ -6,7 +6,6 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import timber.log.Timber
 
 object JsonUtil {
 
@@ -25,8 +24,6 @@ object JsonUtil {
         return try {
             json.decodeFromString<T>(this)
         } catch (error: Exception) {
-            Timber.e("[JsonUtil Exception]:${error.message}")
-            Timber.e("[JsonUtil Exception Content]:${this}")
             throw error
         }
     }

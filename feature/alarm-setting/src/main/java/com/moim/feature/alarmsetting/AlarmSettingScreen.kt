@@ -37,8 +37,8 @@ import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
-import com.moim.core.common.view.ObserveAsEvents
-import com.moim.core.common.view.showToast
+import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.core.ui.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog

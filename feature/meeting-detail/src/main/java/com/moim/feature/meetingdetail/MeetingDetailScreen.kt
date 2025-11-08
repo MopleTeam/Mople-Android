@@ -9,15 +9,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -26,14 +26,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.asPlanItem
-import com.moim.core.common.util.externalShareForUrl
-import com.moim.core.common.view.ObserveAsEvents
-import com.moim.core.common.view.isError
-import com.moim.core.common.view.isLoading
-import com.moim.core.common.view.isSuccess
-import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -46,6 +41,12 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
+import com.moim.core.ui.util.externalShareForUrl
+import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.core.ui.view.isError
+import com.moim.core.ui.view.isLoading
+import com.moim.core.ui.view.isSuccess
+import com.moim.core.ui.view.showToast
 import com.moim.feature.meetingdetail.ui.MeetingDetailHeader
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanContent
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanEmpty
@@ -56,7 +57,7 @@ fun MeetingDetailRoute(
     viewModel: MeetingDetailViewModel = hiltViewModel(),
     navigateToBack: () -> Unit,
     navigateToPlanWrite: (PlanItem) -> Unit,
-    navigateToPlanDetail: (String, Boolean) -> Unit,
+    navigateToPlanDetail: (ViewIdType) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit,
     navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit,
 ) {
@@ -69,7 +70,7 @@ fun MeetingDetailRoute(
         when (event) {
             is MeetingDetailUiEvent.NavigateToBack -> navigateToBack()
             is MeetingDetailUiEvent.NavigateToMeetingSetting -> navigateToMeetingSetting(event.meeting)
-            is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.postId, event.isPlan)
+            is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.viewIdType)
             is MeetingDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan.asPlanItem())
             is MeetingDetailUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.meetingName, listOf(event.imageUrl), 0, R.drawable.ic_empty_meeting)
             is MeetingDetailUiEvent.NavigateToExternalShareUrl -> context.externalShareForUrl(event.url)
@@ -202,7 +203,7 @@ fun MeetingDetailScreen(
                 onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanWrite) }
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_add),
                     contentDescription = ""
                 )
             }

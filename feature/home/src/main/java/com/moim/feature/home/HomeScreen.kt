@@ -43,8 +43,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Plan
-import com.moim.core.common.view.ObserveAsEvents
-import com.moim.core.common.view.showToast
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -52,6 +51,8 @@ import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.core.ui.view.showToast
 import com.moim.feature.home.ui.HomeCreateCards
 import com.moim.feature.home.ui.HomePlanCard
 import com.moim.feature.home.ui.HomePlanMoreCard
@@ -68,7 +69,7 @@ fun HomeRoute(
     navigateToMeetingWrite: () -> Unit = {},
     navigateToPlanWrite: () -> Unit = {},
     navigateToCalendar: () -> Unit = {},
-    navigateToPlanDetail: (String, Boolean) -> Unit,
+    navigateToPlanDetail: (ViewIdType) -> Unit,
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -92,7 +93,7 @@ fun HomeRoute(
             is HomeUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite()
             is HomeUiEvent.NavigateToPlanWrite -> navigateToPlanWrite()
             is HomeUiEvent.NavigateToCalendar -> navigateToCalendar()
-            is HomeUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.planId, event.isPlan)
+            is HomeUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.viewIdType)
             is HomeUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }

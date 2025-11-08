@@ -3,49 +3,49 @@ package com.moim.feature.meetingsetting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.moim.core.common.delegate.MeetingAction
-import com.moim.core.common.delegate.MeetingViewModelDelegate
-import com.moim.core.common.delegate.PlanItemViewModelDelegate
-import com.moim.core.common.delegate.meetingStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.route.DetailRoute
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.ToastMessage
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
-import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
+import com.moim.core.ui.eventbus.EventBus
+import com.moim.core.ui.eventbus.MeetingAction
+import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.eventbus.actionStateIn
+import com.moim.core.ui.route.DetailRoute
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.ToastMessage
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
+import com.moim.core.ui.view.checkState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class MeetingSettingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val meetingRepository: MeetingRepository,
     userRepository: UserRepository,
-    meetingViewModelDelegate: MeetingViewModelDelegate,
-    planItemViewModelDelegate: PlanItemViewModelDelegate
-) : BaseViewModel(),
-    MeetingViewModelDelegate by meetingViewModelDelegate,
-    PlanItemViewModelDelegate by planItemViewModelDelegate {
+    private val meetingRepository: MeetingRepository,
+    private val meetingEventBus: EventBus<MeetingAction>,
+    private val planEventBus: EventBus<PlanAction>
+) : BaseViewModel() {
 
     private val meeting
         get() = savedStateHandle
             .toRoute<DetailRoute.MeetingSetting>(DetailRoute.MeetingSetting.typeMap)
             .meeting
 
-    private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
+    private val meetingActionReceiver = meetingEventBus
+        .action
+        .actionStateIn(viewModelScope, MeetingAction.None)
 
     init {
         viewModelScope.launch {
@@ -77,7 +77,7 @@ class MeetingSettingViewModel @Inject constructor(
             is MeetingSettingUiAction.OnClickBack -> setUiEvent(MeetingSettingUiEvent.NavigateToBack)
             is MeetingSettingUiAction.OnClickMeetingEdit -> setUiEvent(MeetingSettingUiEvent.NavigateToMeetingWrite(uiAction.meeting))
             is MeetingSettingUiAction.OnClickMeetingExit -> deleteMeeting()
-            is MeetingSettingUiAction.OnClickMeetingParticipants -> setUiEvent(MeetingSettingUiEvent.NavigateToMeetingParticipants(uiAction.meetingId))
+            is MeetingSettingUiAction.OnClickMeetingParticipants -> setUiEvent(MeetingSettingUiEvent.NavigateToMeetingParticipants(uiAction.viewIdType))
             is MeetingSettingUiAction.OnShowMeetingExitDialog -> showMeetingExitDialog(uiAction.isShow)
             is MeetingSettingUiAction.OnShowMeetingDeleteDialog -> showMeetingDeleteDialog(uiAction.isShow)
         }
@@ -105,8 +105,8 @@ class MeetingSettingViewModel @Inject constructor(
                         when (result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> {
-                                deleteMeeting(ZonedDateTime.now(), meeting.id)
-                                invalidatePlanItem(ZonedDateTime.now())
+                                meetingEventBus.send(MeetingAction.MeetingDelete(meetId = meeting.id))
+                                planEventBus.send(PlanAction.PlanInvalidate())
                                 setUiEvent(MeetingSettingUiEvent.NavigateToBackForDelete)
                             }
 
@@ -137,7 +137,7 @@ sealed interface MeetingSettingUiState : UiState {
 sealed interface MeetingSettingUiAction : UiAction {
     data object OnClickBack : MeetingSettingUiAction
     data object OnClickMeetingExit : MeetingSettingUiAction
-    data class OnClickMeetingParticipants(val meetingId: String) : MeetingSettingUiAction
+    data class OnClickMeetingParticipants(val viewIdType: ViewIdType) : MeetingSettingUiAction
     data class OnClickMeetingEdit(val meeting: Meeting) : MeetingSettingUiAction
     data class OnShowMeetingExitDialog(val isShow: Boolean) : MeetingSettingUiAction
     data class OnShowMeetingDeleteDialog(val isShow: Boolean) : MeetingSettingUiAction
@@ -147,6 +147,6 @@ sealed interface MeetingSettingUiEvent : UiEvent {
     data object NavigateToBack : MeetingSettingUiEvent
     data object NavigateToBackForDelete : MeetingSettingUiEvent
     data class NavigateToMeetingWrite(val meeting: Meeting) : MeetingSettingUiEvent
-    data class NavigateToMeetingParticipants(val meetingId: String) : MeetingSettingUiEvent
+    data class NavigateToMeetingParticipants(val viewIdType: ViewIdType) : MeetingSettingUiEvent
     data class ShowToastMessage(val message: ToastMessage) : MeetingSettingUiEvent
 }

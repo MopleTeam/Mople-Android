@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.User
 import com.moim.core.designsystem.R
@@ -62,8 +63,14 @@ fun ProfileImage(
             Spacer(Modifier.height(12.dp))
 
             Row(
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
+                    contentDescription = "",
+                    tint = MoimTheme.colors.transparent
+                )
                 MoimText(
                     text = user.nickname,
                     singleLine = false,
@@ -77,5 +84,20 @@ fun ProfileImage(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0XFFFFFF)
+@Composable
+private fun ProfileImagePreview() {
+    MoimTheme {
+        ProfileImage(
+            user = User(
+                "",
+                nickname = "모플",
+                "",
+            ),
+            onUiAction = {}
+        )
     }
 }

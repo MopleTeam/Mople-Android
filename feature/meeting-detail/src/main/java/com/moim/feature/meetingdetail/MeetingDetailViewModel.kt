@@ -7,31 +7,30 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.insertSeparators
 import androidx.paging.map
-import com.moim.core.common.delegate.MeetingAction
-import com.moim.core.common.delegate.MeetingViewModelDelegate
-import com.moim.core.common.delegate.PlanAction
-import com.moim.core.common.delegate.PlanItemViewModelDelegate
-import com.moim.core.common.delegate.meetingStateIn
-import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.Plan
+import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.ToastMessage
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
-import com.moim.core.common.view.checkState
-import com.moim.core.common.view.checkedActionedAtIsBeforeLoadedAt
-import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.domain.usecase.GetPlanItemsUseCase
+import com.moim.core.ui.eventbus.EventBus
+import com.moim.core.ui.eventbus.MeetingAction
+import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.eventbus.actionStateIn
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.ToastMessage
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
+import com.moim.core.ui.view.checkState
+import com.moim.core.ui.view.checkedActionedAtIsBeforeLoadedAt
+import com.moim.core.ui.view.restartableStateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -58,17 +57,19 @@ class MeetingDetailViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val meetingRepository: MeetingRepository,
     userRepository: UserRepository,
-    meetingViewModelDelegate: MeetingViewModelDelegate,
-    planItemViewModelDelegate: PlanItemViewModelDelegate
-) : BaseViewModel(),
-    MeetingViewModelDelegate by meetingViewModelDelegate,
-    PlanItemViewModelDelegate by planItemViewModelDelegate {
+    meetingEventBus: EventBus<MeetingAction>,
+    private val planEventBus: EventBus<PlanAction>
+) : BaseViewModel() {
 
     private val meetingId
         get() = savedStateHandle.get<String>(KEY_MEETING_ID) ?: ""
 
-    private val meetingActionReceiver = meetingAction.meetingStateIn(viewModelScope)
-    private val planActionReceiver = planItemAction.planItemStateIn(viewModelScope)
+    private val meetingActionReceiver = meetingEventBus
+        .action
+        .actionStateIn(viewModelScope, MeetingAction.None)
+    private val planActionReceiver = planEventBus
+        .action
+        .actionStateIn(viewModelScope, PlanAction.None)
 
     private val pagingRefreshSignal = MutableSharedFlow<Unit>()
     private val loadDataSignal: Flow<Unit> = flow {
@@ -264,7 +265,7 @@ class MeetingDetailViewModel @Inject constructor(
             is MeetingDetailUiAction.OnClickMeetingSetting -> navigateToMeetingSetting()
             is MeetingDetailUiAction.OnClickPlanTab -> setPlanTab(uiAction.isBefore)
             is MeetingDetailUiAction.OnClickPlanApply -> setPlanApply(uiAction.planItem, uiAction.isApply)
-            is MeetingDetailUiAction.OnClickPlanDetail -> setUiEvent(MeetingDetailUiEvent.NavigateToPlanDetail(uiAction.postId, uiAction.isPlan))
+            is MeetingDetailUiAction.OnClickPlanDetail -> setUiEvent(MeetingDetailUiEvent.NavigateToPlanDetail(uiAction.viewIdType))
             is MeetingDetailUiAction.OnClickMeetingImage -> setUiEvent(MeetingDetailUiEvent.NavigateToImageViewer(uiAction.imageUrl, uiAction.meetingName))
             is MeetingDetailUiAction.OnClickMeetingInvite -> getInviteLink()
             is MeetingDetailUiAction.OnShowPlanApplyCancelDialog -> showApplyCancelDialog(uiAction.isShow, uiAction.cancelPlanItem)
@@ -293,8 +294,7 @@ class MeetingDetailViewModel @Inject constructor(
                     when (result) {
                         is Result.Loading -> return@collect
                         is Result.Success -> {
-                            updatePlanItem(ZonedDateTime.now(), planItem.copy(isParticipant = !planItem.isParticipant))
-
+                            planEventBus.send(PlanAction.PlanUpdate(planItem = planItem.copy(isParticipant = !planItem.isParticipant)))
                             if (isApply.not()) {
                                 setUiState(copy(cancelPlanItem = null, isShowApplyCancelDialog = false))
                             }
@@ -421,8 +421,7 @@ sealed interface MeetingDetailUiAction : UiAction {
     ) : MeetingDetailUiAction
 
     data class OnClickPlanDetail(
-        val postId: String,
-        val isPlan: Boolean
+        val viewIdType: ViewIdType,
     ) : MeetingDetailUiAction
 
     data class OnClickMeetingImage(
@@ -448,8 +447,7 @@ sealed interface MeetingDetailUiEvent : UiEvent {
     ) : MeetingDetailUiEvent
 
     data class NavigateToPlanDetail(
-        val postId: String,
-        val isPlan: Boolean
+        val viewIdType: ViewIdType,
     ) : MeetingDetailUiEvent
 
     data class NavigateToImageViewer(

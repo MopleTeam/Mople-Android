@@ -28,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.model.Plan
-import com.moim.core.common.util.decimalFormatString
+import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard

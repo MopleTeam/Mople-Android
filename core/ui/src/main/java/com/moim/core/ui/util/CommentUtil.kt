@@ -1,4 +1,4 @@
-package com.moim.core.common.util
+package com.moim.core.ui.util
 
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.User

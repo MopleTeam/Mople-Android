@@ -2,8 +2,8 @@ package com.moim.feature.main.navigation
 
 import androidx.compose.runtime.Composable
 import com.moim.core.designsystem.R
-import com.moim.core.common.route.MainRoute
-import com.moim.core.common.route.Route
+import com.moim.core.ui.route.MainRoute
+import com.moim.core.ui.route.Route
 
 enum class MainTab(
     val iconResId: Int,

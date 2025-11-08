@@ -3,6 +3,7 @@ package com.moim.core.data.datasource.token
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
 import com.moim.core.remote.service.TokenApi
+import com.moim.core.remote.util.FirebaseUtil
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -10,11 +11,11 @@ internal class TokenRepositoryImpl @Inject constructor(
     private val tokenApi: TokenApi,
 ) : TokenRepository {
 
-    override fun setFcmToken(token: String): Flow<Unit> = catchFlow {
+    override fun setFcmToken(): Flow<Unit> = catchFlow {
         emit(
             tokenApi.setFcmToken(
                 jsonOf(
-                    KEY_TOKEN to token,
+                    KEY_TOKEN to FirebaseUtil.getFirebaseMessageToken(),
                     KEY_SUBSCRIBE to true
                 )
             )

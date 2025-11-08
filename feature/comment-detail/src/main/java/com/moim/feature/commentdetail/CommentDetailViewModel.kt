@@ -12,9 +12,6 @@ import androidx.paging.filter
 import androidx.paging.insertHeaderItem
 import androidx.paging.insertSeparators
 import androidx.paging.map
-import com.moim.core.common.delegate.CommentAction
-import com.moim.core.common.delegate.CommentViewModelDelegate
-import com.moim.core.common.delegate.commentStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.User
@@ -22,24 +19,27 @@ import com.moim.core.common.model.isChild
 import com.moim.core.common.model.item.CommentUiModel
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.route.DetailRoute
-import com.moim.core.common.util.cancelIfActive
-import com.moim.core.common.util.createCommentUiModel
-import com.moim.core.common.util.createMentionTagMessage
-import com.moim.core.common.util.filterMentionedUsers
-import com.moim.core.common.util.parseMentionTagMessage
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.ToastMessage
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
-import com.moim.core.common.view.checkState
-import com.moim.core.common.view.checkedActionedAtIsBeforeLoadedAt
-import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.domain.usecase.GetReplyCommentUseCase
+import com.moim.core.ui.eventbus.CommentAction
+import com.moim.core.ui.eventbus.EventBus
+import com.moim.core.ui.eventbus.actionStateIn
+import com.moim.core.ui.route.DetailRoute
+import com.moim.core.ui.util.cancelIfActive
+import com.moim.core.ui.util.createCommentUiModel
+import com.moim.core.ui.util.createMentionTagMessage
+import com.moim.core.ui.util.filterMentionedUsers
+import com.moim.core.ui.util.parseMentionTagMessage
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.ToastMessage
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
+import com.moim.core.ui.view.checkState
+import com.moim.core.ui.view.checkedActionedAtIsBeforeLoadedAt
+import com.moim.core.ui.view.restartableStateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -63,9 +63,8 @@ class CommentDetailViewModel @Inject constructor(
     private val commentRepository: CommentRepository,
     private val meetingRepository: MeetingRepository,
     private val getReplyCommentUseCase: GetReplyCommentUseCase,
-    commentViewModelDelegate: CommentViewModelDelegate,
-) : BaseViewModel(),
-    CommentViewModelDelegate by commentViewModelDelegate {
+    private val commentEventBus: EventBus<CommentAction>,
+) : BaseViewModel() {
 
     private val meetingDetailArgs
         get() = savedStateHandle.toRoute<DetailRoute.CommentDetail>(DetailRoute.CommentDetail.typeMap)
@@ -75,7 +74,9 @@ class CommentDetailViewModel @Inject constructor(
     private val comment = requireNotNull(meetingDetailArgs.comment)
     private var searchJob: Job? = null
 
-    private val commentActionReceiver = commentAction.commentStateIn(viewModelScope)
+    private val commentActionReceiver = commentEventBus
+        .action
+        .actionStateIn(viewModelScope, CommentAction.None)
 
     private var _comments = flowOf(postId)
         .flatMapLatest { postId ->
@@ -256,7 +257,12 @@ class CommentDetailViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Result.Loading -> return@collect
-                        is Result.Success -> updatePlanComment(commentUiModel = result.data.createCommentUiModel())
+                        is Result.Success -> {
+                            commentEventBus.send(
+                                CommentAction.CommentUpdate(commentUiModel = result.data.createCommentUiModel())
+                            )
+                        }
+
                         is Result.Error -> showErrorToast(result.exception)
                     }
                 }
@@ -295,12 +301,19 @@ class CommentDetailViewModel @Inject constructor(
                             is Result.Success -> {
                                 if (updateComment == null) {
                                     val comment = parentComment.comment
-                                    createPlanComment(commentUiModel = result.data.createCommentUiModel())
-                                    updatePlanComment(commentUiModel = parentComment.copy(comment = comment.copy(replayCount = comment.replayCount.plus(1))))
+                                    commentEventBus.send(
+                                        CommentAction.CommentCreate(commentUiModel = result.data.createCommentUiModel())
+                                    )
+                                    commentEventBus.send(
+                                        CommentAction.CommentUpdate(
+                                            commentUiModel = parentComment.copy(comment = comment.copy(replayCount = comment.replayCount.plus(1)))
+                                        )
+                                    )
+
                                     commentState.clearText()
                                     setUiState(copy(selectedMentions = emptyList()))
                                 } else {
-                                    updatePlanComment(commentUiModel = result.data.createCommentUiModel())
+                                    commentEventBus.send(CommentAction.CommentCreate(commentUiModel = result.data.createCommentUiModel()))
                                     commentState.clearText()
                                     setUiState(
                                         copy(
@@ -331,8 +344,7 @@ class CommentDetailViewModel @Inject constructor(
                             is Result.Loading -> return@collect
 
                             is Result.Success -> {
-                                deletePlanComment(commentId = comment.commentId)
-
+                                commentEventBus.send(CommentAction.CommentDelete(commentId = comment.commentId))
                                 if (selectedUpdateComment != null) commentState.clearText()
                                 setUiState(copy(selectedUpdateComment = null))
 
@@ -340,7 +352,11 @@ class CommentDetailViewModel @Inject constructor(
                                     setUiEvent(CommentDetailUiEvent.NavigateToBack)
                                 } else {
                                     val replyCount = parentComment.comment.replayCount.minus(1)
-                                    updatePlanComment(commentUiModel = parentComment.copy(parentComment.comment.copy(replayCount = replyCount)))
+                                    commentEventBus.send(
+                                        CommentAction.CommentUpdate(
+                                            commentUiModel = parentComment.copy(comment = parentComment.comment.copy(replayCount = replyCount))
+                                        )
+                                    )
                                 }
                             }
 

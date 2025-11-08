@@ -8,7 +8,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.moim.core.common.route.DetailRoute
+import com.moim.core.common.model.ViewIdType
+import com.moim.core.ui.route.DetailRoute
 
 fun NavGraphBuilder.participantListNavigation(
     padding: PaddingValues,
@@ -16,6 +17,7 @@ fun NavGraphBuilder.participantListNavigation(
     navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit,
 ) {
     composable<DetailRoute.ParticipantList>(
+        typeMap = DetailRoute.ParticipantList.typeMap,
         enterTransition = { fadeIn(animationSpec = tween(500)) },
         exitTransition = { fadeOut(animationSpec = tween(500)) }
     ) {
@@ -28,16 +30,8 @@ fun NavGraphBuilder.participantListNavigation(
 }
 
 fun NavController.navigateToParticipantList(
-    isMeeting: Boolean,
-    isPlan: Boolean,
-    id: String,
+    viewIdType: ViewIdType,
     navOptions: NavOptions? = null
 ) {
-    this.navigate(
-        DetailRoute.ParticipantList(
-            isMeeting = isMeeting,
-            isPlan = isPlan,
-            id = id
-        ), navOptions
-    )
+    this.navigate(DetailRoute.ParticipantList(viewIdType), navOptions)
 }

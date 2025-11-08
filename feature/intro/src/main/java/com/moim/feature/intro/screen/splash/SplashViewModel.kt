@@ -4,13 +4,13 @@ import androidx.lifecycle.viewModelScope
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.policy.PolicyRepository
 import com.moim.core.data.datasource.user.UserRepository
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
