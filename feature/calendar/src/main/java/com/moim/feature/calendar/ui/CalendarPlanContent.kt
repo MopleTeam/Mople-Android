@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
-import com.moim.core.common.util.decimalFormatString
+import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard

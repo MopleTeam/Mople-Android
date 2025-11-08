@@ -11,12 +11,6 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.insertSeparators
 import androidx.paging.map
-import com.moim.core.common.delegate.CommentAction
-import com.moim.core.common.delegate.CommentViewModelDelegate
-import com.moim.core.common.delegate.PlanAction
-import com.moim.core.common.delegate.PlanItemViewModelDelegate
-import com.moim.core.common.delegate.commentStateIn
-import com.moim.core.common.delegate.planItemStateIn
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.User
@@ -26,20 +20,6 @@ import com.moim.core.common.model.item.CommentUiModel
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.route.DetailRoute
-import com.moim.core.common.util.cancelIfActive
-import com.moim.core.common.util.createCommentUiModel
-import com.moim.core.common.util.createMentionTagMessage
-import com.moim.core.common.util.filterMentionedUsers
-import com.moim.core.common.util.parseMentionTagMessage
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.ToastMessage
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
-import com.moim.core.common.view.checkState
-import com.moim.core.common.view.checkedActionedAtIsBeforeLoadedAt
-import com.moim.core.common.view.restartableStateIn
 import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
@@ -47,6 +27,24 @@ import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.domain.usecase.GetCommentsUseCase
 import com.moim.core.domain.usecase.GetPlanItemUseCase
+import com.moim.core.ui.eventbus.CommentAction
+import com.moim.core.ui.eventbus.EventBus
+import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.eventbus.actionStateIn
+import com.moim.core.ui.route.DetailRoute
+import com.moim.core.ui.util.cancelIfActive
+import com.moim.core.ui.util.createCommentUiModel
+import com.moim.core.ui.util.createMentionTagMessage
+import com.moim.core.ui.util.filterMentionedUsers
+import com.moim.core.ui.util.parseMentionTagMessage
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.ToastMessage
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
+import com.moim.core.ui.view.checkState
+import com.moim.core.ui.view.checkedActionedAtIsBeforeLoadedAt
+import com.moim.core.ui.view.restartableStateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -74,11 +72,9 @@ class PlanDetailViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val commentRepository: CommentRepository,
     private val getCommentsUseCase: GetCommentsUseCase,
-    planItemViewModelDelegate: PlanItemViewModelDelegate,
-    commentViewModelDelegate: CommentViewModelDelegate,
-) : BaseViewModel(),
-    PlanItemViewModelDelegate by planItemViewModelDelegate,
-    CommentViewModelDelegate by commentViewModelDelegate {
+    private val planEventBus: EventBus<PlanAction>,
+    private val commentEventBus: EventBus<CommentAction>,
+) : BaseViewModel() {
 
     private val viewIdType
         get() = savedStateHandle
@@ -86,16 +82,25 @@ class PlanDetailViewModel @Inject constructor(
             .viewIdType
 
     private val meetId = savedStateHandle.getStateFlow<String?>(KEY_MEET_ID, null)
+    private val commentCheckId = savedStateHandle.getStateFlow<String?>(key = KEY_COMMENT_CHECK_ID, null)
 
     private var searchJob: Job? = null
 
-    private val planItemReceiver = planItemAction.planItemStateIn(viewModelScope)
-    private val commentActionReceiver = commentAction.commentStateIn(viewModelScope)
+    private val planItemReceiver =
+        planEventBus
+            .action
+            .actionStateIn(viewModelScope, PlanAction.None)
+    private val commentActionReceiver =
+        commentEventBus
+            .action
+            .actionStateIn(viewModelScope, CommentAction.None)
 
     private var _comments =
-        getCommentsUseCase(GetCommentsUseCase.Params(viewIdType.id))
-            .mapLatest { it.map { comment -> comment.createCommentUiModel() } }
-            .cachedIn(viewModelScope)
+        commentCheckId.filterNotNull().flatMapLatest { commentCheckId ->
+            getCommentsUseCase(GetCommentsUseCase.Params(commentCheckId))
+                .mapLatest { it.map { comment -> comment.createCommentUiModel() } }
+                .cachedIn(viewModelScope)
+        }
 
     private val comments = commentActionReceiver.flatMapLatest { receiver ->
         when (receiver) {
@@ -202,7 +207,7 @@ class PlanDetailViewModel @Inject constructor(
                 planDetailUiState.collect { uiState ->
                     setUiState(uiState)
                     if (uiState is PlanDetailUiState.Success) {
-                        savedStateHandle[KEY_PLAN_ID] = uiState.planItem.commentCheckId
+                        savedStateHandle[KEY_COMMENT_CHECK_ID] = uiState.planItem.commentCheckId
                         savedStateHandle[KEY_MEET_ID] = uiState.planItem.meetingId
                         setUiState(uiState.copy(comments = comments))
                     }
@@ -304,8 +309,7 @@ class PlanDetailViewModel @Inject constructor(
 
                         is Result.Success -> {
                             val planItem = planItem.copy(isParticipant = isApply)
-
-                            updatePlanItem(ZonedDateTime.now(), planItem)
+                            planEventBus.send(PlanAction.PlanUpdate(planItem = planItem))
                             setUiState(
                                 copy(
                                     planItem = planItem,
@@ -350,7 +354,7 @@ class PlanDetailViewModel @Inject constructor(
                     when (result) {
                         is Result.Loading -> return@collect
                         is Result.Success -> {
-                            deletePlanItem(ZonedDateTime.now(), planItem.postId)
+                            planEventBus.send(PlanAction.PlanDelete(postId = planItem.postId))
                             setUiEvent(PlanDetailUiEvent.NavigateToBack)
                         }
 
@@ -372,7 +376,10 @@ class PlanDetailViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Result.Loading -> return@collect
-                        is Result.Success -> updatePlanComment(commentUiModel = result.data.createCommentUiModel())
+                        is Result.Success -> {
+                            commentEventBus.send(CommentAction.CommentUpdate(commentUiModel = result.data.createCommentUiModel()))
+                        }
+
                         is Result.Error -> showErrorToast(result.exception)
                     }
                 }
@@ -412,7 +419,7 @@ class PlanDetailViewModel @Inject constructor(
 
                             is Result.Success -> {
                                 if (updateComment == null) {
-                                    createPlanComment(commentUiModel = result.data.createCommentUiModel())
+                                    commentEventBus.send(CommentAction.CommentCreate(commentUiModel = result.data.createCommentUiModel()))
                                     commentState.clearText()
                                     setUiState(
                                         copy(
@@ -421,7 +428,7 @@ class PlanDetailViewModel @Inject constructor(
                                         )
                                     )
                                 } else {
-                                    updatePlanComment(commentUiModel = result.data.createCommentUiModel())
+                                    commentEventBus.send(CommentAction.CommentUpdate(commentUiModel = result.data.createCommentUiModel()))
                                     commentState.clearText()
                                     setUiState(
                                         copy(
@@ -452,7 +459,7 @@ class PlanDetailViewModel @Inject constructor(
                             is Result.Loading -> return@collect
 
                             is Result.Success -> {
-                                deletePlanComment(commentId = comment.commentId)
+                                commentEventBus.send(CommentAction.CommentDelete(commentId = comment.commentId))
                                 if (selectedUpdateComment != null) {
                                     commentState.clearText()
                                 }
@@ -528,11 +535,11 @@ class PlanDetailViewModel @Inject constructor(
         }
 
         return if (matchLength > 0) {
-            val beforeMatch = currentMessage.substring(0, insertPosition - matchLength)
+            val beforeMatch = currentMessage.take(insertPosition - matchLength)
             val afterCursor = currentMessage.substring(insertPosition)
             "$beforeMatch$inputKeyword $afterCursor"
         } else {
-            currentMessage.substring(0, insertPosition) +
+            currentMessage.take(insertPosition) +
                     inputKeyword + " " +
                     currentMessage.substring(insertPosition)
         }
@@ -671,7 +678,7 @@ class PlanDetailViewModel @Inject constructor(
     }
 
     companion object {
-        private const val KEY_PLAN_ID = "planId"
+        private const val KEY_COMMENT_CHECK_ID = "commentCheckId"
         private const val KEY_MEET_ID = "meetId"
     }
 }

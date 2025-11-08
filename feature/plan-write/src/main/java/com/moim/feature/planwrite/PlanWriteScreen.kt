@@ -27,14 +27,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.util.parseDateString
 import com.moim.core.common.util.parseLongTime
-import com.moim.core.common.view.ObserveAsEvents
-import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.core.ui.view.showToast
 import com.moim.feature.planwrite.ui.MoimDatePickerDialog
 import com.moim.feature.planwrite.ui.MoimTimePickerDialog
 import com.moim.feature.planwrite.ui.PlanWriteMeetingsDialog

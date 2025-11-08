@@ -4,5 +4,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface TokenRepository {
 
-    fun setFcmToken(token: String) : Flow<Unit>
+    fun setFcmToken() : Flow<Unit>
 }

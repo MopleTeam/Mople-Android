@@ -3,30 +3,30 @@ package com.moim.feature.meetingwrite
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.moim.core.common.delegate.MeetingViewModelDelegate
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.route.DetailRoute
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.ToastMessage
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
-import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.meeting.MeetingRepository
+import com.moim.core.ui.eventbus.EventBus
+import com.moim.core.ui.eventbus.MeetingAction
+import com.moim.core.ui.route.DetailRoute
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.ToastMessage
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
+import com.moim.core.ui.view.checkState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class MeetingWriteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val meetingRepository: MeetingRepository,
-    private val meetingViewModelDelegate: MeetingViewModelDelegate
-) : BaseViewModel(), MeetingViewModelDelegate by meetingViewModelDelegate {
+    private val meetingEventBus: EventBus<MeetingAction>,
+) : BaseViewModel() {
 
     private val meeting
         get() = savedStateHandle
@@ -98,14 +98,14 @@ class MeetingWriteViewModel @Inject constructor(
                         is Result.Loading -> return@collect
                         is Result.Success -> {
                             if (meetingId.isNullOrEmpty()) {
-                                createMeeting(ZonedDateTime.now(), result.data)
+                                meetingEventBus.send(MeetingAction.MeetingCreate(meeting = result.data))
                             } else {
-                                updateMeeting(ZonedDateTime.now(), result.data)
+                                meetingEventBus.send(MeetingAction.MeetingUpdate(meeting = result.data))
                             }
                             setUiEvent(MeetingWriteUiEvent.NavigateToBack)
                         }
 
-                        is Result.Error -> when(result.exception) {
+                        is Result.Error -> when (result.exception) {
                             is IOException -> setUiEvent(MeetingWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
                             else -> setUiEvent(MeetingWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
                         }

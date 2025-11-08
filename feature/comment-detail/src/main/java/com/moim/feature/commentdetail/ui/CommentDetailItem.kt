@@ -40,7 +40,7 @@ import com.moim.core.common.model.Comment
 import com.moim.core.common.model.isChild
 import com.moim.core.common.model.item.CommentTextUiModel
 import com.moim.core.common.model.item.CommentUiModel
-import com.moim.core.common.util.decimalFormatString
+import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton

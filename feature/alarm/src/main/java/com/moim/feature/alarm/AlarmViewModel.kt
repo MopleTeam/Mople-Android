@@ -7,11 +7,11 @@ import com.moim.core.common.model.NotificationType
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
 import com.moim.core.data.datasource.notification.NotificationRepository
 import com.moim.core.domain.usecase.GetNotificationsUseCase
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterIsInstance

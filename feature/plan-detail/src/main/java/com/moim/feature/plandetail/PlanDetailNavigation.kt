@@ -11,7 +11,7 @@ import androidx.navigation.compose.composable
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
-import com.moim.core.common.route.DetailRoute
+import com.moim.core.ui.route.DetailRoute
 
 fun NavGraphBuilder.planDetailScreen(
     padding: PaddingValues,

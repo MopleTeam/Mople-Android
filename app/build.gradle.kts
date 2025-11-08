@@ -70,6 +70,7 @@ dependencies {
     implementation(projects.core.data)
     implementation(projects.core.domain)
     implementation(projects.core.common)
+    implementation(projects.core.ui)
     implementation(projects.feature.main)
     implementation(projects.feature.intro)
 

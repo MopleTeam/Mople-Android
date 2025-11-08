@@ -38,6 +38,10 @@ dependencies {
     // Retrofit
     implementation(libs.bundles.retrofit)
 
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messageing)
+
     // Log tracker
     implementation(libs.timber)
 }

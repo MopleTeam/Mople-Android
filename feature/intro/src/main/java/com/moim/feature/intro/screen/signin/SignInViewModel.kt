@@ -9,13 +9,12 @@ import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.exception.NotFoundException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.FirebaseUtil
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.ToastMessage
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.token.TokenRepository
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.ToastMessage
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
@@ -65,7 +64,7 @@ class SignInViewModel @Inject constructor(
     private fun signIn(accessToken: String, email: String) {
         viewModelScope.launch {
             authRepository.signIn(socialType = SOCIAL_TYPE_KAKAO, token = accessToken, email = email)
-                .flatMapLatest { tokenRepository.setFcmToken(FirebaseUtil.getFirebaseMessageToken() ?: "") }
+                .flatMapLatest { tokenRepository.setFcmToken() }
                 .asResult()
                 .onEach { setLoading(it is Result.Loading) }
                 .collect { result ->

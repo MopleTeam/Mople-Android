@@ -9,7 +9,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.moim.core.common.route.DetailRoute
+import com.moim.core.ui.route.DetailRoute
 
 fun NavGraphBuilder.imageViewerScreen(
     padding: PaddingValues,

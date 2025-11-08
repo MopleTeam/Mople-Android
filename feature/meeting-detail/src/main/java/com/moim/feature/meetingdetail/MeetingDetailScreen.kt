@@ -29,12 +29,6 @@ import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.asPlanItem
-import com.moim.core.common.util.externalShareForUrl
-import com.moim.core.common.view.ObserveAsEvents
-import com.moim.core.common.view.isError
-import com.moim.core.common.view.isLoading
-import com.moim.core.common.view.isSuccess
-import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -47,6 +41,12 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
+import com.moim.core.ui.util.externalShareForUrl
+import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.core.ui.view.isError
+import com.moim.core.ui.view.isLoading
+import com.moim.core.ui.view.isSuccess
+import com.moim.core.ui.view.showToast
 import com.moim.feature.meetingdetail.ui.MeetingDetailHeader
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanContent
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanEmpty

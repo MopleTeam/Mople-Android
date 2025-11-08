@@ -1,14 +1,10 @@
 package com.moim.core.common.model.item
 
-import android.os.Bundle
-import androidx.navigation.NavType
 import com.moim.core.common.model.Plan
 import com.moim.core.common.model.Review
 import com.moim.core.common.model.ReviewImage
 import com.moim.core.common.model.util.KZonedDateTimeSerializer
-import com.moim.core.common.model.util.encoding
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import java.time.ZonedDateTime
 
 @Serializable
@@ -124,29 +120,4 @@ fun Review.asPlanItem(): PlanItem {
         reviewImages = images,
         commentCount = commentCount,
     )
-}
-
-val PlanItemType = object : NavType<PlanItem?>(isNullableAllowed = true) {
-    override fun get(bundle: Bundle, key: String): PlanItem? {
-        return bundle.getString(key)?.let { Json.decodeFromString(it) }
-    }
-
-    override fun parseValue(value: String): PlanItem? {
-        return Json.decodeFromString(value)
-    }
-
-    override fun put(bundle: Bundle, key: String, value: PlanItem?) {
-        if (value != null) bundle.putString(key, Json.encodeToString(PlanItem.serializer(), value))
-    }
-
-    override fun serializeAsValue(value: PlanItem?): String {
-        return value
-            ?.let {
-                Json.encodeToString(
-                    serializer = PlanItem.serializer(),
-                    value = it.copy(meetingImageUrl = it.meetingImageUrl.encoding())
-                )
-            }
-            ?: ""
-    }
 }

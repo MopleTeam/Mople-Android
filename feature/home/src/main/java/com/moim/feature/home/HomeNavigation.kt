@@ -6,7 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.moim.core.common.model.ViewIdType
-import com.moim.core.common.route.MainRoute
+import com.moim.core.ui.route.MainRoute
 
 fun NavGraphBuilder.homeScreen(
     padding: PaddingValues,

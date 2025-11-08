@@ -1,4 +1,4 @@
-package com.moim.core.common.util
+package com.moim.core.ui.message
 
 import android.os.Bundle
 import com.google.firebase.messaging.FirebaseMessagingService

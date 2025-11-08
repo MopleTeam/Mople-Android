@@ -24,8 +24,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.ViewIdType
-import com.moim.core.common.view.ObserveAsEvents
-import com.moim.core.common.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.component.MoimAlertDialog
@@ -34,6 +32,8 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
+import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.core.ui.view.showToast
 import com.moim.feature.meetingsetting.ui.MeetingSettingParticipantsInfo
 import com.moim.feature.meetingsetting.ui.MeetingSettingProfile
 import com.moim.feature.meetingsetting.ui.MeetingSettingTopAppbar

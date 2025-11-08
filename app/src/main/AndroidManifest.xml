@@ -42,7 +42,7 @@
         </provider>
 
         <service
-            android:name="com.moim.core.common.util.MoimMessagingService"
+            android:name="com.moim.core.ui.message.MoimMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

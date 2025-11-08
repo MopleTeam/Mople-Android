@@ -1,14 +1,10 @@
-package com.moim.core.common.route
+package com.moim.core.ui.route
 
 import androidx.annotation.DrawableRes
 import com.moim.core.common.model.Comment
-import com.moim.core.common.model.CommentType
 import com.moim.core.common.model.Meeting
-import com.moim.core.common.model.MeetingType
-import com.moim.core.common.model.ViewIdNavType
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
-import com.moim.core.common.model.item.PlanItemType
 import kotlinx.serialization.Serializable
 import kotlin.reflect.typeOf
 

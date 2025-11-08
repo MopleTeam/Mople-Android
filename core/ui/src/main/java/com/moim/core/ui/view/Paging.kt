@@ -1,4 +1,4 @@
-package com.moim.core.common.view
+package com.moim.core.ui.view
 
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState

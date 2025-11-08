@@ -1,4 +1,4 @@
-package com.moim.core.common.util
+package com.moim.core.remote.util
 
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging

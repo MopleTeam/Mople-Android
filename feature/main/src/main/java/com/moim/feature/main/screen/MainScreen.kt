@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
-import com.moim.core.common.view.ObserveAsEvents
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.feature.alarm.alarmScreen
 import com.moim.feature.alarm.navigateToAlarm
 import com.moim.feature.alarmsetting.alarmSettingScreen

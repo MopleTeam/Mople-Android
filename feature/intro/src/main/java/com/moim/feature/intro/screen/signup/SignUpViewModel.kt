@@ -6,16 +6,15 @@ import com.moim.core.common.consts.PATTERN_NICKNAME
 import com.moim.core.common.consts.SOCIAL_TYPE_KAKAO
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
-import com.moim.core.common.util.FirebaseUtil
-import com.moim.core.common.view.BaseViewModel
-import com.moim.core.common.view.ToastMessage
-import com.moim.core.common.view.UiAction
-import com.moim.core.common.view.UiEvent
-import com.moim.core.common.view.UiState
-import com.moim.core.common.view.checkState
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.token.TokenRepository
 import com.moim.core.data.datasource.user.UserRepository
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.ToastMessage
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
+import com.moim.core.ui.view.checkState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
@@ -113,7 +112,7 @@ class SignUpViewModel @Inject constructor(
                         nickname = nickname,
                         profileUrl = profileUrl
                     )
-                    .flatMapLatest { tokenRepository.setFcmToken(FirebaseUtil.getFirebaseMessageToken() ?: "") }
+                    .flatMapLatest { tokenRepository.setFcmToken() }
                     .asResult()
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->

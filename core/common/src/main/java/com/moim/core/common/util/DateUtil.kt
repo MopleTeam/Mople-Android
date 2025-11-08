@@ -1,6 +1,5 @@
 package com.moim.core.common.util
 
-import timber.log.Timber
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -24,7 +23,6 @@ fun ZonedDateTime?.parseDateString(pattern: String): String {
         val formatter = DateTimeFormatter.ofPattern(pattern)
         this?.format(formatter) ?: throw IllegalArgumentException()
     } catch (_: Exception) {
-        Timber.e("[parseZonedDateTime] parse dateTime = $this")
         this.toString()
     }
 }
@@ -49,7 +47,6 @@ fun String?.parseZonedDateTime(): ZonedDateTime {
         val formatterWithTimezone = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssXXX")
         ZonedDateTime.parse("$this+09:00", formatterWithTimezone).withZoneSameInstant(ZoneId.systemDefault())
     } catch (_: Exception) {
-        Timber.e("[parseZonedDateTime] parse text = $this")
         ZonedDateTime.now()
     }
 }
