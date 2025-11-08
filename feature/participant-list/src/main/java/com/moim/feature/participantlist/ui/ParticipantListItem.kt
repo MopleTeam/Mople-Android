@@ -30,6 +30,9 @@ import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.participantlist.ParticipantListUiAction
 
+private const val PLAN_WRITER = "CREATOR"
+private const val MEET_WRITER = "HOST"
+
 @Composable
 fun ParticipantListItem(
     modifier: Modifier = Modifier,
@@ -54,10 +57,15 @@ fun ParticipantListItem(
                 errorImage = painterResource(R.drawable.ic_empty_user_logo),
             )
 
-            if (participant.userRole == "CREATOR" || participant.userRole == "HOST") {
+            if (participant.userRole == MEET_WRITER && isMeeting) {
                 CreatorIcon(
                     modifier = Modifier.align(Alignment.BottomEnd),
-                    isMeeting = isMeeting
+                    isMeeting = true
+                )
+            } else if (participant.userRole == PLAN_WRITER && !isMeeting) {
+                CreatorIcon(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    isMeeting = false
                 )
             }
         }

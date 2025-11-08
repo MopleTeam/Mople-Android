@@ -272,6 +272,7 @@ class CommentDetailViewModel @Inject constructor(
     private fun uploadComment(updateComment: Comment?) {
         viewModelScope.launch {
             uiState.checkState<CommentDetailUiState.Success> {
+                val isCreateComment = updateComment == null
                 val tagMessage = createMentionTagMessage(
                     mentionUsers = selectedMentions,
                     message = commentState.text.toString()
@@ -280,7 +281,8 @@ class CommentDetailViewModel @Inject constructor(
                     mentionUsers = selectedMentions,
                     message = tagMessage
                 )
-                if (updateComment == null) {
+
+                if (isCreateComment) {
                     commentRepository.createReplyComment(
                         postId = postId,
                         commentId = parentComment.comment.commentId,
@@ -299,7 +301,7 @@ class CommentDetailViewModel @Inject constructor(
                             is Result.Loading -> return@collect
 
                             is Result.Success -> {
-                                if (updateComment == null) {
+                                if (isCreateComment) {
                                     val comment = parentComment.comment
                                     commentEventBus.send(
                                         CommentAction.CommentCreate(commentUiModel = result.data.createCommentUiModel())
@@ -313,7 +315,7 @@ class CommentDetailViewModel @Inject constructor(
                                     commentState.clearText()
                                     setUiState(copy(selectedMentions = emptyList()))
                                 } else {
-                                    commentEventBus.send(CommentAction.CommentCreate(commentUiModel = result.data.createCommentUiModel()))
+                                    commentEventBus.send(CommentAction.CommentUpdate(commentUiModel = result.data.createCommentUiModel()))
                                     commentState.clearText()
                                     setUiState(
                                         copy(
@@ -424,11 +426,11 @@ class CommentDetailViewModel @Inject constructor(
         }
 
         return if (matchLength > 0) {
-            val beforeMatch = currentMessage.substring(0, insertPosition - matchLength)
+            val beforeMatch = currentMessage.take(insertPosition - matchLength)
             val afterCursor = currentMessage.substring(insertPosition)
             "$beforeMatch$inputKeyword $afterCursor"
         } else {
-            currentMessage.substring(0, insertPosition) +
+            currentMessage.take(insertPosition) +
                     inputKeyword + " " +
                     currentMessage.substring(insertPosition)
         }
