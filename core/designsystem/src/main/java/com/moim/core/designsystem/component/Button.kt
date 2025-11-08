@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
@@ -231,7 +229,7 @@ private fun MoimPrimaryButtonPreview() {
                     onClick = {}
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_add),
                         contentDescription = ""
                     )
                 }

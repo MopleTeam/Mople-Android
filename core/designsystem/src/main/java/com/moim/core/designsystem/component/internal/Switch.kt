@@ -17,10 +17,8 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.LocalUseFallbackRippleImplementation
 import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -94,12 +92,7 @@ internal fun rippleOrFallbackImplementation(
     bounded: Boolean = true,
     radius: Dp = Dp.Unspecified,
     color: Color = Color.Unspecified,
-): Indication =
-    if (LocalUseFallbackRippleImplementation.current) {
-        rememberRipple(bounded, radius, color)
-    } else {
-        ripple(bounded, radius, color)
-    }
+): Indication = rememberRipple(bounded, radius, color)
 
 internal data class ThumbElement(
     val interactionSource: InteractionSource,
