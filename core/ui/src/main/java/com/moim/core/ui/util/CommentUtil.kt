@@ -56,11 +56,15 @@ fun filterMentionedUsers(
 
 
 fun Comment.createCommentUiModel(): CommentUiModel {
-    val commentTextUiModel = content
-        .parseTextWithLinks()
-        .map { (isWebLink, text) ->
+    val commentTexts = content.parseTextWithLinks()
+    val commentTextUiModel =
+        commentTexts.map { (isWebLink, text) ->
             if (isWebLink) {
-                listOf(CommentTextUiModel.HyperLinkText(content = text))
+                if (text == openGraph?.url && commentTexts.size == 1) {
+                    emptyList()
+                } else {
+                    listOf(CommentTextUiModel.HyperLinkText(content = text))
+                }
             } else {
                 val users = mentions.map {
                     User(
@@ -76,7 +80,11 @@ fun Comment.createCommentUiModel(): CommentUiModel {
             }
         }.flatten()
 
-    return CommentUiModel(this, commentTextUiModel)
+    return CommentUiModel(
+        comment = this,
+        texts = commentTextUiModel,
+        openGraph = this.openGraph,
+    )
 }
 
 private fun parseCommentText(

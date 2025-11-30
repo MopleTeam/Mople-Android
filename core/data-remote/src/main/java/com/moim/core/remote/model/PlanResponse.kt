@@ -27,6 +27,8 @@ data class PlanResponse(
     val planAddress: String = "",
     @SerialName("title")
     val placeName: String = "",
+    @SerialName("description")
+    val description : String = "",
     @SerialName("lot")
     val planLongitude: Double = 0.0,
     @SerialName("lat")
@@ -56,6 +58,7 @@ fun PlanResponse.asItem(): Plan {
         planLongitude = planLongitude,
         planAddress = planAddress,
         placeName = placeName,
+        description = description,
         weatherAddress = weatherAddress,
         weatherIconUrl = weatherIconUrl,
         temperature = temperature,

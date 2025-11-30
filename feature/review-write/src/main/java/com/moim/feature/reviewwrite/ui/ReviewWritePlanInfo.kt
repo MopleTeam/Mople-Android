@@ -90,7 +90,7 @@ fun ReviewWritePlanInfo(
         )
         PlanInfoItem(
             startIconRes = R.drawable.ic_location,
-            text = review.address
+            text = review.address.ifEmpty { stringResource(R.string.common_empty_place) }
         )
         Spacer(Modifier.height(80.dp))
     }

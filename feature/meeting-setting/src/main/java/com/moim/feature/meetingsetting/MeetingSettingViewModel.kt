@@ -136,17 +136,40 @@ sealed interface MeetingSettingUiState : UiState {
 
 sealed interface MeetingSettingUiAction : UiAction {
     data object OnClickBack : MeetingSettingUiAction
+
     data object OnClickMeetingExit : MeetingSettingUiAction
-    data class OnClickMeetingParticipants(val viewIdType: ViewIdType) : MeetingSettingUiAction
-    data class OnClickMeetingEdit(val meeting: Meeting) : MeetingSettingUiAction
-    data class OnShowMeetingExitDialog(val isShow: Boolean) : MeetingSettingUiAction
-    data class OnShowMeetingDeleteDialog(val isShow: Boolean) : MeetingSettingUiAction
+
+    data class OnClickMeetingParticipants(
+        val viewIdType: ViewIdType
+    ) : MeetingSettingUiAction
+
+    data class OnClickMeetingEdit(
+        val meeting: Meeting
+    ) : MeetingSettingUiAction
+
+    data class OnShowMeetingExitDialog(
+        val isShow: Boolean
+    ) : MeetingSettingUiAction
+
+    data class OnShowMeetingDeleteDialog(
+        val isShow: Boolean
+    ) : MeetingSettingUiAction
 }
 
 sealed interface MeetingSettingUiEvent : UiEvent {
     data object NavigateToBack : MeetingSettingUiEvent
+
     data object NavigateToBackForDelete : MeetingSettingUiEvent
-    data class NavigateToMeetingWrite(val meeting: Meeting) : MeetingSettingUiEvent
-    data class NavigateToMeetingParticipants(val viewIdType: ViewIdType) : MeetingSettingUiEvent
-    data class ShowToastMessage(val message: ToastMessage) : MeetingSettingUiEvent
+
+    data class NavigateToMeetingWrite(
+        val meeting: Meeting
+    ) : MeetingSettingUiEvent
+
+    data class NavigateToMeetingParticipants(
+        val viewIdType: ViewIdType
+    ) : MeetingSettingUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage
+    ) : MeetingSettingUiEvent
 }

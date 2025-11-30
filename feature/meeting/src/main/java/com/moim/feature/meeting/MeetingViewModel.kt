@@ -172,13 +172,21 @@ class MeetingViewModel @Inject constructor(
 }
 
 sealed interface MeetingUiAction : UiAction {
-    data class OnClickMeeting(val meetingId: String) : MeetingUiAction
+    data class OnClickMeeting(
+        val meetingId: String
+    ) : MeetingUiAction
+
     data object OnClickMeetingWrite : MeetingUiAction
+
     data object OnClickRefresh : MeetingUiAction
 }
 
 sealed interface MeetingUiEvent : UiEvent {
     data object NavigateToMeetingWrite : MeetingUiEvent
-    data class NavigateToMeetingDetail(val meetingId: String) : MeetingUiEvent
+
+    data class NavigateToMeetingDetail(
+        val meetingId: String
+    ) : MeetingUiEvent
+
     data object RefreshPagingData : MeetingUiEvent
 }

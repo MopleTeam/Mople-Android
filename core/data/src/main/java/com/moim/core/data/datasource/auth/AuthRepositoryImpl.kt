@@ -3,9 +3,9 @@ package com.moim.core.data.datasource.auth
 import com.moim.core.common.consts.DEVICE_TYPE_ANDROID
 import com.moim.core.common.model.Token
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.util.catchFlow
 import com.moim.core.local.PreferenceStorage
+import com.moim.core.remote.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.remote.model.asItem
 import com.moim.core.remote.service.AuthApi
 import com.moim.core.remote.util.convertToToken

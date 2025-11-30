@@ -1,4 +1,4 @@
-package com.moim.core.data.util
+package com.moim.core.remote.util
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext

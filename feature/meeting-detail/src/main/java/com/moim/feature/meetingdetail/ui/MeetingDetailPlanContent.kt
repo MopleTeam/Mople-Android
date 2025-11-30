@@ -368,6 +368,13 @@ private fun MeetingWeatherInfo(
     address: String,
     weatherIconUrl: String,
 ) {
+    val notFoundText = if (address.isEmpty()) {
+        stringResource(R.string.common_empty_place_for_guest)
+    } else if (weatherIconUrl.isEmpty()) {
+        stringResource(R.string.common_weather_not_found)
+    } else {
+        ""
+    }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -389,12 +396,12 @@ private fun MeetingWeatherInfo(
             )
         }
 
-        if (weatherIconUrl.isEmpty()) {
+        if (notFoundText.isNotEmpty()) {
             MoimText(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(end = 32.dp),
-                text = stringResource(R.string.common_weather_not_found),
+                text = notFoundText,
                 textAlign = TextAlign.Center,
                 style = MoimTheme.typography.body02.medium,
                 color = MoimTheme.colors.gray.gray04

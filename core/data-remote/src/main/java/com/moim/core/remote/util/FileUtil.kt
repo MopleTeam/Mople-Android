@@ -1,4 +1,4 @@
-package com.moim.core.data.util
+package com.moim.core.remote.util
 
 import android.content.ContentResolver
 import android.content.Context

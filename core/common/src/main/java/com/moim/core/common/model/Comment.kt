@@ -19,6 +19,7 @@ data class Comment(
     val mentions: List<Writer> = emptyList(),
     @Serializable(with = KZonedDateTimeSerializer::class)
     val commentAt: ZonedDateTime,
+    val openGraph: OpenGraph? = null,
 )
 
 fun Comment.isChild(): Boolean {

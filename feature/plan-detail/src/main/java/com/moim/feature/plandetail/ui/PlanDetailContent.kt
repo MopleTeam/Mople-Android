@@ -2,12 +2,15 @@ package com.moim.feature.plandetail.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,6 +24,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.util.parseDateString
@@ -37,6 +41,7 @@ import com.moim.feature.plandetail.PlanDetailUiAction
 @Composable
 fun PlanDetailContent(
     modifier: Modifier = Modifier,
+    isMyPlan: Boolean,
     planItem: PlanItem,
     isShowApplyButton: Boolean,
     onUiAction: OnPlanDetailUiAction = {}
@@ -79,6 +84,16 @@ fun PlanDetailContent(
             maxLine = 2,
         )
 
+        if (planItem.description.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            MoimText(
+                text = planItem.description,
+                style = MoimTheme.typography.body01.regular,
+                color = MoimTheme.colors.gray.gray03,
+                singleLine = false,
+            )
+        }
+
         Spacer(Modifier.height(16.dp))
 
         PlanInfoItem(
@@ -96,7 +111,7 @@ fun PlanDetailContent(
         )
         PlanInfoItem(
             startIconRes = R.drawable.ic_location,
-            text = planItem.loadAddress,
+            text = planItem.loadAddress.ifBlank { stringResource(R.string.plan_detail_empty_place) },
         )
 
         if (planItem.latitude != 0.0 && planItem.longitude != 0.0) {
@@ -105,6 +120,11 @@ fun PlanDetailContent(
                 latitude = planItem.latitude,
                 longitude = planItem.longitude,
                 onUiAction = onUiAction,
+            )
+        } else if (isMyPlan && planItem.isPlanAtBefore) {
+            Spacer(Modifier.height(20.dp))
+            PlanPlaceEmptyCard(
+                onClick = { onUiAction(PlanDetailUiAction.OnClickPlanUpdate) }
             )
         }
 
@@ -173,5 +193,53 @@ private fun PlanInfoItem(
                 tint = MoimTheme.colors.icon
             )
         }
+    }
+}
+
+@Composable
+private fun PlanPlaceEmptyCard(
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(160.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MoimTheme.colors.bg.input)
+            .onSingleClick(onClick = onClick),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            modifier = Modifier.size(24.dp),
+            imageVector = ImageVector.vectorResource(R.drawable.ic_add),
+            contentDescription = "",
+            tint = MoimTheme.colors.icon
+        )
+        Spacer(Modifier.height(8.dp))
+        MoimText(
+            text = stringResource(R.string.common_empty_place_for_host),
+            style = MoimTheme.typography.body01.medium,
+            color = MoimTheme.colors.gray.gray05,
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0XFFFFFF)
+@Composable
+private fun PlanDetailContentPreview() {
+    MoimTheme {
+        PlanDetailContent(
+            isMyPlan = true,
+            planItem = PlanItem(
+                isPlanAtBefore = true,
+                meetingName = "크리스마스 모험가 클럽",
+                planName = "연말 파티",
+                placeName = "",
+                description = "대신귀\n여운알\n파카를\n드리겠\n습니다",
+            ),
+            isShowApplyButton = false,
+            onUiAction = {},
+        )
     }
 }

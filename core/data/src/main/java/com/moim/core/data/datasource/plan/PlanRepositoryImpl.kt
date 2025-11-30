@@ -5,6 +5,7 @@ import com.moim.core.common.model.Plan
 import com.moim.core.common.model.PlanReviewContainer
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
+import com.moim.core.data.datasource.plan.PlanRepositoryImpl.Companion.KEY_DESCRIPTION
 import com.moim.core.data.util.catchFlow
 import com.moim.core.remote.model.PlaceResponse
 import com.moim.core.remote.model.PlanResponse
@@ -68,7 +69,7 @@ internal class PlanRepositoryImpl @Inject constructor(
     ): PaginationContainer<List<User>> {
         return try {
             planApi.getPlanParticipants(
-                planId =  planId,
+                planId = planId,
                 cursor = cursor,
                 size = size,
             ).asItem {
@@ -93,6 +94,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         planTime: String,
         planAddress: String,
         planWeatherAddress: String,
+        planDescription: String?,
         title: String,
         longitude: Double,
         latitude: Double
@@ -107,7 +109,8 @@ internal class PlanRepositoryImpl @Inject constructor(
                     KEY_TITLE to title,
                     KEY_LOT to longitude,
                     KEY_LAT to latitude,
-                    KEY_WEATHER_ADDRESS to planWeatherAddress
+                    KEY_WEATHER_ADDRESS to planWeatherAddress,
+                    KEY_DESCRIPTION to planDescription,
                 )
             ).asItem()
         )
@@ -119,6 +122,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         planTime: String,
         planAddress: String,
         planWeatherAddress: String,
+        planDescription: String?,
         title: String,
         longitude: Double,
         latitude: Double
@@ -132,7 +136,8 @@ internal class PlanRepositoryImpl @Inject constructor(
                     KEY_PLAN_ADDRESS to planAddress,
                     KEY_LOT to longitude,
                     KEY_LAT to latitude,
-                    KEY_WEATHER_ADDRESS to planWeatherAddress
+                    KEY_WEATHER_ADDRESS to planWeatherAddress,
+                    KEY_DESCRIPTION to planDescription,
                 )
             ).asItem()
         )
@@ -159,6 +164,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         private const val KEY_PLAN_ID = "planId"
         private const val KEY_PLAN_TIME = "planTime"
         private const val KEY_PLAN_ADDRESS = "planAddress"
+        private const val KEY_DESCRIPTION = "description"
         private const val KEY_WEATHER_ADDRESS = "weatherAddress"
         private const val KEY_NAME = "name"
         private const val KEY_TITLE = "title"

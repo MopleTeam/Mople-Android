@@ -85,11 +85,20 @@ class SignInViewModel @Inject constructor(
 }
 
 sealed interface SignInUiAction : UiAction {
-    data class OnClickKakaoLogin(val context: Context) : SignInUiAction
+    data class OnClickKakaoLogin(
+        val context: Context
+    ) : SignInUiAction
 }
 
 sealed interface SignInUiEvent : UiEvent {
-    data class NavigateToSignUp(val email: String, val token: String) : SignInUiEvent
+    data class NavigateToSignUp(
+        val email: String,
+        val token: String
+    ) : SignInUiEvent
+
     data object NavigateToMain : SignInUiEvent
-    data class ShowToastMessage(val message: ToastMessage) : SignInUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage
+    ) : SignInUiEvent
 }

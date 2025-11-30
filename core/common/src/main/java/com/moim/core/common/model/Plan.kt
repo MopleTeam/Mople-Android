@@ -19,6 +19,7 @@ data class Plan(
     val planLongitude: Double = 0.0,
     val planLatitude: Double = 0.0,
     val placeName: String = "",
+    val description: String = "",
     val weatherAddress: String = "",
     val weatherIconUrl: String = "",
     val temperature: Float = 0f,

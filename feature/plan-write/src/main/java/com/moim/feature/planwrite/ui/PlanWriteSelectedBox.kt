@@ -28,9 +28,10 @@ import com.moim.core.designsystem.theme.MoimTheme
 @Composable
 fun PlanWriteSelectedBox(
     modifier: Modifier = Modifier,
-    titleText: String,
-    hintText: String,
-    valueText: String? = null,
+    title: String,
+    hint: String,
+    titleOption: String? = null,
+    value: String? = null,
     @DrawableRes iconRes: Int? = null,
     enable: Boolean = true,
     onClick: () -> Unit
@@ -38,11 +39,24 @@ fun PlanWriteSelectedBox(
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
-        MoimText(
-            text = titleText,
-            style = MoimTheme.typography.title03.semiBold,
-            color = MoimTheme.colors.gray.gray01
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            MoimText(
+                text = title,
+                style = MoimTheme.typography.title03.semiBold,
+                color = MoimTheme.colors.gray.gray01
+            )
+
+            if (titleOption != null) {
+                Spacer(Modifier.width(4.dp))
+                MoimText(
+                    text = titleOption,
+                    style = MoimTheme.typography.body01.regular,
+                    color = MoimTheme.colors.gray.gray04
+                )
+            }
+        }
         Spacer(Modifier.height(8.dp))
 
         Row(
@@ -70,9 +84,9 @@ fun PlanWriteSelectedBox(
 
             MoimText(
                 modifier = Modifier.fillMaxWidth(),
-                text = if (valueText.isNullOrEmpty()) hintText else valueText,
+                text = if (value.isNullOrEmpty()) hint else value,
                 style = MoimTheme.typography.body01.regular,
-                color = if (valueText.isNullOrEmpty()) MoimTheme.colors.gray.gray05 else MoimTheme.colors.gray.gray01,
+                color = if (value.isNullOrEmpty()) MoimTheme.colors.gray.gray05 else MoimTheme.colors.gray.gray01,
             )
         }
     }
@@ -89,8 +103,9 @@ private fun PlanWriteSelectedBoxPreview() {
                 .padding(20.dp)
         ) {
             PlanWriteSelectedBox(
-                titleText = "날짜 선택",
-                hintText = "날짜를 선택해주세요",
+                title = "날짜 선택",
+                titleOption = "(선택)",
+                hint = "날짜를 선택해주세요",
                 enable = false,
                 iconRes = R.drawable.ic_calendar,
                 onClick = {},

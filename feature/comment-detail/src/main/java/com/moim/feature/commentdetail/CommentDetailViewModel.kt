@@ -13,6 +13,8 @@ import androidx.paging.insertHeaderItem
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.moim.core.common.exception.NetworkException
+import com.moim.core.common.exception.NotFoundException
+import com.moim.core.common.exception.UnAuthorizedException
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.User
 import com.moim.core.common.model.isChild
@@ -66,30 +68,23 @@ class CommentDetailViewModel @Inject constructor(
     private val commentEventBus: EventBus<CommentAction>,
 ) : BaseViewModel() {
 
-    private val meetingDetailArgs
+    private val commentDetailArgs
         get() = savedStateHandle.toRoute<DetailRoute.CommentDetail>(DetailRoute.CommentDetail.typeMap)
 
-    private val meetId = meetingDetailArgs.meetId
-    private val postId = meetingDetailArgs.postId
-    private val comment = requireNotNull(meetingDetailArgs.comment)
+    private val meetId = commentDetailArgs.meetId
+    private val postId = commentDetailArgs.postId
+    private val comment = requireNotNull(commentDetailArgs.comment)
     private var searchJob: Job? = null
 
     private val commentActionReceiver = commentEventBus
         .action
         .actionStateIn(viewModelScope, CommentAction.None)
 
-    private var _comments = flowOf(postId)
-        .flatMapLatest { postId ->
-            getReplyCommentUseCase(
-                GetReplyCommentUseCase.Params(
-                    postId = postId,
-                    commentId = comment.commentId
-                )
-            )
-        }
-        .mapLatest { it.map { comment -> comment.createCommentUiModel() } }
-        .mapLatest { it.insertHeaderItem(item = comment.createCommentUiModel()) }
-        .cachedIn(viewModelScope)
+    private var _comments =
+        getReplyCommentUseCase(GetReplyCommentUseCase.Params(postId = postId, commentId = comment.commentId))
+            .mapLatest { it.map { comment -> comment.createCommentUiModel() } }
+            .mapLatest { it.insertHeaderItem(item = comment.createCommentUiModel()) }
+            .cachedIn(viewModelScope)
     private val comments = commentActionReceiver.flatMapLatest { receiver ->
         when (receiver) {
             is CommentAction.None -> _comments
@@ -166,7 +161,6 @@ class CommentDetailViewModel @Inject constructor(
             }
         }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-
     private val commentDetailUiState =
         userRepository
             .getUser()
@@ -178,9 +172,22 @@ class CommentDetailViewModel @Inject constructor(
             }.asResult()
             .mapLatest { result ->
                 when (result) {
-                    is Result.Loading -> CommentDetailUiState.Loading
-                    is Result.Success -> result.data
-                    is Result.Error -> CommentDetailUiState.Error
+                    is Result.Loading -> {
+                        CommentDetailUiState.Loading
+                    }
+
+                    is Result.Success -> {
+                        result.data
+                    }
+
+                    is Result.Error -> {
+                        when (result.exception) {
+                            is UnAuthorizedException,
+                            is NotFoundException -> CommentDetailUiState.NotFoundError
+
+                            else -> CommentDetailUiState.CommonError
+                        }
+                    }
                 }
             }.restartableStateIn(viewModelScope, SharingStarted.Lazily, CommentDetailUiState.Loading)
 
@@ -301,8 +308,9 @@ class CommentDetailViewModel @Inject constructor(
                             is Result.Loading -> return@collect
 
                             is Result.Success -> {
+                                val comment = parentComment.comment
+
                                 if (isCreateComment) {
-                                    val comment = parentComment.comment
                                     commentEventBus.send(
                                         CommentAction.CommentCreate(commentUiModel = result.data.createCommentUiModel())
                                     )
@@ -504,23 +512,62 @@ sealed interface CommentDetailUiState : UiState {
         val isShowMentionDialog: Boolean = false,
     ) : CommentDetailUiState
 
-    data object Error : CommentDetailUiState
+    data object NotFoundError : CommentDetailUiState
+
+    data object CommonError : CommentDetailUiState
 }
 
 sealed interface CommentDetailAction : UiAction {
     data object OnClickBack : CommentDetailAction
+
     data object OnClickRefresh : CommentDetailAction
-    data class OnClickMentionUser(val user: User) : CommentDetailAction
-    data class OnClickUserProfileImage(val imageUrl: String, val userName: String) : CommentDetailAction
-    data class OnClickCommentLike(val comment: Comment) : CommentDetailAction
-    data class OnClickCommentReport(val comment: Comment) : CommentDetailAction
-    data class OnClickCommentUpdate(val comment: Comment) : CommentDetailAction
-    data class OnClickCommentDelete(val comment: Comment) : CommentDetailAction
-    data class OnClickCommentUpload(val updateComment: Comment?) : CommentDetailAction
-    data class OnClickCommentWebLink(val webLink: String) : CommentDetailAction
-    data class OnShowMentionDialog(val keyword: String?) : CommentDetailAction
-    data class OnShowCommentEditDialog(val isShow: Boolean, val comment: Comment?) : CommentDetailAction
-    data class OnShowCommentReportDialog(val isShow: Boolean, val comment: Comment?) : CommentDetailAction
+
+    data class OnClickMentionUser(
+        val user: User
+    ) : CommentDetailAction
+
+    data class OnClickUserProfileImage(
+        val imageUrl: String,
+        val userName: String
+    ) : CommentDetailAction
+
+    data class OnClickCommentLike(
+        val comment: Comment
+    ) : CommentDetailAction
+
+    data class OnClickCommentReport(
+        val comment: Comment
+    ) : CommentDetailAction
+
+    data class OnClickCommentUpdate(
+        val comment: Comment
+    ) : CommentDetailAction
+
+    data class OnClickCommentDelete(
+        val comment: Comment
+    ) : CommentDetailAction
+
+    data class OnClickCommentUpload(
+        val updateComment: Comment?
+    ) : CommentDetailAction
+
+    data class OnClickCommentWebLink(
+        val webLink: String
+    ) : CommentDetailAction
+
+    data class OnShowMentionDialog(
+        val keyword: String?
+    ) : CommentDetailAction
+
+    data class OnShowCommentEditDialog(
+        val isShow: Boolean,
+        val comment: Comment?
+    ) : CommentDetailAction
+
+    data class OnShowCommentReportDialog(
+        val isShow: Boolean,
+        val comment: Comment?
+    ) : CommentDetailAction
 }
 
 sealed interface CommentDetailUiEvent : UiEvent {

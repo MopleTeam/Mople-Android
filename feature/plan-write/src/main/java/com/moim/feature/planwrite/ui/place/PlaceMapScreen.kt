@@ -24,7 +24,7 @@ import com.naver.maps.map.compose.MarkerComposable
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
-import com.naver.maps.map.compose.rememberMarkerState
+import com.naver.maps.map.compose.rememberUpdatedMarkerState
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
@@ -38,7 +38,7 @@ fun PlaceMapScreen(
     onUiAction: (PlanWriteUiAction) -> Unit
 ) {
     val cameraPositionState = rememberCameraPositionState()
-    val markerState = rememberMarkerState(position = LatLng(markerLatitude, markerLongitude))
+    val markerState = rememberUpdatedMarkerState(position = LatLng(markerLatitude, markerLongitude))
 
     TrackScreenViewEvent(screenName = "plan_write_map")
 

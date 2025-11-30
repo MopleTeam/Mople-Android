@@ -19,9 +19,13 @@ data class Review(
     val latitude: Double = 0.0, // x
     val longitude: Double = 0.0, // y
     val placeName: String = "",
+    val description: String = "",
     val memberCount: Int = 1,
     val commentCount: Int = 0,
     val images: List<ReviewImage> = emptyList(),
+    val temperature: Float = 0f,
+    val weatherIcon: String = "",
+    val weatherAddress: String = "",
     @Serializable(KZonedDateTimeSerializer::class)
     val reviewAt: ZonedDateTime,
 )

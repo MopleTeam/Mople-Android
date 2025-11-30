@@ -3,7 +3,9 @@ package com.moim.core.designsystem.common
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +34,7 @@ fun ErrorScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.ic_warning),
+            imageVector = ImageVector.vectorResource(R.drawable.ic_warning_fill),
             contentDescription = "",
             tint = Color.Unspecified
         )
@@ -65,6 +67,50 @@ fun ErrorScreen(
     }
 }
 
+@Composable
+fun NotFoundErrorScreen(
+    modifier: Modifier = Modifier,
+    description: String? = null,
+    onClickBack: () -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Spacer(Modifier.weight(1f))
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.ic_warning),
+            contentDescription = "",
+            tint = Color.Unspecified
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+
+        MoimText(
+            text = description ?: stringResource(id = R.string.common_error_not_found_feed),
+            textAlign = TextAlign.Center,
+            style = MoimTheme.typography.title03.medium,
+            singleLine = false,
+            color = MoimTheme.colors.gray.gray05,
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        MoimPrimaryButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            onClick = onClickBack,
+            text = stringResource(R.string.common_error_not_found_feed_btn)
+        )
+
+        Spacer(Modifier.height(8.dp))
+    }
+}
+
+
 @Preview
 @Composable
 private fun ErrorScreenPreview() {
@@ -72,6 +118,17 @@ private fun ErrorScreenPreview() {
         ErrorScreen(
             modifier = Modifier.containerScreen(),
             onClickRefresh = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun NotFoundErrorScreenPreview() {
+    MoimTheme {
+        NotFoundErrorScreen(
+            modifier = Modifier.containerScreen(),
+            onClickBack = {}
         )
     }
 }

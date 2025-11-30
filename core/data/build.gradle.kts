@@ -19,11 +19,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines)
     implementation(libs.kotlinx.serialization.json)
 
-    implementation(libs.okhttp.logging)
-
-    // image compress
-    implementation(libs.compressor)
-
     // Log tracker
     implementation(libs.timber)
 }

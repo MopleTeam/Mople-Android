@@ -3,11 +3,13 @@ package com.moim.feature.home
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.Plan
+import com.moim.core.common.model.User
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.asPlan
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.plan.PlanRepository
+import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
 import com.moim.core.ui.eventbus.PlanAction
@@ -21,11 +23,14 @@ import com.moim.core.ui.view.checkState
 import com.moim.core.ui.view.restartableStateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    userRepository: UserRepository,
     planRepository: PlanRepository,
     meetingEventBus: EventBus<MeetingAction>,
     planEventBus: EventBus<PlanAction>,
@@ -38,9 +43,14 @@ class HomeViewModel @Inject constructor(
         .action
         .actionStateIn(viewModelScope, PlanAction.None)
 
-    private val meetingPlansResult = planRepository.getCurrentPlans()
-        .asResult()
-        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val meetingPlansResult =
+        combine(
+            userRepository.getUser(),
+            planRepository.getCurrentPlans(),
+            ::Pair
+        ).mapLatest { (user, meetContainer) -> user to meetContainer }
+            .asResult()
+            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
@@ -48,12 +58,17 @@ class HomeViewModel @Inject constructor(
                 meetingPlansResult.collect { result ->
                     when (result) {
                         is Result.Loading -> setUiState(HomeUiState.Loading)
-                        is Result.Success -> setUiState(
-                            HomeUiState.Success(
-                                plans = result.data.plans,
-                                meetings = result.data.meetings,
+                        is Result.Success -> {
+                            val (user, meetContainer) = result.data
+
+                            setUiState(
+                                HomeUiState.Success(
+                                    user = user,
+                                    plans = meetContainer.plans,
+                                    meetings = meetContainer.meetings,
+                                )
                             )
-                        )
+                        }
 
                         is Result.Error -> setUiState(HomeUiState.Error)
                     }
@@ -130,7 +145,7 @@ class HomeViewModel @Inject constructor(
                                     }.sortedBy {
                                         it.planAt
                                     }.filter {
-                                        it.isParticipant
+                                        it.isParticipant || it.userId == user.userId
                                     }
 
                                     setUiState(copy(plans = plans))
@@ -191,6 +206,7 @@ sealed interface HomeUiState : UiState {
     data object Loading : HomeUiState
 
     data class Success(
+        val user: User,
         val plans: List<Plan> = emptyList(),
         val meetings: List<Meeting> = emptyList(),
         val isPermissionCheck: Boolean = false,
@@ -201,19 +217,37 @@ sealed interface HomeUiState : UiState {
 
 sealed interface HomeUiAction : UiAction {
     data object OnClickRefresh : HomeUiAction
+
     data object OnClickAlarm : HomeUiAction
+
     data object OnClickMeetingWrite : HomeUiAction
+
     data object OnClickPlanWrite : HomeUiAction
+
     data object OnClickPlanMore : HomeUiAction
-    data class OnClickPlan(val planId: String, val isPlan: Boolean) : HomeUiAction
+
+    data class OnClickPlan(
+        val planId: String,
+        val isPlan: Boolean
+    ) : HomeUiAction
+
     data object OnUpdatePermissionCheck : HomeUiAction
 }
 
 sealed interface HomeUiEvent : UiEvent {
     data object NavigateToAlarm : HomeUiEvent
+
     data object NavigateToMeetingWrite : HomeUiEvent
+
     data object NavigateToPlanWrite : HomeUiEvent
+
     data object NavigateToCalendar : HomeUiEvent
-    data class NavigateToPlanDetail(val viewIdType: ViewIdType) : HomeUiEvent
-    data class ShowToastMessage(val message: ToastMessage) : HomeUiEvent
+
+    data class NavigateToPlanDetail(
+        val viewIdType: ViewIdType
+    ) : HomeUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage
+    ) : HomeUiEvent
 }

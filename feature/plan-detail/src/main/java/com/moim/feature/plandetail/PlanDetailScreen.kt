@@ -37,6 +37,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.common.NotFoundErrorScreen
 import com.moim.core.designsystem.common.PagingErrorScreen
 import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimAlertDialog
@@ -104,40 +105,79 @@ fun PlanDetailRoute(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is PlanDetailUiEvent.NavigateToBack -> navigateToBack()
-            is PlanDetailUiEvent.NavigateToParticipants -> navigateToParticipants(event.viewIdType)
-            is PlanDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.planItem)
-            is PlanDetailUiEvent.NavigateToReviewWrite -> navigateToReviewWrite(event.postId, true)
-            is PlanDetailUiEvent.NavigateToCommentDetail -> navigateToCommentDetail(event.meetId, event.postId, event.comment)
-            is PlanDetailUiEvent.NavigateToMapDetail -> navigateToMapDetail(event.placeName, event.address, event.latitude, event.longitude)
-            is PlanDetailUiEvent.NavigateToImageViewerForReview -> navigateToImageViewer(context.getString(R.string.plan_detail_image), event.images, event.position, R.drawable.ic_empty_user_logo)
-            is PlanDetailUiEvent.NavigateToImageViewerForUser -> navigateToImageViewer(event.userName, listOf(event.image), 0, R.drawable.ic_empty_user_logo)
+            is PlanDetailUiEvent.NavigateToBack -> {
+                navigateToBack()
+            }
+
+            is PlanDetailUiEvent.NavigateToParticipants -> {
+                navigateToParticipants(event.viewIdType)
+            }
+
+            is PlanDetailUiEvent.NavigateToPlanWrite -> {
+                navigateToPlanWrite(event.planItem)
+            }
+
+            is PlanDetailUiEvent.NavigateToReviewWrite -> {
+                navigateToReviewWrite(event.postId, true)
+            }
+
+            is PlanDetailUiEvent.NavigateToCommentDetail -> {
+                navigateToCommentDetail(event.meetId, event.postId, event.comment)
+            }
+
+            is PlanDetailUiEvent.NavigateToMapDetail -> {
+                navigateToMapDetail(event.placeName, event.address, event.latitude, event.longitude)
+            }
+
+            is PlanDetailUiEvent.NavigateToImageViewerForReview -> {
+                navigateToImageViewer(context.getString(R.string.plan_detail_image), event.images, event.position, R.drawable.ic_empty_user_logo)
+            }
+
+            is PlanDetailUiEvent.NavigateToImageViewerForUser -> {
+                navigateToImageViewer(event.userName, listOf(event.image), 0, R.drawable.ic_empty_user_logo)
+            }
+
             is PlanDetailUiEvent.NavigateToWebBrowser -> {
-                try {
+                runCatching {
                     context.startActivity(Intent(Intent.ACTION_VIEW, event.webLink.toValidUrl()))
-                } catch (e: Exception) {
+                }.onFailure {
                     showToast(context, context.getString(R.string.common_error_open_browser))
                 }
             }
 
-            is PlanDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
+            is PlanDetailUiEvent.ShowToastMessage -> {
+                showToast(context, event.message)
+            }
         }
     }
 
     when (val uiState = planDetailUiState) {
-        is PlanDetailUiState.Loading -> LoadingScreen(modifier)
+        is PlanDetailUiState.Loading -> {
+            LoadingScreen(modifier)
+        }
 
-        is PlanDetailUiState.Success -> PlanDetailScreen(
-            modifier = modifier,
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is PlanDetailUiState.Success -> {
+            PlanDetailScreen(
+                modifier = modifier,
+                uiState = uiState,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction
+            )
+        }
 
-        is PlanDetailUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(PlanDetailUiAction.OnClickRefresh) }
-        )
+        is PlanDetailUiState.NotFoundError -> {
+            NotFoundErrorScreen(
+                modifier = modifier,
+                onClickBack = { viewModel.onUiAction(PlanDetailUiAction.OnClickBack) }
+            )
+        }
+
+        is PlanDetailUiState.CommonError -> {
+            ErrorScreen(
+                modifier = modifier,
+                onClickRefresh = { viewModel.onUiAction(PlanDetailUiAction.OnClickRefresh) }
+            )
+        }
     }
 }
 
@@ -173,6 +213,7 @@ fun PlanDetailScreen(
                 ) {
                     item {
                         PlanDetailContent(
+                            isMyPlan = uiState.user.userId == uiState.planItem.userId,
                             planItem = uiState.planItem,
                             isShowApplyButton = uiState.isShowApplyButton,
                             onUiAction = onUiAction

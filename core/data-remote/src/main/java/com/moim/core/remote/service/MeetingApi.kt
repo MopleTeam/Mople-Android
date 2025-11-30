@@ -26,7 +26,7 @@ interface MeetingApi {
     @POST("meet/invite/{meetId}")
     suspend fun getMeetingInviteCode(@Path("meetId") id: String): String
 
-    @GET("/meet/members/{meetId}")
+    @GET("meet/members/{meetId}")
     suspend fun getMeetingParticipants(
         @Path("meetId") id: String,
         @Query("cursor") cursor: String,

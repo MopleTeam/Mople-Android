@@ -15,8 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.Notification
+import com.moim.core.common.model.NotificationType
+import com.moim.core.common.model.Payload
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
@@ -24,6 +27,7 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.alarm.AlarmUiAction
+import java.time.ZonedDateTime
 
 @Composable
 fun AlarmListItem(
@@ -78,5 +82,31 @@ fun AlarmListItem(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xffffff)
+@Composable
+private fun AlarmListItemPreview() {
+    MoimTheme {
+        AlarmListItem(
+            notification =
+                Notification(
+                    notificationId = "0",
+                    meetName = "모플",
+                    meetImgUrl = "",
+                    meetId = "",
+                    planId = "",
+                    reviewId = "",
+                    type = NotificationType.COMMENT_REPLY,
+                    payload = Payload(
+                        title = "알람 리스트 타이틀",
+                        message = "알람 리스트 메세지 알람 리스트 메세지 알람 리스트 메세지",
+                    ),
+                    planDate = ZonedDateTime.now(),
+                    sendAt = ZonedDateTime.now(),
+                ),
+            onUiAction = {}
+        )
     }
 }

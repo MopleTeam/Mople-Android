@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
-import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
@@ -39,6 +38,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_F6F8FA
+import com.moim.core.ui.util.decimalFormatString
 import com.moim.feature.calendar.CalendarUiAction
 import com.moim.feature.calendar.OnCalendarUiAction
 import java.time.ZonedDateTime
@@ -89,8 +89,6 @@ fun CalendarPlanItem(
     plan: PlanItem,
     onUiAction: OnCalendarUiAction = {}
 ) {
-
-
     MoimCard(
         modifier = modifier,
         onClick = {
@@ -150,7 +148,7 @@ fun CalendarPlanItem(
             MeetingWeatherInfo(
                 modifier = Modifier.align(Alignment.Start),
                 temperature = plan.temperature,
-                address = plan.loadAddress,
+                address = plan.loadAddress.ifEmpty { plan.weatherAddress },
                 weatherIconUrl = plan.weatherIconUrl,
             )
         }
@@ -200,6 +198,15 @@ private fun MeetingWeatherInfo(
     address: String,
     weatherIconUrl: String,
 ) {
+    val notFoundText =
+        if (address.isEmpty()) {
+            stringResource(R.string.common_empty_place_for_guest)
+        } else if (weatherIconUrl.isEmpty()) {
+            stringResource(R.string.common_weather_not_found)
+        } else {
+            ""
+        }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -220,12 +227,13 @@ private fun MeetingWeatherInfo(
             )
         }
 
-        if (weatherIconUrl.isEmpty()) {
+        if (notFoundText.isNotEmpty()) {
             MoimText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 32.dp),
-                text = stringResource(R.string.common_weather_not_found),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(end = 32.dp),
+                text = notFoundText,
                 textAlign = TextAlign.Center,
                 style = MoimTheme.typography.body02.medium,
                 color = MoimTheme.colors.gray.gray04

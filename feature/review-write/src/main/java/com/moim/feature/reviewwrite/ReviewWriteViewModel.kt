@@ -167,17 +167,34 @@ sealed interface ReviewWriteUiState : UiState {
 
 sealed interface ReviewWriteUiAction : UiAction {
     data object OnClickBack : ReviewWriteUiAction
+
     data object OnClickRefresh : ReviewWriteUiAction
+
     data object OnClickImageUpload : ReviewWriteUiAction
-    data class OnClickAddImages(val imageUrls: List<String>) : ReviewWriteUiAction
-    data class OnClickRemoveImage(val reviewImage: ReviewImage) : ReviewWriteUiAction
+
+    data class OnClickAddImages(
+        val imageUrls: List<String>
+    ) : ReviewWriteUiAction
+
+    data class OnClickRemoveImage(
+        val reviewImage: ReviewImage
+    ) : ReviewWriteUiAction
+
     data object OnClickParticipants : ReviewWriteUiAction
+
     data object OnClickSubmit : ReviewWriteUiAction
 }
 
 sealed interface ReviewWriteUiEvent : UiEvent {
     data object NavigateToBack : ReviewWriteUiEvent
+
     data object NavigateToPhotoPicker : ReviewWriteUiEvent
-    data class NavigateToParticipants(val viewIdType: ViewIdType) : ReviewWriteUiEvent
-    data class ShowToastMessage(val toastMessage: ToastMessage) : ReviewWriteUiEvent
+
+    data class NavigateToParticipants(
+        val viewIdType: ViewIdType
+    ) : ReviewWriteUiEvent
+
+    data class ShowToastMessage(
+        val toastMessage: ToastMessage
+    ) : ReviewWriteUiEvent
 }

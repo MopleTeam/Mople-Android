@@ -99,14 +99,26 @@ class AlarmViewModel @Inject constructor(
 
 sealed interface AlarmUiAction : UiAction {
     data object OnClickBack : AlarmUiAction
+
     data object OnClickRefresh : AlarmUiAction
-    data class OnClickAlarm(val notification: Notification) : AlarmUiAction
+
+    data class OnClickAlarm(
+        val notification: Notification
+    ) : AlarmUiAction
+
     data object OnUpdateNotificationCount : AlarmUiAction
 }
 
 sealed interface AlarmUiEvent : UiEvent {
     data object NavigateToBack : AlarmUiEvent
-    data class NavigateToMeetingDetail(val meetingId: String) : AlarmUiEvent
-    data class NavigateToPlanDetail(val viewIdType: ViewIdType) : AlarmUiEvent
+
+    data class NavigateToMeetingDetail(
+        val meetingId: String
+    ) : AlarmUiEvent
+
+    data class NavigateToPlanDetail(
+        val viewIdType: ViewIdType
+    ) : AlarmUiEvent
+
     data object RefreshPagingData : AlarmUiEvent
 }
