@@ -2,7 +2,7 @@ package com.moim.feature.alarm
 
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import com.moim.core.common.model.Notification
+import androidx.paging.map
 import com.moim.core.common.model.NotificationType
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.result.Result
@@ -12,11 +12,14 @@ import com.moim.core.domain.usecase.GetNotificationsUseCase
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
+import com.moim.feature.alarm.model.AlarmUiModel
+import com.moim.feature.alarm.model.asUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -29,7 +32,9 @@ class AlarmViewModel @Inject constructor(
     getNotificationsUseCase: GetNotificationsUseCase,
 ) : BaseViewModel() {
 
-    val notifications = getNotificationsUseCase().cachedIn(viewModelScope)
+    val alarmItems = getNotificationsUseCase()
+        .map { pagingData -> pagingData.map { it.asUiModel() } }
+        .cachedIn(viewModelScope)
     val totalCount = getNotificationTotalCount()
         .filterIsInstance<Result.Success<Int>>()
         .mapLatest { it.data }
@@ -40,7 +45,7 @@ class AlarmViewModel @Inject constructor(
             is AlarmUiAction.OnClickBack -> setUiEvent(AlarmUiEvent.NavigateToBack)
             is AlarmUiAction.OnClickRefresh -> setUiEvent(AlarmUiEvent.RefreshPagingData)
             is AlarmUiAction.OnUpdateNotificationCount -> clearNotificationCount()
-            is AlarmUiAction.OnClickAlarm -> navigateToNotifyTarget(uiAction.notification)
+            is AlarmUiAction.OnClickAlarm -> navigateToNotifyTarget(uiAction.item)
         }
     }
 
@@ -61,11 +66,11 @@ class AlarmViewModel @Inject constructor(
         )
     }.asResult()
 
-    private fun navigateToNotifyTarget(notification: Notification) {
-        when (notification.type) {
+    private fun navigateToNotifyTarget(alarmUiModel: AlarmUiModel) {
+        when (alarmUiModel.type) {
             NotificationType.MEET_NEW_MEMBER,
             NotificationType.PLAN_DELETE -> {
-                setUiEvent(AlarmUiEvent.NavigateToMeetingDetail(requireNotNull(notification.meetId)))
+                setUiEvent(AlarmUiEvent.NavigateToMeetingDetail(requireNotNull(alarmUiModel.meetId)))
             }
 
             NotificationType.COMMENT_REPLY,
@@ -75,15 +80,15 @@ class AlarmViewModel @Inject constructor(
             NotificationType.PLAN_REMIND,
             NotificationType.REVIEW_REMIND,
             NotificationType.REVIEW_UPDATE -> {
-                val viewIdType = if (notification.planId != null) {
-                    ViewIdType.PlanId(requireNotNull(notification.planId))
-                } else if (notification.reviewId != null) {
-                    ViewIdType.ReviewId(requireNotNull(notification.reviewId))
+                val viewIdType = if (alarmUiModel.planId != null) {
+                    ViewIdType.PlanId(requireNotNull(alarmUiModel.planId))
+                } else if (alarmUiModel.reviewId != null) {
+                    ViewIdType.ReviewId(requireNotNull(alarmUiModel.reviewId))
                 } else {
                     return
                 }
 
-                val isPlan = (notification.planDate?.toLocalDate()?.isAfter(LocalDate.now()) == true)
+                val isPlan = (alarmUiModel.planDate?.toLocalDate()?.isAfter(LocalDate.now()) == true)
 
                 if (!isPlan && viewIdType is ViewIdType.PlanId) {
                     setUiEvent(AlarmUiEvent.NavigateToPlanDetail(ViewIdType.PostId(viewIdType.id)))
@@ -103,7 +108,7 @@ sealed interface AlarmUiAction : UiAction {
     data object OnClickRefresh : AlarmUiAction
 
     data class OnClickAlarm(
-        val notification: Notification
+        val item: AlarmUiModel
     ) : AlarmUiAction
 
     data object OnUpdateNotificationCount : AlarmUiAction

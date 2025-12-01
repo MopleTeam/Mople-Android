@@ -35,7 +35,6 @@ import androidx.paging.compose.itemKey
 import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
-import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
@@ -45,6 +44,7 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.designsystem.theme.moimButtomColors
+import com.moim.core.ui.util.decimalFormatString
 import com.moim.feature.meetingdetail.MeetingDetailUiAction
 import java.time.ZonedDateTime
 
