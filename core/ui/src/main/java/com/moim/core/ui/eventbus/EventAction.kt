@@ -15,11 +15,12 @@ sealed interface EventAction {
 
 fun <T : EventAction> SharedFlow<T>.actionStateIn(
     coroutineScope: CoroutineScope,
-    initialValue: T
+    initialValue: T,
+    started: SharingStarted = SharingStarted.WhileSubscribed(5000),
 ) = this.stateIn(
     scope = coroutineScope,
-    started = SharingStarted.WhileSubscribed(5000),
-    initialValue = initialValue
+    initialValue = initialValue,
+    started = started,
 )
 
 sealed class CommentAction(

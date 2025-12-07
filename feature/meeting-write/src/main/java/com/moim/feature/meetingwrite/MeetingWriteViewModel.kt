@@ -128,15 +128,28 @@ sealed interface MeetingWriteUiState : UiState {
 
 sealed interface MeetingWriteUiAction : UiAction {
     data object OnClickMeetingWrite : MeetingWriteUiAction
+
     data object OnClickBack : MeetingWriteUiAction
-    data class OnChangeMeetingPhotoUrl(val meetingPhotoUrl: String?) : MeetingWriteUiAction
-    data class OnChangeMeetingName(val name: String) : MeetingWriteUiAction
-    data class OnShowMeetingPhotoEditDialog(val isShow: Boolean) : MeetingWriteUiAction
+
+    data class OnChangeMeetingPhotoUrl(
+        val meetingPhotoUrl: String?
+    ) : MeetingWriteUiAction
+
+    data class OnChangeMeetingName(
+        val name: String
+    ) : MeetingWriteUiAction
+
+    data class OnShowMeetingPhotoEditDialog(
+        val isShow: Boolean
+    ) : MeetingWriteUiAction
+
     data object OnNavigatePhotoPicker : MeetingWriteUiAction
 }
 
 sealed interface MeetingWriteUiEvent : UiEvent {
     data object NavigateToBack : MeetingWriteUiEvent
+
     data object NavigateToPhotoPicker : MeetingWriteUiEvent
+
     data class ShowToastMessage(val message: ToastMessage) : MeetingWriteUiEvent
 }

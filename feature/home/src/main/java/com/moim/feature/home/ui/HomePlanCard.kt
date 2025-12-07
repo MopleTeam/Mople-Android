@@ -28,7 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.model.Plan
-import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimCard
@@ -36,6 +35,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_F6F8FA
+import com.moim.core.ui.util.decimalFormatString
 import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
 import java.time.ZonedDateTime
@@ -43,6 +43,7 @@ import java.time.ZonedDateTime
 @Composable
 fun HomePlanCard(
     modifier: Modifier = Modifier,
+    isHost: Boolean,
     plan: Plan,
     onUiAction: OnHomeUiAction = {}
 ) {
@@ -80,15 +81,16 @@ fun HomePlanCard(
             )
             MeetingInfoText(
                 iconRes = R.drawable.ic_location,
-                text = plan.planAddress,
+                text = plan.planAddress.ifEmpty { stringResource(R.string.common_empty_place) },
             )
             Spacer(Modifier.height(16.dp))
 
             MeetingWeatherInfo(
                 modifier = Modifier.align(Alignment.Start),
+                isHost = isHost,
                 temperature = plan.temperature,
                 address = plan.weatherAddress,
-                weatherUrl = plan.weatherIconUrl
+                weatherUrl = plan.weatherIconUrl,
             )
         }
     }
@@ -165,10 +167,23 @@ private fun MeetingInfoText(
 @Composable
 private fun MeetingWeatherInfo(
     modifier: Modifier = Modifier,
+    isHost: Boolean,
     temperature: Float,
     address: String,
-    weatherUrl: String,
+    weatherUrl: String
 ) {
+    val notFoundText = if (address.isEmpty()) {
+        if (isHost) {
+            stringResource(R.string.common_empty_place_for_host)
+        } else {
+            stringResource(R.string.common_empty_place_for_guest)
+        }
+    } else if (weatherUrl.isEmpty()) {
+        stringResource(R.string.common_weather_not_found)
+    } else {
+        ""
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -189,10 +204,12 @@ private fun MeetingWeatherInfo(
             )
         }
 
-        if (weatherUrl.isEmpty()) {
+        if (notFoundText.isNotEmpty()) {
             MoimText(
-                modifier = Modifier.fillMaxWidth().padding(end = 32.dp),
-                text = stringResource(R.string.common_weather_not_found),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 32.dp),
+                text = notFoundText,
                 textAlign = TextAlign.Center,
                 style = MoimTheme.typography.body02.medium,
                 color = MoimTheme.colors.gray.gray04
@@ -221,12 +238,13 @@ private fun MeetingWeatherInfo(
 private fun HomeMeetingPlanCardPreview() {
     MoimTheme {
         HomePlanCard(
+            isHost = false,
             plan = Plan(
                 meetingId = "1",
                 meetingName = "우리중학교 동창1",
                 planName = "술 한잔 하는 날",
                 planMemberCount = 3,
-                planAddress = "서울 강남구",
+                planAddress = "",
                 planAt = ZonedDateTime.now()
             ),
         )

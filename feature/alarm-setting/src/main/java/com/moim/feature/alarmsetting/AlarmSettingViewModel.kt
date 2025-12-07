@@ -115,16 +115,34 @@ sealed interface AlarmSettingUiState : UiState {
 
 sealed interface AlarmSettingUiAction : UiAction {
     data object OnClickBack : AlarmSettingUiAction
+
     data object OnClickRefresh : AlarmSettingUiAction
+
     data object OnClickPermissionRequest : AlarmSettingUiAction
-    data class OnChangeMeetingNotify(val isCheck: Boolean) : AlarmSettingUiAction
-    data class OnChangePlanNotify(val isCheck: Boolean) : AlarmSettingUiAction
-    data class OnChangeCommentNotify(val isCheck: Boolean) : AlarmSettingUiAction
-    data class OnChangeMentionNotify(val isCheck: Boolean) : AlarmSettingUiAction
+
+    data class OnChangeMeetingNotify(
+        val isCheck: Boolean
+    ) : AlarmSettingUiAction
+
+    data class OnChangePlanNotify(
+        val isCheck: Boolean
+    ) : AlarmSettingUiAction
+
+    data class OnChangeCommentNotify(
+        val isCheck: Boolean
+    ) : AlarmSettingUiAction
+
+    data class OnChangeMentionNotify(
+        val isCheck: Boolean
+    ) : AlarmSettingUiAction
 }
 
 sealed interface AlarmSettingUiEvent : UiEvent {
     data object NavigateToBack : AlarmSettingUiEvent
+
     data object NavigateToSystemSetting : AlarmSettingUiEvent
-    data class ShowToastMessage(val message: ToastMessage) : AlarmSettingUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage
+    ) : AlarmSettingUiEvent
 }

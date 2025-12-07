@@ -239,13 +239,30 @@ sealed interface CalendarUiState : UiState {
 
 sealed interface CalendarUiAction : UiAction {
     data object OnClickRefresh : CalendarUiAction
-    data class OnClickDateDay(val date: ZonedDateTime) : CalendarUiAction
-    data class OnClickExpandable(val date: ZonedDateTime) : CalendarUiAction
-    data class OnClickMeetingPlan(val viewIdType: ViewIdType) : CalendarUiAction
-    data class OnChangeDate(val date: ZonedDateTime) : CalendarUiAction
+
+    data class OnClickDateDay(
+        val date: ZonedDateTime
+    ) : CalendarUiAction
+
+    data class OnClickExpandable(
+        val date: ZonedDateTime
+    ) : CalendarUiAction
+
+    data class OnClickMeetingPlan(
+        val viewIdType: ViewIdType
+    ) : CalendarUiAction
+
+    data class OnChangeDate(
+        val date: ZonedDateTime
+    ) : CalendarUiAction
 }
 
 sealed interface CalendarUiEvent : UiEvent {
-    data class NavigateToPlanDetail(val viewIdType: ViewIdType) : CalendarUiEvent
-    data class ShowToastMessage(val message: ToastMessage) : CalendarUiEvent
+    data class NavigateToPlanDetail(
+        val viewIdType: ViewIdType
+    ) : CalendarUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage
+    ) : CalendarUiEvent
 }

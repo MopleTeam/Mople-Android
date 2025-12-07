@@ -40,10 +40,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.Comment
+import com.moim.core.common.model.OpenGraph
 import com.moim.core.common.model.Writer
 import com.moim.core.common.model.item.CommentTextUiModel
 import com.moim.core.common.model.item.CommentUiModel
-import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton
@@ -51,6 +51,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.util.decimalFormatString
 import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
 import java.time.ZonedDateTime
@@ -124,11 +125,22 @@ fun PlanDetailCommentItem(
                 comment = comment.comment,
                 onUiAction = onUiAction
             )
-            Spacer(Modifier.height(8.dp))
-            CommentText(
-                texts = comment.texts,
-                onUiAction = onUiAction
-            )
+            if (comment.texts.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                CommentText(
+                    texts = comment.texts,
+                    onUiAction = onUiAction
+                )
+            }
+
+            if (comment.openGraph != null) {
+                Spacer(Modifier.height(8.dp))
+                CommentOpenGraph(
+                    openGraph = requireNotNull(comment.openGraph),
+                    onUiAction = onUiAction
+                )
+            }
+
             CommentFooter(
                 comment = comment.comment,
                 onUiAction = onUiAction
@@ -246,6 +258,49 @@ private fun CommentText(
         text = annotatedText,
         singleLine = false
     )
+}
+
+@Composable
+private fun CommentOpenGraph(
+    openGraph: OpenGraph,
+    onUiAction: OnPlanDetailUiAction
+) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MoimTheme.colors.tertiary)
+                .onSingleClick(onClick = { onUiAction(PlanDetailUiAction.OnClickCommentWebLink(openGraph.url)) })
+    ) {
+        NetworkImage(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp),
+            imageUrl = openGraph.imageUrl,
+            errorImage = painterResource(R.drawable.ic_empty_image)
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 16.dp)
+        ) {
+            if (openGraph.title.isNullOrBlank().not()) {
+                MoimText(
+                    text = openGraph.title ?: "",
+                    style = MoimTheme.typography.body02.semiBold,
+                    color = MoimTheme.colors.black
+                )
+                Spacer(Modifier.height(4.dp))
+            }
+            MoimText(
+                text = openGraph.description ?: "",
+                style = MoimTheme.typography.body02.regular,
+                color = MoimTheme.colors.black
+            )
+        }
+    }
 }
 
 @Composable
@@ -370,7 +425,14 @@ private fun PlanDetailCommentItemPreview() {
                         CommentTextUiModel.HyperLinkText(
                             content = "instagram.com",
                         ),
-                    )
+                    ),
+                    openGraph =
+                        OpenGraph(
+                            url = "www.naver.com",
+                            imageUrl = "",
+                            title = "강남역 레스토랑 & 다이닝 펍",
+                            description = "100여평 규모, 전실 프라이빗 단독 룸 +예약환영+ 히츠마부시/튀김/회 교대역 4번 출구, 도보 3분 / 건물 내 주차가능",
+                        )
                 ),
                 onUiAction = {}
             )

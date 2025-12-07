@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -30,6 +31,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.common.NotFoundErrorScreen
 import com.moim.core.designsystem.common.PagingErrorScreen
 import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimScaffold
@@ -88,19 +90,33 @@ fun CommentDetailRoute(
     }
 
     when (val uiState = commentDetailUiState) {
-        is CommentDetailUiState.Loading -> LoadingScreen(modifier)
+        is CommentDetailUiState.Loading -> {
+            LoadingScreen(modifier)
+        }
 
-        is CommentDetailUiState.Success -> CommentDetailScreen(
-            modifier = modifier,
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is CommentDetailUiState.Success -> {
+            CommentDetailScreen(
+                modifier = modifier,
+                uiState = uiState,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction
+            )
+        }
 
-        is CommentDetailUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(CommentDetailAction.OnClickRefresh) }
-        )
+        is CommentDetailUiState.NotFoundError -> {
+            NotFoundErrorScreen(
+                modifier = modifier,
+                description = stringResource(R.string.comment_detail_not_found_error),
+                onClickBack = { viewModel.onUiAction(CommentDetailAction.OnClickBack) }
+            )
+        }
+
+        is CommentDetailUiState.CommonError -> {
+            ErrorScreen(
+                modifier = modifier,
+                onClickRefresh = { viewModel.onUiAction(CommentDetailAction.OnClickRefresh) }
+            )
+        }
     }
 }
 

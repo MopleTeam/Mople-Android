@@ -21,7 +21,7 @@ import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.MarkerComposable
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
-import com.naver.maps.map.compose.rememberMarkerState
+import com.naver.maps.map.compose.rememberUpdatedMarkerState
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
@@ -32,7 +32,7 @@ fun MapContainer(
     onUiAction: (MapDetailUiAction) -> Unit
 ) {
     val cameraPositionState = rememberCameraPositionState()
-    val markerState = rememberMarkerState(position = LatLng(latitude, longitude))
+    val markerState = rememberUpdatedMarkerState(position = LatLng(latitude, longitude))
 
     LaunchedEffect(latitude, longitude) {
         if (longitude != 0.0 && latitude != 0.0) {

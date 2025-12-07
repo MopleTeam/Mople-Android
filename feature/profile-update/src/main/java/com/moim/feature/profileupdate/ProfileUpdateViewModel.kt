@@ -157,18 +157,35 @@ sealed interface ProfileUpdateUiState : UiState {
 
 sealed interface ProfileUpdateUiAction : UiAction {
     data object OnClickBack : ProfileUpdateUiAction
+
     data object OnClickProfileUpdate : ProfileUpdateUiAction
+
     data object OnClickDuplicatedCheck : ProfileUpdateUiAction
+
     data object OnClickRefresh : ProfileUpdateUiAction
-    data class OnChangeProfileUrl(val profileUrl: String?) : ProfileUpdateUiAction
-    data class OnChangeNickname(val nickname: String) : ProfileUpdateUiAction
-    data class OnShowProfileEditDialog(val isShow: Boolean) : ProfileUpdateUiAction
+
+    data class OnChangeProfileUrl(
+        val profileUrl: String?
+    ) : ProfileUpdateUiAction
+
+    data class OnChangeNickname(
+        val nickname: String
+    ) : ProfileUpdateUiAction
+
+    data class OnShowProfileEditDialog(
+        val isShow: Boolean
+    ) : ProfileUpdateUiAction
+
     data object OnNavigatePhotoPicker : ProfileUpdateUiAction
 
 }
 
 sealed interface ProfileUpdateUiEvent : UiEvent {
     data object NavigateToBack : ProfileUpdateUiEvent
+
     data object NavigateToPhotoPicker : ProfileUpdateUiEvent
-    data class ShowToastMessage(val message: ToastMessage) : ProfileUpdateUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage
+    ) : ProfileUpdateUiEvent
 }

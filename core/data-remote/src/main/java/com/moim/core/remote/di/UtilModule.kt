@@ -1,8 +1,8 @@
-package com.moim.core.data.di
+package com.moim.core.remote.di
 
 import android.content.Context
-import com.moim.core.data.util.CompressorUtil
-import com.moim.core.data.util.FileUtil
+import com.moim.core.remote.util.CompressorUtil
+import com.moim.core.remote.util.FileUtil
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

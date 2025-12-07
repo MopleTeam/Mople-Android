@@ -43,6 +43,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Plan
+import com.moim.core.common.model.User
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
@@ -141,7 +142,9 @@ fun HomeScreen(
             if (uiState.plans.isEmpty()) {
                 HomePlanEmpty()
             } else {
+
                 HomePlanPager(
+                    user = uiState.user,
                     plans = uiState.plans,
                     onUiAction = onUiAction
                 )
@@ -184,6 +187,7 @@ fun HomePlanEmpty(modifier: Modifier = Modifier) {
 @Composable
 fun HomePlanPager(
     modifier: Modifier = Modifier,
+    user: User,
     plans: List<Plan>,
     onUiAction: OnHomeUiAction = {}
 ) {
@@ -202,13 +206,14 @@ fun HomePlanPager(
 
         if (meetingPlan != null) {
             HomePlanCard(
-                modifier = heightModifier
-                    .onGloballyPositioned {
+                modifier =
+                    heightModifier.onGloballyPositioned {
                         with(localDensity) {
                             val contentHeight = it.size.height.toDp()
                             if (pageHeight < contentHeight) pageHeight = contentHeight
                         }
                     },
+                isHost = meetingPlan.userId == user.userId,
                 plan = meetingPlan,
                 onUiAction = onUiAction
             )
@@ -228,6 +233,7 @@ private fun HomeScreenPreview() {
         HomeScreen(
             modifier = Modifier.containerScreen(),
             uiState = HomeUiState.Success(
+                user = User(userId = ""),
                 plans = listOf(
                     Plan(
                         meetingId = "1",

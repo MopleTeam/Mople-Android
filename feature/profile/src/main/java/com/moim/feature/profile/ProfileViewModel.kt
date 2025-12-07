@@ -128,19 +128,36 @@ sealed interface ProfileUiState : UiState {
 
 sealed interface ProfileUiAction : UiAction {
     data object OnClickProfile : ProfileUiAction
+
     data object OnClickAlarmSetting : ProfileUiAction
+
     data object OnClickPrivacyPolicy : ProfileUiAction
+
     data object OnClickLogout : ProfileUiAction
+
     data object OnClickUserDelete : ProfileUiAction
+
     data object OnClickRefresh : ProfileUiAction
-    data class OnShowUserLogoutDialog(val isShow: Boolean) : ProfileUiAction
-    data class OnShowUserDeleteDialog(val isShow: Boolean) : ProfileUiAction
+
+    data class OnShowUserLogoutDialog(
+        val isShow: Boolean
+    ) : ProfileUiAction
+
+    data class OnShowUserDeleteDialog(
+        val isShow: Boolean
+    ) : ProfileUiAction
 }
 
 sealed interface ProfileUiEvent : UiEvent {
     data object NavigateToProfileUpdate : ProfileUiEvent
+
     data object NavigateToAlarmSetting : ProfileUiEvent
+
     data object NavigateToPrivacyPolicy : ProfileUiEvent
+
     data object NavigateToIntro : ProfileUiEvent
-    data class ShowToastMessage(val message: ToastMessage) : ProfileUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage
+    ) : ProfileUiEvent
 }

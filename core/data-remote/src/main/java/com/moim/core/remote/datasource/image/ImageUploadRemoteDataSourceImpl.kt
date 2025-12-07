@@ -1,8 +1,8 @@
-package com.moim.core.data.datasource.image
+package com.moim.core.remote.datasource.image
 
-import com.moim.core.data.util.CompressorUtil
-import com.moim.core.data.util.FileUtil
 import com.moim.core.remote.service.ImageApi
+import com.moim.core.remote.util.CompressorUtil
+import com.moim.core.remote.util.FileUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull

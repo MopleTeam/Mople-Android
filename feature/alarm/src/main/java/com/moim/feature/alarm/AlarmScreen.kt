@@ -28,9 +28,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
-import com.moim.core.common.model.Notification
 import com.moim.core.common.model.ViewIdType
-import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.PagingErrorScreen
@@ -39,6 +37,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PAGING_ERROR
 import com.moim.core.ui.view.PAGING_LOADING
@@ -47,6 +46,7 @@ import com.moim.core.ui.view.isAppendLoading
 import com.moim.core.ui.view.isError
 import com.moim.core.ui.view.isLoading
 import com.moim.core.ui.view.isSuccess
+import com.moim.feature.alarm.model.AlarmUiModel
 import com.moim.feature.alarm.ui.AlarmEmptyScreen
 import com.moim.feature.alarm.ui.AlarmListItem
 
@@ -58,7 +58,7 @@ fun AlarmRoute(
     navigateToPlanDetail: (ViewIdType) -> Unit,
     navigateToBack: () -> Unit,
 ) {
-    val notifications = viewModel.notifications.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
+    val notifications = viewModel.alarmItems.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
     val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
 
@@ -80,7 +80,7 @@ fun AlarmRoute(
     AlarmScreen(
         modifier = modifier,
         totalCount = totalCount,
-        notifications = notifications,
+        alarmItems = notifications,
         onUiAction = viewModel::onUiAction
     )
 }
@@ -89,7 +89,7 @@ fun AlarmRoute(
 fun AlarmScreen(
     modifier: Modifier = Modifier,
     totalCount: Int,
-    notifications: LazyPagingItems<Notification>,
+    alarmItems: LazyPagingItems<AlarmUiModel>,
     onUiAction: (AlarmUiAction) -> Unit
 ) {
     TrackScreenViewEvent(screenName = "notification")
@@ -108,20 +108,20 @@ fun AlarmScreen(
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = notifications.loadState.isSuccess() && notifications.itemCount > 0
+            visible = alarmItems.loadState.isSuccess() && alarmItems.itemCount > 0
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 64.dp)
             ) {
                 items(
-                    count = notifications.itemCount,
-                    key = notifications.itemKey(),
-                    contentType = notifications.itemContentType()
+                    count = alarmItems.itemCount,
+                    key = alarmItems.itemKey(),
+                    contentType = alarmItems.itemContentType()
                 ) { index ->
-                    val notification = notifications[index] ?: return@items
+                    val alarmUiModel = alarmItems[index] ?: return@items
                     AlarmListItem(
-                        notification = notification,
+                        alarm = alarmUiModel,
                         onUiAction = onUiAction
                     )
                 }
@@ -138,7 +138,7 @@ fun AlarmScreen(
                     )
                 }
 
-                if (notifications.loadState.isAppendLoading()) {
+                if (alarmItems.loadState.isAppendLoading()) {
                     item(key = PAGING_LOADING) {
                         PagingLoadingScreen(
                             modifier =
@@ -150,7 +150,7 @@ fun AlarmScreen(
                     }
                 }
 
-                if (notifications.loadState.isAppendError()) {
+                if (alarmItems.loadState.isAppendError()) {
                     item(key = PAGING_ERROR) {
                         PagingErrorScreen(
                             modifier =
@@ -158,7 +158,7 @@ fun AlarmScreen(
                                     .fillMaxWidth()
                                     .background(MoimTheme.colors.white)
                                     .animateItem(),
-                            onClickRetry = notifications::retry,
+                            onClickRetry = alarmItems::retry,
                         )
                     }
                 }
@@ -169,7 +169,7 @@ fun AlarmScreen(
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = notifications.loadState.isLoading()
+            visible = alarmItems.loadState.isLoading()
         ) {
             PagingLoadingScreen(modifier = Modifier.fillMaxSize())
         }
@@ -178,7 +178,7 @@ fun AlarmScreen(
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = notifications.loadState.isError()
+            visible = alarmItems.loadState.isError()
         ) {
             ErrorScreen(
                 modifier = Modifier
@@ -192,7 +192,7 @@ fun AlarmScreen(
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = notifications.loadState.isSuccess() && notifications.itemCount == 0
+            visible = alarmItems.loadState.isSuccess() && alarmItems.itemCount == 0
         ) {
             AlarmEmptyScreen(
                 modifier = Modifier

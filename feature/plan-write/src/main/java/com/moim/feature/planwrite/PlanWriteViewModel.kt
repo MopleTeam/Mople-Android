@@ -45,10 +45,10 @@ class PlanWriteViewModel @Inject constructor(
     private val planEventBus: EventBus<PlanAction>,
 ) : BaseViewModel() {
 
-    private val plan
+    private val planItem
         get() = savedStateHandle
             .toRoute<DetailRoute.PlanWrite>(DetailRoute.PlanWrite.typeMap)
-            .plan
+            .planItem
 
     private val selectedMeetingId = MutableStateFlow<String?>(null)
 
@@ -61,7 +61,7 @@ class PlanWriteViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            plan?.let { plan ->
+            planItem?.let { plan ->
                 setUiState(
                     PlanWriteUiState.PlanWrite(
                         planId = plan.postId,
@@ -71,6 +71,7 @@ class PlanWriteViewModel @Inject constructor(
                         planLoadAddress = plan.loadAddress,
                         planWeatherAddress = plan.weatherAddress,
                         planPlaceName = plan.planName,
+                        planDescription = plan.description,
                         planLongitude = plan.longitude,
                         planLatitude = plan.latitude,
                         selectMeetingId = plan.meetingId,
@@ -100,6 +101,7 @@ class PlanWriteViewModel @Inject constructor(
             is PlanWriteUiAction.OnShowPlaceMapScreen -> showPlaceMapScreen(uiAction.isShow)
             is PlanWriteUiAction.OnShowPlaceInfoDialog -> showPlaceInfoDialog(uiAction.isShow)
             is PlanWriteUiAction.OnChangePlanName -> setPlanName(uiAction.name)
+            is PlanWriteUiAction.OnChangePlanDescription -> setPlanDescription(uiAction.description)
         }
     }
 
@@ -114,7 +116,6 @@ class PlanWriteViewModel @Inject constructor(
                     isShowMapSearchScreen = false
                 )
             )
-            setPlanCreateEnabled()
         }
     }
 
@@ -131,13 +132,19 @@ class PlanWriteViewModel @Inject constructor(
                     isShowMapScreen = false
                 )
             )
-            setPlanCreateEnabled()
         }
     }
 
     private fun setPlanName(name: String) {
         uiState.checkState<PlanWriteUiState.PlanWrite> {
             setUiState(copy(planName = name))
+            setPlanCreateEnabled()
+        }
+    }
+
+    private fun setPlanDescription(planInfo: String) {
+        uiState.checkState<PlanWriteUiState.PlanWrite> {
+            setUiState(copy(planDescription = planInfo))
             setPlanCreateEnabled()
         }
     }
@@ -167,7 +174,6 @@ class PlanWriteViewModel @Inject constructor(
     private fun setPlanCreateEnabled() {
         uiState.checkState<PlanWriteUiState.PlanWrite> {
             val enable = planName.isNullOrEmpty().not()
-                    && planLoadAddress.isNullOrEmpty().not()
                     && selectMeetingId.isNullOrEmpty().not()
                     && planDate != null
                     && planTime != null
@@ -225,6 +231,7 @@ class PlanWriteViewModel @Inject constructor(
                             planTime = planTime.parseDateString(),
                             planAddress = requireNotNull(planLoadAddress),
                             planWeatherAddress = requireNotNull(planWeatherAddress),
+                            planDescription = planDescription,
                             title = requireNotNull(planPlaceName),
                             longitude = planLongitude,
                             latitude = planLatitude,
@@ -237,6 +244,7 @@ class PlanWriteViewModel @Inject constructor(
                             planTime = planTime.parseDateString(),
                             planAddress = requireNotNull(planLoadAddress),
                             planWeatherAddress = requireNotNull(planWeatherAddress),
+                            planDescription = planDescription,
                             title = requireNotNull(planPlaceName),
                             longitude = planLongitude,
                             latitude = planLatitude,
@@ -327,6 +335,7 @@ sealed interface PlanWriteUiState : UiState {
     data class PlanWrite(
         val planId: String? = null,
         val planName: String? = null,
+        val planDescription: String? = null,
         val planDate: ZonedDateTime? = null,
         val planTime: ZonedDateTime? = null,
         val planLoadAddress: String? = null,
@@ -353,22 +362,68 @@ sealed interface PlanWriteUiState : UiState {
 
 sealed interface PlanWriteUiAction : UiAction {
     data object OnClickBack : PlanWriteUiAction
+
     data object OnClickPlanWrite : PlanWriteUiAction
-    data class OnClickPlanPlaceSearch(val keyword: String, val xPoint: String, val yPoint: String) : PlanWriteUiAction
-    data class OnClickSearchPlace(val place: Place) : PlanWriteUiAction
-    data class OnClickPlanPlace(val place: Place) : PlanWriteUiAction
-    data class OnClickPlanMeeting(val meeting: Meeting) : PlanWriteUiAction
-    data class OnClickPlanDate(val date: ZonedDateTime) : PlanWriteUiAction
-    data class OnClickPlanTime(val date: ZonedDateTime) : PlanWriteUiAction
-    data class OnShowMeetingsDialog(val isShow: Boolean) : PlanWriteUiAction
-    data class OnShowDatePickerDialog(val isShow: Boolean) : PlanWriteUiAction
-    data class OnShowTimePickerDialog(val isShow: Boolean) : PlanWriteUiAction
-    data class OnShowPlaceInfoDialog(val isShow: Boolean) : PlanWriteUiAction
-    data class OnShowPlaceMapScreen(val isShow: Boolean) : PlanWriteUiAction
-    data class OnChangePlanName(val name: String) : PlanWriteUiAction
+
+    data class OnClickPlanPlaceSearch(
+        val keyword: String,
+        val xPoint: String,
+        val yPoint: String
+    ) : PlanWriteUiAction
+
+    data class OnClickSearchPlace(
+        val place: Place
+    ) : PlanWriteUiAction
+
+    data class OnClickPlanPlace(
+        val place: Place
+    ) : PlanWriteUiAction
+
+    data class OnClickPlanMeeting(
+        val meeting: Meeting
+    ) : PlanWriteUiAction
+
+    data class OnClickPlanDate(
+        val date: ZonedDateTime
+    ) : PlanWriteUiAction
+
+    data class OnClickPlanTime(
+        val date: ZonedDateTime
+    ) : PlanWriteUiAction
+
+    data class OnShowMeetingsDialog(
+        val isShow: Boolean
+    ) : PlanWriteUiAction
+
+    data class OnShowDatePickerDialog(
+        val isShow: Boolean
+    ) : PlanWriteUiAction
+
+    data class OnShowTimePickerDialog(
+        val isShow: Boolean
+    ) : PlanWriteUiAction
+
+    data class OnShowPlaceInfoDialog(
+        val isShow: Boolean
+    ) : PlanWriteUiAction
+
+    data class OnShowPlaceMapScreen(
+        val isShow: Boolean
+    ) : PlanWriteUiAction
+
+    data class OnChangePlanName(
+        val name: String
+    ) : PlanWriteUiAction
+
+    data class OnChangePlanDescription(
+        val description: String
+    ) : PlanWriteUiAction
 }
 
 sealed interface PlanWriteUiEvent : UiEvent {
     data object NavigateToBack : PlanWriteUiEvent
-    data class ShowToastMessage(val message: ToastMessage) : PlanWriteUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage
+    ) : PlanWriteUiEvent
 }

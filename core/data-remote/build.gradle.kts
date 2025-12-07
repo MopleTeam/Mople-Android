@@ -42,6 +42,13 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messageing)
 
+    // open graph
+    implementation(libs.ksoup)
+    implementation(libs.ksoup.network)
+
+    // image compress
+    implementation(libs.compressor)
+
     // Log tracker
     implementation(libs.timber)
 }

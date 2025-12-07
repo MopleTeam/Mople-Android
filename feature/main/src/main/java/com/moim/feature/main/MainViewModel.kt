@@ -47,6 +47,11 @@ class MainViewModel @Inject constructor(
 }
 
 sealed interface MainUiEvent : UiEvent {
-    data class NavigateToPlanDetail(val viewIdType: ViewIdType) : MainUiEvent
-    data class NavigateToMeetingDetail(val meetingId: String) : MainUiEvent
+    data class NavigateToPlanDetail(
+        val viewIdType: ViewIdType
+    ) : MainUiEvent
+
+    data class NavigateToMeetingDetail(
+        val meetingId: String
+    ) : MainUiEvent
 }

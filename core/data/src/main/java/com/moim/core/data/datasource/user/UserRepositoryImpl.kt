@@ -2,9 +2,9 @@ package com.moim.core.data.datasource.user
 
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.util.catchFlow
 import com.moim.core.local.PreferenceStorage
+import com.moim.core.remote.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.remote.model.asItem
 import com.moim.core.remote.service.UserApi
 import kotlinx.coroutines.flow.Flow

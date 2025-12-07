@@ -91,7 +91,7 @@ class SignUpViewModel @Inject constructor(
                         when (result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> setUiState(copy(isDuplicatedName = result.data, enableSignUp = result.data.not()))
-                            is Result.Error -> when(result.exception) {
+                            is Result.Error -> when (result.exception) {
                                 is IOException -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
                                 else -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
                             }
@@ -119,7 +119,7 @@ class SignUpViewModel @Inject constructor(
                         when (result) {
                             is Result.Loading -> return@collect
                             is Result.Success -> setUiEvent(SignUpUiEvent.NavigateToMain)
-                            is Result.Error -> when(result.exception) {
+                            is Result.Error -> when (result.exception) {
                                 is IOException -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
                                 else -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
                             }
@@ -148,15 +148,28 @@ sealed interface SignUpUiState : UiState {
 
 sealed interface SignUpUiAction : UiAction {
     data object OnClickSignUp : SignUpUiAction
+
     data object OnClickDuplicatedCheck : SignUpUiAction
-    data class OnChangeProfileUrl(val profileUrl: String?) : SignUpUiAction
-    data class OnChangeNickname(val nickname: String) : SignUpUiAction
-    data class OnShowProfileEditDialog(val isShow: Boolean) : SignUpUiAction
+
+    data class OnChangeProfileUrl(
+        val profileUrl: String?
+    ) : SignUpUiAction
+
+    data class OnChangeNickname(
+        val nickname: String
+    ) : SignUpUiAction
+
+    data class OnShowProfileEditDialog(
+        val isShow: Boolean
+    ) : SignUpUiAction
+
     data object OnNavigatePhotoPicker : SignUpUiAction
 }
 
 sealed interface SignUpUiEvent : UiEvent {
     data object NavigateToPhotoPicker : SignUpUiEvent
+
     data object NavigateToMain : SignUpUiEvent
+
     data class ShowToastMessage(val message: ToastMessage) : SignUpUiEvent
 }

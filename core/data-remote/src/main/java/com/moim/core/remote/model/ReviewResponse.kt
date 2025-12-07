@@ -30,10 +30,18 @@ data class ReviewResponse(
     val longitude: Double = 0.0, // y
     @SerialName("title")
     val placeName: String = "",
+    @SerialName("description")
+    val description: String = "",
     @SerialName("participantsCount")
     val memberCount: Int = 1,
     @SerialName("commentCount")
     val commentCount: Int = 0,
+    @SerialName("temperature")
+    val temperature: Float = 0f,
+    @SerialName("weatherIcon")
+    val weatherIcon: String = "",
+    @SerialName("weatherAddress")
+    val weatherAddress: String = "",
     @SerialName("images")
     val images: List<ReviewImageResponse> = emptyList(),
     @SerialName("reviewTime")
@@ -57,6 +65,7 @@ fun ReviewResponse.asItem(): Review {
         postId = postId,
         reviewId = reviewId,
         reviewName = reviewName,
+        description = description,
         address = address,
         latitude = latitude,
         longitude = longitude,
@@ -64,6 +73,9 @@ fun ReviewResponse.asItem(): Review {
         memberCount = memberCount,
         commentCount = commentCount,
         images = images.map(ReviewImageResponse::asItem),
+        temperature = temperature,
+        weatherAddress = weatherAddress,
+        weatherIcon = weatherIcon,
         reviewAt = reviewAt.parseZonedDateTime()
     )
 }

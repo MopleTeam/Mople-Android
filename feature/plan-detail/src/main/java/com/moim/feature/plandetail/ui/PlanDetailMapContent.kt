@@ -27,7 +27,7 @@ import com.naver.maps.map.compose.MarkerComposable
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
-import com.naver.maps.map.compose.rememberMarkerState
+import com.naver.maps.map.compose.rememberUpdatedMarkerState
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
@@ -40,7 +40,7 @@ fun PlanDetailMapContent(
     val cameraPositionState = rememberCameraPositionState().apply {
         position = CameraPosition(LatLng(latitude, longitude), 15.2)
     }
-    val markerState = rememberMarkerState(position = LatLng(latitude, longitude))
+    val markerState = rememberUpdatedMarkerState(position = LatLng(latitude, longitude))
     Box(
         modifier = modifier
             .fillMaxWidth()

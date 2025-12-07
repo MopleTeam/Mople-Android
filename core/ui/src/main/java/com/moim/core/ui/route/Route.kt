@@ -94,7 +94,9 @@ sealed interface DetailRoute : Route {
     }
 
     @Serializable
-    data class PlanWrite(val plan: PlanItem? = null) : DetailRoute {
+    data class PlanWrite(
+        val planItem: PlanItem? = null
+    ) : DetailRoute {
         companion object {
             val typeMap = mapOf(typeOf<PlanItem?>() to PlanItemType)
         }

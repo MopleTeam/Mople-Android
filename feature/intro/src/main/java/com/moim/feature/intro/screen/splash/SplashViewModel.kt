@@ -94,12 +94,16 @@ sealed interface SplashUiState : UiState {
 
 sealed interface SplashUiAction : UiAction {
     data object OnClickExit : SplashUiAction
+
     data object OnClickForceUpdate : SplashUiAction
 }
 
 sealed interface SplashUiEvent : UiEvent {
     data object NavigateToSignIn : SplashUiEvent
+
     data object NavigateToMain : SplashUiEvent
+
     data object NavigateToExit : SplashUiEvent
+
     data object NavigateToPlayStore : SplashUiEvent
 }

@@ -12,6 +12,8 @@ import androidx.paging.filter
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.moim.core.common.exception.NetworkException
+import com.moim.core.common.exception.NotFoundException
+import com.moim.core.common.exception.UnAuthorizedException
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.User
 import com.moim.core.common.model.ViewIdType
@@ -96,90 +98,94 @@ class PlanDetailViewModel @Inject constructor(
             .actionStateIn(viewModelScope, CommentAction.None)
 
     private var _comments =
-        commentCheckId.filterNotNull().flatMapLatest { commentCheckId ->
-            getCommentsUseCase(GetCommentsUseCase.Params(commentCheckId))
-                .mapLatest { it.map { comment -> comment.createCommentUiModel() } }
-                .cachedIn(viewModelScope)
-        }
+        commentCheckId
+            .filterNotNull()
+            .flatMapLatest { commentCheckId ->
+                getCommentsUseCase(GetCommentsUseCase.Params(commentCheckId)).mapLatest {
+                    it.map { comment -> comment.createCommentUiModel() }
+                }
+            }.cachedIn(viewModelScope)
 
-    private val comments = commentActionReceiver.flatMapLatest { receiver ->
-        when (receiver) {
-            is CommentAction.None -> _comments
+    private val comments =
+        commentActionReceiver.flatMapLatest { receiver ->
+            when (receiver) {
+                is CommentAction.None -> _comments
 
-            is CommentAction.CommentCreate -> {
-                _comments.map { pagingData ->
-                    pagingData.checkedActionedAtIsBeforeLoadedAt(
-                        actionedAt = receiver.actionAt,
-                        loadedAt = getCommentsUseCase.loadedAt
-                    ) {
-                        pagingData.insertSeparators { before: CommentUiModel?, _: CommentUiModel? ->
-                            if (receiver.commentUiModel.comment.isChild()) {
-                                return@insertSeparators null
-                            } else if (before == null) {
-                                return@insertSeparators receiver.commentUiModel
-                            } else {
-                                null
+                is CommentAction.CommentCreate -> {
+                    _comments.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getCommentsUseCase.loadedAt
+                        ) {
+                            pagingData.insertSeparators { before: CommentUiModel?, _: CommentUiModel? ->
+                                if (receiver.commentUiModel.comment.isChild()) {
+                                    return@insertSeparators null
+                                } else if (before == null) {
+                                    return@insertSeparators receiver.commentUiModel
+                                } else {
+                                    null
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            is CommentAction.CommentUpdate -> {
-                _comments.map { pagingData ->
-                    pagingData.checkedActionedAtIsBeforeLoadedAt(
-                        actionedAt = receiver.actionAt,
-                        loadedAt = getCommentsUseCase.loadedAt
-                    ) {
-                        pagingData.map { uiModel ->
-                            if (uiModel.comment.commentId == receiver.commentUiModel.comment.commentId) {
-                                receiver.commentUiModel
-                            } else {
-                                uiModel
-                            }
-                        }
-                    }
-                }
-            }
-
-            is CommentAction.CommentDelete -> {
-                _comments.map { pagingData ->
-                    pagingData.checkedActionedAtIsBeforeLoadedAt(
-                        actionedAt = receiver.actionAt,
-                        loadedAt = getCommentsUseCase.loadedAt
-                    ) {
-                        pagingData
-                            .map { uiModel ->
-                                if (uiModel.comment.commentId == receiver.commentId) {
-                                    uiModel.apply { isDeleted = true }
+                is CommentAction.CommentUpdate -> {
+                    _comments.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getCommentsUseCase.loadedAt
+                        ) {
+                            pagingData.map { uiModel ->
+                                if (uiModel.comment.commentId == receiver.commentUiModel.comment.commentId) {
+                                    receiver.commentUiModel
                                 } else {
                                     uiModel
                                 }
                             }
-                            .filter { it.isDeleted.not() }
+                        }
                     }
                 }
-            }
-        }.also {
-            _comments = it
-        }
-    }.cachedIn(viewModelScope)
 
-    private val meetingParticipants = meetId
-        .filterNotNull()
-        .mapLatest {
-            meetingRepository.getMeetingParticipants(
-                meetingId = it,
-                cursor = "",
-                size = 100
-            ).content
-        }.asResult().mapLatest {
-            if (it is Result.Success) {
-                it.data
-            } else {
-                null
+                is CommentAction.CommentDelete -> {
+                    _comments.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getCommentsUseCase.loadedAt
+                        ) {
+                            pagingData
+                                .map { uiModel ->
+                                    if (uiModel.comment.commentId == receiver.commentId) {
+                                        uiModel.apply { isDeleted = true }
+                                    } else {
+                                        uiModel
+                                    }
+                                }
+                                .filter { it.isDeleted.not() }
+                        }
+                    }
+                }
+            }.also {
+                _comments = it
             }
-        }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+        }.cachedIn(viewModelScope)
+
+    private val meetingParticipants =
+        meetId
+            .filterNotNull()
+            .mapLatest {
+                meetingRepository.getMeetingParticipants(
+                    meetingId = it,
+                    cursor = "",
+                    size = 100
+                ).content
+            }.asResult().mapLatest {
+                if (it is Result.Success) {
+                    it.data
+                } else {
+                    null
+                }
+            }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     private val planDetailUiState =
         combine(
@@ -195,9 +201,22 @@ class PlanDetailViewModel @Inject constructor(
             )
         }.asResult().mapLatest { result ->
             when (result) {
-                is Result.Loading -> PlanDetailUiState.Loading
-                is Result.Success -> result.data
-                is Result.Error -> PlanDetailUiState.Error
+                is Result.Loading -> {
+                    PlanDetailUiState.Loading
+                }
+
+                is Result.Success -> {
+                    result.data
+                }
+
+                is Result.Error -> {
+                    when (result.exception) {
+                        is UnAuthorizedException,
+                        is NotFoundException -> PlanDetailUiState.NotFoundError
+
+                        else -> PlanDetailUiState.CommonError
+                    }
+                }
             }
         }.restartableStateIn(viewModelScope, SharingStarted.Lazily, PlanDetailUiState.Loading)
 
@@ -706,34 +725,96 @@ sealed interface PlanDetailUiState : UiState {
         val isShowMentionDialog: Boolean = false,
     ) : PlanDetailUiState
 
-    data object Error : PlanDetailUiState
+    data object NotFoundError : PlanDetailUiState
+
+    data object CommonError : PlanDetailUiState
 }
 
 sealed interface PlanDetailUiAction : UiAction {
     data object OnClickBack : PlanDetailUiAction
+
     data object OnClickRefresh : PlanDetailUiAction
+
     data object OnClickParticipants : PlanDetailUiAction
+
     data object OnClickPlanDelete : PlanDetailUiAction
+
     data object OnClickPlanUpdate : PlanDetailUiAction
+
     data object OnClickPlanReport : PlanDetailUiAction
+
     data object OnClickMapDetail : PlanDetailUiAction
-    data class OnClickPlanApply(val isApply: Boolean) : PlanDetailUiAction
-    data class OnClickCommentLike(val comment: Comment) : PlanDetailUiAction
-    data class OnClickCommentAddReply(val comment: Comment) : PlanDetailUiAction
-    data class OnClickCommentReport(val comment: Comment) : PlanDetailUiAction
-    data class OnClickCommentUpdate(val comment: Comment) : PlanDetailUiAction
-    data class OnClickCommentDelete(val comment: Comment) : PlanDetailUiAction
-    data class OnClickCommentUpload(val updateComment: Comment?) : PlanDetailUiAction
-    data class OnClickCommentWebLink(val webLink: String) : PlanDetailUiAction
-    data class OnClickReviewImage(val selectedImageIndex: Int) : PlanDetailUiAction
-    data class OnClickUserProfileImage(val imageUrl: String, val userName: String) : PlanDetailUiAction
-    data class OnClickMentionUser(val user: User) : PlanDetailUiAction
-    data class OnShowMentionDialog(val keyword: String?) : PlanDetailUiAction
-    data class OnShowPlanApplyCancelDialog(val isShow: Boolean) : PlanDetailUiAction
-    data class OnShowPlanEditDialog(val isShow: Boolean) : PlanDetailUiAction
-    data class OnShowPlanReportDialog(val isShow: Boolean) : PlanDetailUiAction
-    data class OnShowCommentEditDialog(val isShow: Boolean, val comment: Comment?) : PlanDetailUiAction
-    data class OnShowCommentReportDialog(val isShow: Boolean, val comment: Comment?) : PlanDetailUiAction
+
+    data class OnClickPlanApply(
+        val isApply: Boolean
+    ) : PlanDetailUiAction
+
+    data class OnClickCommentLike(
+        val comment: Comment
+    ) : PlanDetailUiAction
+
+    data class OnClickCommentAddReply(
+        val comment: Comment
+    ) : PlanDetailUiAction
+
+    data class OnClickCommentReport(
+        val comment: Comment
+    ) : PlanDetailUiAction
+
+    data class OnClickCommentUpdate(
+        val comment: Comment
+    ) : PlanDetailUiAction
+
+    data class OnClickCommentDelete(
+        val comment: Comment
+    ) : PlanDetailUiAction
+
+    data class OnClickCommentUpload(
+        val updateComment: Comment?
+    ) : PlanDetailUiAction
+
+    data class OnClickCommentWebLink(
+        val webLink: String
+    ) : PlanDetailUiAction
+
+    data class OnClickReviewImage(
+        val selectedImageIndex: Int
+    ) : PlanDetailUiAction
+
+    data class OnClickUserProfileImage(
+        val imageUrl: String,
+        val userName: String
+    ) : PlanDetailUiAction
+
+    data class OnClickMentionUser(
+        val user: User
+    ) : PlanDetailUiAction
+
+    data class OnShowMentionDialog(
+        val keyword: String?
+    ) : PlanDetailUiAction
+
+    data class OnShowPlanApplyCancelDialog(
+        val isShow: Boolean
+    ) : PlanDetailUiAction
+
+    data class OnShowPlanEditDialog(
+        val isShow: Boolean
+    ) : PlanDetailUiAction
+
+    data class OnShowPlanReportDialog(
+        val isShow: Boolean
+    ) : PlanDetailUiAction
+
+    data class OnShowCommentEditDialog(
+        val isShow: Boolean,
+        val comment: Comment?
+    ) : PlanDetailUiAction
+
+    data class OnShowCommentReportDialog(
+        val isShow: Boolean,
+        val comment: Comment?
+    ) : PlanDetailUiAction
 }
 
 sealed interface PlanDetailUiEvent : UiEvent {

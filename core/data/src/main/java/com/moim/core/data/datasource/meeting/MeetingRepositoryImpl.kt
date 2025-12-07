@@ -4,8 +4,8 @@ import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.data.util.catchFlow
+import com.moim.core.remote.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.remote.model.MeetingResponse
 import com.moim.core.remote.model.UserResponse
 import com.moim.core.remote.model.asItem

@@ -1,6 +1,7 @@
 package com.moim.core.remote.model
 
 import com.moim.core.common.model.Comment
+import com.moim.core.common.model.OpenGraph
 import com.moim.core.common.model.Writer
 import com.moim.core.common.util.parseZonedDateTime
 import kotlinx.serialization.SerialName
@@ -40,7 +41,7 @@ data class WriterResponse(
     val image: String? = null,
 )
 
-fun CommentResponse.asItem(): Comment {
+fun CommentResponse.asItem(openGraph: OpenGraph?): Comment {
     return Comment(
         postId = postId,
         commentId = commentId,
@@ -52,6 +53,7 @@ fun CommentResponse.asItem(): Comment {
         writer = writer.asItem(),
         mentions = mentions.map(WriterResponse::asItem),
         commentAt = commentAt.parseZonedDateTime(),
+        openGraph = openGraph
     )
 }
 

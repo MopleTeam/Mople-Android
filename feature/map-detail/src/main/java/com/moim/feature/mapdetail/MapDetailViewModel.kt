@@ -91,13 +91,23 @@ data class MapDetailUiState(
 
 sealed interface MapDetailUiAction : UiAction {
     data object OnClickBack : MapDetailUiAction
-    data class OnClickMapAddress(val mapType: MapType) : MapDetailUiAction
-    data class OnShowPlaceInfoDialog(val isShow: Boolean) : MapDetailUiAction
-    data class OnShowMapAppDialog(val isShow: Boolean) : MapDetailUiAction
+
+    data class OnClickMapAddress(
+        val mapType: MapType
+    ) : MapDetailUiAction
+
+    data class OnShowPlaceInfoDialog(
+        val isShow: Boolean
+    ) : MapDetailUiAction
+
+    data class OnShowMapAppDialog(
+        val isShow: Boolean
+    ) : MapDetailUiAction
 }
 
 sealed interface MapDetailUiEvent : UiEvent {
     data object NavigateToBack : MapDetailUiEvent
+
     data class NavigateToMapApp(
         val mapType: MapType,
         val latitude: Double,

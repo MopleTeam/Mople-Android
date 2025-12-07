@@ -6,7 +6,7 @@ import retrofit2.http.Query
 
 interface HolidayApi {
 
-    @GET("/holiday")
+    @GET("holiday")
     suspend fun getHolidays(
         @Query("year") year: String
     ): List<HolidayResponse>

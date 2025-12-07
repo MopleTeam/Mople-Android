@@ -10,8 +10,8 @@ object MoimConfig {
     val javaCompileTarget = JavaVersion.VERSION_17
 
     private const val VERSION_MAJOR = 1
-    private const val VERSION_MINOR = 2
-    private const val VERSION_PATCH = 4
+    private const val VERSION_MINOR = 3
+    private const val VERSION_PATCH = 0
 
     const val VERSION_NAME = "$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH"
     const val VERSION_CODE = VERSION_MAJOR.times(1000000) + VERSION_MINOR.times(1000) + VERSION_PATCH
