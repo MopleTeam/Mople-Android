@@ -11,9 +11,9 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.insertSeparators
 import androidx.paging.map
+import com.moim.core.common.exception.ForbiddenException
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.exception.NotFoundException
-import com.moim.core.common.exception.UnAuthorizedException
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.User
 import com.moim.core.common.model.ViewIdType
@@ -211,7 +211,7 @@ class PlanDetailViewModel @Inject constructor(
 
                 is Result.Error -> {
                     when (result.exception) {
-                        is UnAuthorizedException,
+                        is ForbiddenException,
                         is NotFoundException -> PlanDetailUiState.NotFoundError
 
                         else -> PlanDetailUiState.CommonError
