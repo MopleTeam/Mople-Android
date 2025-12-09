@@ -62,7 +62,7 @@ fun AlarmListItem(
                             append(alarm.targetKeyword)
                         }
 
-                        withStyle(style = MoimTheme.typography.title03.semiBold.toSpanStyle()) {
+                        withStyle(style = MoimTheme.typography.title03.medium.toSpanStyle()) {
                             append(alarm.title)
                         }
                     },
