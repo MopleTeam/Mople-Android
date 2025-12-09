@@ -32,13 +32,15 @@ class AlarmViewModel @Inject constructor(
     getNotificationsUseCase: GetNotificationsUseCase,
 ) : BaseViewModel() {
 
-    val alarmItems = getNotificationsUseCase()
-        .map { pagingData -> pagingData.map { it.asUiModel() } }
-        .cachedIn(viewModelScope)
-    val totalCount = getNotificationTotalCount()
-        .filterIsInstance<Result.Success<Int>>()
-        .mapLatest { it.data }
-        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
+    val alarmItems =
+        getNotificationsUseCase()
+            .map { pagingData -> pagingData.map { it.asUiModel() } }
+            .cachedIn(viewModelScope)
+    val totalCount =
+        getNotificationTotalCount()
+            .filterIsInstance<Result.Success<Int>>()
+            .mapLatest { it.data }
+            .stateIn(viewModelScope, SharingStarted.Lazily, 0)
 
     fun onUiAction(uiAction: AlarmUiAction) {
         when (uiAction) {

@@ -21,10 +21,9 @@ data class AlarmUiModel(
     val sendAt: ZonedDateTime,
 )
 
-
 fun Notification.asUiModel(): AlarmUiModel {
-    val targetKeyword = boldRegex.find(payload.title)?.groupValues?.getOrNull(1)
-    val remainingText = payload.title.replace(boldRegex, "").trim()
+    val targetKeyword = boldRegex.find(message)?.groupValues?.getOrNull(1)
+    val remainingText = message.replace(boldRegex, "").trim()
     return AlarmUiModel(
         notificationId = notificationId,
         meetName = meetName,
@@ -34,7 +33,7 @@ fun Notification.asUiModel(): AlarmUiModel {
         reviewId = reviewId,
         title = remainingText,
         targetKeyword = targetKeyword ?: "",
-        description = payload.message,
+        description = message,
         type = type,
         planDate = planDate,
         sendAt = sendAt,

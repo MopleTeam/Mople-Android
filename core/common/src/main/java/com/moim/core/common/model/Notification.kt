@@ -23,12 +23,7 @@ data class Notification(
     val planId: String?,
     val reviewId: String?,
     val type: NotificationType,
-    val payload: Payload,
+    val message: String,
     val planDate: ZonedDateTime?,
     val sendAt: ZonedDateTime,
-)
-
-data class Payload(
-    val title: String,
-    val message: String
 )

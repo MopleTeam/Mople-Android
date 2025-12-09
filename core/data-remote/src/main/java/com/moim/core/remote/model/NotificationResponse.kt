@@ -2,7 +2,6 @@ package com.moim.core.remote.model
 
 import com.moim.core.common.model.Notification
 import com.moim.core.common.model.NotificationType
-import com.moim.core.common.model.Payload
 import com.moim.core.common.util.parseZonedDateTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -23,20 +22,12 @@ data class NotificationResponse(
     val reviewId: String? = null,
     @SerialName("type")
     val type: String,
-    @SerialName("payload")
-    val payload: PayloadResponse,
     @SerialName("planDate")
     val planDate: String?,
     @SerialName("sendAt")
     val sendAt: String,
-)
-
-@Serializable
-data class PayloadResponse(
-    @SerialName("title")
-    val title: String,
     @SerialName("message")
-    val message: String
+    val message: String? = null,
 )
 
 fun NotificationResponse.asItem(): Notification {
@@ -48,15 +39,8 @@ fun NotificationResponse.asItem(): Notification {
         planId = planId,
         reviewId = reviewId,
         type = NotificationType.entries.find { it.name == type } ?: NotificationType.NONE,
-        payload = payload.asItem(),
+        message = message ?: "",
         planDate = planDate.parseZonedDateTime(),
         sendAt = sendAt.parseZonedDateTime(),
-    )
-}
-
-fun PayloadResponse.asItem(): Payload {
-    return Payload(
-        title = title,
-        message = message
     )
 }
