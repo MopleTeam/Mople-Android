@@ -12,9 +12,9 @@ import androidx.paging.filter
 import androidx.paging.insertHeaderItem
 import androidx.paging.insertSeparators
 import androidx.paging.map
+import com.moim.core.common.exception.ForbiddenException
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.exception.NotFoundException
-import com.moim.core.common.exception.UnAuthorizedException
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.User
 import com.moim.core.common.model.isChild
@@ -182,7 +182,7 @@ class CommentDetailViewModel @Inject constructor(
 
                     is Result.Error -> {
                         when (result.exception) {
-                            is UnAuthorizedException,
+                            is ForbiddenException,
                             is NotFoundException -> CommentDetailUiState.NotFoundError
 
                             else -> CommentDetailUiState.CommonError
