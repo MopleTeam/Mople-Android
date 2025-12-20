@@ -38,12 +38,12 @@ interface PlanRepository {
         meetingId: String,
         planName: String,
         planTime: String,
-        planAddress: String,
-        planWeatherAddress: String,
+        planAddress: String?,
+        planWeatherAddress: String?,
         planDescription: String?,
         title: String,
-        longitude: Double,
-        latitude: Double,
+        longitude: Double?,
+        latitude: Double?,
     ): Flow<Plan>
 
     fun joinPlan(
@@ -58,12 +58,12 @@ interface PlanRepository {
         planId: String,
         planName: String,
         planTime: String,
-        planAddress: String,
-        planWeatherAddress: String,
+        planAddress: String?,
+        planWeatherAddress: String?,
         planDescription: String?,
         title: String,
-        longitude: Double,
-        latitude: Double,
+        longitude: Double?,
+        latitude: Double?,
     ): Flow<Plan>
 
     fun deletePlan(planId: String): Flow<Unit>

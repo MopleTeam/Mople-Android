@@ -92,12 +92,12 @@ internal class PlanRepositoryImpl @Inject constructor(
         meetingId: String,
         planName: String,
         planTime: String,
-        planAddress: String,
-        planWeatherAddress: String,
+        planAddress: String?,
+        planWeatherAddress: String?,
         planDescription: String?,
         title: String,
-        longitude: Double,
-        latitude: Double
+        longitude: Double?,
+        latitude: Double?
     ) = catchFlow {
         emit(
             planApi.createPlan(
@@ -120,12 +120,12 @@ internal class PlanRepositoryImpl @Inject constructor(
         planId: String,
         planName: String,
         planTime: String,
-        planAddress: String,
-        planWeatherAddress: String,
+        planAddress: String?,
+        planWeatherAddress: String?,
         planDescription: String?,
         title: String,
-        longitude: Double,
-        latitude: Double
+        longitude: Double?,
+        latitude: Double?
     ) = catchFlow {
         emit(
             planApi.updatePlan(
