@@ -30,26 +30,26 @@ import com.naver.maps.map.compose.rememberUpdatedMarkerState
 @Composable
 fun PlaceMapScreen(
     modifier: Modifier = Modifier,
-    longitude: Double,
-    latitude: Double,
-    markerLongitude: Double = 0.0,
-    markerLatitude: Double = 0.0,
+    longitude: Double?,
+    latitude: Double?,
+    markerLongitude: Double?,
+    markerLatitude: Double?,
     onLocationChange: (Location) -> Unit,
     onUiAction: (PlanWriteUiAction) -> Unit
 ) {
     val cameraPositionState = rememberCameraPositionState()
-    val markerState = rememberUpdatedMarkerState(position = LatLng(markerLatitude, markerLongitude))
+    val markerState = rememberUpdatedMarkerState(position = LatLng(markerLatitude ?: 0.0, markerLongitude ?: 0.0))
 
     TrackScreenViewEvent(screenName = "plan_write_map")
 
     LaunchedEffect(latitude, longitude) {
-        if (longitude != 0.0 && latitude != 0.0) {
+        if (longitude != null && latitude != null) {
             cameraPositionState.position = CameraPosition(LatLng(latitude, longitude), 15.2)
         }
     }
 
     LaunchedEffect(markerLatitude, markerLongitude) {
-        if (markerLongitude != 0.0 && markerLatitude != 0.0) {
+        if (markerLongitude != null && markerLatitude != null) {
             markerState.position = LatLng(markerLatitude, markerLongitude)
             cameraPositionState.position = CameraPosition(LatLng(markerLatitude, markerLongitude), 15.2)
         }
