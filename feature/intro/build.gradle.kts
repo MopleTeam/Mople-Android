@@ -26,4 +26,6 @@ android {
 
 dependencies {
     implementation(libs.kakao.login)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 }

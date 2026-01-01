@@ -143,7 +143,7 @@ fun MoimTopAppbar(
                 }
             },
             windowInsets = WindowInsets(top = 0.dp),
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,
                 navigationIconContentColor = MoimTheme.colors.secondary,
                 titleContentColor = titleColor,

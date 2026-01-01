@@ -1,8 +1,6 @@
 package com.moim.feature.participantlist
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.moim.core.common.exception.NetworkException
@@ -14,32 +12,28 @@ import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.domain.usecase.GetParticipantsUseCase
-import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
-import javax.inject.Inject
 
-@HiltViewModel
-class ParticipantListViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = ParticipantListViewModel.Factory::class)
+class ParticipantListViewModel @AssistedInject constructor(
     private val meetingRepository: MeetingRepository,
     private val planRepository: PlanRepository,
     private val reviewRepository: ReviewRepository,
     getParticipantsUseCase: GetParticipantsUseCase,
+    @Assisted val viewIdType : ViewIdType,
 ) : BaseViewModel() {
-
-    private val viewIdType
-        get() = savedStateHandle
-            .toRoute<DetailRoute.ParticipantList>(DetailRoute.PlanDetail.typeMap)
-            .viewIdType
 
     private val participants = getParticipantsUseCase(
         params = GetParticipantsUseCase.Params(
@@ -114,6 +108,13 @@ class ParticipantListViewModel @Inject constructor(
         }.getOrElse { 0 }
 
         return totalCount
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            viewIdType: ViewIdType,
+        ): ParticipantListViewModel
     }
 }
 

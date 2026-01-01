@@ -1,8 +1,6 @@
 package com.moim.feature.meetingsetting
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.ViewIdType
@@ -14,34 +12,30 @@ import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
 import com.moim.core.ui.eventbus.PlanAction
 import com.moim.core.ui.eventbus.actionStateIn
-import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
-import javax.inject.Inject
 
-@HiltViewModel
-class MeetingSettingViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = MeetingSettingViewModel.Factory::class)
+class MeetingSettingViewModel @AssistedInject constructor(
     userRepository: UserRepository,
     private val meetingRepository: MeetingRepository,
     private val meetingEventBus: EventBus<MeetingAction>,
-    private val planEventBus: EventBus<PlanAction>
+    private val planEventBus: EventBus<PlanAction>,
+    @Assisted val meeting: Meeting,
 ) : BaseViewModel() {
-
-    private val meeting
-        get() = savedStateHandle
-            .toRoute<DetailRoute.MeetingSetting>(DetailRoute.MeetingSetting.typeMap)
-            .meeting
 
     private val meetingActionReceiver = meetingEventBus
         .action
@@ -122,6 +116,13 @@ class MeetingSettingViewModel @Inject constructor(
             is IOException -> setUiEvent(MeetingSettingUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
             is NetworkException -> setUiEvent(MeetingSettingUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            meeting: Meeting?,
+        ): MeetingSettingViewModel
     }
 }
 

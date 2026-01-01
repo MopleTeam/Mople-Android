@@ -3,9 +3,7 @@ package com.moim.feature.commentdetail
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.insert
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
@@ -42,6 +40,9 @@ import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
 import com.moim.core.ui.view.checkedActionedAtIsBeforeLoadedAt
 import com.moim.core.ui.view.restartableStateIn
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -56,32 +57,26 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
-import javax.inject.Inject
 
-@HiltViewModel
-class CommentDetailViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = CommentDetailViewModel.Factory::class)
+class CommentDetailViewModel @AssistedInject constructor(
     userRepository: UserRepository,
     private val commentRepository: CommentRepository,
     private val meetingRepository: MeetingRepository,
     private val getReplyCommentUseCase: GetReplyCommentUseCase,
     private val commentEventBus: EventBus<CommentAction>,
+    @Assisted val commentDetail: DetailRoute.CommentDetail,
 ) : BaseViewModel() {
 
-    private val commentDetailArgs
-        get() = savedStateHandle.toRoute<DetailRoute.CommentDetail>(DetailRoute.CommentDetail.typeMap)
-
-    private val meetId = commentDetailArgs.meetId
-    private val postId = commentDetailArgs.postId
-    private val comment = requireNotNull(commentDetailArgs.comment)
     private var searchJob: Job? = null
+    private val comment = requireNotNull(commentDetail.comment)
 
     private val commentActionReceiver = commentEventBus
         .action
         .actionStateIn(viewModelScope, CommentAction.None)
 
     private var _comments =
-        getReplyCommentUseCase(GetReplyCommentUseCase.Params(postId = postId, commentId = comment.commentId))
+        getReplyCommentUseCase(GetReplyCommentUseCase.Params(postId = commentDetail.postId, commentId = comment.commentId))
             .mapLatest { it.map { comment -> comment.createCommentUiModel() } }
             .mapLatest { it.insertHeaderItem(item = comment.createCommentUiModel()) }
             .cachedIn(viewModelScope)
@@ -146,7 +141,7 @@ class CommentDetailViewModel @Inject constructor(
         }
     }.cachedIn(viewModelScope)
 
-    private val meetingParticipants = flowOf(meetId)
+    private val meetingParticipants = flowOf(commentDetail.meetId)
         .mapLatest {
             meetingRepository.getMeetingParticipants(
                 meetingId = it,
@@ -291,7 +286,7 @@ class CommentDetailViewModel @Inject constructor(
 
                 if (isCreateComment) {
                     commentRepository.createReplyComment(
-                        postId = postId,
+                        postId = commentDetail.postId,
                         commentId = parentComment.comment.commentId,
                         content = tagMessage.trim(),
                         mentionIds = selectedMentionUsers.map { it.userId }
@@ -491,6 +486,14 @@ class CommentDetailViewModel @Inject constructor(
             is IOException -> setUiEvent(CommentDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
             is NetworkException -> setUiEvent(CommentDetailUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
         }
+    }
+
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            commentDetail: DetailRoute.CommentDetail
+        ): CommentDetailViewModel
     }
 }
 

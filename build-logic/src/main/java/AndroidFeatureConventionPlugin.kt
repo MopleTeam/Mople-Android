@@ -36,7 +36,8 @@ internal class AndroidFeatureConventionPlugin : Plugin<Project> {
                 // AndroidX Paging
                 implementation(libs.bundles.androidx.paging)
                 // AndroidX Navigation
-                implementation(libs.androidx.navigation.compose)
+                implementation(libs.androidx.navigation3.runtime)
+                implementation(libs.androidx.navigation3.ui)
 
                 // AndroidX Compose material3
                 implementation(libs.androidx.compose.material3)
