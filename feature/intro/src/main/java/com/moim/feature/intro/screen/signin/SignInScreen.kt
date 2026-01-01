@@ -26,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavOptions
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.LoadingDialog
@@ -36,7 +35,6 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_FEE500
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.ui.route.IntroRoute
 import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
 
@@ -45,18 +43,15 @@ internal typealias OnSignInUiAction = (SignInUiAction) -> Unit
 @Composable
 fun SignInRoute(
     viewModel: SignInViewModel = hiltViewModel(),
-    navigateToSignUp: (String, String, NavOptions) -> Unit,
+    navigateToSignUp: (email: String, token: String) -> Unit,
     navigateToMain: () -> Unit,
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val options = NavOptions.Builder()
-        .setPopUpTo(IntroRoute.SignIn, inclusive = true)
-        .build()
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is SignInUiEvent.NavigateToSignUp -> navigateToSignUp(event.email, event.token, options)
+            is SignInUiEvent.NavigateToSignUp -> navigateToSignUp(event.email, event.token)
             is SignInUiEvent.NavigateToMain -> navigateToMain()
             is SignInUiEvent.ShowToastMessage -> showToast(context, event.message)
         }

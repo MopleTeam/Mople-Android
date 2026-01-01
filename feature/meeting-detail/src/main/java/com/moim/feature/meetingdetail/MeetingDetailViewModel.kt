@@ -1,6 +1,5 @@
 package com.moim.feature.meetingdetail
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -31,6 +30,9 @@ import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
 import com.moim.core.ui.view.checkedActionedAtIsBeforeLoadedAt
 import com.moim.core.ui.view.restartableStateIn
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -47,107 +49,108 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.ZonedDateTime
-import javax.inject.Inject
 
-@HiltViewModel
-class MeetingDetailViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = MeetingDetailViewModel.Factory::class)
+class MeetingDetailViewModel @AssistedInject constructor(
     private val getPlanItemsUseCase: GetPlanItemsUseCase,
     private val planRepository: PlanRepository,
     private val reviewRepository: ReviewRepository,
     private val meetingRepository: MeetingRepository,
     userRepository: UserRepository,
     meetingEventBus: EventBus<MeetingAction>,
-    private val planEventBus: EventBus<PlanAction>
+    private val planEventBus: EventBus<PlanAction>,
+    @Assisted val meetingId : String,
 ) : BaseViewModel() {
 
-    private val meetingId
-        get() = savedStateHandle.get<String>(KEY_MEETING_ID) ?: ""
-
-    private val meetingActionReceiver = meetingEventBus
-        .action
-        .actionStateIn(viewModelScope, MeetingAction.None)
-    private val planActionReceiver = planEventBus
-        .action
-        .actionStateIn(viewModelScope, PlanAction.None)
+    private val meetingActionReceiver =
+        meetingEventBus
+            .action
+            .actionStateIn(viewModelScope, MeetingAction.None)
+    private val planActionReceiver =
+        planEventBus
+            .action
+            .actionStateIn(viewModelScope, PlanAction.None)
 
     private val pagingRefreshSignal = MutableSharedFlow<Unit>()
-    private val loadDataSignal: Flow<Unit> = flow {
-        emit(Unit)
-        emitAll(pagingRefreshSignal)
-    }
-
-    private var _plans = loadDataSignal
-        .flatMapLatest { getPlanItemsUseCase(GetPlanItemsUseCase.Params(meetId = meetingId, isPlanAtBefore = true)) }
-        .cachedIn(viewModelScope)
-    private val plans = planActionReceiver.flatMapLatest { receiver ->
-        when (receiver) {
-            is PlanAction.None -> _plans
-
-            is PlanAction.PlanCreate -> {
-                _plans.map { pagingData ->
-                    pagingData.checkedActionedAtIsBeforeLoadedAt(
-                        actionedAt = receiver.actionAt,
-                        loadedAt = getPlanItemsUseCase.loadedAt
-                    ) {
-                        pagingData.insertSeparators { before: PlanItem?, aftet: PlanItem? ->
-                            if (before == null) {
-                                return@insertSeparators receiver.planItem
-                            } else {
-                                null
-                            }
-                        }
-                    }
-                }
-            }
-
-            is PlanAction.PlanUpdate -> {
-                _plans.map { pagingData ->
-                    pagingData.checkedActionedAtIsBeforeLoadedAt(
-                        actionedAt = receiver.actionAt,
-                        loadedAt = getPlanItemsUseCase.loadedAt
-                    ) {
-                        if (receiver.planItem.isPlanAtBefore.not()) {
-                            pagingData
-                        } else {
-                            pagingData.map { planItem ->
-                                if (planItem.postId == receiver.planItem.postId) {
-                                    receiver.planItem
-                                } else {
-                                    planItem
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            is PlanAction.PlanDelete -> {
-                _plans.map { pagingData ->
-                    pagingData.checkedActionedAtIsBeforeLoadedAt(
-                        actionedAt = receiver.actionAt,
-                        loadedAt = getPlanItemsUseCase.loadedAt
-                    ) {
-                        pagingData
-                            .map { planItem ->
-                                if (planItem.postId == receiver.postId) {
-                                    planItem.apply { isDeleted = true }
-                                } else {
-                                    planItem
-                                }
-                            }.filter { it.isDeleted.not() }
-                    }
-                }
-            }
-
-            is PlanAction.PlanInvalidate -> {
-                onRefresh()
-                _plans
-            }
-        }.also {
-            _plans = it
+    private val loadDataSignal: Flow<Unit> =
+        flow {
+            emit(Unit)
+            emitAll(pagingRefreshSignal)
         }
-    }.cachedIn(viewModelScope)
+
+    private var _plans =
+        loadDataSignal
+            .flatMapLatest { getPlanItemsUseCase(GetPlanItemsUseCase.Params(meetId = meetingId, isPlanAtBefore = true)) }
+            .cachedIn(viewModelScope)
+    private val plans =
+        planActionReceiver.flatMapLatest { receiver ->
+            when (receiver) {
+                is PlanAction.None -> _plans
+
+                is PlanAction.PlanCreate -> {
+                    _plans.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getPlanItemsUseCase.loadedAt
+                        ) {
+                            pagingData.insertSeparators { before: PlanItem?, _: PlanItem? ->
+                                if (before == null) {
+                                    return@insertSeparators receiver.planItem
+                                } else {
+                                    null
+                                }
+                            }
+                        }
+                    }
+                }
+
+                is PlanAction.PlanUpdate -> {
+                    _plans.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getPlanItemsUseCase.loadedAt
+                        ) {
+                            if (receiver.planItem.isPlanAtBefore.not()) {
+                                pagingData
+                            } else {
+                                pagingData.map { planItem ->
+                                    if (planItem.postId == receiver.planItem.postId) {
+                                        receiver.planItem
+                                    } else {
+                                        planItem
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                is PlanAction.PlanDelete -> {
+                    _plans.map { pagingData ->
+                        pagingData.checkedActionedAtIsBeforeLoadedAt(
+                            actionedAt = receiver.actionAt,
+                            loadedAt = getPlanItemsUseCase.loadedAt
+                        ) {
+                            pagingData
+                                .map { planItem ->
+                                    if (planItem.postId == receiver.postId) {
+                                        planItem.apply { isDeleted = true }
+                                    } else {
+                                        planItem
+                                    }
+                                }.filter { it.isDeleted.not() }
+                        }
+                    }
+                }
+
+                is PlanAction.PlanInvalidate -> {
+                    onRefresh()
+                    _plans
+                }
+            }.also {
+                _plans = it
+            }
+        }.cachedIn(viewModelScope)
 
     private var _review = loadDataSignal
         .flatMapLatest { getPlanItemsUseCase(GetPlanItemsUseCase.Params(meetId = meetingId, isPlanAtBefore = false)) }
@@ -376,8 +379,11 @@ class MeetingDetailViewModel @Inject constructor(
         }
     }
 
-    companion object {
-        private const val KEY_MEETING_ID = "meetingId"
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            meetingId: String,
+        ): MeetingDetailViewModel
     }
 }
 

@@ -5,7 +5,6 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.insert
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
@@ -33,7 +32,6 @@ import com.moim.core.ui.eventbus.CommentAction
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.PlanAction
 import com.moim.core.ui.eventbus.actionStateIn
-import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.cancelIfActive
 import com.moim.core.ui.util.createCommentUiModel
 import com.moim.core.ui.util.createMentionTagMessage
@@ -47,6 +45,9 @@ import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
 import com.moim.core.ui.view.checkedActionedAtIsBeforeLoadedAt
 import com.moim.core.ui.view.restartableStateIn
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -62,10 +63,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.ZonedDateTime
-import javax.inject.Inject
 
-@HiltViewModel
-class PlanDetailViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = PlanDetailViewModel.Factory::class)
+class PlanDetailViewModel @AssistedInject constructor(
     private val savedStateHandle: SavedStateHandle,
     userRepository: UserRepository,
     getPlanItemUseCase: GetPlanItemUseCase,
@@ -76,13 +76,8 @@ class PlanDetailViewModel @Inject constructor(
     private val getCommentsUseCase: GetCommentsUseCase,
     private val planEventBus: EventBus<PlanAction>,
     private val commentEventBus: EventBus<CommentAction>,
+    @Assisted val viewIdType: ViewIdType,
 ) : BaseViewModel() {
-
-    private val viewIdType
-        get() = savedStateHandle
-            .toRoute<DetailRoute.PlanDetail>(DetailRoute.PlanDetail.typeMap)
-            .viewIdType
-
     private val meetId = savedStateHandle.getStateFlow<String?>(KEY_MEET_ID, null)
     private val commentCheckId = savedStateHandle.getStateFlow<String?>(key = KEY_COMMENT_CHECK_ID, null)
 
@@ -694,6 +689,13 @@ class PlanDetailViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            viewIdType: ViewIdType,
+        ): PlanDetailViewModel
     }
 
     companion object {

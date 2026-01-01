@@ -1,37 +1,32 @@
 package com.moim.feature.meetingwrite
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
+import com.moim.core.common.model.Meeting
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
-import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
-import javax.inject.Inject
 
-@HiltViewModel
-class MeetingWriteViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = MeetingWriteViewModel.Factory::class)
+class MeetingWriteViewModel @AssistedInject constructor(
     private val meetingRepository: MeetingRepository,
     private val meetingEventBus: EventBus<MeetingAction>,
+    @Assisted val meeting: Meeting?,
 ) : BaseViewModel() {
-
-    private val meeting
-        get() = savedStateHandle
-            .toRoute<DetailRoute.MeetingWrite>(DetailRoute.MeetingWrite.typeMap)
-            .meeting
 
     init {
         viewModelScope.launch {
@@ -113,6 +108,13 @@ class MeetingWriteViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            meeting: Meeting?,
+        ): MeetingWriteViewModel
     }
 }
 

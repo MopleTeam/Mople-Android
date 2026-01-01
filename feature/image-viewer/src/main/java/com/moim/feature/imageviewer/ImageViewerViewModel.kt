@@ -1,29 +1,24 @@
 package com.moim.feature.imageviewer
 
 import androidx.annotation.DrawableRes
-import androidx.lifecycle.SavedStateHandle
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 
-@HiltViewModel
-class ImageViewerViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle
+@HiltViewModel(assistedFactory = ImageViewerViewModel.Factory::class)
+class ImageViewerViewModel @AssistedInject constructor(
+    @Assisted imageViewer: DetailRoute.ImageViewer,
 ) : BaseViewModel() {
-    private val title
-        get() = savedStateHandle.get<String>(KEY_TITLE) ?: ""
-
-    private val images
-        get() = savedStateHandle.get<Array<String>>(KEY_IMAGES)?.toList() ?: emptyList()
-
-    private val currentPosition
-        get() = savedStateHandle.get<Int>(KEY_POSITION) ?: 0
-
-    private val defaultImage
-        get() = savedStateHandle.get<Int?>(KEY_DEFAULT_IMAGE)
+    private val title = imageViewer.title
+    private val images = imageViewer.images
+    private val currentPosition = imageViewer.position
+    private val defaultImage = imageViewer.defaultImage
 
     init {
         setUiState(
@@ -42,11 +37,11 @@ class ImageViewerViewModel @Inject constructor(
         }
     }
 
-    companion object {
-        private const val KEY_TITLE = "title"
-        private const val KEY_IMAGES = "images"
-        private const val KEY_POSITION = "position"
-        private const val KEY_DEFAULT_IMAGE = "defaultImage"
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            commentDetail: DetailRoute.ImageViewer
+        ): ImageViewerViewModel
     }
 }
 

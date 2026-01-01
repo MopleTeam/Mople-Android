@@ -29,12 +29,12 @@ import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun MapDetailRoute(
-    paddingValues: PaddingValues,
+    padding: PaddingValues,
     viewModel: MapDetailViewModel = hiltViewModel(),
     navigateToBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val modifier = Modifier.containerScreen(paddingValues, MoimTheme.colors.white)
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
     val uiState by viewModel.uiState
         .filterIsInstance<MapDetailUiState>()
         .collectAsStateWithLifecycle(null)

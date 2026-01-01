@@ -1,6 +1,5 @@
 package com.moim.feature.reviewwrite
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.model.Review
 import com.moim.core.common.model.ReviewImage
@@ -18,26 +17,23 @@ import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
 import com.moim.core.ui.view.restartableStateIn
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
-import javax.inject.Inject
 
-@HiltViewModel
-class ReviewWriteViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = ReviewWriteViewModel.Factory::class)
+class ReviewWriteViewModel @AssistedInject constructor(
     reviewRepository: ReviewRepository,
     private val updateReviewImagesUseCase: UpdateReviewImagesUseCase,
     private val planEventBus: EventBus<PlanAction>,
+    @Assisted val postId: String,
+    @Assisted val isUpdated: Boolean,
 ) : BaseViewModel() {
-
-    private val postId
-        get() = savedStateHandle.get<String>(KEY_POST_ID) ?: ""
-
-    private val isUpdated
-        get() = savedStateHandle.get<Boolean>(KEY_IS_UPDATED) ?: false
 
     private val reviewWriteResult =
         reviewRepository.getReview(postId)
@@ -145,9 +141,12 @@ class ReviewWriteViewModel @Inject constructor(
         }
     }
 
-    companion object {
-        private const val KEY_POST_ID = "postId"
-        private const val KEY_IS_UPDATED = "isUpdated"
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            postId: String,
+            isUpdated: Boolean,
+        ): ReviewWriteViewModel
     }
 }
 

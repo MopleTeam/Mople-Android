@@ -1,14 +1,13 @@
 package com.moim.feature.planwrite
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.Place
+import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.asPlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
@@ -17,7 +16,6 @@ import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.domain.usecase.GetMeetingsUseCase
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.PlanAction
-import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
@@ -25,6 +23,9 @@ import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
 import com.moim.feature.planwrite.model.MeetingUiModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,20 +36,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okio.IOException
 import java.time.ZonedDateTime
-import javax.inject.Inject
 
-@HiltViewModel
-class PlanWriteViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = PlanWriteViewModel.Factory::class)
+class PlanWriteViewModel @AssistedInject constructor(
     private val planRepository: PlanRepository,
     getMeetingsUseCase: GetMeetingsUseCase,
     private val planEventBus: EventBus<PlanAction>,
+    @Assisted val planItem: PlanItem?
 ) : BaseViewModel() {
-
-    private val planItem
-        get() = savedStateHandle
-            .toRoute<DetailRoute.PlanWrite>(DetailRoute.PlanWrite.typeMap)
-            .planItem
 
     private val selectedMeetingId = MutableStateFlow<String?>(null)
 
@@ -328,6 +323,13 @@ class PlanWriteViewModel @Inject constructor(
                 setUiEvent(PlanWriteUiEvent.NavigateToBack)
             }
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            planItem: PlanItem?,
+        ): PlanWriteViewModel
     }
 }
 

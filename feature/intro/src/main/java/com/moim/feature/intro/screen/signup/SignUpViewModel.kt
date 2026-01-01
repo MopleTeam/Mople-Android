@@ -1,6 +1,5 @@
 package com.moim.feature.intro.screen.signup
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.consts.PATTERN_NICKNAME
 import com.moim.core.common.consts.SOCIAL_TYPE_KAKAO
@@ -9,33 +8,32 @@ import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.token.TokenRepository
 import com.moim.core.data.datasource.user.UserRepository
+import com.moim.core.ui.route.IntroRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import okio.IOException
 import java.util.regex.Pattern
-import javax.inject.Inject
 
-@HiltViewModel
-class SignUpViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = SignUpViewModel.Factory::class)
+class SignUpViewModel @AssistedInject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    private val tokenRepository: TokenRepository
+    private val tokenRepository: TokenRepository,
+    @Assisted signUp: IntroRoute.SignUp,
 ) : BaseViewModel() {
-
-    private val email
-        get() = savedStateHandle.get<String>(KEY_EMAIL) ?: ""
-
-    private val token
-        get() = savedStateHandle.get<String>(KEY_TOKEN) ?: ""
+    private val email = signUp.email
+    private val token = signUp.token
 
     init {
         setUiState(SignUpUiState.SignUp())
@@ -129,9 +127,11 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    companion object {
-        private const val KEY_EMAIL = "email"
-        private const val KEY_TOKEN = "token"
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            signUp: IntroRoute.SignUp,
+        ): SignUpViewModel
     }
 }
 

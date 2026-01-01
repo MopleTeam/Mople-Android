@@ -18,7 +18,6 @@ dependencies {
     implementation(libs.firebase.messageing)
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.material3)
@@ -31,6 +30,7 @@ dependencies {
     implementation(libs.lottie.compose)
     implementation(libs.bundles.coil)
     implementation(libs.timber)
-
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
     api(libs.androidx.compose.ui.tooling)
 }

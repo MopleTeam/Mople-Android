@@ -1,9 +1,7 @@
 package com.moim.feature.main.navigation
 
-import androidx.compose.runtime.Composable
 import com.moim.core.designsystem.R
 import com.moim.core.ui.route.MainRoute
-import com.moim.core.ui.route.Route
 
 enum class MainTab(
     val iconResId: Int,
@@ -37,14 +35,24 @@ enum class MainTab(
     );
 
     companion object {
-        @Composable
-        fun find(predicate: @Composable (MainRoute) -> Boolean): MainTab? {
+        /**
+         * 조건에 맞는 MainTab 찾기
+         */
+        fun find(predicate: (MainRoute) -> Boolean): MainTab? {
             return entries.find { predicate(it.route) }
         }
 
-        @Composable
-        fun contains(predicate: @Composable (Route) -> Boolean): Boolean {
+        /**
+         * 조건에 맞는 Route가 있는지 확인
+         */
+        fun contains(predicate: (MainRoute) -> Boolean): Boolean {
             return entries.map { it.route }.any { predicate(it) }
         }
+
+        /**
+         * 모든 MainRoute 리스트 반환
+         */
+        val routes: List<MainRoute>
+            get() = entries.map { it.route }
     }
 }
