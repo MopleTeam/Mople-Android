@@ -10,6 +10,7 @@ import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.domain.usecase.UpdateReviewImagesUseCase
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
@@ -31,9 +32,10 @@ class ReviewWriteViewModel @AssistedInject constructor(
     reviewRepository: ReviewRepository,
     private val updateReviewImagesUseCase: UpdateReviewImagesUseCase,
     private val planEventBus: EventBus<PlanAction>,
-    @Assisted val postId: String,
-    @Assisted val isUpdated: Boolean,
+    @Assisted val reviewWriteRoute: DetailRoute.ReviewWrite,
 ) : BaseViewModel() {
+    private val postId = reviewWriteRoute.postId
+    private val isUpdated = reviewWriteRoute.isUpdated
 
     private val reviewWriteResult =
         reviewRepository.getReview(postId)
@@ -144,8 +146,7 @@ class ReviewWriteViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            postId: String,
-            isUpdated: Boolean,
+            reviewWriteRoute: DetailRoute.ReviewWrite,
         ): ReviewWriteViewModel
     }
 }

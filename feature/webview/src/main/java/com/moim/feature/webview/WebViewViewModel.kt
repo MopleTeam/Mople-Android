@@ -1,5 +1,6 @@
 package com.moim.feature.webview
 
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
@@ -12,8 +13,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @HiltViewModel(assistedFactory = WebViewViewModel.Factory::class)
 class WebViewViewModel @AssistedInject constructor(
-    @Assisted val webUrl: String,
+    @Assisted val webViewRoute: DetailRoute.WebView,
 ) : BaseViewModel() {
+    private val webUrl = webViewRoute.webUrl
 
     init {
         setUiState(WebViewUiState(webUrl = webUrl, loadProgress = 0f))
@@ -43,7 +45,7 @@ class WebViewViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            webUrl: String,
+            webViewRoute: DetailRoute.WebView,
         ): WebViewViewModel
     }
 }

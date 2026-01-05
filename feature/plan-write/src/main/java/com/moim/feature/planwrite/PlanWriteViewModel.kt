@@ -7,7 +7,6 @@ import androidx.paging.map
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.Place
-import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.asPlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
@@ -16,6 +15,7 @@ import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.domain.usecase.GetMeetingsUseCase
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
@@ -42,9 +42,9 @@ class PlanWriteViewModel @AssistedInject constructor(
     private val planRepository: PlanRepository,
     getMeetingsUseCase: GetMeetingsUseCase,
     private val planEventBus: EventBus<PlanAction>,
-    @Assisted val planItem: PlanItem?
+    @Assisted val planWriteRoute: DetailRoute.PlanWrite,
 ) : BaseViewModel() {
-
+    private val planItem = planWriteRoute.planItem
     private val selectedMeetingId = MutableStateFlow<String?>(null)
 
     private val meetings = getMeetingsUseCase()
@@ -328,7 +328,7 @@ class PlanWriteViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            planItem: PlanItem?,
+            planWriteRoute: DetailRoute.PlanWrite
         ): PlanWriteViewModel
     }
 }

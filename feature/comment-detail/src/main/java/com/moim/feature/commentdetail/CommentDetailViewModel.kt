@@ -65,18 +65,18 @@ class CommentDetailViewModel @AssistedInject constructor(
     private val meetingRepository: MeetingRepository,
     private val getReplyCommentUseCase: GetReplyCommentUseCase,
     private val commentEventBus: EventBus<CommentAction>,
-    @Assisted val commentDetail: DetailRoute.CommentDetail,
+    @Assisted val commentDetailRoute: DetailRoute.CommentDetail,
 ) : BaseViewModel() {
 
     private var searchJob: Job? = null
-    private val comment = requireNotNull(commentDetail.comment)
+    private val comment = requireNotNull(commentDetailRoute.comment)
 
     private val commentActionReceiver = commentEventBus
         .action
         .actionStateIn(viewModelScope, CommentAction.None)
 
     private var _comments =
-        getReplyCommentUseCase(GetReplyCommentUseCase.Params(postId = commentDetail.postId, commentId = comment.commentId))
+        getReplyCommentUseCase(GetReplyCommentUseCase.Params(postId = commentDetailRoute.postId, commentId = comment.commentId))
             .mapLatest { it.map { comment -> comment.createCommentUiModel() } }
             .mapLatest { it.insertHeaderItem(item = comment.createCommentUiModel()) }
             .cachedIn(viewModelScope)
@@ -141,7 +141,7 @@ class CommentDetailViewModel @AssistedInject constructor(
         }
     }.cachedIn(viewModelScope)
 
-    private val meetingParticipants = flowOf(commentDetail.meetId)
+    private val meetingParticipants = flowOf(commentDetailRoute.meetId)
         .mapLatest {
             meetingRepository.getMeetingParticipants(
                 meetingId = it,
@@ -286,7 +286,7 @@ class CommentDetailViewModel @AssistedInject constructor(
 
                 if (isCreateComment) {
                     commentRepository.createReplyComment(
-                        postId = commentDetail.postId,
+                        postId = commentDetailRoute.postId,
                         commentId = parentComment.comment.commentId,
                         content = tagMessage.trim(),
                         mentionIds = selectedMentionUsers.map { it.userId }
@@ -492,7 +492,7 @@ class CommentDetailViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            commentDetail: DetailRoute.CommentDetail
+            commentDetailRoute: DetailRoute.CommentDetail
         ): CommentDetailViewModel
     }
 }

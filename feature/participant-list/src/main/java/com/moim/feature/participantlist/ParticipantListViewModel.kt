@@ -12,6 +12,7 @@ import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.domain.usecase.GetParticipantsUseCase
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
@@ -32,8 +33,9 @@ class ParticipantListViewModel @AssistedInject constructor(
     private val planRepository: PlanRepository,
     private val reviewRepository: ReviewRepository,
     getParticipantsUseCase: GetParticipantsUseCase,
-    @Assisted val viewIdType : ViewIdType,
+    @Assisted val participantListRoute: DetailRoute.ParticipantList,
 ) : BaseViewModel() {
+    private val viewIdType = participantListRoute.viewIdType
 
     private val participants = getParticipantsUseCase(
         params = GetParticipantsUseCase.Params(
@@ -84,8 +86,8 @@ class ParticipantListViewModel @AssistedInject constructor(
 
     private suspend fun getParticipantTotalCount(): Int {
         val totalCount = runCatching {
-            when(viewIdType) {
-                 is ViewIdType.MeetId -> meetingRepository.getMeetingParticipants(
+            when (viewIdType) {
+                is ViewIdType.MeetId -> meetingRepository.getMeetingParticipants(
                     meetingId = viewIdType.id,
                     cursor = "",
                     size = 1
@@ -113,7 +115,7 @@ class ParticipantListViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            viewIdType: ViewIdType,
+            participantListRoute: DetailRoute.ParticipantList,
         ): ParticipantListViewModel
     }
 }

@@ -32,6 +32,7 @@ import com.moim.core.ui.eventbus.CommentAction
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.PlanAction
 import com.moim.core.ui.eventbus.actionStateIn
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.cancelIfActive
 import com.moim.core.ui.util.createCommentUiModel
 import com.moim.core.ui.util.createMentionTagMessage
@@ -76,8 +77,9 @@ class PlanDetailViewModel @AssistedInject constructor(
     private val getCommentsUseCase: GetCommentsUseCase,
     private val planEventBus: EventBus<PlanAction>,
     private val commentEventBus: EventBus<CommentAction>,
-    @Assisted val viewIdType: ViewIdType,
+    @Assisted val planDetailRoute: DetailRoute.PlanDetail,
 ) : BaseViewModel() {
+    private val viewIdType = planDetailRoute.viewIdType
     private val meetId = savedStateHandle.getStateFlow<String?>(KEY_MEET_ID, null)
     private val commentCheckId = savedStateHandle.getStateFlow<String?>(key = KEY_COMMENT_CHECK_ID, null)
 
@@ -694,7 +696,7 @@ class PlanDetailViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            viewIdType: ViewIdType,
+            planDetailRoute: DetailRoute.PlanDetail,
         ): PlanDetailViewModel
     }
 

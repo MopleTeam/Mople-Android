@@ -22,6 +22,7 @@ import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
 import com.moim.core.ui.eventbus.PlanAction
 import com.moim.core.ui.eventbus.actionStateIn
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
@@ -59,9 +60,9 @@ class MeetingDetailViewModel @AssistedInject constructor(
     userRepository: UserRepository,
     meetingEventBus: EventBus<MeetingAction>,
     private val planEventBus: EventBus<PlanAction>,
-    @Assisted val meetingId : String,
+    @Assisted val meetingDetailRoute: DetailRoute.MeetingDetail,
 ) : BaseViewModel() {
-
+    private val meetingId = meetingDetailRoute.meetingId
     private val meetingActionReceiver =
         meetingEventBus
             .action
@@ -382,7 +383,7 @@ class MeetingDetailViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            meetingId: String,
+            meetingDetailRoute: DetailRoute.MeetingDetail
         ): MeetingDetailViewModel
     }
 }

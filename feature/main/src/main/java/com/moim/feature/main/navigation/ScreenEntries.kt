@@ -44,8 +44,8 @@ fun EntryProviderScope<NavKey>.homeScreenEntry(
         HomeRoute(
             padding = paddingValues,
             navigateToAlarm = navigator::navigateToAlarm,
-            navigateToMeetingWrite = { navigator.navigateToMeetingWrite() },
-            navigateToPlanWrite = { navigator.navigateToPlanWrite() },
+            navigateToMeetingWrite = navigator::navigateToMeetingWrite,
+            navigateToPlanWrite = navigator::navigateToPlanWrite,
             navigateToCalendar = navigator::navigateToCalendar,
             navigateToPlanDetail = navigator::navigateToPlanDetail,
         )
@@ -59,7 +59,7 @@ fun EntryProviderScope<NavKey>.meetingScreenEntry(
     entry<MainRoute.Meeting> {
         MeetingRoute(
             padding = paddingValues,
-            navigateToMeetingWrite = { navigator.navigateToMeetingWrite() },
+            navigateToMeetingWrite = navigator::navigateToMeetingWrite,
             navigateToMeetingDetail = navigator::navigateToMeetingDetail
         )
     }
@@ -99,23 +99,17 @@ fun EntryProviderScope<NavKey>.meetingDetailScreenEntry(
     paddingValues: PaddingValues,
 ) {
     entry<DetailRoute.MeetingDetail> { key ->
-        val meetingId = key.meetingId
-
         MeetingDetailRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
-            navigateToPlanWrite = { navigator.navigateToPlanWrite() },
+            navigateToPlanWrite = navigator::navigateToPlanWrite,
             navigateToPlanDetail = navigator::navigateToPlanDetail,
-            navigateToMeetingSetting = { meeting ->
-                navigator.navigateToMeetingSetting(meeting)
-            },
-            navigateToImageViewer = { title, images, position, defaultImage ->
-                navigator.navigateToImageViewer(title, images, position, defaultImage)
-            },
+            navigateToMeetingSetting = navigator::navigateToMeetingSetting,
+            navigateToImageViewer = navigator::navigateToImageViewer,
             viewModel = hiltViewModel<MeetingDetailViewModel, MeetingDetailViewModel.Factory>(
-                key = meetingId,
+                key = key.meetingId,
             ) { factory ->
-                factory.create(meetingId)
+                factory.create(key)
             },
         )
     }
@@ -126,14 +120,13 @@ fun EntryProviderScope<NavKey>.meetingWriteScreenEntry(
     paddingValues: PaddingValues,
 ) {
     entry<DetailRoute.MeetingWrite> { key ->
-        val meeting = key.meeting
         MeetingWriteRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
             viewModel = hiltViewModel<MeetingWriteViewModel, MeetingWriteViewModel.Factory>(
-                key = meeting?.id,
+                key = key.meeting?.id,
             ) { factory ->
-                factory.create(meeting)
+                factory.create(key)
             },
         )
     }
@@ -144,23 +137,18 @@ fun EntryProviderScope<NavKey>.meetingSettingScreenEntry(
     paddingValues: PaddingValues,
 ) {
     entry<DetailRoute.MeetingSetting> { key ->
-        val meeting = key.meeting
         MeetingSettingRoute(
             padding = paddingValues,
             navigateToBack = { shouldPopTwice ->
                 navigator.goBack()
                 if (shouldPopTwice) navigator.goBack()
             },
-            navigateToParticipants = { viewIdType ->
-                navigator.navigateToParticipantList(viewIdType)
-            },
-            navigateToMeetingWrite = { meeting ->
-                navigator.navigateToMeetingWrite(meeting)
-            },
+            navigateToParticipants = navigator::navigateToParticipantList,
+            navigateToMeetingWrite = navigator::navigateToMeetingWrite,
             viewModel = hiltViewModel<MeetingSettingViewModel, MeetingSettingViewModel.Factory>(
-                key = meeting.id,
+                key = key.meeting.id,
             ) { factory ->
-                factory.create(meeting)
+                factory.create(key)
             },
         )
     }
@@ -177,9 +165,7 @@ fun EntryProviderScope<NavKey>.mapDetailScreenEntry(
             viewModel = hiltViewModel<MapDetailViewModel, MapDetailViewModel.Factory>(
                 key = "${key.latitude}_${key.longitude}",
             ) { factory ->
-                factory.create(
-                    mapDetail = key,
-                )
+                factory.create(key)
             },
         )
     }
@@ -190,31 +176,19 @@ fun EntryProviderScope<NavKey>.planDetailScreenEntry(
     paddingValues: PaddingValues,
 ) {
     entry<DetailRoute.PlanDetail> { key ->
-        val viewIdType = key.viewIdType
-
         PlanDetailRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
-            navigateToMapDetail = { placeName, address, lat, lng ->
-                navigator.navigateToMapDetail(placeName, address, lat, lng)
-            },
+            navigateToMapDetail = navigator::navigateToMapDetail,
             navigateToParticipants = navigator::navigateToParticipantList,
-            navigateToPlanWrite = { planItem ->
-                navigator.navigateToPlanWrite(planItem)
-            },
-            navigateToReviewWrite = { postId, isUpdated ->
-                navigator.navigateToReviewWrite(postId, isUpdated)
-            },
-            navigateToCommentDetail = { meetId, postId, comment ->
-                navigator.navigateToCommentDetail(meetId, postId, comment)
-            },
-            navigateToImageViewer = { title, images, position, defaultImage ->
-                navigator.navigateToImageViewer(title, images, position, defaultImage)
-            },
+            navigateToPlanWrite = navigator::navigateToPlanWrite,
+            navigateToReviewWrite = navigator::navigateToReviewWrite,
+            navigateToCommentDetail = navigator::navigateToCommentDetail,
+            navigateToImageViewer = navigator::navigateToImageViewer,
             viewModel = hiltViewModel<PlanDetailViewModel, PlanDetailViewModel.Factory>(
-                key = viewIdType.id,
+                key = key.viewIdType.id,
             ) { factory ->
-                factory.create(viewIdType)
+                factory.create(key)
             },
         )
     }
@@ -228,15 +202,11 @@ fun EntryProviderScope<NavKey>.commentDetailScreenEntry(
         CommentDetailRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
-            navigateToImageViewer = { title, images, position, defaultImage ->
-                navigator.navigateToImageViewer(title, images, position, defaultImage)
-            },
+            navigateToImageViewer = navigator::navigateToImageViewer,
             viewModel = hiltViewModel<CommentDetailViewModel, CommentDetailViewModel.Factory>(
                 key = key.postId,
             ) { factory ->
-                factory.create(
-                    commentDetail = key
-                )
+                factory.create(key)
             },
         )
     }
@@ -247,15 +217,13 @@ fun EntryProviderScope<NavKey>.planWriteScreenEntry(
     paddingValues: PaddingValues,
 ) {
     entry<DetailRoute.PlanWrite> { key ->
-        val planItem = key.planItem
-
         PlanWriteRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
             viewModel = hiltViewModel<PlanWriteViewModel, PlanWriteViewModel.Factory>(
-                key = planItem?.postId,
+                key = key.planItem?.postId,
             ) { factory ->
-                factory.create(planItem)
+                factory.create(key)
             },
         )
     }
@@ -266,16 +234,14 @@ fun EntryProviderScope<NavKey>.reviewWriteScreenEntry(
     paddingValues: PaddingValues,
 ) {
     entry<DetailRoute.ReviewWrite> { key ->
-        val postId = key.postId
-        val isUpdated = key.isUpdated
         ReviewWriteRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
             navigateToParticipants = navigator::navigateToParticipantList,
             viewModel = hiltViewModel<ReviewWriteViewModel, ReviewWriteViewModel.Factory>(
-                key = postId
+                key = key.postId
             ) { factory ->
-                factory.create(postId, isUpdated)
+                factory.create(key)
             }
         )
     }
@@ -286,18 +252,14 @@ fun EntryProviderScope<NavKey>.participantListScreenEntry(
     paddingValues: PaddingValues,
 ) {
     entry<DetailRoute.ParticipantList> { key ->
-        val viewIdType = key.viewIdType
-
         ParticipantListRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
-            navigateToImageViewer = { title, images, position, defaultImage ->
-                navigator.navigateToImageViewer(title, images, position, defaultImage)
-            },
+            navigateToImageViewer = navigator::navigateToImageViewer,
             viewModel = hiltViewModel<ParticipantListViewModel, ParticipantListViewModel.Factory>(
-                key = viewIdType.id
+                key = key.viewIdType.id
             ) { factory ->
-                factory.create(viewIdType)
+                factory.create(key)
             }
         )
     }
@@ -363,14 +325,13 @@ fun EntryProviderScope<NavKey>.webViewScreenEntry(
     paddingValues: PaddingValues,
 ) {
     entry<DetailRoute.WebView> { key ->
-        val webUrl = key.webUrl
         WebViewRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
             viewModel = hiltViewModel<WebViewViewModel, WebViewViewModel.Factory>(
-                key = webUrl,
+                key = key.webUrl,
             ) { factory ->
-                factory.create(webUrl)
+                factory.create(key)
             },
         )
     }

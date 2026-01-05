@@ -13,12 +13,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @HiltViewModel(assistedFactory = ImageViewerViewModel.Factory::class)
 class ImageViewerViewModel @AssistedInject constructor(
-    @Assisted imageViewer: DetailRoute.ImageViewer,
+    @Assisted val imageViewerRoute: DetailRoute.ImageViewer,
 ) : BaseViewModel() {
-    private val title = imageViewer.title
-    private val images = imageViewer.images
-    private val currentPosition = imageViewer.position
-    private val defaultImage = imageViewer.defaultImage
+    private val title = imageViewerRoute.title
+    private val images = imageViewerRoute.images
+    private val currentPosition = imageViewerRoute.position
+    private val defaultImage = imageViewerRoute.defaultImage
 
     init {
         setUiState(
@@ -40,7 +40,7 @@ class ImageViewerViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            commentDetail: DetailRoute.ImageViewer
+            imageViewerRoute: DetailRoute.ImageViewer
         ): ImageViewerViewModel
     }
 }

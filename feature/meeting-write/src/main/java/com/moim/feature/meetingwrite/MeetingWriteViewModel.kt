@@ -1,12 +1,12 @@
 package com.moim.feature.meetingwrite
 
 import androidx.lifecycle.viewModelScope
-import com.moim.core.common.model.Meeting
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
@@ -25,8 +25,9 @@ import java.io.IOException
 class MeetingWriteViewModel @AssistedInject constructor(
     private val meetingRepository: MeetingRepository,
     private val meetingEventBus: EventBus<MeetingAction>,
-    @Assisted val meeting: Meeting?,
+    @Assisted val meetingWriteRoute : DetailRoute.MeetingWrite,
 ) : BaseViewModel() {
+    private val meeting = meetingWriteRoute.meeting
 
     init {
         viewModelScope.launch {
@@ -113,7 +114,7 @@ class MeetingWriteViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            meeting: Meeting?,
+            meetingWriteRoute : DetailRoute.MeetingWrite,
         ): MeetingWriteViewModel
     }
 }
