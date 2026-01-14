@@ -13,7 +13,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MeetingApi {
-
     @GET("meet/list")
     suspend fun getMeetings(
         @Query("cursor") cursor: String,
@@ -21,10 +20,14 @@ interface MeetingApi {
     ): PaginationContainerResponse<List<MeetingResponse>>
 
     @GET("meet/{meetId}")
-    suspend fun getMeeting(@Path("meetId") id: String): MeetingResponse
+    suspend fun getMeeting(
+        @Path("meetId") id: String,
+    ): MeetingResponse
 
     @POST("meet/invite/{meetId}")
-    suspend fun getMeetingInviteCode(@Path("meetId") id: String): String
+    suspend fun getMeetingInviteCode(
+        @Path("meetId") id: String,
+    ): String
 
     @GET("meet/members/{meetId}")
     suspend fun getMeetingParticipants(
@@ -35,20 +38,22 @@ interface MeetingApi {
 
     @POST("meet/create")
     suspend fun createMeeting(
-        @Body params: JsonObject
+        @Body params: JsonObject,
     ): MeetingResponse
 
     @PATCH("meet/update/{meetId}")
     suspend fun updateMeeting(
         @Path("meetId") id: String,
-        @Body params: JsonObject
+        @Body params: JsonObject,
     ): MeetingResponse
 
     @POST("meet/join/{meetCode}")
     suspend fun joinMeeting(
-        @Path("meetCode") meetCode: String
+        @Path("meetCode") meetCode: String,
     ): MeetingResponse
 
     @DELETE("meet/{meetId}")
-    suspend fun deleteMeeting(@Path("meetId") id: String)
+    suspend fun deleteMeeting(
+        @Path("meetId") id: String,
+    )
 }

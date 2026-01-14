@@ -17,12 +17,12 @@ import com.moim.feature.meetingwrite.OnMeetingWriteUiAction
 @Composable
 fun MeetingWriteNameTextField(
     meetingName: String,
-    onUiAction: OnMeetingWriteUiAction = {}
+    onUiAction: OnMeetingWriteUiAction = {},
 ) {
     MoimText(
         text = stringResource(R.string.meeting_write_name),
         style = MoimTheme.typography.title03.semiBold,
-        color = MoimTheme.colors.gray.gray01
+        color = MoimTheme.colors.gray.gray01,
     )
     Spacer(Modifier.height(8.dp))
     MoimTextField(

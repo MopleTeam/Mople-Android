@@ -47,4 +47,3 @@ fun <T> Flow<T>.restartableStateIn(
         override fun restart() = sharingRestartable.restart()
     }
 }
-

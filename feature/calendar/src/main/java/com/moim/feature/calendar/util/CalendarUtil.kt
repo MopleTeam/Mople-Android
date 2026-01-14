@@ -16,11 +16,10 @@ import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
 
-fun DayOfWeek.displayText(uppercase: Boolean = false): String {
-    return getDisplayName(TextStyle.SHORT, Locale.KOREA).let { value ->
+fun DayOfWeek.displayText(uppercase: Boolean = false): String =
+    getDisplayName(TextStyle.SHORT, Locale.KOREA).let { value ->
         if (uppercase) value.uppercase(Locale.KOREA) else value
     }
-}
 
 @Composable
 fun rememberFirstMostVisibleMonth(
@@ -51,17 +50,17 @@ fun rememberFirstVisibleWeekAfterScroll(state: WeekCalendarState): Week {
     return visibleWeek.value
 }
 
-private fun CalendarLayoutInfo.firstMostVisibleMonth(viewportPercent: Float = 50f): CalendarMonth? {
-    return if (visibleMonthsInfo.isEmpty()) {
+private fun CalendarLayoutInfo.firstMostVisibleMonth(viewportPercent: Float = 50f): CalendarMonth? =
+    if (visibleMonthsInfo.isEmpty()) {
         null
     } else {
         val viewportSize = (viewportEndOffset + viewportStartOffset) * viewportPercent / 100f
-        visibleMonthsInfo.firstOrNull { itemInfo ->
-            if (itemInfo.offset < 0) {
-                itemInfo.offset + itemInfo.size >= viewportSize
-            } else {
-                itemInfo.size - itemInfo.offset >= viewportSize
-            }
-        }?.month
+        visibleMonthsInfo
+            .firstOrNull { itemInfo ->
+                if (itemInfo.offset < 0) {
+                    itemInfo.offset + itemInfo.size >= viewportSize
+                } else {
+                    itemInfo.size - itemInfo.offset >= viewportSize
+                }
+            }?.month
     }
-}

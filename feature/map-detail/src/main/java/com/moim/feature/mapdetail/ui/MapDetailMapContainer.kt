@@ -29,7 +29,7 @@ fun MapContainer(
     modifier: Modifier = Modifier,
     latitude: Double,
     longitude: Double,
-    onUiAction: (MapDetailUiAction) -> Unit
+    onUiAction: (MapDetailUiAction) -> Unit,
 ) {
     val cameraPositionState = rememberCameraPositionState()
     val markerState = rememberUpdatedMarkerState(position = LatLng(latitude, longitude))
@@ -42,15 +42,16 @@ fun MapContainer(
 
     NaverMap(
         modifier = modifier.fillMaxSize(),
-        uiSettings = MapUiSettings(
-            isZoomControlEnabled = false,
-            isScaleBarEnabled = false,
-            isLogoClickEnabled = false,
-            isCompassEnabled = false
-        ),
+        uiSettings =
+            MapUiSettings(
+                isZoomControlEnabled = false,
+                isScaleBarEnabled = false,
+                isLogoClickEnabled = false,
+                isCompassEnabled = false,
+            ),
         cameraPositionState = cameraPositionState,
         properties = MapProperties(locationTrackingMode = LocationTrackingMode.Follow),
-        onLocationChange = {}
+        onLocationChange = {},
     ) {
         if (longitude != 0.0 && latitude != 0.0) {
             MarkerComposable(
@@ -59,13 +60,13 @@ fun MapContainer(
                 onClick = {
                     onUiAction(MapDetailUiAction.OnShowPlaceInfoDialog(true))
                     true
-                }
+                },
             ) {
                 Icon(
                     modifier = Modifier.size(54.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_location),
                     contentDescription = "",
-                    tint = MoimTheme.colors.primary.primary
+                    tint = MoimTheme.colors.primary.primary,
                 )
             }
         }

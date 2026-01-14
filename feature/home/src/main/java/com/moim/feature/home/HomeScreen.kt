@@ -79,14 +79,17 @@ fun HomeRoute(
 
     var isPostNotificationPermission by remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            mutableStateOf(ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+            mutableStateOf(
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED,
+            )
         } else {
             mutableStateOf(true)
         }
     }
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
-        isPostNotificationPermission = result
-    }
+    val permissionLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
+            isPostNotificationPermission = result
+        }
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
@@ -108,19 +111,25 @@ fun HomeRoute(
     }
 
     when (val uiState = homeUiState) {
-        is HomeUiState.Loading -> LoadingScreen(modifier = modifier)
+        is HomeUiState.Loading -> {
+            LoadingScreen(modifier = modifier)
+        }
 
-        is HomeUiState.Success -> HomeScreen(
-            modifier = modifier,
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is HomeUiState.Success -> {
+            HomeScreen(
+                modifier = modifier,
+                uiState = uiState,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction,
+            )
+        }
 
-        is HomeUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(HomeUiAction.OnClickRefresh) }
-        )
+        is HomeUiState.Error -> {
+            ErrorScreen(
+                modifier = modifier,
+                onClickRefresh = { viewModel.onUiAction(HomeUiAction.OnClickRefresh) },
+            )
+        }
     }
 }
 
@@ -129,28 +138,28 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     uiState: HomeUiState.Success,
     isLoading: Boolean,
-    onUiAction: OnHomeUiAction
+    onUiAction: OnHomeUiAction,
 ) {
     TrackScreenViewEvent(screenName = "home")
     Column(modifier = modifier) {
         HomeTopAppbar(onUiAction = onUiAction)
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
         ) {
             if (uiState.plans.isEmpty()) {
                 HomePlanEmpty()
             } else {
-
                 HomePlanPager(
                     user = uiState.user,
                     plans = uiState.plans,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
             HomeCreateCards(
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         }
     }
@@ -161,25 +170,26 @@ fun HomeScreen(
 @Composable
 fun HomePlanEmpty(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .padding(horizontal = 20.dp)
-            .fillMaxWidth()
-            .background(color = MoimTheme.colors.white, shape = RoundedCornerShape(12.dp))
-            .aspectRatio(1.25f),
+        modifier =
+            modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth()
+                .background(color = MoimTheme.colors.white, shape = RoundedCornerShape(12.dp))
+                .aspectRatio(1.25f),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_empty_logo),
             contentDescription = "",
-            tint = Color.Unspecified
+            tint = Color.Unspecified,
         )
         MoimText(
             text = stringResource(R.string.home_empty_plan),
             textAlign = TextAlign.Center,
             singleLine = false,
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray06
+            color = MoimTheme.colors.gray.gray06,
         )
     }
 }
@@ -189,7 +199,7 @@ fun HomePlanPager(
     modifier: Modifier = Modifier,
     user: User,
     plans: List<Plan>,
-    onUiAction: OnHomeUiAction = {}
+    onUiAction: OnHomeUiAction = {},
 ) {
     val localDensity = LocalDensity.current
     val pagerState = rememberPagerState(pageCount = { plans.size + 1 })
@@ -215,12 +225,12 @@ fun HomePlanPager(
                     },
                 isHost = meetingPlan.userId == user.userId,
                 plan = meetingPlan,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         } else {
             HomePlanMoreCard(
                 modifier = modifier.then(heightModifier),
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         }
     }
@@ -232,29 +242,31 @@ private fun HomeScreenPreview() {
     MoimTheme {
         HomeScreen(
             modifier = Modifier.containerScreen(),
-            uiState = HomeUiState.Success(
-                user = User(userId = ""),
-                plans = listOf(
-                    Plan(
-                        meetingId = "1",
-                        meetingName = "우리중학교 동창1",
-                        planName = "술 한잔 하는 날",
-                        planMemberCount = 3,
-                        planAddress = "서울 강남구",
-                        planAt = ZonedDateTime.now()
-                    ),
-                    Plan(
-                        meetingId = "2",
-                        meetingName = "우리중학교 동창2",
-                        planName = "술 한잔 하는 날",
-                        planMemberCount = 3,
-                        planAddress = "서울 강남구",
-                        planAt = ZonedDateTime.now()
-                    ),
-                )
-            ),
+            uiState =
+                HomeUiState.Success(
+                    user = User(userId = ""),
+                    plans =
+                        listOf(
+                            Plan(
+                                meetingId = "1",
+                                meetingName = "우리중학교 동창1",
+                                planName = "술 한잔 하는 날",
+                                planMemberCount = 3,
+                                planAddress = "서울 강남구",
+                                planAt = ZonedDateTime.now(),
+                            ),
+                            Plan(
+                                meetingId = "2",
+                                meetingName = "우리중학교 동창2",
+                                planName = "술 한잔 하는 날",
+                                planMemberCount = 3,
+                                planAddress = "서울 강남구",
+                                planAt = ZonedDateTime.now(),
+                            ),
+                        ),
+                ),
             isLoading = false,
-            onUiAction = {}
+            onUiAction = {},
         )
     }
 }

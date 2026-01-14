@@ -12,14 +12,14 @@ data class CommentUiModel(
 }
 
 sealed class CommentTextUiModel(
-    open val content: String
+    open val content: String,
 ) {
     data class PlainText(
-        override val content: String
+        override val content: String,
     ) : CommentTextUiModel(content)
 
     data class MentionText(
-        override val content: String
+        override val content: String,
     ) : CommentTextUiModel(content)
 
     data class HyperLinkText(

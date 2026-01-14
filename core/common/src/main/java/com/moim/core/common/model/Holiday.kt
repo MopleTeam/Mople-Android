@@ -6,5 +6,5 @@ import java.time.ZonedDateTime
 @Stable
 data class Holiday(
     val title: String,
-    val date: ZonedDateTime
+    val date: ZonedDateTime,
 )

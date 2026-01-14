@@ -21,7 +21,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     @Inject
     lateinit var analyticsHelper: AnalyticsHelper
 
@@ -37,7 +36,7 @@ class MainActivity : ComponentActivity() {
                 MoimTheme {
                     MainScreen(
                         viewModel = viewModel,
-                        navigateToIntro = ::navigateToIntro
+                        navigateToIntro = ::navigateToIntro,
                     )
                 }
             }

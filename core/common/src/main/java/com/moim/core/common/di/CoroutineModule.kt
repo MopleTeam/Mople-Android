@@ -13,7 +13,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 object CoroutineModule {
-
     @DefaultDispatcher
     @Provides
     fun providesDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
@@ -30,6 +29,6 @@ object CoroutineModule {
     @Singleton
     @Provides
     fun providesApplicationScope(
-        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
+        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher,
     ): CoroutineScope = CoroutineScope(SupervisorJob() + defaultDispatcher)
 }

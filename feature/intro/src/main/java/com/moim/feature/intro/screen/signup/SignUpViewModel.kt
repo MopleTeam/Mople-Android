@@ -71,8 +71,8 @@ class SignUpViewModel @AssistedInject constructor(
                     nickname = trimNickname,
                     isDuplicatedName = null,
                     isRegexError = if (trimNickname.isEmpty()) false else Pattern.matches(PATTERN_NICKNAME, nickname).not(),
-                    enableSignUp = false
-                )
+                    enableSignUp = false,
+                ),
             )
         }
     }
@@ -87,11 +87,19 @@ class SignUpViewModel @AssistedInject constructor(
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
                         when (result) {
-                            is Result.Loading -> return@collect
-                            is Result.Success -> setUiState(copy(isDuplicatedName = result.data, enableSignUp = result.data.not()))
-                            is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                else -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            is Result.Loading -> {
+                                return@collect
+                            }
+
+                            is Result.Success -> {
+                                setUiState(copy(isDuplicatedName = result.data, enableSignUp = result.data.not()))
+                            }
+
+                            is Result.Error -> {
+                                when (result.exception) {
+                                    is IOException -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                    else -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                                }
                             }
                         }
                     }
@@ -108,18 +116,25 @@ class SignUpViewModel @AssistedInject constructor(
                         token = token,
                         email = email,
                         nickname = nickname,
-                        profileUrl = profileUrl
-                    )
-                    .flatMapLatest { tokenRepository.setFcmToken() }
+                        profileUrl = profileUrl,
+                    ).flatMapLatest { tokenRepository.setFcmToken() }
                     .asResult()
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
                         when (result) {
-                            is Result.Loading -> return@collect
-                            is Result.Success -> setUiEvent(SignUpUiEvent.NavigateToMain)
-                            is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                else -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            is Result.Loading -> {
+                                return@collect
+                            }
+
+                            is Result.Success -> {
+                                setUiEvent(SignUpUiEvent.NavigateToMain)
+                            }
+
+                            is Result.Error -> {
+                                when (result.exception) {
+                                    is IOException -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                    else -> setUiEvent(SignUpUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                                }
                             }
                         }
                     }
@@ -129,9 +144,7 @@ class SignUpViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(
-            signUp: IntroRoute.SignUp,
-        ): SignUpViewModel
+        fun create(signUp: IntroRoute.SignUp): SignUpViewModel
     }
 }
 
@@ -142,7 +155,7 @@ sealed interface SignUpUiState : UiState {
         val isDuplicatedName: Boolean? = null,
         val isRegexError: Boolean = false,
         val enableSignUp: Boolean = false,
-        val isShowProfileEditDialog: Boolean = false
+        val isShowProfileEditDialog: Boolean = false,
     ) : SignUpUiState
 }
 
@@ -152,15 +165,15 @@ sealed interface SignUpUiAction : UiAction {
     data object OnClickDuplicatedCheck : SignUpUiAction
 
     data class OnChangeProfileUrl(
-        val profileUrl: String?
+        val profileUrl: String?,
     ) : SignUpUiAction
 
     data class OnChangeNickname(
-        val nickname: String
+        val nickname: String,
     ) : SignUpUiAction
 
     data class OnShowProfileEditDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : SignUpUiAction
 
     data object OnNavigatePhotoPicker : SignUpUiAction
@@ -171,5 +184,7 @@ sealed interface SignUpUiEvent : UiEvent {
 
     data object NavigateToMain : SignUpUiEvent
 
-    data class ShowToastMessage(val message: ToastMessage) : SignUpUiEvent
+    data class ShowToastMessage(
+        val message: ToastMessage,
+    ) : SignUpUiEvent
 }

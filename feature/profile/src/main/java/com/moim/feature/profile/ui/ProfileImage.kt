@@ -35,27 +35,30 @@ import com.moim.feature.profile.ProfileUiAction
 fun ProfileImage(
     modifier: Modifier = Modifier,
     user: User,
-    onUiAction: OnProfileUiAction
+    onUiAction: OnProfileUiAction,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 40.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 40.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .onSingleClick { onUiAction(ProfileUiAction.OnClickProfile) },
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .onSingleClick { onUiAction(ProfileUiAction.OnClickProfile) },
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             NetworkImage(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
-                    .size(80.dp),
+                modifier =
+                    Modifier
+                        .clip(CircleShape)
+                        .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
+                        .size(80.dp),
                 imageUrl = user.profileUrl,
                 errorImage = painterResource(R.drawable.ic_empty_user_logo),
             )
@@ -64,23 +67,23 @@ fun ProfileImage(
 
             Row(
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
                     contentDescription = "",
-                    tint = MoimTheme.colors.transparent
+                    tint = MoimTheme.colors.transparent,
                 )
                 MoimText(
                     text = user.nickname,
                     singleLine = false,
                     style = MoimTheme.typography.title03.semiBold,
-                    color = MoimTheme.colors.gray.gray01
+                    color = MoimTheme.colors.gray.gray01,
                 )
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
                     contentDescription = "",
-                    tint = MoimTheme.colors.icon
+                    tint = MoimTheme.colors.icon,
                 )
             }
         }
@@ -92,12 +95,13 @@ fun ProfileImage(
 private fun ProfileImagePreview() {
     MoimTheme {
         ProfileImage(
-            user = User(
-                "",
-                nickname = "모플",
-                "",
-            ),
-            onUiAction = {}
+            user =
+                User(
+                    "",
+                    nickname = "모플",
+                    "",
+                ),
+            onUiAction = {},
         )
     }
 }

@@ -37,8 +37,6 @@ import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
-import com.moim.core.ui.view.ObserveAsEvents
-import com.moim.core.ui.view.showToast
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -49,12 +47,14 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.core.ui.view.showToast
 
 @Composable
 fun AlarmSettingRoute(
     padding: PaddingValues,
     viewModel: AlarmSettingViewModel = hiltViewModel(),
-    navigateToBack: () -> Unit
+    navigateToBack: () -> Unit,
 ) {
     val alarmSettingUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -63,33 +63,45 @@ fun AlarmSettingRoute(
 
     var isPostNotificationPermission by remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            mutableStateOf(ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+            mutableStateOf(
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED,
+            )
         } else {
             mutableStateOf(true)
         }
     }
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
-        isPostNotificationPermission = result
-    }
-    val settingLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true
+    val permissionLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
+            isPostNotificationPermission = result
         }
-        isPostNotificationPermission = result
-    }
+    val settingLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            val result =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                } else {
+                    true
+                }
+            isPostNotificationPermission = result
+        }
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is AlarmSettingUiEvent.NavigateToBack -> navigateToBack()
+            is AlarmSettingUiEvent.NavigateToBack -> {
+                navigateToBack()
+            }
 
             is AlarmSettingUiEvent.NavigateToSystemSetting -> {
-                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply { putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName) }
+                val intent =
+                    Intent(
+                        Settings.ACTION_APP_NOTIFICATION_SETTINGS,
+                    ).apply { putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName) }
                 settingLauncher.launch(intent)
             }
 
-            is AlarmSettingUiEvent.ShowToastMessage -> showToast(context, event.message)
+            is AlarmSettingUiEvent.ShowToastMessage -> {
+                showToast(context, event.message)
+            }
         }
     }
 
@@ -101,20 +113,26 @@ fun AlarmSettingRoute(
     }
 
     when (val uiState = alarmSettingUiState) {
-        is AlarmSettingUiState.Loading -> LoadingScreen(modifier)
+        is AlarmSettingUiState.Loading -> {
+            LoadingScreen(modifier)
+        }
 
-        is AlarmSettingUiState.Success -> AlarmSettingScreen(
-            modifier = modifier,
-            uiState = uiState,
-            isPostNotificationPermission = isPostNotificationPermission,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is AlarmSettingUiState.Success -> {
+            AlarmSettingScreen(
+                modifier = modifier,
+                uiState = uiState,
+                isPostNotificationPermission = isPostNotificationPermission,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction,
+            )
+        }
 
-        is AlarmSettingUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(AlarmSettingUiAction.OnClickRefresh) }
-        )
+        is AlarmSettingUiState.Error -> {
+            ErrorScreen(
+                modifier = modifier,
+                onClickRefresh = { viewModel.onUiAction(AlarmSettingUiAction.OnClickRefresh) },
+            )
+        }
     }
 }
 
@@ -124,7 +142,7 @@ fun AlarmSettingScreen(
     uiState: AlarmSettingUiState.Success,
     isPostNotificationPermission: Boolean,
     isLoading: Boolean,
-    onUiAction: (AlarmSettingUiAction) -> Unit
+    onUiAction: (AlarmSettingUiAction) -> Unit,
 ) {
     TrackScreenViewEvent(screenName = "notification_setting")
     Column(
@@ -132,7 +150,7 @@ fun AlarmSettingScreen(
     ) {
         MoimTopAppbar(
             title = stringResource(R.string.alarm_setting_title),
-            onClickNavigate = { onUiAction(AlarmSettingUiAction.OnClickBack) }
+            onClickNavigate = { onUiAction(AlarmSettingUiAction.OnClickBack) },
         )
         if (isPostNotificationPermission.not()) {
             AlarmSettingPermissionItem(onUiAction = onUiAction)
@@ -144,25 +162,25 @@ fun AlarmSettingScreen(
             title = stringResource(R.string.alarm_setting_meeting_notify),
             description = stringResource(R.string.alarm_setting_meeting_notify_description),
             isChecked = uiState.isSubscribeForMeetingNotify,
-            onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangeMeetingNotify(it)) }
+            onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangeMeetingNotify(it)) },
         )
         AlarmSettingSwitchItem(
             title = stringResource(R.string.alarm_setting_plan_notify),
             description = stringResource(R.string.alarm_setting_plan_notify_description),
             isChecked = uiState.isSubscribeForPlanNotify,
-            onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangePlanNotify(it)) }
+            onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangePlanNotify(it)) },
         )
         AlarmSettingSwitchItem(
             title = stringResource(R.string.alarm_setting_comment_notify),
             description = stringResource(R.string.alarm_setting_comment_notify_description),
             isChecked = uiState.isSubscribeForCommentNotify,
-            onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangeCommentNotify(it)) }
+            onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangeCommentNotify(it)) },
         )
         AlarmSettingSwitchItem(
             title = stringResource(R.string.alarm_setting_mention_notify),
             description = stringResource(R.string.alarm_setting_mention_notify_description),
             isChecked = uiState.isSubscribeForMentionNotify,
-            onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangeMentionNotify(it)) }
+            onCheckedChange = { onUiAction(AlarmSettingUiAction.OnChangeMentionNotify(it)) },
         )
     }
 
@@ -175,20 +193,21 @@ private fun AlarmSettingPermissionItem(
     onUiAction: (AlarmSettingUiAction) -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .padding(horizontal = 20.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(MoimTheme.colors.bg.input)
-            .onSingleClick { onUiAction(AlarmSettingUiAction.OnClickPermissionRequest) }
-            .padding(12.dp),
+        modifier =
+            modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(MoimTheme.colors.bg.input)
+                .onSingleClick { onUiAction(AlarmSettingUiAction.OnClickPermissionRequest) }
+                .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Center,
     ) {
         MoimText(
             text = stringResource(R.string.alarm_setting_permission),
             style = MoimTheme.typography.body01.regular,
-            color = MoimTheme.colors.gray.gray04
+            color = MoimTheme.colors.gray.gray04,
         )
     }
 }
@@ -199,16 +218,17 @@ private fun AlarmSettingSwitchItem(
     title: String,
     description: String,
     isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp, horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 6.dp, horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) {
             MoimText(
                 text = title,
@@ -227,7 +247,7 @@ private fun AlarmSettingSwitchItem(
 
         MoimSwitch(
             isChecked = isChecked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
         )
     }
 }
@@ -240,15 +260,16 @@ private fun AlarmSettingScreenPreview() {
 
         AlarmSettingScreen(
             modifier = modifier,
-            uiState = AlarmSettingUiState.Success(
-                isSubscribeForMeetingNotify = true,
-                isSubscribeForPlanNotify = false,
-                isSubscribeForCommentNotify = false,
-                isSubscribeForMentionNotify = false,
-            ),
+            uiState =
+                AlarmSettingUiState.Success(
+                    isSubscribeForMeetingNotify = true,
+                    isSubscribeForPlanNotify = false,
+                    isSubscribeForCommentNotify = false,
+                    isSubscribeForMentionNotify = false,
+                ),
             isPostNotificationPermission = false,
             isLoading = false,
-            onUiAction = {}
+            onUiAction = {},
         )
     }
 }

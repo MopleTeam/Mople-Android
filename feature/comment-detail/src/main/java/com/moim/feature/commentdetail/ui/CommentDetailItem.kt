@@ -57,29 +57,31 @@ fun CommentDetailItem(
     modifier: Modifier = Modifier,
     userId: String,
     comment: CommentUiModel,
-    onUiAction: (CommentDetailAction) -> Unit
+    onUiAction: (CommentDetailAction) -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(vertical = if (comment.comment.isChild()) 24.dp else 20.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(vertical = if (comment.comment.isChild()) 24.dp else 20.dp),
     ) {
         NetworkImage(
-            modifier = Modifier
-                .padding(start = if (comment.comment.isChild()) 40.dp else 0.dp)
-                .padding(top = 4.dp)
-                .size(32.dp)
-                .clip(CircleShape)
-                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
-                .onSingleClick {
-                    onUiAction(
-                        CommentDetailAction.OnClickUserProfileImage(
-                            imageUrl = comment.comment.writer.imageUrl,
-                            userName = comment.comment.writer.nickname
+            modifier =
+                Modifier
+                    .padding(start = if (comment.comment.isChild()) 40.dp else 0.dp)
+                    .padding(top = 4.dp)
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
+                    .onSingleClick {
+                        onUiAction(
+                            CommentDetailAction.OnClickUserProfileImage(
+                                imageUrl = comment.comment.writer.imageUrl,
+                                userName = comment.comment.writer.nickname,
+                            ),
                         )
-                    )
-                },
+                    },
             imageUrl = comment.comment.writer.imageUrl,
             errorImage = painterResource(R.drawable.ic_empty_user_logo),
         )
@@ -88,18 +90,18 @@ fun CommentDetailItem(
 
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Top,
         ) {
             CommentHeader(
                 userId = userId,
                 comment = comment.comment,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
             if (comment.texts.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
                 CommentText(
                     texts = comment.texts,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
 
@@ -107,12 +109,12 @@ fun CommentDetailItem(
                 Spacer(Modifier.height(8.dp))
                 CommentOpenGraph(
                     openGraph = requireNotNull(comment.openGraph),
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
             CommentFooter(
                 comment = comment.comment,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         }
     }
@@ -123,16 +125,16 @@ private fun CommentHeader(
     modifier: Modifier = Modifier,
     userId: String,
     comment: Comment,
-    onUiAction: (CommentDetailAction) -> Unit
+    onUiAction: (CommentDetailAction) -> Unit,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         MoimText(
             text = comment.writer.nickname,
             style = MoimTheme.typography.body01.semiBold,
-            color = MoimTheme.colors.gray.gray01
+            color = MoimTheme.colors.gray.gray01,
         )
 
         Spacer(Modifier.width(8.dp))
@@ -141,26 +143,27 @@ private fun CommentHeader(
             modifier = Modifier.weight(1f),
             text = comment.commentAt.parseDateString(stringResource(R.string.regex_date_month_day)),
             style = MoimTheme.typography.body02.regular,
-            color = MoimTheme.colors.gray.gray04
+            color = MoimTheme.colors.gray.gray04,
         )
 
         MoimIconButton(
             iconRes = R.drawable.ic_more,
             onClick = {
-                val uiAction = if (userId == comment.writer.userId) {
-                    CommentDetailAction.OnShowCommentEditDialog(
-                        isShow = true,
-                        comment = comment
-                    )
-                } else {
-                    CommentDetailAction.OnShowCommentReportDialog(
-                        isShow = true,
-                        comment = comment
-                    )
-                }
+                val uiAction =
+                    if (userId == comment.writer.userId) {
+                        CommentDetailAction.OnShowCommentEditDialog(
+                            isShow = true,
+                            comment = comment,
+                        )
+                    } else {
+                        CommentDetailAction.OnShowCommentReportDialog(
+                            isShow = true,
+                            comment = comment,
+                        )
+                    }
 
                 onUiAction(uiAction)
-            }
+            },
         )
     }
 }
@@ -169,65 +172,69 @@ private fun CommentHeader(
 private fun CommentText(
     modifier: Modifier = Modifier,
     texts: List<CommentTextUiModel>,
-    onUiAction: (CommentDetailAction) -> Unit
+    onUiAction: (CommentDetailAction) -> Unit,
 ) {
     val text = texts.joinToString("") { it.content }
-    val spanStyle = SpanStyle(
-        color = MoimTheme.colors.gray.gray03,
-        fontFamily = FontFamily(Font(R.font.pretendard_medium, FontWeight.W600)),
-        fontWeight = FontWeight.W600,
-        textDecoration = TextDecoration.None
-    )
-    val annotatedText = buildAnnotatedString {
-        texts.forEach { uiModel ->
-            when (uiModel) {
-                is CommentTextUiModel.PlainText -> {
-                    withStyle(style = spanStyle) {
-                        append(uiModel.content)
+    val spanStyle =
+        SpanStyle(
+            color = MoimTheme.colors.gray.gray03,
+            fontFamily = FontFamily(Font(R.font.pretendard_medium, FontWeight.W600)),
+            fontWeight = FontWeight.W600,
+            textDecoration = TextDecoration.None,
+        )
+    val annotatedText =
+        buildAnnotatedString {
+            texts.forEach { uiModel ->
+                when (uiModel) {
+                    is CommentTextUiModel.PlainText -> {
+                        withStyle(style = spanStyle) {
+                            append(uiModel.content)
+                        }
                     }
-                }
 
-                is CommentTextUiModel.MentionText -> {
-                    withStyle(style = spanStyle.copy(color = MoimTheme.colors.primary.primary)) {
-                        append(uiModel.content)
+                    is CommentTextUiModel.MentionText -> {
+                        withStyle(style = spanStyle.copy(color = MoimTheme.colors.primary.primary)) {
+                            append(uiModel.content)
+                        }
                     }
-                }
 
-                is CommentTextUiModel.HyperLinkText -> {
-                    val startIndex = text.indexOf(uiModel.content)
+                    is CommentTextUiModel.HyperLinkText -> {
+                        val startIndex = text.indexOf(uiModel.content)
 
-                    withStyle(
-                        style = spanStyle.copy(
-                            color = MoimTheme.colors.primary.primary,
-                            textDecoration = TextDecoration.Underline
+                        withStyle(
+                            style =
+                                spanStyle.copy(
+                                    color = MoimTheme.colors.primary.primary,
+                                    textDecoration = TextDecoration.Underline,
+                                ),
+                        ) {
+                            append(uiModel.content)
+                        }
+                        addLink(
+                            clickable =
+                                LinkAnnotation.Clickable(
+                                    tag = "URL",
+                                    linkInteractionListener = { onUiAction(CommentDetailAction.OnClickCommentWebLink(uiModel.content)) },
+                                ),
+                            start = startIndex,
+                            end = startIndex + uiModel.content.length,
                         )
-                    ) {
-                        append(uiModel.content)
                     }
-                    addLink(
-                        clickable = LinkAnnotation.Clickable(
-                            tag = "URL",
-                            linkInteractionListener = { onUiAction(CommentDetailAction.OnClickCommentWebLink(uiModel.content)) }
-                        ),
-                        start = startIndex,
-                        end = startIndex + uiModel.content.length
-                    )
                 }
             }
         }
-    }
 
     MoimText(
         modifier = modifier,
         text = annotatedText,
-        singleLine = false
+        singleLine = false,
     )
 }
 
 @Composable
 private fun CommentOpenGraph(
     openGraph: OpenGraph,
-    onUiAction: (CommentDetailAction) -> Unit
+    onUiAction: (CommentDetailAction) -> Unit,
 ) {
     Column(
         modifier =
@@ -235,33 +242,35 @@ private fun CommentOpenGraph(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(MoimTheme.colors.tertiary)
-                .onSingleClick(onClick = { onUiAction(CommentDetailAction.OnClickCommentWebLink(openGraph.url)) })
+                .onSingleClick(onClick = { onUiAction(CommentDetailAction.OnClickCommentWebLink(openGraph.url)) }),
     ) {
         NetworkImage(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
             imageUrl = openGraph.imageUrl,
-            errorImage = painterResource(R.drawable.ic_empty_image)
+            errorImage = painterResource(R.drawable.ic_empty_image),
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 16.dp),
         ) {
             if (openGraph.title.isNullOrBlank().not()) {
                 MoimText(
                     text = openGraph.title ?: "",
                     style = MoimTheme.typography.body02.semiBold,
-                    color = MoimTheme.colors.black
+                    color = MoimTheme.colors.black,
                 )
                 Spacer(Modifier.height(4.dp))
             }
             MoimText(
                 text = openGraph.description ?: "",
                 style = MoimTheme.typography.body02.regular,
-                color = MoimTheme.colors.black
+                color = MoimTheme.colors.black,
             )
         }
     }
@@ -270,50 +279,51 @@ private fun CommentOpenGraph(
 @Composable
 private fun CommentFooter(
     comment: Comment,
-    onUiAction: (CommentDetailAction) -> Unit
+    onUiAction: (CommentDetailAction) -> Unit,
 ) {
-    val likeResource = if (comment.isLike) {
-        R.drawable.ic_thumb_up_fill
-    } else {
-        R.drawable.ic_thumb_up
-    }
+    val likeResource =
+        if (comment.isLike) {
+            R.drawable.ic_thumb_up_fill
+        } else {
+            R.drawable.ic_thumb_up
+        }
 
     Column {
         Row(
             modifier = Modifier.padding(top = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+            horizontalArrangement = Arrangement.Start,
         ) {
             CommentIcon(
                 modifier = Modifier.padding(end = 8.dp),
                 iconRes = likeResource,
                 iconCount = comment.likeCount,
-                onClick = { onUiAction(CommentDetailAction.OnClickCommentLike(comment = comment)) }
+                onClick = { onUiAction(CommentDetailAction.OnClickCommentLike(comment = comment)) },
             )
         }
     }
 }
-
 
 @Composable
 private fun CommentIcon(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
     iconCount: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .defaultMinSize(minWidth = 56.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .onSingleClick(onClick = onClick),
+        modifier =
+            modifier
+                .defaultMinSize(minWidth = 56.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .onSingleClick(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.Start,
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = "",
-            tint = Color.Unspecified
+            tint = Color.Unspecified,
         )
 
         if (iconCount > 0) {

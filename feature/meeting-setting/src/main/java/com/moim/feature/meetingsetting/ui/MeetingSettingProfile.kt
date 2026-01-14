@@ -42,30 +42,33 @@ fun MeetingSettingProfile(
     modifier: Modifier = Modifier,
     meeting: Meeting,
     isMeetingHost: Boolean,
-    onUiAction: OnMeetingSettingUiAction = {}
+    onUiAction: OnMeetingSettingUiAction = {},
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(20.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(20.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .onSingleClick(
-                    enabled = isMeetingHost,
-                    onClick = { onUiAction(MeetingSettingUiAction.OnClickMeetingEdit(meeting)) }
-                ),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .onSingleClick(
+                        enabled = isMeetingHost,
+                        onClick = { onUiAction(MeetingSettingUiAction.OnClickMeetingEdit(meeting)) },
+                    ),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             NetworkImage(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(10.dp))
-                    .size(40.dp),
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(10.dp))
+                        .size(40.dp),
                 imageUrl = meeting.imageUrl,
-                errorImage = painterResource(R.drawable.ic_empty_meeting)
+                errorImage = painterResource(R.drawable.ic_empty_meeting),
             )
 
             Spacer(Modifier.width(12.dp))
@@ -73,13 +76,13 @@ fun MeetingSettingProfile(
             MoimText(
                 text = meeting.name,
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
             if (isMeetingHost) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
                     contentDescription = "",
-                    tint = MoimTheme.colors.icon
+                    tint = MoimTheme.colors.icon,
                 )
             }
         }
@@ -87,18 +90,20 @@ fun MeetingSettingProfile(
         Spacer(Modifier.height(24.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.bg.input, shape = RoundedCornerShape(8.dp)),
-            horizontalArrangement = Arrangement.Center
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MoimTheme.colors.bg.input, shape = RoundedCornerShape(8.dp)),
+            horizontalArrangement = Arrangement.Center,
         ) {
             MoimText(
                 modifier = Modifier.padding(12.dp),
-                text = buildAnnotatedString {
-                    append(stringResource(R.string.meeting_setting_date_01))
-                    withStyle(style = SpanStyle(color = MoimTheme.colors.primary.primary)) { append(" ${meeting.sinceDays} ") }
-                    append(stringResource(R.string.meeting_setting_date_02))
-                },
+                text =
+                    buildAnnotatedString {
+                        append(stringResource(R.string.meeting_setting_date_01))
+                        withStyle(style = SpanStyle(color = MoimTheme.colors.primary.primary)) { append(" ${meeting.sinceDays} ") }
+                        append(stringResource(R.string.meeting_setting_date_02))
+                    },
                 overflow = TextOverflow.Ellipsis,
                 style = MoimTheme.typography.body01.medium,
                 color = MoimTheme.colors.gray.gray04,
@@ -112,16 +117,18 @@ fun MeetingSettingProfile(
 private fun MeetingSettingProfilePreview() {
     MoimTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.white)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MoimTheme.colors.white),
         ) {
             MeetingSettingProfile(
-                meeting = Meeting(
-                    name = "우리중학교 동창",
-                    sinceDays = 12,
-                ),
-                isMeetingHost = true
+                meeting =
+                    Meeting(
+                        name = "우리중학교 동창",
+                        sinceDays = 12,
+                    ),
+                isMeetingHost = true,
             )
         }
     }

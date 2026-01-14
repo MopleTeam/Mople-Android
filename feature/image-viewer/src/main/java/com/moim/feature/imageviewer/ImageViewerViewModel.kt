@@ -26,8 +26,8 @@ class ImageViewerViewModel @AssistedInject constructor(
                 title = title,
                 images = images,
                 position = currentPosition,
-                defaultImage = defaultImage
-            )
+                defaultImage = defaultImage,
+            ),
         )
     }
 
@@ -39,9 +39,7 @@ class ImageViewerViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(
-            imageViewerRoute: DetailRoute.ImageViewer
-        ): ImageViewerViewModel
+        fun create(imageViewerRoute: DetailRoute.ImageViewer): ImageViewerViewModel
     }
 }
 

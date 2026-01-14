@@ -13,16 +13,15 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 internal object UtilModule {
-
     @Singleton
     @Provides
     fun provideCompressorUtil(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): CompressorUtil = CompressorUtil(context)
 
     @Singleton
     @Provides
     fun provideFileUtil(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): FileUtil = FileUtil(context)
 }

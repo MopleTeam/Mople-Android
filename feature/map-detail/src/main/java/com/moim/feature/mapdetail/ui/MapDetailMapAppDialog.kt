@@ -46,11 +46,12 @@ fun MapDetailMapAppDialog(
         modifier = modifier.fillMaxWidth(),
         dragHandle = {
             Spacer(
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .size(width = 80.dp, height = 8.dp)
-                    .clip(CircleShape)
-                    .background(MoimTheme.colors.tertiary)
+                modifier =
+                    Modifier
+                        .padding(top = 20.dp)
+                        .size(width = 80.dp, height = 8.dp)
+                        .clip(CircleShape)
+                        .background(MoimTheme.colors.tertiary),
             )
         },
         onDismiss = {
@@ -60,11 +61,12 @@ fun MapDetailMapAppDialog(
         },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -75,7 +77,7 @@ fun MapDetailMapAppDialog(
                     onClick = {
                         onUiAction(MapDetailUiAction.OnClickMapAddress(MapType.NAVER))
                         onUiAction(dismissAction)
-                    }
+                    },
                 )
 
                 MapLogo(
@@ -84,7 +86,7 @@ fun MapDetailMapAppDialog(
                     onClick = {
                         onUiAction(MapDetailUiAction.OnClickMapAddress(MapType.KAKAO))
                         onUiAction(dismissAction)
-                    }
+                    },
                 )
             }
 
@@ -97,22 +99,24 @@ fun MapDetailMapAppDialog(
 private fun MapLogo(
     @DrawableRes appLogoRes: Int,
     appName: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .onSingleClick(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .onSingleClick(onClick = onClick)
+                .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape),
+            modifier =
+                Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape),
             painter = painterResource(appLogoRes),
-            contentDescription = ""
+            contentDescription = "",
         )
 
         Spacer(Modifier.size(8.dp))
@@ -120,7 +124,7 @@ private fun MapLogo(
         MoimText(
             text = appName,
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray02
+            color = MoimTheme.colors.gray.gray02,
         )
     }
 }

@@ -48,15 +48,16 @@ fun CalendarPlanContent(
     modifier: Modifier = Modifier,
     selectDate: ZonedDateTime,
     plans: List<PlanItem> = emptyList(),
-    onUiAction: OnCalendarUiAction = {}
+    onUiAction: OnCalendarUiAction = {},
 ) {
     LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MoimTheme.colors.bg.primary),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MoimTheme.colors.bg.primary),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        contentPadding = PaddingValues(vertical = 28.dp, horizontal = 20.dp)
+        contentPadding = PaddingValues(vertical = 28.dp, horizontal = 20.dp),
     ) {
         item {
             Column {
@@ -73,11 +74,11 @@ fun CalendarPlanContent(
 
         items(
             items = plans,
-            key = { plan -> plan.postId }
+            key = { plan -> plan.postId },
         ) {
             CalendarPlanItem(
                 plan = it,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         }
     }
@@ -87,7 +88,7 @@ fun CalendarPlanContent(
 fun CalendarPlanItem(
     modifier: Modifier = Modifier,
     plan: PlanItem,
-    onUiAction: OnCalendarUiAction = {}
+    onUiAction: OnCalendarUiAction = {},
 ) {
     MoimCard(
         modifier = modifier,
@@ -98,20 +99,21 @@ fun CalendarPlanItem(
                         ViewIdType.PlanId(plan.postId)
                     } else {
                         ViewIdType.ReviewId(plan.postId)
-                    }
-                )
+                    },
+                ),
             )
-        }
+        },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.white)
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MoimTheme.colors.white)
+                    .padding(16.dp),
         ) {
             MeetingInfoTopAppbar(
                 meetingImageUrl = plan.meetingImageUrl,
-                groupName = plan.meetingName
+                groupName = plan.meetingName,
             )
             Spacer(Modifier.height(16.dp))
 
@@ -119,25 +121,26 @@ fun CalendarPlanItem(
                 text = plan.planName,
                 singleLine = false,
                 style = MoimTheme.typography.title02.bold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
             Spacer(Modifier.height(4.dp))
 
             Row(
                 modifier = modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     modifier = Modifier.size(18.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_meeting),
                     contentDescription = "",
-                    tint = MoimTheme.colors.icon
+                    tint = MoimTheme.colors.icon,
                 )
 
                 MoimText(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 4.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(start = 4.dp),
                     text = stringResource(R.string.unit_participants_count, plan.participantsCount),
                     style = MoimTheme.typography.body02.medium,
                     color = MoimTheme.colors.gray.gray04,
@@ -163,21 +166,23 @@ private fun MeetingInfoTopAppbar(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         NetworkImage(
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
-                .size(28.dp),
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
+                    .size(28.dp),
             imageUrl = meetingImageUrl,
-            errorImage = painterResource(R.drawable.ic_empty_meeting)
+            errorImage = painterResource(R.drawable.ic_empty_meeting),
         )
 
         MoimText(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
             text = groupName,
             style = MoimTheme.typography.body02.semiBold,
             color = MoimTheme.colors.gray.gray04,
@@ -186,7 +191,7 @@ private fun MeetingInfoTopAppbar(
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_next),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
     }
 }
@@ -208,22 +213,24 @@ private fun MeetingWeatherInfo(
         }
 
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(color = color_F6F8FA, shape = RoundedCornerShape(10.dp))
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(color = color_F6F8FA, shape = RoundedCornerShape(10.dp))
+                .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .size(32.dp)
-                .background(MoimTheme.colors.white)
-                .padding(4.dp)
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .size(32.dp)
+                    .background(MoimTheme.colors.white)
+                    .padding(4.dp),
         ) {
             NetworkImage(
                 imageUrl = WEATHER_ICON_URL.format(weatherIconUrl),
-                errorImage = painterResource(R.drawable.ic_empty_weather)
+                errorImage = painterResource(R.drawable.ic_empty_weather),
             )
         }
 
@@ -236,24 +243,25 @@ private fun MeetingWeatherInfo(
                 text = notFoundText,
                 textAlign = TextAlign.Center,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04
+                color = MoimTheme.colors.gray.gray04,
             )
         } else {
             MoimText(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp),
                 text = stringResource(R.string.unit_weather, temperature.decimalFormatString()),
                 singleLine = false,
                 style = MoimTheme.typography.body01.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
 
             MoimText(
                 text = address,
                 singleLine = false,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04
+                color = MoimTheme.colors.gray.gray04,
             )
         }
     }

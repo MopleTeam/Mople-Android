@@ -24,16 +24,16 @@ fun <T : EventAction> SharedFlow<T>.actionStateIn(
 )
 
 sealed class CommentAction(
-    override val actionAt: ZonedDateTime
+    override val actionAt: ZonedDateTime,
 ) : EventAction {
     data class CommentCreate(
         override val actionAt: ZonedDateTime = ZonedDateTime.now(),
-        val commentUiModel: CommentUiModel
+        val commentUiModel: CommentUiModel,
     ) : CommentAction(actionAt)
 
     data class CommentUpdate(
         override val actionAt: ZonedDateTime = ZonedDateTime.now(),
-        val commentUiModel: CommentUiModel
+        val commentUiModel: CommentUiModel,
     ) : CommentAction(actionAt)
 
     data class CommentDelete(
@@ -45,7 +45,7 @@ sealed class CommentAction(
 }
 
 sealed class MeetingAction(
-    override val actionAt: ZonedDateTime
+    override val actionAt: ZonedDateTime,
 ) : EventAction {
     data class MeetingInvalidate(
         override val actionAt: ZonedDateTime = ZonedDateTime.now(),
@@ -53,24 +53,24 @@ sealed class MeetingAction(
 
     data class MeetingCreate(
         override val actionAt: ZonedDateTime = ZonedDateTime.now(),
-        val meeting: Meeting
+        val meeting: Meeting,
     ) : MeetingAction(actionAt)
 
     data class MeetingUpdate(
         override val actionAt: ZonedDateTime = ZonedDateTime.now(),
-        val meeting: Meeting
+        val meeting: Meeting,
     ) : MeetingAction(actionAt)
 
     data class MeetingDelete(
         override val actionAt: ZonedDateTime = ZonedDateTime.now(),
-        val meetId: String
+        val meetId: String,
     ) : MeetingAction(actionAt)
 
     data object None : MeetingAction(ZonedDateTime.now())
 }
 
 sealed class PlanAction(
-    override val actionAt: ZonedDateTime
+    override val actionAt: ZonedDateTime,
 ) : EventAction {
     data class PlanInvalidate(
         override val actionAt: ZonedDateTime = ZonedDateTime.now(),
@@ -78,17 +78,17 @@ sealed class PlanAction(
 
     data class PlanCreate(
         override val actionAt: ZonedDateTime = ZonedDateTime.now(),
-        val planItem: PlanItem
+        val planItem: PlanItem,
     ) : PlanAction(actionAt)
 
     data class PlanUpdate(
         override val actionAt: ZonedDateTime = ZonedDateTime.now(),
-        val planItem: PlanItem
+        val planItem: PlanItem,
     ) : PlanAction(actionAt)
 
     data class PlanDelete(
         override val actionAt: ZonedDateTime = ZonedDateTime.now(),
-        val postId: String
+        val postId: String,
     ) : PlanAction(actionAt)
 
     data object None : PlanAction(ZonedDateTime.now())

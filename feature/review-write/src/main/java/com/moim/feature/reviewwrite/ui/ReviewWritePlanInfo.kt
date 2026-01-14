@@ -35,25 +35,27 @@ import com.moim.feature.reviewwrite.ReviewWriteUiAction
 fun ReviewWritePlanInfo(
     modifier: Modifier = Modifier,
     review: Review,
-    onUiAction: (ReviewWriteUiAction) -> Unit = {}
+    onUiAction: (ReviewWriteUiAction) -> Unit = {},
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
     ) {
         Spacer(Modifier.height(20.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             NetworkImage(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
-                    .size(20.dp),
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
+                        .size(20.dp),
                 imageUrl = review.meetingImageUrl,
-                errorImage = painterResource(R.drawable.ic_empty_meeting)
+                errorImage = painterResource(R.drawable.ic_empty_meeting),
             )
 
             Spacer(Modifier.width(8.dp))
@@ -61,7 +63,7 @@ fun ReviewWritePlanInfo(
             MoimText(
                 text = review.meetingName,
                 style = MoimTheme.typography.body02.semiBold,
-                color = MoimTheme.colors.gray.gray04
+                color = MoimTheme.colors.gray.gray04,
             )
         }
 
@@ -81,7 +83,7 @@ fun ReviewWritePlanInfo(
             endIconRes = R.drawable.ic_next,
             enable = true,
             text = stringResource(R.string.unit_participants_count, review.memberCount),
-            onClick = { onUiAction(ReviewWriteUiAction.OnClickParticipants) }
+            onClick = { onUiAction(ReviewWriteUiAction.OnClickParticipants) },
         )
         PlanInfoItem(
             modifier = Modifier.padding(vertical = 4.dp),
@@ -90,7 +92,7 @@ fun ReviewWritePlanInfo(
         )
         PlanInfoItem(
             startIconRes = R.drawable.ic_location,
-            text = review.address.ifEmpty { stringResource(R.string.common_empty_place) }
+            text = review.address.ifEmpty { stringResource(R.string.common_empty_place) },
         )
         Spacer(Modifier.height(80.dp))
     }
@@ -103,20 +105,21 @@ private fun PlanInfoItem(
     @DrawableRes endIconRes: Int? = null,
     enable: Boolean = false,
     text: String,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp))
-            .onSingleClick(enabled = enable, onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(4.dp))
+                .onSingleClick(enabled = enable, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             modifier = Modifier.size(24.dp),
             imageVector = ImageVector.vectorResource(startIconRes),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
 
         MoimText(
@@ -124,7 +127,7 @@ private fun PlanInfoItem(
             text = text,
             style = MoimTheme.typography.body01.medium,
             color = MoimTheme.colors.gray.gray03,
-            maxLine = 2
+            maxLine = 2,
         )
 
         if (endIconRes != null) {
@@ -132,7 +135,7 @@ private fun PlanInfoItem(
                 modifier = Modifier.size(20.dp),
                 imageVector = ImageVector.vectorResource(endIconRes),
                 contentDescription = "",
-                tint = MoimTheme.colors.icon
+                tint = MoimTheme.colors.icon,
             )
         }
     }

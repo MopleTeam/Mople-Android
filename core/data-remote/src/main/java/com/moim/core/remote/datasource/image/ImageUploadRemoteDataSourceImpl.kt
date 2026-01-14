@@ -17,25 +17,33 @@ internal class ImageUploadRemoteDataSourceImpl @Inject constructor(
     private val compressorUtil: CompressorUtil,
     private val fileUtil: FileUtil,
 ) : ImageUploadRemoteDataSource {
+    override suspend fun uploadImage(
+        url: String?,
+        folderName: String,
+    ): String? =
+        withContext(Dispatchers.IO) {
+            return@withContext if (url.isNullOrEmpty() || url.startsWith("http")) {
+                url
+            } else {
+                val imageFile = fileUtil.from(url).run { compressorUtil.compressFile(this) }
 
-    override suspend fun uploadImage(url: String?, folderName: String): String? = withContext(Dispatchers.IO) {
-        return@withContext if (url.isNullOrEmpty() || url.startsWith("http")) {
-            url
-        } else {
-            val imageFile = fileUtil.from(url).run { compressorUtil.compressFile(this) }
-
-            imageApi.uploadImage(
-                folderName = folderName,
-                file = MultipartBody.Part.createFormData(
-                    name = "image",
-                    filename = URLEncoder.encode(imageFile.name, Charsets.UTF_8.displayName()),
-                    body = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
+                imageApi.uploadImage(
+                    folderName = folderName,
+                    file =
+                        MultipartBody.Part.createFormData(
+                            name = "image",
+                            filename = URLEncoder.encode(imageFile.name, Charsets.UTF_8.displayName()),
+                            body = imageFile.asRequestBody("image/*".toMediaTypeOrNull()),
+                        ),
                 )
-            )
+            }
         }
-    }
 
-    override suspend fun uploadReviewImages(reviewId: String, urls: List<String>, folderName: String) {
+    override suspend fun uploadReviewImages(
+        reviewId: String,
+        urls: List<String>,
+        folderName: String,
+    ) {
         val localImageUrls = urls.filterNot { url -> url.isEmpty() || url.startsWith("http") }
         if (localImageUrls.isEmpty()) return
 
@@ -44,13 +52,14 @@ internal class ImageUploadRemoteDataSourceImpl @Inject constructor(
         imageApi.uploadReviewImages(
             folderName = folderName,
             reviewId = reviewId.toRequestBody(contentType = "text/plain".toMediaTypeOrNull()),
-            files = imageFiles.map { imageFile ->
-                MultipartBody.Part.createFormData(
-                    name = "images",
-                    filename = URLEncoder.encode(imageFile.name, Charsets.UTF_8.displayName()),
-                    body = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
-                )
-            }
+            files =
+                imageFiles.map { imageFile ->
+                    MultipartBody.Part.createFormData(
+                        name = "images",
+                        filename = URLEncoder.encode(imageFile.name, Charsets.UTF_8.displayName()),
+                        body = imageFile.asRequestBody("image/*".toMediaTypeOrNull()),
+                    )
+                },
         )
     }
 }

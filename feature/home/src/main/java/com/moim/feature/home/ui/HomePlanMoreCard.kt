@@ -25,23 +25,24 @@ import com.moim.feature.home.OnHomeUiAction
 @Composable
 fun HomePlanMoreCard(
     modifier: Modifier = Modifier,
-    onUiAction: OnHomeUiAction
+    onUiAction: OnHomeUiAction,
 ) {
     MoimCard(
         modifier = modifier.fillMaxHeight(),
-        onClick = { onUiAction(HomeUiAction.OnClickPlanMore) }
+        onClick = { onUiAction(HomeUiAction.OnClickPlanMore) },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(12.dp),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .padding(12.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_add),
                 contentDescription = "",
-                tint = MoimTheme.colors.gray.gray03
+                tint = MoimTheme.colors.gray.gray03,
             )
 
             Spacer(Modifier.height(6.dp))
@@ -49,7 +50,7 @@ fun HomePlanMoreCard(
             MoimText(
                 text = stringResource(R.string.home_meeting_more),
                 style = MoimTheme.typography.title03.bold,
-                color = MoimTheme.colors.gray.gray03
+                color = MoimTheme.colors.gray.gray03,
             )
         }
     }
@@ -61,7 +62,7 @@ private fun HomeMeetingMoreCardPreview() {
     MoimTheme {
         HomePlanMoreCard(
             modifier = Modifier.height(240.dp),
-            onUiAction = {}
+            onUiAction = {},
         )
     }
 }

@@ -20,10 +20,14 @@ interface NotificationApi {
     suspend fun getNotificationSubscribes(): List<String>
 
     @POST("notification/unsubscribe")
-    suspend fun setNotificationUnSubscribe(@Body params: JsonObject)
+    suspend fun setNotificationUnSubscribe(
+        @Body params: JsonObject,
+    )
 
     @POST("notification/subscribe")
-    suspend fun setNotificationSubscribe(@Body params: JsonObject)
+    suspend fun setNotificationSubscribe(
+        @Body params: JsonObject,
+    )
 
     @PUT("notification/clear")
     suspend fun clearNotificationCount()

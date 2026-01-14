@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 data object None : UiState
 
 open class BaseViewModel : ViewModel() {
-
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 

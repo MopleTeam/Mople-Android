@@ -12,7 +12,7 @@ data class PaginationContainerResponse<T>(
     @SerialName("content")
     val content: T,
     @SerialName("page")
-    val page: CursorPagerResponse
+    val page: CursorPagerResponse,
 )
 
 @Serializable
@@ -22,21 +22,19 @@ data class CursorPagerResponse(
     @SerialName("hasNext")
     val isNext: Boolean,
     @SerialName("size")
-    val size: Int
+    val size: Int,
 )
 
 fun <T, R> PaginationContainerResponse<T>.asItem(transform: (T) -> R): PaginationContainer<R> =
     PaginationContainer(
         totalCount = totalCount,
         content = content.let(transform),
-        page = page.asItem()
+        page = page.asItem(),
     )
 
-fun CursorPagerResponse.asItem(): CursorPage {
-    return CursorPage(
+fun CursorPagerResponse.asItem(): CursorPage =
+    CursorPage(
         nextCursor = nextCursor,
         isNext = isNext,
-        size = size
+        size = size,
     )
-}
-

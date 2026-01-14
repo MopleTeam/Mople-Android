@@ -26,25 +26,28 @@ import com.moim.core.ui.route.MainRoute
 @Composable
 fun rememberMainNavigationState(
     startRoute: MainRoute = MainRoute.Home,
-    topLevelRoutes: List<MainRoute> = MainTab.routes
+    topLevelRoutes: List<MainRoute> = MainTab.routes,
 ): MainNavigationState {
-    val topLevelRoute = rememberSerializable(
-        startRoute, topLevelRoutes,
-        serializer = MutableStateSerializer(NavKeySerializer())
-    ) {
-        mutableStateOf(startRoute)
-    }
+    val topLevelRoute =
+        rememberSerializable(
+            startRoute,
+            topLevelRoutes,
+            serializer = MutableStateSerializer(NavKeySerializer()),
+        ) {
+            mutableStateOf(startRoute)
+        }
 
-    val backStacks = topLevelRoutes.associateWith { key ->
-        rememberNavBackStack(key)
-    }
+    val backStacks =
+        topLevelRoutes.associateWith { key ->
+            rememberNavBackStack(key)
+        }
 
     return remember(startRoute, topLevelRoutes) {
         MainNavigationState(
             startRoute = startRoute,
             topLevelRoute = topLevelRoute,
             backStacks = backStacks,
-            topLevelRoutes = topLevelRoutes
+            topLevelRoutes = topLevelRoutes,
         )
     }
 }
@@ -56,7 +59,7 @@ class MainNavigationState(
     val startRoute: MainRoute,
     topLevelRoute: MutableState<MainRoute>,
     val backStacks: Map<MainRoute, NavBackStack<NavKey>>,
-    private val topLevelRoutes: List<MainRoute>
+    private val topLevelRoutes: List<MainRoute>,
 ) {
     var topLevelRoute: MainRoute by topLevelRoute
 
@@ -64,11 +67,12 @@ class MainNavigationState(
      * 현재 사용 중인 스택 목록
      */
     val stacksInUse: List<MainRoute>
-        get() = if (topLevelRoute == startRoute) {
-            listOf(startRoute)
-        } else {
-            listOf(startRoute, topLevelRoute)
-        }
+        get() =
+            if (topLevelRoute == startRoute) {
+                listOf(startRoute)
+            } else {
+                listOf(startRoute, topLevelRoute)
+            }
 
     /**
      * 현재 백스택의 최상위 라우트
@@ -99,20 +103,20 @@ class MainNavigationState(
  * NavigationState를 NavEntry 리스트로 변환
  */
 @Composable
-fun MainNavigationState.toEntries(
-    entryProvider: (NavKey) -> NavEntry<NavKey>
-): SnapshotStateList<NavEntry<NavKey>> {
-    val decoratedEntries = backStacks.mapValues { (_, stack) ->
-        val decorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
-            rememberViewModelStoreNavEntryDecorator()
-        )
-        rememberDecoratedNavEntries(
-            backStack = stack,
-            entryDecorators = decorators,
-            entryProvider = entryProvider
-        )
-    }
+fun MainNavigationState.toEntries(entryProvider: (NavKey) -> NavEntry<NavKey>): SnapshotStateList<NavEntry<NavKey>> {
+    val decoratedEntries =
+        backStacks.mapValues { (_, stack) ->
+            val decorators =
+                listOf(
+                    rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                )
+            rememberDecoratedNavEntries(
+                backStack = stack,
+                entryDecorators = decorators,
+                entryProvider = entryProvider,
+            )
+        }
 
     return stacksInUse
         .flatMap { decoratedEntries[it] ?: emptyList() }

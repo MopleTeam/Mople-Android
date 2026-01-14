@@ -31,57 +31,74 @@ fun CalendarDay(
     selectedDay: ZonedDateTime? = null,
     isCurrentDatePosition: Boolean = true,
     enabled: Boolean = false,
-    onUiAction: OnCalendarUiAction = {}
+    onUiAction: OnCalendarUiAction = {},
 ) {
     val isToday = (day == ZonedDateTime.now().default())
     val isSelected = (day == selectedDay)
     val isHoliday = day.dayOfWeek == DayOfWeek.SUNDAY || holidays.any { it == day }
 
-    val textColor = when {
-        isCurrentDatePosition.not() -> MoimTheme.colors.white
-        enabled && isHoliday -> MoimTheme.colors.red
-        enabled.not() && isHoliday -> MoimTheme.colors.red01
-        enabled.not() -> MoimTheme.colors.gray.gray07
-        isSelected -> MoimTheme.colors.primary.primary
-        else -> MoimTheme.colors.gray.gray01
-    }
-    val circleColor = when {
-        isCurrentDatePosition.not() -> MoimTheme.colors.white
-        isSelected -> MoimTheme.colors.primary.primary.copy(alpha = 0.1f)
-        isToday -> MoimTheme.colors.bg.primary
-        else -> MoimTheme.colors.white
-    }
+    val textColor =
+        when {
+            isCurrentDatePosition.not() -> MoimTheme.colors.white
+            enabled && isHoliday -> MoimTheme.colors.red
+            enabled.not() && isHoliday -> MoimTheme.colors.red01
+            enabled.not() -> MoimTheme.colors.gray.gray07
+            isSelected -> MoimTheme.colors.primary.primary
+            else -> MoimTheme.colors.gray.gray01
+        }
+    val circleColor =
+        when {
+            isCurrentDatePosition.not() -> {
+                MoimTheme.colors.white
+            }
+
+            isSelected -> {
+                MoimTheme.colors.primary.primary
+                    .copy(alpha = 0.1f)
+            }
+
+            isToday -> {
+                MoimTheme.colors.bg.primary
+            }
+
+            else -> {
+                MoimTheme.colors.white
+            }
+        }
 
     Box(
-        modifier = modifier
-            .aspectRatio(1f)
-            .clip(CircleShape)
-            .onSingleClick(
-                enabled = enabled,
-                onClick = { onUiAction(CalendarUiAction.OnClickDateDay(day)) }
-            ),
+        modifier =
+            modifier
+                .aspectRatio(1f)
+                .clip(CircleShape)
+                .onSingleClick(
+                    enabled = enabled,
+                    onClick = { onUiAction(CalendarUiAction.OnClickDateDay(day)) },
+                ),
         contentAlignment = Alignment.Center,
     ) {
         Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .aspectRatio(1f)
-                .padding(4.dp)
-                .background(circleColor, CircleShape)
+            modifier =
+                Modifier
+                    .align(Alignment.Center)
+                    .aspectRatio(1f)
+                    .padding(4.dp)
+                    .background(circleColor, CircleShape),
         )
 
         Column(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .defaultMinSize(minHeight = 48.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.Center)
+                    .defaultMinSize(minHeight = 48.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             MoimText(
                 text = day.dayOfMonth.toString(),
                 textAlign = TextAlign.Center,
                 style = MoimTheme.typography.title03.semiBold,
-                color = textColor
+                color = textColor,
             )
         }
     }

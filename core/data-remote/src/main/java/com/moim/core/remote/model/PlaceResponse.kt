@@ -11,7 +11,7 @@ data class PlaceResponseContainer(
     @SerialName("page")
     val page: Int = 1,
     @SerialName("isEnd")
-    val isEnd: Boolean = true
+    val isEnd: Boolean = true,
 )
 
 @Serializable
@@ -27,16 +27,15 @@ data class PlaceResponse(
     @SerialName("x")
     val xPoint: String,
     @SerialName("y")
-    val yPoint: String
+    val yPoint: String,
 )
 
-fun PlaceResponse.asItem(): Place {
-    return Place(
+fun PlaceResponse.asItem(): Place =
+    Place(
         title = title,
         distance = distance,
         address = address,
         roadAddress = roadAddress,
         xPoint = xPoint,
-        yPoint = yPoint
+        yPoint = yPoint,
     )
-}

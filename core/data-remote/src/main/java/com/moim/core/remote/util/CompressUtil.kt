@@ -8,11 +8,10 @@ import java.io.File
 import javax.inject.Inject
 
 internal class CompressorUtil @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
 ) {
-
-    suspend fun compressFile(imageFile: File): File {
-        return if (imageFile.path.contains("compressor")) {
+    suspend fun compressFile(imageFile: File): File =
+        if (imageFile.path.contains("compressor")) {
             imageFile
         } else {
             Compressor.compress(
@@ -20,8 +19,7 @@ internal class CompressorUtil @Inject constructor(
                 imageFile = imageFile,
                 compressionPatch = {
                     default()
-                }
+                },
             )
         }
-    }
 }

@@ -20,7 +20,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class IntroActivity : ComponentActivity() {
-
     @Inject
     lateinit var analyticsHelper: AnalyticsHelper
 
@@ -44,10 +43,11 @@ class IntroActivity : ComponentActivity() {
 private fun Activity.navigateToMain() {
     val bundles = intent.extras
     val inviteCode = intent.data?.getQueryParameter(KEY_INVITE_CODE).also { intent.data = null }
-    val intent = Intent(this, Class.forName(MAIN_ACTIVITY_NAME)).apply {
-        putExtra(KEY_INVITE_CODE, inviteCode)
-        if (bundles != null) putExtras(bundles)
-    }
+    val intent =
+        Intent(this, Class.forName(MAIN_ACTIVITY_NAME)).apply {
+            putExtra(KEY_INVITE_CODE, inviteCode)
+            if (bundles != null) putExtras(bundles)
+        }
     finish()
     startActivity(intent)
 }

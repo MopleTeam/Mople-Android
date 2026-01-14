@@ -12,9 +12,8 @@ data class MemberResponse(
     val imageUrl: String? = null,
 )
 
-fun MemberResponse.asItem(): Member {
-    return Member(
+fun MemberResponse.asItem(): Member =
+    Member(
         userNickname = userNickname,
-        imageUrl = imageUrl
+        imageUrl = imageUrl,
     )
-}

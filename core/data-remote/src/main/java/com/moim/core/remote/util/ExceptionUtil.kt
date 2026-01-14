@@ -23,7 +23,10 @@ data class ErrorResponse(
 
 fun converterException(exception: Throwable): Exception {
     return when (exception) {
-        is IOException -> exception
+        is IOException -> {
+            exception
+        }
+
         is HttpException -> {
             val errorBody = (exception.response()?.errorBody()?.string() ?: "").toObject<ErrorResponse>()
             val code = errorBody?.code?.toInt() ?: (exception.response()?.code())
@@ -41,6 +44,8 @@ fun converterException(exception: Throwable): Exception {
             }
         }
 
-        else -> UnknownErrorException(exception.message, exception)
+        else -> {
+            UnknownErrorException(exception.message, exception)
+        }
     }
 }

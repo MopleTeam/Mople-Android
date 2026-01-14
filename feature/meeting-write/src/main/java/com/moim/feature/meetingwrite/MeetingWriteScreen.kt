@@ -39,36 +39,50 @@ internal typealias OnMeetingWriteUiAction = (MeetingWriteUiAction) -> Unit
 fun MeetingWriteRoute(
     viewModel: MeetingWriteViewModel = hiltViewModel(),
     padding: PaddingValues,
-    navigateToBack: () -> Unit
+    navigateToBack: () -> Unit,
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val meetingWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> if (uri != null) viewModel.onUiAction(MeetingWriteUiAction.OnChangeMeetingPhotoUrl(uri.toString())) }
-    )
+    val singlePhotoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia(),
+            onResult = { uri -> if (uri != null) viewModel.onUiAction(MeetingWriteUiAction.OnChangeMeetingPhotoUrl(uri.toString())) },
+        )
 
-    val modifier = Modifier.containerScreen(
-        backgroundColor = MoimTheme.colors.white,
-        padding = padding
-    )
+    val modifier =
+        Modifier.containerScreen(
+            backgroundColor = MoimTheme.colors.white,
+            padding = padding,
+        )
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is MeetingWriteUiEvent.NavigateToBack -> navigateToBack()
-            is MeetingWriteUiEvent.NavigateToPhotoPicker -> singlePhotoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            is MeetingWriteUiEvent.ShowToastMessage -> showToast(context, event.message)
+            is MeetingWriteUiEvent.NavigateToBack -> {
+                navigateToBack()
+            }
+
+            is MeetingWriteUiEvent.NavigateToPhotoPicker -> {
+                singlePhotoPickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
+            }
+
+            is MeetingWriteUiEvent.ShowToastMessage -> {
+                showToast(context, event.message)
+            }
         }
     }
 
     when (val uiState = meetingWriteUiState) {
-        is MeetingWriteUiState.MeetingWrite -> MeetingWriteScreen(
-            modifier = modifier,
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is MeetingWriteUiState.MeetingWrite -> {
+            MeetingWriteScreen(
+                modifier = modifier,
+                uiState = uiState,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction,
+            )
+        }
     }
 }
 
@@ -81,36 +95,41 @@ fun MeetingWriteScreen(
 ) {
     TrackScreenViewEvent(screenName = "meet_write")
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         MoimTopAppbar(
-            title = stringResource(if (uiState.meetingId.isNullOrEmpty()) R.string.meeting_write_title_for_create else R.string.meeting_write_title_for_update),
-            onClickNavigate = { onUiAction(MeetingWriteUiAction.OnClickBack) }
+            title =
+                stringResource(
+                    if (uiState.meetingId.isNullOrEmpty()) R.string.meeting_write_title_for_create else R.string.meeting_write_title_for_update,
+                ),
+            onClickNavigate = { onUiAction(MeetingWriteUiAction.OnClickBack) },
         )
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 28.dp)
-                .imePadding()
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 28.dp)
+                    .imePadding(),
         ) {
             MeetingWriteImage(
                 meetingImageUrl = uiState.meetingUrl,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
 
             MeetingWriteNameTextField(
                 meetingName = uiState.meetingName,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
 
             Spacer(Modifier.weight(1f))
 
             MoimPrimaryButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 28.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 28.dp),
                 enable = uiState.enableMeetingWrite,
                 text = stringResource(if (uiState.meetingId.isNullOrEmpty()) R.string.meeting_write_create else R.string.common_save),
                 onClick = { onUiAction(MeetingWriteUiAction.OnClickMeetingWrite) },

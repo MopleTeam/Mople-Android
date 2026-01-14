@@ -8,10 +8,9 @@ import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import kotlinx.serialization.Serializable
 
-sealed interface Route
+sealed interface Route : NavKey
 
-sealed interface IntroRoute : Route, NavKey {
-
+sealed interface IntroRoute : Route {
     @Serializable
     data object Splash : IntroRoute
 
@@ -21,13 +20,12 @@ sealed interface IntroRoute : Route, NavKey {
     @Serializable
     data class SignUp(
         val email: String,
-        val token: String
+        val token: String,
     ) : IntroRoute
 }
 
 @Serializable
-sealed interface MainRoute : Route, NavKey {
-
+sealed interface MainRoute : Route {
     @Serializable
     data object Home : MainRoute
 
@@ -42,21 +40,20 @@ sealed interface MainRoute : Route, NavKey {
 }
 
 @Serializable
-sealed interface DetailRoute : Route, NavKey {
-
+sealed interface DetailRoute : Route {
     @Serializable
     data class MeetingDetail(
-        val meetingId: String
+        val meetingId: String,
     ) : DetailRoute
 
     @Serializable
     data class MeetingWrite(
-        val meeting: Meeting? = null
+        val meeting: Meeting? = null,
     ) : DetailRoute
 
     @Serializable
     data class MeetingSetting(
-        val meeting: Meeting
+        val meeting: Meeting,
     ) : DetailRoute
 
     @Serializable
@@ -71,6 +68,7 @@ sealed interface DetailRoute : Route, NavKey {
     data class PlanDetail(
         val viewIdType: ViewIdType,
     ) : DetailRoute
+
     @Serializable
     data class CommentDetail(
         val meetId: String,
@@ -80,12 +78,13 @@ sealed interface DetailRoute : Route, NavKey {
 
     @Serializable
     data class PlanWrite(
-        val planItem: PlanItem? = null
+        val planItem: PlanItem? = null,
     ) : DetailRoute
+
     @Serializable
     data class ReviewWrite(
         val postId: String,
-        val isUpdated: Boolean
+        val isUpdated: Boolean,
     ) : DetailRoute
 
     @Serializable
@@ -112,6 +111,6 @@ sealed interface DetailRoute : Route, NavKey {
 
     @Serializable
     data class WebView(
-        val webUrl: String
+        val webUrl: String,
     ) : DetailRoute
 }

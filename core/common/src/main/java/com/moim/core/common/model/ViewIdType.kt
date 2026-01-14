@@ -11,17 +11,25 @@ sealed class ViewIdType {
 
     @Serializable
     @SerialName("PostId")
-    data class PostId(override val id: String) : ViewIdType()
+    data class PostId(
+        override val id: String,
+    ) : ViewIdType()
 
     @Serializable
     @SerialName("PlanId")
-    data class PlanId(override val id: String) : ViewIdType()
+    data class PlanId(
+        override val id: String,
+    ) : ViewIdType()
 
     @Serializable
     @SerialName("ReviewId")
-    data class ReviewId(override val id: String) : ViewIdType()
+    data class ReviewId(
+        override val id: String,
+    ) : ViewIdType()
 
     @Serializable
     @SerialName("MeetId")
-    data class MeetId(override val id: String) : ViewIdType()
+    data class MeetId(
+        override val id: String,
+    ) : ViewIdType()
 }

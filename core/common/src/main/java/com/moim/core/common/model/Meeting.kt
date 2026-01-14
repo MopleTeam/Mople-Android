@@ -17,5 +17,5 @@ data class Meeting(
     @Serializable(with = KZonedDateTimeSerializer::class)
     val lastPlanAt: ZonedDateTime? = null,
 ) {
-    var isDeleted : Boolean = false
+    var isDeleted: Boolean = false
 }

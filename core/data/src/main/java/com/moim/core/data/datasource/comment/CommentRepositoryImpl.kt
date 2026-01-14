@@ -18,150 +18,159 @@ internal class CommentRepositoryImpl @Inject constructor(
     private val commentApi: CommentApi,
     private val openGraphRemoteDataSource: OpenGraphRemoteDataSource,
 ) : CommentRepository {
-
     override suspend fun getComments(
         postId: String,
         cursor: String,
         size: Int,
-    ): PaginationContainer<List<Comment>> = coroutineScope {
-        try {
-            val commentContainer =
-                commentApi.getComments(
-                    postId = postId,
-                    cursor = cursor,
-                    size = size
-                )
-            val commentItems =
-                commentContainer
-                    .content
-                    .map { comment ->
-                        async {
-                            val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
-                            comment.asItem(openGraph)
-                        }
-                    }.awaitAll()
+    ): PaginationContainer<List<Comment>> =
+        coroutineScope {
+            try {
+                val commentContainer =
+                    commentApi.getComments(
+                        postId = postId,
+                        cursor = cursor,
+                        size = size,
+                    )
+                val commentItems =
+                    commentContainer
+                        .content
+                        .map { comment ->
+                            async {
+                                val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
+                                comment.asItem(openGraph)
+                            }
+                        }.awaitAll()
 
-            commentContainer.asItem { commentItems }
-        } catch (e: Exception) {
-            throw converterException(e)
+                commentContainer.asItem { commentItems }
+            } catch (e: Exception) {
+                throw converterException(e)
+            }
         }
-    }
 
     override suspend fun getReplyComments(
         postId: String,
         commentId: String,
         cursor: String,
-        size: Int
-    ): PaginationContainer<List<Comment>> = coroutineScope {
-        try {
-            val commentContainer =
-                commentApi
-                    .getReplyComments(
-                        postId = postId,
-                        commentId = commentId,
-                        cursor = cursor,
-                        size = size
-                    )
-            val commentItems =
-                commentContainer
-                    .content
-                    .map { comment ->
-                        async {
-                            val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
-                            comment.asItem(openGraph)
-                        }
-                    }.awaitAll()
+        size: Int,
+    ): PaginationContainer<List<Comment>> =
+        coroutineScope {
+            try {
+                val commentContainer =
+                    commentApi
+                        .getReplyComments(
+                            postId = postId,
+                            commentId = commentId,
+                            cursor = cursor,
+                            size = size,
+                        )
+                val commentItems =
+                    commentContainer
+                        .content
+                        .map { comment ->
+                            async {
+                                val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
+                                comment.asItem(openGraph)
+                            }
+                        }.awaitAll()
 
-            commentContainer.asItem { commentItems }
-        } catch (e: Exception) {
-            throw converterException(e)
+                commentContainer.asItem { commentItems }
+            } catch (e: Exception) {
+                throw converterException(e)
+            }
         }
-    }
 
     override fun createComment(
         postId: String,
         content: String,
         mentionIds: List<String>,
-    ): Flow<Comment> = catchFlow {
-        val comment =
-            commentApi
-                .createComment(
-                    postId = postId,
-                    params =
-                        jsonOf(
-                            KEY_CONTENTS to content,
-                            KEY_MENTIONS to mentionIds,
-                        )
-                )
-        val openGraph =
-            openGraphRemoteDataSource
-                .getOpenGraph(url = comment.content.findWebLink())
+    ): Flow<Comment> =
+        catchFlow {
+            val comment =
+                commentApi
+                    .createComment(
+                        postId = postId,
+                        params =
+                            jsonOf(
+                                KEY_CONTENTS to content,
+                                KEY_MENTIONS to mentionIds,
+                            ),
+                    )
+            val openGraph =
+                openGraphRemoteDataSource
+                    .getOpenGraph(url = comment.content.findWebLink())
 
-        emit(comment.asItem(openGraph))
-    }
+            emit(comment.asItem(openGraph))
+        }
 
     override fun createReplyComment(
         postId: String,
         commentId: String,
         content: String,
-        mentionIds: List<String>
-    ): Flow<Comment> = catchFlow {
-        val comment =
-            commentApi
-                .createReplyComment(
-                    postId = postId,
-                    commentId = commentId,
-                    params = jsonOf(
-                        KEY_CONTENTS to content,
-                        KEY_MENTIONS to mentionIds,
+        mentionIds: List<String>,
+    ): Flow<Comment> =
+        catchFlow {
+            val comment =
+                commentApi
+                    .createReplyComment(
+                        postId = postId,
+                        commentId = commentId,
+                        params =
+                            jsonOf(
+                                KEY_CONTENTS to content,
+                                KEY_MENTIONS to mentionIds,
+                            ),
                     )
-                )
-        val openGraph =
-            openGraphRemoteDataSource.getOpenGraph(url = comment.content.findWebLink())
+            val openGraph =
+                openGraphRemoteDataSource.getOpenGraph(url = comment.content.findWebLink())
 
-        emit(comment.asItem(openGraph))
-    }
+            emit(comment.asItem(openGraph))
+        }
 
     override fun updateComment(
         commentId: String,
         content: String,
         mentionIds: List<String>,
-    ): Flow<Comment> = catchFlow {
-        val comment =
-            commentApi
-                .updateComment(
-                    commentId = commentId,
-                    params = jsonOf(
-                        KEY_CONTENTS to content,
-                        KEY_MENTIONS to mentionIds,
+    ): Flow<Comment> =
+        catchFlow {
+            val comment =
+                commentApi
+                    .updateComment(
+                        commentId = commentId,
+                        params =
+                            jsonOf(
+                                KEY_CONTENTS to content,
+                                KEY_MENTIONS to mentionIds,
+                            ),
                     )
-                )
-        val openGraph =
-            openGraphRemoteDataSource
-                .getOpenGraph(url = comment.content.findWebLink())
+            val openGraph =
+                openGraphRemoteDataSource
+                    .getOpenGraph(url = comment.content.findWebLink())
 
-        emit(comment.asItem(openGraph))
-    }
+            emit(comment.asItem(openGraph))
+        }
 
-    override fun updateLikeComment(commentId: String): Flow<Comment> = catchFlow {
-        val comment = commentApi.updateLikeComment(commentId)
-        val openGraph = openGraphRemoteDataSource.getOpenGraph(url = comment.content.findWebLink())
-        emit(comment.asItem(openGraph))
-    }
+    override fun updateLikeComment(commentId: String): Flow<Comment> =
+        catchFlow {
+            val comment = commentApi.updateLikeComment(commentId)
+            val openGraph = openGraphRemoteDataSource.getOpenGraph(url = comment.content.findWebLink())
+            emit(comment.asItem(openGraph))
+        }
 
-    override fun deleteComment(commentId: String): Flow<Unit> = catchFlow {
-        emit(commentApi.deleteComment(commentId))
-    }
+    override fun deleteComment(commentId: String): Flow<Unit> =
+        catchFlow {
+            emit(commentApi.deleteComment(commentId))
+        }
 
-    override fun reportComment(commentId: String): Flow<Unit> = catchFlow {
-        emit(commentApi.reportComment(jsonOf(KEY_COMMENT_ID to commentId, KEY_REASON to "")))
-    }
+    override fun reportComment(commentId: String): Flow<Unit> =
+        catchFlow {
+            emit(commentApi.reportComment(jsonOf(KEY_COMMENT_ID to commentId, KEY_REASON to "")))
+        }
 
     private fun String.findWebLink(): String? {
         val urlPattern =
             Regex(
                 pattern = """(https?://\S+)|(www\.\S+)|([a-zA-Z0-9-]+\.[a-zA-Z]{2,}\S*)""",
-                option = RegexOption.IGNORE_CASE
+                option = RegexOption.IGNORE_CASE,
             )
 
         return urlPattern.find(this)?.value

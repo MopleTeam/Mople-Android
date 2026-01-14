@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.theme.MoimTheme
 
-
 internal val OutlinedTextFieldTopPadding = 8.dp
 
 @Composable
@@ -66,27 +65,29 @@ internal fun MoimOutlinedTextField(
     focusedBorderThickness: Dp = 2.dp,
     unfocusedBorderThickness: Dp = 1.dp,
 ) {
-    val textSelectionColor = TextSelectionColors(
-        handleColor = MoimTheme.colors.primary.primary,
-        backgroundColor = MoimTheme.colors.gray.gray04
-    )
+    val textSelectionColor =
+        TextSelectionColors(
+            handleColor = MoimTheme.colors.primary.primary,
+            backgroundColor = MoimTheme.colors.gray.gray04,
+        )
     val focusManager = LocalFocusManager.current
 
     CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColor) {
         Column {
             BasicTextField(
-                modifier = if (label != null) {
-                    modifier
-                        // Merge semantics at the beginning of the modifier chain to ensure padding is
-                        // considered part of the text field.
-                        .semantics(mergeDescendants = true) {}
-                        .padding(top = OutlinedTextFieldTopPadding)
-                } else {
-                    modifier
-                }.defaultMinSize(
-                    minWidth = minWidth,
-                    minHeight = minHeight
-                ),
+                modifier =
+                    if (label != null) {
+                        modifier
+                            // Merge semantics at the beginning of the modifier chain to ensure padding is
+                            // considered part of the text field.
+                            .semantics(mergeDescendants = true) {}
+                            .padding(top = OutlinedTextFieldTopPadding)
+                    } else {
+                        modifier
+                    }.defaultMinSize(
+                        minWidth = minWidth,
+                        minHeight = minHeight,
+                    ),
                 state = textFieldState,
                 enabled = enabled,
                 readOnly = readOnly,
@@ -97,10 +98,11 @@ internal fun MoimOutlinedTextField(
                     focusManager.clearFocus()
                     onKeyboardAction?.invoke()
                 },
-                lineLimits = TextFieldLineLimits.MultiLine(
-                    minHeightInLines = minLines,
-                    maxHeightInLines = maxLines
-                ),
+                lineLimits =
+                    TextFieldLineLimits.MultiLine(
+                        minHeightInLines = minLines,
+                        maxHeightInLines = maxLines,
+                    ),
                 interactionSource = interactionSource,
                 cursorBrush = SolidColor(MoimTheme.colors.primary.primary),
                 decorator = { innerTextFiled ->
@@ -128,12 +130,11 @@ internal fun MoimOutlinedTextField(
                                 colors = colors,
                                 shape = shape,
                                 focusedBorderThickness = focusedBorderThickness,
-                                unfocusedBorderThickness = unfocusedBorderThickness
+                                unfocusedBorderThickness = unfocusedBorderThickness,
                             )
                         },
                     )
-                }
-
+                },
             )
 
             if (supportingText != null) {
@@ -141,7 +142,7 @@ internal fun MoimOutlinedTextField(
                     modifier = Modifier.padding(start = 4.dp, top = 4.dp),
                     text = supportingText,
                     style = MoimTheme.typography.body01.regular,
-                    color = if (isError) colors.errorSupportingTextColor else colors.focusedSupportingTextColor
+                    color = if (isError) colors.errorSupportingTextColor else colors.focusedSupportingTextColor,
                 )
             }
         }
@@ -179,27 +180,29 @@ internal fun MoimOutlinedTextField(
     focusedBorderThickness: Dp = 2.dp,
     unfocusedBorderThickness: Dp = 1.dp,
 ) {
-    val textSelectionColor = TextSelectionColors(
-        handleColor = MoimTheme.colors.primary.primary,
-        backgroundColor = MoimTheme.colors.gray.gray04
-    )
+    val textSelectionColor =
+        TextSelectionColors(
+            handleColor = MoimTheme.colors.primary.primary,
+            backgroundColor = MoimTheme.colors.gray.gray04,
+        )
 
     CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColor) {
         Column {
             BasicTextField(
                 value = value,
-                modifier = if (label != null) {
-                    modifier
-                        // Merge semantics at the beginning of the modifier chain to ensure padding is
-                        // considered part of the text field.
-                        .semantics(mergeDescendants = true) {}
-                        .padding(top = OutlinedTextFieldTopPadding)
-                } else {
-                    modifier
-                }.defaultMinSize(
-                    minWidth = minWidth,
-                    minHeight = minHeight
-                ),
+                modifier =
+                    if (label != null) {
+                        modifier
+                            // Merge semantics at the beginning of the modifier chain to ensure padding is
+                            // considered part of the text field.
+                            .semantics(mergeDescendants = true) {}
+                            .padding(top = OutlinedTextFieldTopPadding)
+                    } else {
+                        modifier
+                    }.defaultMinSize(
+                        minWidth = minWidth,
+                        minHeight = minHeight,
+                    ),
                 onValueChange = onValueChange,
                 enabled = enabled,
                 readOnly = readOnly,
@@ -237,11 +240,11 @@ internal fun MoimOutlinedTextField(
                                 colors = colors,
                                 shape = shape,
                                 focusedBorderThickness = focusedBorderThickness,
-                                unfocusedBorderThickness = unfocusedBorderThickness
+                                unfocusedBorderThickness = unfocusedBorderThickness,
                             )
                         },
                     )
-                }
+                },
             )
 
             if (supportingText != null) {
@@ -249,7 +252,7 @@ internal fun MoimOutlinedTextField(
                     modifier = Modifier.padding(start = 4.dp, top = 4.dp),
                     text = supportingText,
                     style = MoimTheme.typography.body01.regular,
-                    color = if (isError) colors.errorSupportingTextColor else colors.focusedSupportingTextColor
+                    color = if (isError) colors.errorSupportingTextColor else colors.focusedSupportingTextColor,
                 )
             }
         }
@@ -287,27 +290,29 @@ internal fun MoimOutlinedTextField(
     focusedBorderThickness: Dp = 2.dp,
     unfocusedBorderThickness: Dp = 1.dp,
 ) {
-    val textSelectionColor = TextSelectionColors(
-        handleColor = MoimTheme.colors.primary.primary,
-        backgroundColor = MoimTheme.colors.gray.gray04
-    )
+    val textSelectionColor =
+        TextSelectionColors(
+            handleColor = MoimTheme.colors.primary.primary,
+            backgroundColor = MoimTheme.colors.gray.gray04,
+        )
 
     CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColor) {
         Column {
             BasicTextField(
                 value = value,
-                modifier = if (label != null) {
-                    modifier
-                        // Merge semantics at the beginning of the modifier chain to ensure padding is
-                        // considered part of the text field.
-                        .semantics(mergeDescendants = true) {}
-                        .padding(top = OutlinedTextFieldTopPadding)
-                } else {
-                    modifier
-                }.defaultMinSize(
-                    minWidth = minWidth,
-                    minHeight = minHeight
-                ),
+                modifier =
+                    if (label != null) {
+                        modifier
+                            // Merge semantics at the beginning of the modifier chain to ensure padding is
+                            // considered part of the text field.
+                            .semantics(mergeDescendants = true) {}
+                            .padding(top = OutlinedTextFieldTopPadding)
+                    } else {
+                        modifier
+                    }.defaultMinSize(
+                        minWidth = minWidth,
+                        minHeight = minHeight,
+                    ),
                 onValueChange = onValueChange,
                 enabled = enabled,
                 readOnly = readOnly,
@@ -345,11 +350,11 @@ internal fun MoimOutlinedTextField(
                                 colors,
                                 shape,
                                 focusedBorderThickness,
-                                unfocusedBorderThickness
+                                unfocusedBorderThickness,
                             )
                         },
                     )
-                }
+                },
             )
 
             if (supportingText != null) {
@@ -357,7 +362,7 @@ internal fun MoimOutlinedTextField(
                     modifier = Modifier.padding(start = 4.dp, top = 4.dp),
                     text = supportingText,
                     style = MoimTheme.typography.body01.regular,
-                    color = if (isError) colors.errorSupportingTextColor else colors.focusedSupportingTextColor
+                    color = if (isError) colors.errorSupportingTextColor else colors.focusedSupportingTextColor,
                 )
             }
         }

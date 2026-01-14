@@ -6,7 +6,6 @@ import com.moim.core.common.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface MeetingRepository {
-
     suspend fun getMeetings(
         cursor: String,
         size: Int,
@@ -22,9 +21,16 @@ interface MeetingRepository {
         size: Int,
     ): PaginationContainer<List<User>>
 
-    fun createMeeting(meetingName: String, meetingImageUrl: String?): Flow<Meeting>
+    fun createMeeting(
+        meetingName: String,
+        meetingImageUrl: String?,
+    ): Flow<Meeting>
 
-    fun updateMeeting(meetingId: String, meetingName: String, meetingImageUrl: String?): Flow<Meeting>
+    fun updateMeeting(
+        meetingId: String,
+        meetingName: String,
+        meetingImageUrl: String?,
+    ): Flow<Meeting>
 
     fun joinMeeting(code: String): Flow<Meeting>
 

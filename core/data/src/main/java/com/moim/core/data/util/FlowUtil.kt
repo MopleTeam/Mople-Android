@@ -14,8 +14,7 @@ fun <T> catchFlow(block: suspend FlowCollector<T>.() -> Unit): Flow<T> =
         .catch {
             Timber.e("[CatchFlow Exception]=$it")
             throw converterException(it)
-        }
-        .flowOn(Dispatchers.IO)
+        }.flowOn(Dispatchers.IO)
 
 private class SafeFlow<T>(
     private val block: suspend FlowCollector<T>.() -> Unit,

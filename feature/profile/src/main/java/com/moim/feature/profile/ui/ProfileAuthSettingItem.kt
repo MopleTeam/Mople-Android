@@ -15,27 +15,28 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.profile.OnProfileUiAction
 import com.moim.feature.profile.ProfileUiAction
 
-
 @Composable
 fun ProfileAuthSettingContainer(
     modifier: Modifier = Modifier,
-    onUiAction: OnProfileUiAction
+    onUiAction: OnProfileUiAction,
 ) {
     Column(
         modifier = modifier.padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ProfileAuthSettingItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .onSingleClick { onUiAction(ProfileUiAction.OnShowUserLogoutDialog(true)) },
-            text = stringResource(R.string.profile_logout)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .onSingleClick { onUiAction(ProfileUiAction.OnShowUserLogoutDialog(true)) },
+            text = stringResource(R.string.profile_logout),
         )
         ProfileAuthSettingItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .onSingleClick { onUiAction(ProfileUiAction.OnShowUserDeleteDialog(true)) },
-            text = stringResource(R.string.profile_user_delete)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .onSingleClick { onUiAction(ProfileUiAction.OnShowUserDeleteDialog(true)) },
+            text = stringResource(R.string.profile_user_delete),
         )
     }
 }
@@ -50,12 +51,13 @@ fun ProfileAuthSettingItem(
         verticalArrangement = Arrangement.Center,
     ) {
         MoimText(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp, horizontal = 20.dp),
             text = text,
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.gray.gray01
+            color = MoimTheme.colors.gray.gray01,
         )
     }
 }

@@ -42,17 +42,18 @@ fun ProfileImageEditDialog(
         },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             MoimText(
                 text = stringResource(R.string.common_profile_edit),
                 singleLine = false,
                 style = MoimTheme.typography.body01.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
             Spacer(Modifier.height(24.dp))
 
@@ -63,7 +64,7 @@ fun ProfileImageEditDialog(
                 onClick = {
                     onUiAction(dismissAction)
                     onUiAction(SignUpUiAction.OnChangeProfileUrl(null))
-                }
+                },
             )
             Spacer(Modifier.height(12.dp))
 
@@ -74,7 +75,7 @@ fun ProfileImageEditDialog(
                 onClick = {
                     onUiAction(dismissAction)
                     onUiAction(SignUpUiAction.OnNavigatePhotoPicker)
-                }
+                },
             )
             Spacer(Modifier.height(12.dp))
         }

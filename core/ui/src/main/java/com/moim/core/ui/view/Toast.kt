@@ -5,7 +5,9 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import com.moim.core.designsystem.R
 
-enum class ToastMessage(@StringRes val messageRes: Int) {
+enum class ToastMessage(
+    @StringRes val messageRes: Int,
+) {
     ServerErrorMessage(R.string.common_error_disconnection),
     NetworkErrorMessage(R.string.common_error_network),
 
@@ -14,17 +16,26 @@ enum class ToastMessage(@StringRes val messageRes: Int) {
     SocialLoginErrorMessage(R.string.sign_in_kakao_fail),
 
     ReportCompletedMessage(R.string.plan_detail_report_completed),
-    PlanWriteTimeErrorMessage(R.string.plan_write_time_error)
+    PlanWriteTimeErrorMessage(R.string.plan_write_time_error),
 }
 
-fun showToast(context: Context, message: ToastMessage) {
+fun showToast(
+    context: Context,
+    message: ToastMessage,
+) {
     Toast.makeText(context, message.messageRes, Toast.LENGTH_SHORT).show()
 }
 
-fun showToast(context: Context, message: String) {
+fun showToast(
+    context: Context,
+    message: String,
+) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
-fun showToast(context: Context, @StringRes messageRes: Int) {
+fun showToast(
+    context: Context,
+    @StringRes messageRes: Int,
+) {
     Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
 }

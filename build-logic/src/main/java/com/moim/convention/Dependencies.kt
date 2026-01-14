@@ -9,14 +9,9 @@ import org.gradle.kotlin.dsl.the
 internal val Project.libs
     get() = the<LibrariesForLibs>()
 
-internal fun DependencyHandler.implementation(dependencyNotation: Any): Dependency? {
-    return add("implementation", dependencyNotation)
-}
+internal fun DependencyHandler.implementation(dependencyNotation: Any): Dependency? = add("implementation", dependencyNotation)
 
-internal fun DependencyHandler.ksp(dependencyNotation: Any): Dependency? {
-    return add("ksp", dependencyNotation)
-}
+internal fun DependencyHandler.ksp(dependencyNotation: Any): Dependency? = add("ksp", dependencyNotation)
 
-internal fun DependencyHandler.coreLibraryDesugaring(dependencyNotation: Any): Dependency? {
-    return add("coreLibraryDesugaring", dependencyNotation)
-}
+internal fun DependencyHandler.coreLibraryDesugaring(dependencyNotation: Any): Dependency? =
+    add("coreLibraryDesugaring", dependencyNotation)

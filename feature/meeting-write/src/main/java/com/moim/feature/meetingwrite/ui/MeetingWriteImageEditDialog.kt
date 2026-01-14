@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MeetingWriteImageEditDialog(
     modifier: Modifier = Modifier,
-    onUiAction: OnMeetingWriteUiAction
+    onUiAction: OnMeetingWriteUiAction,
 ) {
     val dismissAction = MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
@@ -42,16 +42,17 @@ fun MeetingWriteImageEditDialog(
         },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             MoimText(
                 text = stringResource(R.string.common_profile_edit),
                 style = MoimTheme.typography.body01.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
             Spacer(Modifier.height(24.dp))
 
@@ -62,7 +63,7 @@ fun MeetingWriteImageEditDialog(
                 onClick = {
                     onUiAction(dismissAction)
                     onUiAction(MeetingWriteUiAction.OnChangeMeetingPhotoUrl(null))
-                }
+                },
             )
             Spacer(Modifier.height(12.dp))
 
@@ -73,7 +74,7 @@ fun MeetingWriteImageEditDialog(
                 onClick = {
                     onUiAction(dismissAction)
                     onUiAction(MeetingWriteUiAction.OnNavigatePhotoPicker)
-                }
+                },
             )
             Spacer(Modifier.height(12.dp))
         }

@@ -9,7 +9,7 @@ data class ParticipantContainerResponse(
     @SerialName("creatorId")
     val creatorId: String,
     @SerialName("members")
-    val members: List<ParticipantResponse>
+    val members: List<ParticipantResponse>,
 )
 
 @Serializable
@@ -19,14 +19,13 @@ data class ParticipantResponse(
     @SerialName("nickname")
     val nickname: String,
     @SerialName("profileImg")
-    val profileImg: String="",
+    val profileImg: String = "",
 )
 
-fun ParticipantResponse.asItem(isCreator: Boolean): Participant {
-    return Participant(
+fun ParticipantResponse.asItem(isCreator: Boolean): Participant =
+    Participant(
         isCreator = isCreator,
         memberId = memberId,
         nickname = nickname,
-        imageUrl = profileImg
+        imageUrl = profileImg,
     )
-}

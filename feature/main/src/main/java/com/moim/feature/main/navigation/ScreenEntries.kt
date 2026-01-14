@@ -60,7 +60,7 @@ fun EntryProviderScope<NavKey>.meetingScreenEntry(
         MeetingRoute(
             padding = paddingValues,
             navigateToMeetingWrite = navigator::navigateToMeetingWrite,
-            navigateToMeetingDetail = navigator::navigateToMeetingDetail
+            navigateToMeetingDetail = navigator::navigateToMeetingDetail,
         )
     }
 }
@@ -72,7 +72,7 @@ fun EntryProviderScope<NavKey>.calendarScreenEntry(
     entry<MainRoute.Calendar> {
         CalendarRoute(
             padding = paddingValues,
-            navigateToPlanDetail = navigator::navigateToPlanDetail
+            navigateToPlanDetail = navigator::navigateToPlanDetail,
         )
     }
 }
@@ -80,7 +80,7 @@ fun EntryProviderScope<NavKey>.calendarScreenEntry(
 fun EntryProviderScope<NavKey>.profileScreenEntry(
     navigator: MainNavigator,
     paddingValues: PaddingValues,
-    navigateToIntro: () -> Unit
+    navigateToIntro: () -> Unit,
 ) {
     entry<MainRoute.Profile> {
         ProfileRoute(
@@ -88,7 +88,7 @@ fun EntryProviderScope<NavKey>.profileScreenEntry(
             navigateToProfileUpdate = navigator::navigateToProfileUpdate,
             navigateToAlarmSetting = navigator::navigateToAlarmSetting,
             navigateToPrivacyPolicy = navigator::navigateToWebView,
-            navigateToIntro = navigateToIntro
+            navigateToIntro = navigateToIntro,
         )
     }
 }
@@ -106,11 +106,12 @@ fun EntryProviderScope<NavKey>.meetingDetailScreenEntry(
             navigateToPlanDetail = navigator::navigateToPlanDetail,
             navigateToMeetingSetting = navigator::navigateToMeetingSetting,
             navigateToImageViewer = navigator::navigateToImageViewer,
-            viewModel = hiltViewModel<MeetingDetailViewModel, MeetingDetailViewModel.Factory>(
-                key = key.meetingId,
-            ) { factory ->
-                factory.create(key)
-            },
+            viewModel =
+                hiltViewModel<MeetingDetailViewModel, MeetingDetailViewModel.Factory>(
+                    key = key.meetingId,
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }
@@ -123,11 +124,12 @@ fun EntryProviderScope<NavKey>.meetingWriteScreenEntry(
         MeetingWriteRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
-            viewModel = hiltViewModel<MeetingWriteViewModel, MeetingWriteViewModel.Factory>(
-                key = key.meeting?.id,
-            ) { factory ->
-                factory.create(key)
-            },
+            viewModel =
+                hiltViewModel<MeetingWriteViewModel, MeetingWriteViewModel.Factory>(
+                    key = key.meeting?.id,
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }
@@ -145,11 +147,12 @@ fun EntryProviderScope<NavKey>.meetingSettingScreenEntry(
             },
             navigateToParticipants = navigator::navigateToParticipantList,
             navigateToMeetingWrite = navigator::navigateToMeetingWrite,
-            viewModel = hiltViewModel<MeetingSettingViewModel, MeetingSettingViewModel.Factory>(
-                key = key.meeting.id,
-            ) { factory ->
-                factory.create(key)
-            },
+            viewModel =
+                hiltViewModel<MeetingSettingViewModel, MeetingSettingViewModel.Factory>(
+                    key = key.meeting.id,
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }
@@ -162,11 +165,12 @@ fun EntryProviderScope<NavKey>.mapDetailScreenEntry(
         MapDetailRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
-            viewModel = hiltViewModel<MapDetailViewModel, MapDetailViewModel.Factory>(
-                key = "${key.latitude}_${key.longitude}",
-            ) { factory ->
-                factory.create(key)
-            },
+            viewModel =
+                hiltViewModel<MapDetailViewModel, MapDetailViewModel.Factory>(
+                    key = "${key.latitude}_${key.longitude}",
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }
@@ -185,11 +189,12 @@ fun EntryProviderScope<NavKey>.planDetailScreenEntry(
             navigateToReviewWrite = navigator::navigateToReviewWrite,
             navigateToCommentDetail = navigator::navigateToCommentDetail,
             navigateToImageViewer = navigator::navigateToImageViewer,
-            viewModel = hiltViewModel<PlanDetailViewModel, PlanDetailViewModel.Factory>(
-                key = key.viewIdType.id,
-            ) { factory ->
-                factory.create(key)
-            },
+            viewModel =
+                hiltViewModel<PlanDetailViewModel, PlanDetailViewModel.Factory>(
+                    key = key.viewIdType.id,
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }
@@ -203,11 +208,12 @@ fun EntryProviderScope<NavKey>.commentDetailScreenEntry(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
             navigateToImageViewer = navigator::navigateToImageViewer,
-            viewModel = hiltViewModel<CommentDetailViewModel, CommentDetailViewModel.Factory>(
-                key = key.postId,
-            ) { factory ->
-                factory.create(key)
-            },
+            viewModel =
+                hiltViewModel<CommentDetailViewModel, CommentDetailViewModel.Factory>(
+                    key = key.postId,
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }
@@ -220,11 +226,12 @@ fun EntryProviderScope<NavKey>.planWriteScreenEntry(
         PlanWriteRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
-            viewModel = hiltViewModel<PlanWriteViewModel, PlanWriteViewModel.Factory>(
-                key = key.planItem?.postId,
-            ) { factory ->
-                factory.create(key)
-            },
+            viewModel =
+                hiltViewModel<PlanWriteViewModel, PlanWriteViewModel.Factory>(
+                    key = key.planItem?.postId,
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }
@@ -238,11 +245,12 @@ fun EntryProviderScope<NavKey>.reviewWriteScreenEntry(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
             navigateToParticipants = navigator::navigateToParticipantList,
-            viewModel = hiltViewModel<ReviewWriteViewModel, ReviewWriteViewModel.Factory>(
-                key = key.postId
-            ) { factory ->
-                factory.create(key)
-            }
+            viewModel =
+                hiltViewModel<ReviewWriteViewModel, ReviewWriteViewModel.Factory>(
+                    key = key.postId,
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }
@@ -256,11 +264,12 @@ fun EntryProviderScope<NavKey>.participantListScreenEntry(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
             navigateToImageViewer = navigator::navigateToImageViewer,
-            viewModel = hiltViewModel<ParticipantListViewModel, ParticipantListViewModel.Factory>(
-                key = key.viewIdType.id
-            ) { factory ->
-                factory.create(key)
-            }
+            viewModel =
+                hiltViewModel<ParticipantListViewModel, ParticipantListViewModel.Factory>(
+                    key = key.viewIdType.id,
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }
@@ -273,11 +282,12 @@ fun EntryProviderScope<NavKey>.imageViewerScreenEntry(
         ImageViewerRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
-            viewModel = hiltViewModel<ImageViewerViewModel, ImageViewerViewModel.Factory>(
-                key = key.title
-            ) { factory ->
-                factory.create(key)
-            }
+            viewModel =
+                hiltViewModel<ImageViewerViewModel, ImageViewerViewModel.Factory>(
+                    key = key.title,
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }
@@ -289,7 +299,7 @@ fun EntryProviderScope<NavKey>.profileUpdateScreenEntry(
     entry<DetailRoute.ProfileUpdate> {
         ProfileUpdateRoute(
             padding = paddingValues,
-            navigateToBack = navigator::goBack
+            navigateToBack = navigator::goBack,
         )
     }
 }
@@ -303,7 +313,7 @@ fun EntryProviderScope<NavKey>.alarmScreenEntry(
             padding = paddingValues,
             navigateToMeetingDetail = navigator::navigateToMeetingDetail,
             navigateToPlanDetail = navigator::navigateToPlanDetail,
-            navigateToBack = navigator::goBack
+            navigateToBack = navigator::goBack,
         )
     }
 }
@@ -315,7 +325,7 @@ fun EntryProviderScope<NavKey>.alarmSettingScreenEntry(
     entry<DetailRoute.AlarmSetting> {
         AlarmSettingRoute(
             padding = paddingValues,
-            navigateToBack = navigator::goBack
+            navigateToBack = navigator::goBack,
         )
     }
 }
@@ -328,11 +338,12 @@ fun EntryProviderScope<NavKey>.webViewScreenEntry(
         WebViewRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
-            viewModel = hiltViewModel<WebViewViewModel, WebViewViewModel.Factory>(
-                key = key.webUrl,
-            ) { factory ->
-                factory.create(key)
-            },
+            viewModel =
+                hiltViewModel<WebViewViewModel, WebViewViewModel.Factory>(
+                    key = key.webUrl,
+                ) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }

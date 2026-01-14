@@ -26,7 +26,6 @@ class SplashViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val policyRepository: PolicyRepository,
 ) : BaseViewModel() {
-
     private val splashResult =
         authRepository
             .getToken()
@@ -34,7 +33,7 @@ class SplashViewModel @Inject constructor(
                 combine(
                     if (token != null) userRepository.fetchUser() else flowOf(null),
                     policyRepository.getForceUpdateInfo(),
-                    ::Pair
+                    ::Pair,
                 )
             }.asResult()
 
@@ -54,7 +53,10 @@ class SplashViewModel @Inject constructor(
         viewModelScope.launch {
             splashResult.collect { result ->
                 when (result) {
-                    is Result.Loading -> return@collect
+                    is Result.Loading -> {
+                        return@collect
+                    }
+
                     is Result.Success -> {
                         val (user, forceUpdateState) = result.data
 
@@ -74,12 +76,13 @@ class SplashViewModel @Inject constructor(
                         }
                     }
 
-                    is Result.Error -> when (result.exception) {
-                        is IOException -> setUiState(SplashUiState.Splash(isShowErrorDialog = true))
-                        is NetworkException -> setUiEvent(SplashUiEvent.NavigateToSignIn).also { userRepository.clearMoimStorage() }
+                    is Result.Error -> {
+                        when (result.exception) {
+                            is IOException -> setUiState(SplashUiState.Splash(isShowErrorDialog = true))
+                            is NetworkException -> setUiEvent(SplashUiEvent.NavigateToSignIn).also { userRepository.clearMoimStorage() }
+                        }
                     }
                 }
-
             }
         }
     }
@@ -88,7 +91,7 @@ class SplashViewModel @Inject constructor(
 sealed interface SplashUiState : UiState {
     data class Splash(
         val isShowErrorDialog: Boolean = false,
-        val isShowForceUpdateDialog: Boolean = false
+        val isShowForceUpdateDialog: Boolean = false,
     ) : SplashUiState
 }
 

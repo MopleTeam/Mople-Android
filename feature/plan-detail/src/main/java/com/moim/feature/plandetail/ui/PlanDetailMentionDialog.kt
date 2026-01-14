@@ -35,37 +35,40 @@ import com.moim.feature.plandetail.PlanDetailUiAction
 fun PlanDetailMentionDialog(
     modifier: Modifier = Modifier,
     userList: List<User>,
-    onUiAction: (PlanDetailUiAction) -> Unit = {}
+    onUiAction: (PlanDetailUiAction) -> Unit = {},
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(elevation = 12.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MoimTheme.colors.white)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .shadow(elevation = 12.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MoimTheme.colors.white),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 8.dp)
+            contentPadding = PaddingValues(vertical = 8.dp),
         ) {
             items(
                 items = userList,
-                key = { it.userId }
+                key = { it.userId },
             ) { user ->
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onSingleClick { onUiAction(PlanDetailUiAction.OnClickMentionUser(user)) }
-                        .padding(vertical = 8.dp, horizontal = 24.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .onSingleClick { onUiAction(PlanDetailUiAction.OnClickMentionUser(user)) }
+                            .padding(vertical = 8.dp, horizontal = 24.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     NetworkImage(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape),
+                        modifier =
+                            Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape),
                         imageUrl = user.profileUrl,
-                        errorImage = painterResource(R.drawable.ic_empty_user_logo)
+                        errorImage = painterResource(R.drawable.ic_empty_user_logo),
                     )
 
                     Spacer(Modifier.width(8.dp))
@@ -73,7 +76,7 @@ fun PlanDetailMentionDialog(
                     MoimText(
                         text = user.nickname,
                         style = MoimTheme.typography.body01.regular,
-                        color = MoimTheme.colors.gray.gray02
+                        color = MoimTheme.colors.gray.gray02,
                     )
                 }
             }
@@ -89,24 +92,26 @@ private fun PlanDetailMentionDialogPreview() {
             User(
                 userId = "0",
                 nickname = "우리중퉁퉁이",
-            )
+            ),
         )
 
-        val sample = (0..5).map {
-            User(
-                userId = it.toString(),
-                nickname = "우리중퉁퉁이_$it",
-            )
-        }
+        val sample =
+            (0..5).map {
+                User(
+                    userId = it.toString(),
+                    nickname = "우리중퉁퉁이_$it",
+                )
+            }
 
         Column(
-            modifier = Modifier
-                .background(MoimTheme.colors.bg.primary)
-                .padding(24.dp)
+            modifier =
+                Modifier
+                    .background(MoimTheme.colors.bg.primary)
+                    .padding(24.dp),
         ) {
             PlanDetailMentionDialog(
                 userList = sample,
-                onUiAction = {}
+                onUiAction = {},
             )
         }
     }

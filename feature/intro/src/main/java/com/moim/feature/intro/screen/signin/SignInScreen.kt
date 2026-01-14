@@ -60,7 +60,7 @@ fun SignInRoute(
     SignInScreen(
         modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
         isLoading = isLoading,
-        onUiAction = viewModel::onUiAction
+        onUiAction = viewModel::onUiAction,
     )
 }
 
@@ -72,19 +72,20 @@ fun SignInScreen(
 ) {
     TrackScreenViewEvent(screenName = "sign_in")
     Box(
-        modifier = modifier
-            .systemBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 28.dp)
+        modifier =
+            modifier
+                .systemBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 28.dp),
     ) {
         Column(
             modifier = Modifier.align(Alignment.Center),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_logo_full),
                 contentDescription = "",
-                tint = Color.Unspecified
+                tint = Color.Unspecified,
             )
             Spacer(Modifier.height(16.dp))
 
@@ -92,7 +93,7 @@ fun SignInScreen(
                 text = stringResource(R.string.app_description),
                 singleLine = false,
                 style = MoimTheme.typography.body01.regular,
-                color = MoimTheme.colors.gray.gray03
+                color = MoimTheme.colors.gray.gray03,
             )
         }
 
@@ -103,32 +104,32 @@ fun SignInScreen(
 }
 
 @Composable
-private fun BoxScope.KakaoLoginButton(
-    onUiAction: OnSignInUiAction
-) {
+private fun BoxScope.KakaoLoginButton(onUiAction: OnSignInUiAction) {
     val context = LocalContext.current
 
     MoimPrimaryButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .align(Alignment.BottomCenter),
-        buttonColors = moimButtomColors().copy(
-            containerColor = color_FEE500,
-            contentColor = MoimTheme.colors.gray.gray01
-        ),
-        onClick = { onUiAction(SignInUiAction.OnClickKakaoLogin(context)) }
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+        buttonColors =
+            moimButtomColors().copy(
+                containerColor = color_FEE500,
+                contentColor = MoimTheme.colors.gray.gray01,
+            ),
+        onClick = { onUiAction(SignInUiAction.OnClickKakaoLogin(context)) },
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_kakao),
-                contentDescription = ""
+                contentDescription = "",
             )
             Spacer(Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.sign_in_kakao),
-                style = MoimTheme.typography.body01.semiBold
+                style = MoimTheme.typography.body01.semiBold,
             )
         }
     }
@@ -140,7 +141,7 @@ private fun SignInScreenPreview() {
     MoimTheme {
         SignInScreen(
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
-            onUiAction = {}
+            onUiAction = {},
         )
     }
 }

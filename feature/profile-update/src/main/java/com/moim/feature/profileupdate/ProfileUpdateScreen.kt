@@ -48,33 +48,50 @@ fun ProfileUpdateRoute(
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val profileUpdateUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
-    val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> if (uri != null) viewModel.onUiAction(ProfileUpdateUiAction.OnChangeProfileUrl(uri.toString())) }
-    )
+    val singlePhotoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia(),
+            onResult = { uri -> if (uri != null) viewModel.onUiAction(ProfileUpdateUiAction.OnChangeProfileUrl(uri.toString())) },
+        )
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is ProfileUpdateUiEvent.NavigateToBack -> navigateToBack()
-            is ProfileUpdateUiEvent.NavigateToPhotoPicker -> singlePhotoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            is ProfileUpdateUiEvent.ShowToastMessage -> showToast(context, event.message)
+            is ProfileUpdateUiEvent.NavigateToBack -> {
+                navigateToBack()
+            }
+
+            is ProfileUpdateUiEvent.NavigateToPhotoPicker -> {
+                singlePhotoPickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
+            }
+
+            is ProfileUpdateUiEvent.ShowToastMessage -> {
+                showToast(context, event.message)
+            }
         }
     }
 
     when (val uiState = profileUpdateUiState) {
-        is ProfileUpdateUiState.Loading -> LoadingScreen(modifier)
+        is ProfileUpdateUiState.Loading -> {
+            LoadingScreen(modifier)
+        }
 
-        is ProfileUpdateUiState.Success -> ProfileUpdateScreen(
-            modifier = modifier,
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is ProfileUpdateUiState.Success -> {
+            ProfileUpdateScreen(
+                modifier = modifier,
+                uiState = uiState,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction,
+            )
+        }
 
-        is ProfileUpdateUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(ProfileUpdateUiAction.OnClickRefresh) }
-        )
+        is ProfileUpdateUiState.Error -> {
+            ErrorScreen(
+                modifier = modifier,
+                onClickRefresh = { viewModel.onUiAction(ProfileUpdateUiAction.OnClickRefresh) },
+            )
+        }
     }
 }
 
@@ -83,43 +100,45 @@ fun ProfileUpdateScreen(
     modifier: Modifier = Modifier,
     uiState: ProfileUpdateUiState.Success,
     isLoading: Boolean,
-    onUiAction: OnProfileUpdateUiAction
+    onUiAction: OnProfileUpdateUiAction,
 ) {
     TrackScreenViewEvent(screenName = "profile_write")
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         MoimTopAppbar(
             title = stringResource(R.string.profile_update_title),
-            onClickNavigate = { onUiAction(ProfileUpdateUiAction.OnClickBack) }
+            onClickNavigate = { onUiAction(ProfileUpdateUiAction.OnClickBack) },
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 28.dp)
-                .imePadding()
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 28.dp)
+                    .imePadding(),
         ) {
             ProfileUpdateImage(
                 profileUrl = uiState.profileUrl,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
 
             ProfileUpdateNicknameTextField(
                 nickname = uiState.nickname,
                 isDuplicated = uiState.isDuplicatedName,
                 isRegexError = uiState.isRegexError,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
 
             Spacer(Modifier.weight(1f))
 
             MoimPrimaryButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 28.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 28.dp),
                 enable = uiState.enableProfileUpdate,
                 text = stringResource(R.string.common_save),
                 onClick = { onUiAction(ProfileUpdateUiAction.OnClickProfileUpdate) },
@@ -141,7 +160,7 @@ private fun ProfileUpdateScreenPreview() {
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
             uiState = ProfileUpdateUiState.Success(),
             isLoading = false,
-            onUiAction = {}
+            onUiAction = {},
         )
     }
 }

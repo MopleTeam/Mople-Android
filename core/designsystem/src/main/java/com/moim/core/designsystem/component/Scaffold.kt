@@ -18,12 +18,13 @@ fun MoimScaffold(
     bottomBar: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .navigationBarsPadding(),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .navigationBarsPadding(),
         containerColor = backgroundColor,
         contentColor = backgroundColor,
         topBar = topBar,

@@ -24,35 +24,38 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 internal object TokenServiceModule {
-
     @MoimTokenApiOkHttp
     @Singleton
     @Provides
     fun provideApiOkHttpCallFactory(
         headerInterceptor: Interceptor,
         httpLoggingInterceptor: HttpLoggingInterceptor,
-    ): Call.Factory = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.MINUTES)
-        .readTimeout(10, TimeUnit.MINUTES)
-        .writeTimeout(10, TimeUnit.MINUTES)
-        .addInterceptor(headerInterceptor)
-        .addInterceptor(httpLoggingInterceptor)
-        .build()
+    ): Call.Factory =
+        OkHttpClient
+            .Builder()
+            .connectTimeout(10, TimeUnit.MINUTES)
+            .readTimeout(10, TimeUnit.MINUTES)
+            .writeTimeout(10, TimeUnit.MINUTES)
+            .addInterceptor(headerInterceptor)
+            .addInterceptor(httpLoggingInterceptor)
+            .build()
 
     @Singleton
     @Provides
     fun provideTokenApi(
-        @MoimTokenApiOkHttp okHttpCallFactory: Call.Factory
+        @MoimTokenApiOkHttp okHttpCallFactory: Call.Factory,
     ): AuthTokenApi {
-        val format = Json {
-            isLenient = true
-            coerceInputValues = true
-            ignoreUnknownKeys = true
-            encodeDefaults = true
-        }
+        val format =
+            Json {
+                isLenient = true
+                coerceInputValues = true
+                ignoreUnknownKeys = true
+                encodeDefaults = true
+            }
         val contentType = "application/json".toMediaType()
 
-        return Retrofit.Builder()
+        return Retrofit
+            .Builder()
             .callFactory(okHttpCallFactory)
             .addConverterFactory(format.asConverterFactory(contentType))
             .baseUrl(BuildConfig.API_URL)
@@ -62,14 +65,12 @@ internal object TokenServiceModule {
 
     @Singleton
     @Provides
-    fun provideTokenInterceptor(
-        userDataUtil: UserDataUtil
-    ): TokenInterceptor = TokenInterceptor(userDataUtil)
+    fun provideTokenInterceptor(userDataUtil: UserDataUtil): TokenInterceptor = TokenInterceptor(userDataUtil)
 
     @Singleton
     @Provides
     fun provideTokenAuthenticator(
         userDataUtil: UserDataUtil,
-        authTokenApi: AuthTokenApi
+        authTokenApi: AuthTokenApi,
     ): TokenAuthenticator = TokenAuthenticator(userDataUtil, authTokenApi)
 }

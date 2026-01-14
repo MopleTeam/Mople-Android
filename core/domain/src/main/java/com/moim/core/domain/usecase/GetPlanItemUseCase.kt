@@ -14,26 +14,28 @@ import javax.inject.Inject
 class GetPlanItemUseCase @Inject constructor(
     private val planRepository: PlanRepository,
     private val reviewRepository: ReviewRepository,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
+    operator fun invoke(params: Params) =
+        flow {
+            when (val type = params.viewIdType) {
+                is ViewIdType.PlanId -> {
+                    emit(planRepository.getPlan(type.id).first().asPlanItem())
+                }
 
-    operator fun invoke(params: Params) = flow {
-        when (val type = params.viewIdType) {
-            is ViewIdType.PlanId -> {
-                emit(planRepository.getPlan(type.id).first().asPlanItem())
+                is ViewIdType.ReviewId -> {
+                    emit(reviewRepository.getReview(type.id).first().asPlanItem())
+                }
+
+                is ViewIdType.PostId -> {
+                    emit(reviewRepository.getReviewForPostId(type.id).first().asPlanItem())
+                }
+
+                else -> {
+                    throw IllegalStateException("this ViewTypeId is not allowed")
+                }
             }
-
-            is ViewIdType.ReviewId -> {
-                emit(reviewRepository.getReview(type.id).first().asPlanItem())
-            }
-
-            is ViewIdType.PostId -> {
-                emit(reviewRepository.getReviewForPostId(type.id).first().asPlanItem())
-            }
-
-            else -> throw IllegalStateException("this ViewTypeId is not allowed")
-        }
-    }.flowOn(ioDispatcher)
+        }.flowOn(ioDispatcher)
 
     data class Params(
         val viewIdType: ViewIdType,

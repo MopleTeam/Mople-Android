@@ -27,26 +27,28 @@ import com.moim.feature.participantlist.ParticipantListUiAction
 @Composable
 fun ParticipantMeetingInviteItem(
     modifier: Modifier = Modifier,
-    onUiAction: (ParticipantListUiAction) -> Unit
+    onUiAction: (ParticipantListUiAction) -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .onSingleClick { onUiAction(ParticipantListUiAction.OnClickMeetingInvite) }
-            .padding(horizontal = 20.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .onSingleClick { onUiAction(ParticipantListUiAction.OnClickMeetingInvite) }
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-
         Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MoimTheme.colors.bg.primary),
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MoimTheme.colors.bg.primary),
         ) {
             Icon(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(18.dp),
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .size(18.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.ic_add),
                 contentDescription = "",
                 tint = MoimTheme.colors.primary.primary,
@@ -58,7 +60,7 @@ fun ParticipantMeetingInviteItem(
         MoimText(
             text = stringResource(R.string.common_invite),
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.primary.primary
+            color = MoimTheme.colors.primary.primary,
         )
     }
 }

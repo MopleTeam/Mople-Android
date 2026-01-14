@@ -15,9 +15,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 internal object DataStoreModule {
-
     private val Context.preference: DataStore<Preferences> by preferencesDataStore(
-        name = PreferenceStorageImpl.PREFS_MOIM
+        name = PreferenceStorageImpl.PREFS_MOIM,
     )
 
     @Provides

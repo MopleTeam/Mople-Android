@@ -19,38 +19,39 @@ class GetMeetingsUseCase @Inject constructor(
 ) {
     var loadedAt: ZonedDateTime = ZonedDateTime.now()
 
-    operator fun invoke(params: Params = Params()) = Pager(
-        config = PagingConfig(pageSize = params.size)
-    ) {
-        object : PagingSource<String, Meeting>() {
+    operator fun invoke(params: Params = Params()) =
+        Pager(
+            config = PagingConfig(pageSize = params.size),
+        ) {
+            object : PagingSource<String, Meeting>() {
+                init {
+                    loadedAt = ZonedDateTime.now()
+                }
 
-            init {
-                loadedAt = ZonedDateTime.now()
-            }
+                override fun getRefreshKey(state: PagingState<String, Meeting>): String? = null
 
-            override fun getRefreshKey(state: PagingState<String, Meeting>): String? = null
+                override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, Meeting> {
+                    val page = loadParams.key ?: ""
+                    return try {
+                        val meetingContainer =
+                            meetingRepository.getMeetings(
+                                cursor = page,
+                                size = params.size,
+                            )
+                        val nextCursor = meetingContainer.page.nextCursor
 
-            override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, Meeting> {
-                val page = loadParams.key ?: ""
-                return try {
-                    val meetingContainer = meetingRepository.getMeetings(
-                        cursor = page,
-                        size = params.size
-                    )
-                    val nextCursor = meetingContainer.page.nextCursor
-
-                    LoadResult.Page(
-                        data = meetingContainer.content,
-                        prevKey = null,
-                        nextKey = if (meetingContainer.page.isNext && meetingContainer.page.size >= params.size) nextCursor else null
-                    )
-                } catch (e: Exception) {
-                    Timber.e("[GetMeetingsUseCase] error $e")
-                    LoadResult.Error(e)
+                        LoadResult.Page(
+                            data = meetingContainer.content,
+                            prevKey = null,
+                            nextKey = if (meetingContainer.page.isNext && meetingContainer.page.size >= params.size) nextCursor else null,
+                        )
+                    } catch (e: Exception) {
+                        Timber.e("[GetMeetingsUseCase] error $e")
+                        LoadResult.Error(e)
+                    }
                 }
             }
-        }
-    }.flow.flowOn(ioDispatcher)
+        }.flow.flowOn(ioDispatcher)
 
     data class Params(
         val size: Int = 30,

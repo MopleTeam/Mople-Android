@@ -16,77 +16,91 @@ import javax.inject.Inject
 
 internal class MeetingRepositoryImpl @Inject constructor(
     private val meetingApi: MeetingApi,
-    private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource
+    private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource,
 ) : MeetingRepository {
-
     override suspend fun getMeetings(
         cursor: String,
-        size: Int
-    ): PaginationContainer<List<Meeting>> {
-        return try {
-            meetingApi.getMeetings(
-                cursor = cursor,
-                size = size
-            ).asItem {
-                it.map(MeetingResponse::asItem)
-            }
+        size: Int,
+    ): PaginationContainer<List<Meeting>> =
+        try {
+            meetingApi
+                .getMeetings(
+                    cursor = cursor,
+                    size = size,
+                ).asItem {
+                    it.map(MeetingResponse::asItem)
+                }
         } catch (e: Exception) {
             throw converterException(e)
         }
-    }
 
-    override fun getMeeting(meetingId: String) = catchFlow {
-        emit(meetingApi.getMeeting(meetingId).asItem())
-    }
+    override fun getMeeting(meetingId: String) =
+        catchFlow {
+            emit(meetingApi.getMeeting(meetingId).asItem())
+        }
 
-    override fun getMeetingInviteCode(meetingId: String) = catchFlow {
-        emit(meetingApi.getMeetingInviteCode(meetingId))
-    }
+    override fun getMeetingInviteCode(meetingId: String) =
+        catchFlow {
+            emit(meetingApi.getMeetingInviteCode(meetingId))
+        }
 
     override suspend fun getMeetingParticipants(
         meetingId: String,
         cursor: String,
         size: Int,
-    ): PaginationContainer<List<User>> {
-        return try {
-            meetingApi.getMeetingParticipants(
-                id =  meetingId,
-                cursor = cursor,
-                size = size
-            ).asItem {
-                it.map(UserResponse::asItem)
-            }
+    ): PaginationContainer<List<User>> =
+        try {
+            meetingApi
+                .getMeetingParticipants(
+                    id = meetingId,
+                    cursor = cursor,
+                    size = size,
+                ).asItem {
+                    it.map(UserResponse::asItem)
+                }
         } catch (e: Exception) {
             throw converterException(e)
         }
-    }
 
-    override fun createMeeting(meetingName: String, meetingImageUrl: String?): Flow<Meeting> = catchFlow {
-        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
-        emit(meetingApi.createMeeting(jsonOf(KEY_NAME to meetingName, KEY_IMAGE to uploadImageUrl)).asItem())
-    }
+    override fun createMeeting(
+        meetingName: String,
+        meetingImageUrl: String?,
+    ): Flow<Meeting> =
+        catchFlow {
+            val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
+            emit(meetingApi.createMeeting(jsonOf(KEY_NAME to meetingName, KEY_IMAGE to uploadImageUrl)).asItem())
+        }
 
-    override fun updateMeeting(meetingId: String, meetingName: String, meetingImageUrl: String?): Flow<Meeting> = catchFlow {
-        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
+    override fun updateMeeting(
+        meetingId: String,
+        meetingName: String,
+        meetingImageUrl: String?,
+    ): Flow<Meeting> =
+        catchFlow {
+            val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
 
-        emit(
-            meetingApi.updateMeeting(
-                id = meetingId,
-                params = jsonOf(
-                    KEY_NAME to meetingName,
-                    KEY_IMAGE to uploadImageUrl
-                )
-            ).asItem()
-        )
-    }
+            emit(
+                meetingApi
+                    .updateMeeting(
+                        id = meetingId,
+                        params =
+                            jsonOf(
+                                KEY_NAME to meetingName,
+                                KEY_IMAGE to uploadImageUrl,
+                            ),
+                    ).asItem(),
+            )
+        }
 
-    override fun joinMeeting(code: String): Flow<Meeting> = catchFlow {
-        emit(meetingApi.joinMeeting(code).asItem())
-    }
+    override fun joinMeeting(code: String): Flow<Meeting> =
+        catchFlow {
+            emit(meetingApi.joinMeeting(code).asItem())
+        }
 
-    override fun deleteMeeting(meetingId: String): Flow<Unit> = catchFlow {
-        emit(meetingApi.deleteMeeting(meetingId))
-    }
+    override fun deleteMeeting(meetingId: String): Flow<Unit> =
+        catchFlow {
+            emit(meetingApi.deleteMeeting(meetingId))
+        }
 
     companion object {
         private const val KEY_NAME = "name"

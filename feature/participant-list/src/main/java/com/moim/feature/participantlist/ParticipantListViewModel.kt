@@ -37,13 +37,15 @@ class ParticipantListViewModel @AssistedInject constructor(
 ) : BaseViewModel() {
     private val viewIdType = participantListRoute.viewIdType
 
-    private val participants = getParticipantsUseCase(
-        params = GetParticipantsUseCase.Params(
-            id = viewIdType.id,
-            isMeeting = viewIdType is ViewIdType.MeetId,
-            isPlan = viewIdType is ViewIdType.PlanId,
-        )
-    ).cachedIn(viewModelScope)
+    private val participants =
+        getParticipantsUseCase(
+            params =
+                GetParticipantsUseCase.Params(
+                    id = viewIdType.id,
+                    isMeeting = viewIdType is ViewIdType.MeetId,
+                    isPlan = viewIdType is ViewIdType.PlanId,
+                ),
+        ).cachedIn(viewModelScope)
 
     init {
         viewModelScope.launch {
@@ -51,17 +53,27 @@ class ParticipantListViewModel @AssistedInject constructor(
                 ParticipantListUiState(
                     isMeeting = viewIdType is ViewIdType.MeetId,
                     participant = participants,
-                    totalCount = getParticipantTotalCount()
-                )
+                    totalCount = getParticipantTotalCount(),
+                ),
             )
         }
     }
 
     fun onUiAction(uiAction: ParticipantListUiAction) {
         when (uiAction) {
-            is ParticipantListUiAction.OnClickBack -> setUiEvent(ParticipantListUiEvent.NavigateToBack)
-            is ParticipantListUiAction.OnClickUserImage -> setUiEvent(ParticipantListUiEvent.NavigateToImageViewer(uiAction.userImage, uiAction.userName))
-            is ParticipantListUiAction.OnClickMeetingInvite -> getInviteLink()
+            is ParticipantListUiAction.OnClickBack -> {
+                setUiEvent(ParticipantListUiEvent.NavigateToBack)
+            }
+
+            is ParticipantListUiAction.OnClickUserImage -> {
+                setUiEvent(
+                    ParticipantListUiEvent.NavigateToImageViewer(uiAction.userImage, uiAction.userName),
+                )
+            }
+
+            is ParticipantListUiAction.OnClickMeetingInvite -> {
+                getInviteLink()
+            }
         }
     }
 
@@ -73,11 +85,19 @@ class ParticipantListViewModel @AssistedInject constructor(
                 .onEach { setLoading(it is Result.Loading) }
                 .collect { result ->
                     when (result) {
-                        is Result.Loading -> return@collect
-                        is Result.Success -> setUiEvent(ParticipantListUiEvent.NavigateToExternalShareUrl(result.data))
-                        is Result.Error -> when (result.exception) {
-                            is IOException -> setUiEvent(ParticipantListUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                            is NetworkException -> setUiEvent(ParticipantListUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                        is Result.Loading -> {
+                            return@collect
+                        }
+
+                        is Result.Success -> {
+                            setUiEvent(ParticipantListUiEvent.NavigateToExternalShareUrl(result.data))
+                        }
+
+                        is Result.Error -> {
+                            when (result.exception) {
+                                is IOException -> setUiEvent(ParticipantListUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                is NetworkException -> setUiEvent(ParticipantListUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
                         }
                     }
                 }
@@ -85,38 +105,45 @@ class ParticipantListViewModel @AssistedInject constructor(
     }
 
     private suspend fun getParticipantTotalCount(): Int {
-        val totalCount = runCatching {
-            when (viewIdType) {
-                is ViewIdType.MeetId -> meetingRepository.getMeetingParticipants(
-                    meetingId = viewIdType.id,
-                    cursor = "",
-                    size = 1
-                )
+        val totalCount =
+            runCatching {
+                when (viewIdType) {
+                    is ViewIdType.MeetId -> {
+                        meetingRepository.getMeetingParticipants(
+                            meetingId = viewIdType.id,
+                            cursor = "",
+                            size = 1,
+                        )
+                    }
 
-                is ViewIdType.PlanId -> planRepository.getPlanParticipants(
-                    planId = viewIdType.id,
-                    cursor = "",
-                    size = 1
-                )
+                    is ViewIdType.PlanId -> {
+                        planRepository.getPlanParticipants(
+                            planId = viewIdType.id,
+                            cursor = "",
+                            size = 1,
+                        )
+                    }
 
-                is ViewIdType.ReviewId -> reviewRepository.getReviewParticipants(
-                    reviewId = viewIdType.id,
-                    cursor = "",
-                    size = 1
-                )
+                    is ViewIdType.ReviewId -> {
+                        reviewRepository.getReviewParticipants(
+                            reviewId = viewIdType.id,
+                            cursor = "",
+                            size = 1,
+                        )
+                    }
 
-                else -> throw IllegalStateException("this ViewTypeId is not allowed")
-            }.totalCount
-        }.getOrElse { 0 }
+                    else -> {
+                        throw IllegalStateException("this ViewTypeId is not allowed")
+                    }
+                }.totalCount
+            }.getOrElse { 0 }
 
         return totalCount
     }
 
     @AssistedFactory
     interface Factory {
-        fun create(
-            participantListRoute: DetailRoute.ParticipantList,
-        ): ParticipantListViewModel
+        fun create(participantListRoute: DetailRoute.ParticipantList): ParticipantListViewModel
     }
 }
 
@@ -133,7 +160,7 @@ sealed interface ParticipantListUiAction : UiAction {
 
     data class OnClickUserImage(
         val userImage: String,
-        val userName: String
+        val userName: String,
     ) : ParticipantListUiAction
 }
 
@@ -142,12 +169,14 @@ sealed interface ParticipantListUiEvent : UiEvent {
 
     data class NavigateToImageViewer(
         val userImage: String,
-        val userName: String
+        val userName: String,
     ) : ParticipantListUiEvent
 
     data class NavigateToExternalShareUrl(
-        val url: String
+        val url: String,
     ) : ParticipantListUiEvent
 
-    data class ShowToastMessage(val toastMessage: ToastMessage) : ParticipantListUiEvent
+    data class ShowToastMessage(
+        val toastMessage: ToastMessage,
+    ) : ParticipantListUiEvent
 }

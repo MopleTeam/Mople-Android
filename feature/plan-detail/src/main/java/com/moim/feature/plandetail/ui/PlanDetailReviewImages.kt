@@ -30,23 +30,24 @@ import com.moim.feature.plandetail.PlanDetailUiAction
 fun PlanDetailReviewImages(
     modifier: Modifier = Modifier,
     images: List<ReviewImage>,
-    onUiAction: OnPlanDetailUiAction
+    onUiAction: OnPlanDetailUiAction,
 ) {
     if (images.isEmpty()) return
 
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 28.dp)
-                .padding(horizontal = 20.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 28.dp)
+                    .padding(horizontal = 20.dp),
         ) {
             MoimText(
                 text = stringResource(R.string.plan_detail_image),
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
 
             Spacer(Modifier.weight(1f))
@@ -54,7 +55,7 @@ fun PlanDetailReviewImages(
             MoimText(
                 text = stringResource(R.string.unit_count, images.size.decimalFormatString()),
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray04
+                color = MoimTheme.colors.gray.gray04,
             )
         }
 
@@ -67,12 +68,13 @@ fun PlanDetailReviewImages(
                 count = images.size,
             ) { index ->
                 NetworkImage(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .size(109.dp)
-                        .onSingleClick { onUiAction(PlanDetailUiAction.OnClickReviewImage(index)) },
+                    modifier =
+                        Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .size(109.dp)
+                            .onSingleClick { onUiAction(PlanDetailUiAction.OnClickReviewImage(index)) },
                     errorImage = painterResource(R.drawable.ic_empty_image),
-                    imageUrl = images[index].imageUrl
+                    imageUrl = images[index].imageUrl,
                 )
             }
         }

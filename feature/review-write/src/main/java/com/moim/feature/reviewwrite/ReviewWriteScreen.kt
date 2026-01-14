@@ -48,33 +48,54 @@ fun ReviewWriteRoute(
     val reviewWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val multiPhotoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickMultipleVisualMedia(5),
-        onResult = { uris -> if (uris.isNotEmpty()) viewModel.onUiAction(ReviewWriteUiAction.OnClickAddImages(uris.map { it.toString() })) }
-    )
+    val multiPhotoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickMultipleVisualMedia(5),
+            onResult = { uris ->
+                if (uris.isNotEmpty()) viewModel.onUiAction(ReviewWriteUiAction.OnClickAddImages(uris.map { it.toString() }))
+            },
+        )
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is ReviewWriteUiEvent.NavigateToBack -> navigateToBack()
-            is ReviewWriteUiEvent.NavigateToParticipants -> navigateToParticipants(event.viewIdType)
-            is ReviewWriteUiEvent.NavigateToPhotoPicker -> multiPhotoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            is ReviewWriteUiEvent.ShowToastMessage -> showToast(context, event.toastMessage)
+            is ReviewWriteUiEvent.NavigateToBack -> {
+                navigateToBack()
+            }
+
+            is ReviewWriteUiEvent.NavigateToParticipants -> {
+                navigateToParticipants(event.viewIdType)
+            }
+
+            is ReviewWriteUiEvent.NavigateToPhotoPicker -> {
+                multiPhotoPickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
+            }
+
+            is ReviewWriteUiEvent.ShowToastMessage -> {
+                showToast(context, event.toastMessage)
+            }
         }
     }
 
-
     when (val uiState = reviewWriteUiState) {
-        is ReviewWriteUiState.Loading -> LoadingScreen(modifier)
+        is ReviewWriteUiState.Loading -> {
+            LoadingScreen(modifier)
+        }
 
-        is ReviewWriteUiState.Success -> ReviewWriteScreen(
-            modifier = modifier,
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is ReviewWriteUiState.Success -> {
+            ReviewWriteScreen(
+                modifier = modifier,
+                uiState = uiState,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction,
+            )
+        }
 
-        is ReviewWriteUiState.Error -> ErrorScreen(modifier = modifier) {
-            viewModel.onUiAction(ReviewWriteUiAction.OnClickRefresh)
+        is ReviewWriteUiState.Error -> {
+            ErrorScreen(modifier = modifier) {
+                viewModel.onUiAction(ReviewWriteUiAction.OnClickRefresh)
+            }
         }
     }
 }
@@ -92,15 +113,16 @@ fun ReviewWriteScreen(
         topBar = {
             MoimTopAppbar(
                 title = stringResource(if (uiState.isUpdated) R.string.review_write_title_update else R.string.review_write_title_create),
-                onClickNavigate = { onUiAction(ReviewWriteUiAction.OnClickBack) }
+                onClickNavigate = { onUiAction(ReviewWriteUiAction.OnClickBack) },
             )
         },
         content = {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(it)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(it),
             ) {
                 if (!uiState.isUpdated) {
                     ReviewWriteHeader()
@@ -109,29 +131,37 @@ fun ReviewWriteScreen(
 
                 ReviewWriteUploadImageContainer(
                     images = uiState.uploadImages,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
                 ReviewWriteDivider()
                 ReviewWritePlanInfo(
                     review = uiState.review,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
         },
         bottomBar = {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
             ) {
                 MoimPrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
                     enable = uiState.enableSubmit,
-                    text = if (uiState.isUpdated) stringResource(R.string.review_write_update) else stringResource(R.string.review_write_create),
-                    onClick = { onUiAction(ReviewWriteUiAction.OnClickSubmit) }
+                    text =
+                        if (uiState.isUpdated) {
+                            stringResource(
+                                R.string.review_write_update,
+                            )
+                        } else {
+                            stringResource(R.string.review_write_create)
+                        },
+                    onClick = { onUiAction(ReviewWriteUiAction.OnClickSubmit) },
                 )
             }
-        }
+        },
     )
 
     LoadingDialog(isLoading)
@@ -140,15 +170,16 @@ fun ReviewWriteScreen(
 @Composable
 private fun ReviewWriteHeader() {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(20.dp),
     ) {
         MoimText(
             text = stringResource(R.string.review_write_header),
             style = MoimTheme.typography.heading.bold,
             color = MoimTheme.colors.gray.gray01,
-            singleLine = false
+            singleLine = false,
         )
     }
 }
@@ -157,6 +188,6 @@ private fun ReviewWriteHeader() {
 private fun ReviewWriteDivider() {
     HorizontalDivider(
         color = MoimTheme.colors.bg.input,
-        thickness = 8.dp
+        thickness = 8.dp,
     )
 }

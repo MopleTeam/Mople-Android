@@ -66,7 +66,7 @@ internal typealias OnCalendarUiAction = (CalendarUiAction) -> Unit
 fun CalendarRoute(
     viewModel: CalendarViewModel = hiltViewModel(),
     padding: PaddingValues,
-    navigateToPlanDetail: (ViewIdType) -> Unit
+    navigateToPlanDetail: (ViewIdType) -> Unit,
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -81,19 +81,25 @@ fun CalendarRoute(
     }
 
     when (val uiState = calendarUiState) {
-        is CalendarUiState.Loading -> LoadingScreen(modifier)
+        is CalendarUiState.Loading -> {
+            LoadingScreen(modifier)
+        }
 
-        is CalendarUiState.Success -> CalendarScreen(
-            modifier = modifier,
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is CalendarUiState.Success -> {
+            CalendarScreen(
+                modifier = modifier,
+                uiState = uiState,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction,
+            )
+        }
 
-        is CalendarUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(CalendarUiAction.OnClickRefresh) }
-        )
+        is CalendarUiState.Error -> {
+            ErrorScreen(
+                modifier = modifier,
+                onClickRefresh = { viewModel.onUiAction(CalendarUiAction.OnClickRefresh) },
+            )
+        }
     }
 }
 
@@ -102,35 +108,41 @@ fun CalendarScreen(
     modifier: Modifier = Modifier,
     uiState: CalendarUiState.Success,
     isLoading: Boolean,
-    onUiAction: OnCalendarUiAction
+    onUiAction: OnCalendarUiAction,
 ) {
     val localDate = uiState.selectDayOfMonth.toLocalDate()
     val startDate = localDate.yearMonth.minusMonths(500)
     val endDate = localDate.yearMonth.plusMonths(500)
 
-    val monthState = rememberCalendarState(
-        startMonth = startDate,
-        endMonth = endDate,
-        firstVisibleMonth = localDate.yearMonth,
-        firstDayOfWeek = uiState.daysOfWeek.first(),
-    )
-    val weekState = rememberWeekCalendarState(
-        startDate = startDate.atStartOfMonth(),
-        endDate = endDate.atEndOfMonth(),
-        firstVisibleWeekDate = uiState.selectDay?.toLocalDate() ?: LocalDate.now(),
-        firstDayOfWeek = uiState.daysOfWeek.first(),
-    )
+    val monthState =
+        rememberCalendarState(
+            startMonth = startDate,
+            endMonth = endDate,
+            firstVisibleMonth = localDate.yearMonth,
+            firstDayOfWeek = uiState.daysOfWeek.first(),
+        )
+    val weekState =
+        rememberWeekCalendarState(
+            startDate = startDate.atStartOfMonth(),
+            endDate = endDate.atEndOfMonth(),
+            firstVisibleWeekDate = uiState.selectDay?.toLocalDate() ?: LocalDate.now(),
+            firstDayOfWeek = uiState.daysOfWeek.first(),
+        )
     val currentDateForWeek = rememberFirstVisibleWeekAfterScroll(state = weekState)
-    val currentDate = rememberFirstMostVisibleMonth(state = monthState, viewportPercent = 90f)
-        .yearMonth
-        .atStartOfMonth()
-        .parseZonedDateTime()
+    val currentDate =
+        rememberFirstMostVisibleMonth(state = monthState, viewportPercent = 90f)
+            .yearMonth
+            .atStartOfMonth()
+            .parseZonedDateTime()
 
     LaunchedEffect(currentDateForWeek) {
-        val weekDate = currentDateForWeek.days.first().date
-            .parseZonedDateTime()
-            .default()
-            .withDayOfMonth(1)
+        val weekDate =
+            currentDateForWeek.days
+                .first()
+                .date
+                .parseZonedDateTime()
+                .default()
+                .withDayOfMonth(1)
 
         if (uiState.selectDayOfMonth == weekDate) return@LaunchedEffect
         onUiAction(CalendarUiAction.OnChangeDate(weekDate))
@@ -142,32 +154,32 @@ fun CalendarScreen(
 
     TrackScreenViewEvent(screenName = "calendar")
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         CalendarTopAppbar(
             currentDate = currentDate,
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
         AnimatedVisibility(
-            visible = uiState.isExpandable
+            visible = uiState.isExpandable,
         ) {
             CalendarMonth(
                 uiState = uiState,
                 currentDate = currentDate,
                 monthState = monthState,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         }
 
         AnimatedVisibility(
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = uiState.isExpandable.not()
+            visible = uiState.isExpandable.not(),
         ) {
             CalendarWeek(
                 uiState = uiState,
                 weekState = weekState,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         }
     }
@@ -181,19 +193,20 @@ fun CalendarMonth(
     uiState: CalendarUiState.Success,
     currentDate: ZonedDateTime,
     monthState: CalendarState,
-    onUiAction: OnCalendarUiAction
+    onUiAction: OnCalendarUiAction,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
         CalendarMonthCard(selectDate = currentDate)
         Spacer(Modifier.height(16.dp))
 
         CalendarDayOfWeekHeader(
-            daysOfWeek = uiState.daysOfWeek
+            daysOfWeek = uiState.daysOfWeek,
         )
         HorizontalCalendar(
             modifier = Modifier.fillMaxSize(),
@@ -208,9 +221,9 @@ fun CalendarMonth(
                     holidays = uiState.holidays.filter { it.year == day.date.year && it.month == day.date.month },
                     isCurrentDatePosition = day.position == DayPosition.MonthDate,
                     enabled = enabled,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
-            }
+            },
         )
     }
 }
@@ -220,18 +233,19 @@ fun CalendarWeek(
     modifier: Modifier = Modifier,
     uiState: CalendarUiState.Success,
     weekState: WeekCalendarState,
-    onUiAction: OnCalendarUiAction
+    onUiAction: OnCalendarUiAction,
 ) {
-    val selectedDatePlans = uiState.plans.filter {
-        it.planAt.dayOfMonth == (uiState.selectDay ?: ZonedDateTime.now()).dayOfMonth
-    }
+    val selectedDatePlans =
+        uiState.plans.filter {
+            it.planAt.dayOfMonth == (uiState.selectDay ?: ZonedDateTime.now()).dayOfMonth
+        }
 
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
     ) {
         CalendarDayOfWeekHeader(
             daysOfWeek = uiState.daysOfWeek,
-            selectedDayOfWeek = uiState.selectDay?.dayOfWeek
+            selectedDayOfWeek = uiState.selectDay?.dayOfWeek,
         )
         WeekCalendar(
             state = weekState,
@@ -245,7 +259,7 @@ fun CalendarWeek(
                     holidays = uiState.holidays.filter { it.year == day.date.year && it.month == day.date.month },
                     isCurrentDatePosition = day.position == WeekDayPosition.RangeDate,
                     enabled = enabled,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             },
         )
@@ -254,20 +268,21 @@ fun CalendarWeek(
             CalendarPlanContent(
                 selectDate = uiState.selectDay ?: ZonedDateTime.now().default(),
                 plans = selectedDatePlans,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         } else {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MoimTheme.colors.bg.primary),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MoimTheme.colors.bg.primary),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_empty_calendar),
                     contentDescription = "",
-                    tint = MoimTheme.colors.icon
+                    tint = MoimTheme.colors.icon,
                 )
 
                 MoimText(

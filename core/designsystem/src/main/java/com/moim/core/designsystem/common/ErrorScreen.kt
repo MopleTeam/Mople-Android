@@ -36,7 +36,7 @@ fun ErrorScreen(
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_warning_fill),
             contentDescription = "",
-            tint = Color.Unspecified
+            tint = Color.Unspecified,
         )
 
         Spacer(Modifier.height(24.dp))
@@ -62,7 +62,7 @@ fun ErrorScreen(
         MoimPrimaryButton(
             onClick = onClickRefresh,
             verticalPadding = 8.dp,
-            text = stringResource(R.string.common_refresh)
+            text = stringResource(R.string.common_refresh),
         )
     }
 }
@@ -82,11 +82,10 @@ fun NotFoundErrorScreen(
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_warning),
             contentDescription = "",
-            tint = Color.Unspecified
+            tint = Color.Unspecified,
         )
 
         Spacer(Modifier.height(8.dp))
-
 
         MoimText(
             text = description ?: stringResource(id = R.string.common_error_not_found_feed),
@@ -99,17 +98,17 @@ fun NotFoundErrorScreen(
         Spacer(Modifier.weight(1f))
 
         MoimPrimaryButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
             onClick = onClickBack,
-            text = stringResource(R.string.common_error_not_found_feed_btn)
+            text = stringResource(R.string.common_error_not_found_feed_btn),
         )
 
         Spacer(Modifier.height(8.dp))
     }
 }
-
 
 @Preview
 @Composable
@@ -117,7 +116,7 @@ private fun ErrorScreenPreview() {
     MoimTheme {
         ErrorScreen(
             modifier = Modifier.containerScreen(),
-            onClickRefresh = {}
+            onClickRefresh = {},
         )
     }
 }
@@ -128,7 +127,7 @@ private fun NotFoundErrorScreenPreview() {
     MoimTheme {
         NotFoundErrorScreen(
             modifier = Modifier.containerScreen(),
-            onClickBack = {}
+            onClickBack = {},
         )
     }
 }

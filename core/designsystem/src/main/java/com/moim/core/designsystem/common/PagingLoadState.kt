@@ -30,9 +30,10 @@ import com.moim.core.designsystem.theme.MoimTheme
 @Composable
 fun PagingLoadingScreen(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
     ) {
         Box(
             modifier =
@@ -63,10 +64,11 @@ fun PagingErrorScreen(
     onClickRetry: () -> Unit = {},
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(backgroundColor)
-            .padding(vertical = 24.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(backgroundColor)
+                .padding(vertical = 24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -91,7 +93,7 @@ fun PagingErrorScreen(
         MoimPrimaryButton(
             onClick = onClickRetry,
             verticalPadding = 8.dp,
-            text = stringResource(R.string.common_refresh)
+            text = stringResource(R.string.common_refresh),
         )
     }
 }
@@ -101,9 +103,10 @@ fun PagingErrorScreen(
 private fun PagingLoadingScreenPreview() {
     MoimTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.white)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MoimTheme.colors.white),
         ) {
             PagingLoadingScreen()
         }
@@ -115,7 +118,7 @@ private fun PagingLoadingScreenPreview() {
 private fun PagingErrorScreenPreview() {
     MoimTheme {
         PagingErrorScreen(
-            backgroundColor = MoimTheme.colors.bg.primary
+            backgroundColor = MoimTheme.colors.bg.primary,
         )
     }
 }

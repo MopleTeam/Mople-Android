@@ -7,7 +7,7 @@ import com.moim.core.common.model.item.CommentUiModel
 
 fun createMentionTagMessage(
     mentionUsers: List<User>,
-    message: String
+    message: String,
 ): String {
     var result = message
     mentionUsers.forEach { user ->
@@ -20,7 +20,7 @@ fun createMentionTagMessage(
 
 fun parseMentionTagMessage(
     mentionUsers: List<User>,
-    message: String
+    message: String,
 ): String {
     val userMap = mentionUsers.associateBy { it.userId }
     val mentionPattern = Regex("""<mention id=(\d+)>@[^<]+</mention>""")
@@ -36,7 +36,7 @@ fun parseMentionTagMessage(
 
 fun filterMentionedUsers(
     mentionUsers: List<User>,
-    message: String
+    message: String,
 ): List<User> {
     if (mentionUsers.isEmpty() || message.isEmpty()) {
         return emptyList()
@@ -44,9 +44,11 @@ fun filterMentionedUsers(
 
     // 메시지에서 멘션된 사용자 ID들 추출
     val mentionPattern = Regex("""<mention id=(\d+)>@[^<]+</mention>""")
-    val mentionedUserIds = mentionPattern.findAll(message)
-        .map { it.groupValues[1] }
-        .toSet() // 중복 제거
+    val mentionedUserIds =
+        mentionPattern
+            .findAll(message)
+            .map { it.groupValues[1] }
+            .toSet() // 중복 제거
 
     // 실제로 멘션된 사용자들만 필터링
     return mentionUsers.filter { user ->
@@ -54,31 +56,32 @@ fun filterMentionedUsers(
     }
 }
 
-
 fun Comment.createCommentUiModel(): CommentUiModel {
     val commentTexts = content.parseTextWithLinks()
     val commentTextUiModel =
-        commentTexts.map { (isWebLink, text) ->
-            if (isWebLink) {
-                if (text == openGraph?.url && commentTexts.size == 1) {
-                    emptyList()
+        commentTexts
+            .map { (isWebLink, text) ->
+                if (isWebLink) {
+                    if (text == openGraph?.url && commentTexts.size == 1) {
+                        emptyList()
+                    } else {
+                        listOf(CommentTextUiModel.HyperLinkText(content = text))
+                    }
                 } else {
-                    listOf(CommentTextUiModel.HyperLinkText(content = text))
-                }
-            } else {
-                val users = mentions.map {
-                    User(
-                        userId = it.userId,
-                        nickname = it.nickname,
-                        profileUrl = it.imageUrl
+                    val users =
+                        mentions.map {
+                            User(
+                                userId = it.userId,
+                                nickname = it.nickname,
+                                profileUrl = it.imageUrl,
+                            )
+                        }
+                    parseCommentText(
+                        mentionNames = users.map { it.nickname },
+                        message = parseMentionTagMessage(users, text),
                     )
                 }
-                parseCommentText(
-                    mentionNames = users.map { it.nickname },
-                    message = parseMentionTagMessage(users, text)
-                )
-            }
-        }.flatten()
+            }.flatten()
 
     return CommentUiModel(
         comment = this,
@@ -89,7 +92,7 @@ fun Comment.createCommentUiModel(): CommentUiModel {
 
 private fun parseCommentText(
     mentionNames: List<String>,
-    message: String
+    message: String,
 ): List<CommentTextUiModel> {
     if (mentionNames.isEmpty() || message.isEmpty()) {
         return listOf(CommentTextUiModel.PlainText(message))
@@ -99,9 +102,10 @@ private fun parseCommentText(
     val sortedMentionNames = mentionNames.sortedByDescending { it.length }
 
     // 정규식 패턴 생성: @이름 형태를 찾기 위한 패턴
-    val mentionPattern = sortedMentionNames
-        .map { Regex.escape(it) } // 특수문자 이스케이프
-        .joinToString("|") { "@$it" }
+    val mentionPattern =
+        sortedMentionNames
+            .map { Regex.escape(it) } // 특수문자 이스케이프
+            .joinToString("|") { "@$it" }
 
     val regex = Regex("($mentionPattern)")
 

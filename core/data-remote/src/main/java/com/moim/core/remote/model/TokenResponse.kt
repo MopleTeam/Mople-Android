@@ -9,12 +9,11 @@ data class TokenResponse(
     @SerialName("accessToken")
     val accessToken: String = "",
     @SerialName("refreshToken")
-    val refreshToken: String ="",
+    val refreshToken: String = "",
 )
 
-fun TokenResponse.asItem(): Token {
-    return Token(
+fun TokenResponse.asItem(): Token =
+    Token(
         accessToken = accessToken,
         refreshToken = refreshToken,
     )
-}

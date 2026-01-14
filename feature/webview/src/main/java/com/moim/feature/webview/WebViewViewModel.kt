@@ -44,9 +44,7 @@ class WebViewViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(
-            webViewRoute: DetailRoute.WebView,
-        ): WebViewViewModel
+        fun create(webViewRoute: DetailRoute.WebView): WebViewViewModel
     }
 }
 

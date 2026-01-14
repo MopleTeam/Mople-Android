@@ -9,16 +9,19 @@ import retrofit2.http.PATCH
 import retrofit2.http.Query
 
 interface UserApi {
-
     @GET("user/info")
     suspend fun getUser(): UserResponse
 
     @PATCH("user/info")
-    suspend fun updateUser(@Body params: JsonObject): UserResponse
+    suspend fun updateUser(
+        @Body params: JsonObject,
+    ): UserResponse
 
     @DELETE("user/remove")
     suspend fun deleteUser()
 
     @GET("user/nickname/duplicate")
-    suspend fun checkedNickname(@Query("nickname") nickname: String): Boolean
+    suspend fun checkedNickname(
+        @Query("nickname") nickname: String,
+    ): Boolean
 }

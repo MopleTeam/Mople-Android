@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileUpdateImageEditDialog(
     modifier: Modifier = Modifier,
-    onUiAction: OnProfileUpdateUiAction
+    onUiAction: OnProfileUpdateUiAction,
 ) {
     val dismissAction = ProfileUpdateUiAction.OnShowProfileEditDialog(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
@@ -42,17 +42,18 @@ fun ProfileUpdateImageEditDialog(
         },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             MoimText(
                 text = stringResource(R.string.common_profile_edit),
                 singleLine = false,
                 style = MoimTheme.typography.body01.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
             Spacer(Modifier.height(24.dp))
 
@@ -63,7 +64,7 @@ fun ProfileUpdateImageEditDialog(
                 onClick = {
                     onUiAction(dismissAction)
                     onUiAction(ProfileUpdateUiAction.OnChangeProfileUrl(null))
-                }
+                },
             )
             Spacer(Modifier.height(12.dp))
 
@@ -74,7 +75,7 @@ fun ProfileUpdateImageEditDialog(
                 onClick = {
                     onUiAction(dismissAction)
                     onUiAction(ProfileUpdateUiAction.OnNavigatePhotoPicker)
-                }
+                },
             )
             Spacer(Modifier.height(12.dp))
         }

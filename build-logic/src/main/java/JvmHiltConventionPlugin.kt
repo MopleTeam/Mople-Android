@@ -1,4 +1,3 @@
-
 import com.moim.convention.Plugins
 import com.moim.convention.implementation
 import com.moim.convention.ksp
@@ -8,7 +7,6 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 
 internal class JvmHiltConventionPlugin : Plugin<Project> {
-
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {

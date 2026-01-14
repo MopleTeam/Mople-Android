@@ -22,27 +22,34 @@ import javax.inject.Inject
 class AlarmSettingViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
 ) : BaseViewModel() {
-
-    private val alarmSettingResult = notificationRepository
-        .getNotificationSubscribes()
-        .asResult()
-        .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    private val alarmSettingResult =
+        notificationRepository
+            .getNotificationSubscribes()
+            .asResult()
+            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
     init {
         viewModelScope.launch {
             alarmSettingResult.collect { result ->
                 when (result) {
-                    is Result.Loading -> setUiState(AlarmSettingUiState.Loading)
-                    is Result.Success -> setUiState(
-                        AlarmSettingUiState.Success(
-                            isSubscribeForMeetingNotify = result.data.any { it == ENABLE_MEET },
-                            isSubscribeForPlanNotify = result.data.any { it == ENABLE_PLAN },
-                            isSubscribeForCommentNotify = result.data.any { it == ENABLE_COMMENT },
-                            isSubscribeForMentionNotify = result.data.any { it == ENABLE_MENTION },
-                        )
-                    )
+                    is Result.Loading -> {
+                        setUiState(AlarmSettingUiState.Loading)
+                    }
 
-                    is Result.Error -> setUiState(AlarmSettingUiState.Error)
+                    is Result.Success -> {
+                        setUiState(
+                            AlarmSettingUiState.Success(
+                                isSubscribeForMeetingNotify = result.data.any { it == ENABLE_MEET },
+                                isSubscribeForPlanNotify = result.data.any { it == ENABLE_PLAN },
+                                isSubscribeForCommentNotify = result.data.any { it == ENABLE_COMMENT },
+                                isSubscribeForMentionNotify = result.data.any { it == ENABLE_MENTION },
+                            ),
+                        )
+                    }
+
+                    is Result.Error -> {
+                        setUiState(AlarmSettingUiState.Error)
+                    }
                 }
             }
         }
@@ -60,7 +67,10 @@ class AlarmSettingViewModel @Inject constructor(
         }
     }
 
-    private fun setSubscribeNotify(topic: String, isCheck: Boolean) {
+    private fun setSubscribeNotify(
+        topic: String,
+        isCheck: Boolean,
+    ) {
         viewModelScope.launch {
             if (isCheck) {
                 notificationRepository.setNotificationSubscribe(topic)
@@ -69,7 +79,9 @@ class AlarmSettingViewModel @Inject constructor(
             }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                 uiState.checkState<AlarmSettingUiState.Success> {
                     when (result) {
-                        is Result.Loading -> return@collect
+                        is Result.Loading -> {
+                            return@collect
+                        }
 
                         is Result.Success -> {
                             setUiState(
@@ -78,13 +90,15 @@ class AlarmSettingViewModel @Inject constructor(
                                     isSubscribeForPlanNotify = if (topic == ENABLE_PLAN) isCheck else isSubscribeForPlanNotify,
                                     isSubscribeForCommentNotify = if (topic == ENABLE_COMMENT) isCheck else isSubscribeForCommentNotify,
                                     isSubscribeForMentionNotify = if (topic == ENABLE_MENTION) isCheck else isSubscribeForMentionNotify,
-                                )
+                                ),
                             )
                         }
 
-                        is Result.Error -> when (result.exception) {
-                            is IOException -> setUiEvent(AlarmSettingUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                            else -> setUiEvent(AlarmSettingUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                        is Result.Error -> {
+                            when (result.exception) {
+                                is IOException -> setUiEvent(AlarmSettingUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                else -> setUiEvent(AlarmSettingUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
                         }
                     }
                 }
@@ -121,19 +135,19 @@ sealed interface AlarmSettingUiAction : UiAction {
     data object OnClickPermissionRequest : AlarmSettingUiAction
 
     data class OnChangeMeetingNotify(
-        val isCheck: Boolean
+        val isCheck: Boolean,
     ) : AlarmSettingUiAction
 
     data class OnChangePlanNotify(
-        val isCheck: Boolean
+        val isCheck: Boolean,
     ) : AlarmSettingUiAction
 
     data class OnChangeCommentNotify(
-        val isCheck: Boolean
+        val isCheck: Boolean,
     ) : AlarmSettingUiAction
 
     data class OnChangeMentionNotify(
-        val isCheck: Boolean
+        val isCheck: Boolean,
     ) : AlarmSettingUiAction
 }
 
@@ -143,6 +157,6 @@ sealed interface AlarmSettingUiEvent : UiEvent {
     data object NavigateToSystemSetting : AlarmSettingUiEvent
 
     data class ShowToastMessage(
-        val message: ToastMessage
+        val message: ToastMessage,
     ) : AlarmSettingUiEvent
 }

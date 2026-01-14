@@ -19,40 +19,41 @@ class GetCommentsUseCase @Inject constructor(
 ) {
     var loadedAt: ZonedDateTime = ZonedDateTime.now()
 
-    operator fun invoke(params: Params) = Pager(
-        config = PagingConfig(pageSize = params.size)
-    ) {
-        object : PagingSource<String, Comment>() {
+    operator fun invoke(params: Params) =
+        Pager(
+            config = PagingConfig(pageSize = params.size),
+        ) {
+            object : PagingSource<String, Comment>() {
+                init {
+                    loadedAt = ZonedDateTime.now()
+                }
 
-            init {
-                loadedAt = ZonedDateTime.now()
-            }
+                override fun getRefreshKey(state: PagingState<String, Comment>): String? = null
 
-            override fun getRefreshKey(state: PagingState<String, Comment>): String? = null
+                override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, Comment> {
+                    val page = loadParams.key ?: ""
 
-            override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, Comment> {
-                val page = loadParams.key ?: ""
+                    return try {
+                        val commentContainer =
+                            commentRepository.getComments(
+                                postId = params.postId,
+                                cursor = page,
+                                size = params.size,
+                            )
+                        val nextCursor = commentContainer.page.nextCursor
 
-                return try {
-                    val commentContainer = commentRepository.getComments(
-                        postId = params.postId,
-                        cursor = page,
-                        size = params.size
-                    )
-                    val nextCursor = commentContainer.page.nextCursor
-
-                    LoadResult.Page(
-                        data = commentContainer.content,
-                        prevKey = null,
-                        nextKey = if (commentContainer.page.isNext && commentContainer.page.size >= params.size) nextCursor else null
-                    )
-                } catch (e: Exception) {
-                    Timber.e("[GetCommentsUseCase] error $e")
-                    LoadResult.Error(e)
+                        LoadResult.Page(
+                            data = commentContainer.content,
+                            prevKey = null,
+                            nextKey = if (commentContainer.page.isNext && commentContainer.page.size >= params.size) nextCursor else null,
+                        )
+                    } catch (e: Exception) {
+                        Timber.e("[GetCommentsUseCase] error $e")
+                        LoadResult.Error(e)
+                    }
                 }
             }
-        }
-    }.flow.flowOn(ioDispatcher)
+        }.flow.flowOn(ioDispatcher)
 
     data class Params(
         val postId: String,

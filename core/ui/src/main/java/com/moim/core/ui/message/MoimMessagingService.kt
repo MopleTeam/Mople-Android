@@ -10,7 +10,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MoimMessagingService : FirebaseMessagingService() {
-
     @Inject
     lateinit var moimNotificationManager: MoimNotificationManager
 
@@ -23,17 +22,19 @@ class MoimMessagingService : FirebaseMessagingService() {
 
     private fun sendNotification(remoteMessage: RemoteMessage) {
         val (notifyTitle, notifyBody) = remoteMessage.notification?.title to remoteMessage.notification?.body
-        val bundle = Bundle().apply {
-            putString(NOTIFY_MEET_ID, remoteMessage.data[NOTIFY_MEET_ID])
-            putString(NOTIFY_PLAN_ID, remoteMessage.data[NOTIFY_PLAN_ID])
-            putString(NOTIFY_REVIEW_ID, remoteMessage.data[NOTIFY_REVIEW_ID])
-        }
-        val notificationBuilder = moimNotificationManager
-            .createNotificationBuilder()
-            .setSmallIcon(R.drawable.ic_logo_full)
-            .setContentTitle(notifyTitle)
-            .setContentText(notifyBody)
-            .setContentIntent(moimNotificationManager.getNotificationContentIntent(REQUEST_CODE, bundle))
+        val bundle =
+            Bundle().apply {
+                putString(NOTIFY_MEET_ID, remoteMessage.data[NOTIFY_MEET_ID])
+                putString(NOTIFY_PLAN_ID, remoteMessage.data[NOTIFY_PLAN_ID])
+                putString(NOTIFY_REVIEW_ID, remoteMessage.data[NOTIFY_REVIEW_ID])
+            }
+        val notificationBuilder =
+            moimNotificationManager
+                .createNotificationBuilder()
+                .setSmallIcon(R.drawable.ic_logo_full)
+                .setContentTitle(notifyTitle)
+                .setContentText(notifyBody)
+                .setContentIntent(moimNotificationManager.getNotificationContentIntent(REQUEST_CODE, bundle))
 
         moimNotificationManager.notify(0, notificationBuilder)
     }

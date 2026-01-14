@@ -17,9 +17,8 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val meetingRepository: MeetingRepository,
     private val meetingEventBus: EventBus<MeetingAction>,
-    private val planEventBus: EventBus<PlanAction>
+    private val planEventBus: EventBus<PlanAction>,
 ) : BaseViewModel() {
-
     fun setPlanId(planId: String) {
         planEventBus.send(PlanAction.PlanInvalidate())
         setUiEvent(MainUiEvent.NavigateToPlanDetail(ViewIdType.PlanId(planId)))
@@ -48,10 +47,10 @@ class MainViewModel @Inject constructor(
 
 sealed interface MainUiEvent : UiEvent {
     data class NavigateToPlanDetail(
-        val viewIdType: ViewIdType
+        val viewIdType: ViewIdType,
     ) : MainUiEvent
 
     data class NavigateToMeetingDetail(
-        val meetingId: String
+        val meetingId: String,
     ) : MainUiEvent
 }

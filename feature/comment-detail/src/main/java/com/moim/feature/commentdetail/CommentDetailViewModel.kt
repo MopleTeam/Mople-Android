@@ -67,94 +67,100 @@ class CommentDetailViewModel @AssistedInject constructor(
     private val commentEventBus: EventBus<CommentAction>,
     @Assisted val commentDetailRoute: DetailRoute.CommentDetail,
 ) : BaseViewModel() {
-
     private var searchJob: Job? = null
     private val comment = requireNotNull(commentDetailRoute.comment)
 
-    private val commentActionReceiver = commentEventBus
-        .action
-        .actionStateIn(viewModelScope, CommentAction.None)
+    private val commentActionReceiver =
+        commentEventBus
+            .action
+            .actionStateIn(viewModelScope, CommentAction.None)
 
     private var _comments =
         getReplyCommentUseCase(GetReplyCommentUseCase.Params(postId = commentDetailRoute.postId, commentId = comment.commentId))
             .mapLatest { it.map { comment -> comment.createCommentUiModel() } }
             .mapLatest { it.insertHeaderItem(item = comment.createCommentUiModel()) }
             .cachedIn(viewModelScope)
-    private val comments = commentActionReceiver.flatMapLatest { receiver ->
-        when (receiver) {
-            is CommentAction.None -> _comments
-
-            is CommentAction.CommentCreate -> {
-                _comments.map { pagingData ->
-                    pagingData.checkedActionedAtIsBeforeLoadedAt(
-                        actionedAt = receiver.actionAt,
-                        loadedAt = getReplyCommentUseCase.loadedAt
-                    ) {
-                        pagingData.insertSeparators { before: CommentUiModel?, _: CommentUiModel? ->
-                            if (before?.comment?.commentId == comment.commentId) {
-                                return@insertSeparators receiver.commentUiModel
-                            } else {
-                                null
-                            }
-                        }
+    private val comments =
+        commentActionReceiver
+            .flatMapLatest { receiver ->
+                when (receiver) {
+                    is CommentAction.None -> {
+                        _comments
                     }
-                }
-            }
 
-            is CommentAction.CommentUpdate -> {
-                _comments.map { pagingData ->
-                    pagingData.checkedActionedAtIsBeforeLoadedAt(
-                        actionedAt = receiver.actionAt,
-                        loadedAt = getReplyCommentUseCase.loadedAt
-                    ) {
-                        pagingData.map { uiModel ->
-                            if (uiModel.comment.commentId == receiver.commentUiModel.comment.commentId) {
-                                receiver.commentUiModel
-                            } else {
-                                uiModel
-                            }
-                        }
-                    }
-                }
-            }
-
-            is CommentAction.CommentDelete -> {
-                _comments.map { pagingData ->
-                    pagingData.checkedActionedAtIsBeforeLoadedAt(
-                        actionedAt = receiver.actionAt,
-                        loadedAt = getReplyCommentUseCase.loadedAt
-                    ) {
-                        pagingData
-                            .map { uiModel ->
-                                if (uiModel.comment.commentId == receiver.commentId) {
-                                    uiModel.apply { isDeleted = true }
-                                } else {
-                                    uiModel
+                    is CommentAction.CommentCreate -> {
+                        _comments.map { pagingData ->
+                            pagingData.checkedActionedAtIsBeforeLoadedAt(
+                                actionedAt = receiver.actionAt,
+                                loadedAt = getReplyCommentUseCase.loadedAt,
+                            ) {
+                                pagingData.insertSeparators { before: CommentUiModel?, _: CommentUiModel? ->
+                                    if (before?.comment?.commentId == comment.commentId) {
+                                        return@insertSeparators receiver.commentUiModel
+                                    } else {
+                                        null
+                                    }
                                 }
                             }
-                            .filter { it.isDeleted.not() }
+                        }
                     }
-                }
-            }
-        }.also {
-            _comments = it
-        }
-    }.cachedIn(viewModelScope)
 
-    private val meetingParticipants = flowOf(commentDetailRoute.meetId)
-        .mapLatest {
-            meetingRepository.getMeetingParticipants(
-                meetingId = it,
-                cursor = "",
-                size = 100
-            ).content
-        }.asResult().mapLatest {
-            if (it is Result.Success) {
-                it.data
-            } else {
-                null
-            }
-        }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+                    is CommentAction.CommentUpdate -> {
+                        _comments.map { pagingData ->
+                            pagingData.checkedActionedAtIsBeforeLoadedAt(
+                                actionedAt = receiver.actionAt,
+                                loadedAt = getReplyCommentUseCase.loadedAt,
+                            ) {
+                                pagingData.map { uiModel ->
+                                    if (uiModel.comment.commentId == receiver.commentUiModel.comment.commentId) {
+                                        receiver.commentUiModel
+                                    } else {
+                                        uiModel
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    is CommentAction.CommentDelete -> {
+                        _comments.map { pagingData ->
+                            pagingData.checkedActionedAtIsBeforeLoadedAt(
+                                actionedAt = receiver.actionAt,
+                                loadedAt = getReplyCommentUseCase.loadedAt,
+                            ) {
+                                pagingData
+                                    .map { uiModel ->
+                                        if (uiModel.comment.commentId == receiver.commentId) {
+                                            uiModel.apply { isDeleted = true }
+                                        } else {
+                                            uiModel
+                                        }
+                                    }.filter { it.isDeleted.not() }
+                            }
+                        }
+                    }
+                }.also {
+                    _comments = it
+                }
+            }.cachedIn(viewModelScope)
+
+    private val meetingParticipants =
+        flowOf(commentDetailRoute.meetId)
+            .mapLatest {
+                meetingRepository
+                    .getMeetingParticipants(
+                        meetingId = it,
+                        cursor = "",
+                        size = 100,
+                    ).content
+            }.asResult()
+            .mapLatest {
+                if (it is Result.Success) {
+                    it.data
+                } else {
+                    null
+                }
+            }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     private val commentDetailUiState =
         userRepository
@@ -162,7 +168,7 @@ class CommentDetailViewModel @AssistedInject constructor(
             .mapLatest { user ->
                 CommentDetailUiState.Success(
                     user = user,
-                    parentComment = comment.createCommentUiModel()
+                    parentComment = comment.createCommentUiModel(),
                 )
             }.asResult()
             .mapLatest { result ->
@@ -178,7 +184,8 @@ class CommentDetailViewModel @AssistedInject constructor(
                     is Result.Error -> {
                         when (result.exception) {
                             is ForbiddenException,
-                            is NotFoundException -> CommentDetailUiState.NotFoundError
+                            is NotFoundException,
+                            -> CommentDetailUiState.NotFoundError
 
                             else -> CommentDetailUiState.CommonError
                         }
@@ -227,25 +234,27 @@ class CommentDetailViewModel @AssistedInject constructor(
 
     private fun updateComment(comment: Comment) {
         uiState.checkState<CommentDetailUiState.Success> {
-            val selectedMentions = comment.mentions.map {
-                User(
-                    userId = it.userId,
-                    nickname = it.nickname,
-                    profileUrl = it.imageUrl
+            val selectedMentions =
+                comment.mentions.map {
+                    User(
+                        userId = it.userId,
+                        nickname = it.nickname,
+                        profileUrl = it.imageUrl,
+                    )
+                }
+            val message =
+                parseMentionTagMessage(
+                    mentionUsers = selectedMentions,
+                    message = comment.content,
                 )
-            }
-            val message = parseMentionTagMessage(
-                mentionUsers = selectedMentions,
-                message = comment.content
-            )
 
             commentState.clearText()
             commentState.edit { insert(0, message) }
             setUiState(
                 copy(
                     selectedUpdateComment = comment,
-                    selectedMentions = selectedMentions
-                )
+                    selectedMentions = selectedMentions,
+                ),
             )
         }
     }
@@ -258,14 +267,19 @@ class CommentDetailViewModel @AssistedInject constructor(
                 .onEach { setLoading(it is Result.Loading) }
                 .collect { result ->
                     when (result) {
-                        is Result.Loading -> return@collect
+                        is Result.Loading -> {
+                            return@collect
+                        }
+
                         is Result.Success -> {
                             commentEventBus.send(
-                                CommentAction.CommentUpdate(commentUiModel = result.data.createCommentUiModel())
+                                CommentAction.CommentUpdate(commentUiModel = result.data.createCommentUiModel()),
                             )
                         }
 
-                        is Result.Error -> showErrorToast(result.exception)
+                        is Result.Error -> {
+                            showErrorToast(result.exception)
+                        }
                     }
                 }
         }
@@ -275,44 +289,51 @@ class CommentDetailViewModel @AssistedInject constructor(
         viewModelScope.launch {
             uiState.checkState<CommentDetailUiState.Success> {
                 val isCreateComment = updateComment == null
-                val tagMessage = createMentionTagMessage(
-                    mentionUsers = selectedMentions,
-                    message = commentState.text.toString()
-                )
-                val selectedMentionUsers = filterMentionedUsers(
-                    mentionUsers = selectedMentions,
-                    message = tagMessage
-                )
+                val tagMessage =
+                    createMentionTagMessage(
+                        mentionUsers = selectedMentions,
+                        message = commentState.text.toString(),
+                    )
+                val selectedMentionUsers =
+                    filterMentionedUsers(
+                        mentionUsers = selectedMentions,
+                        message = tagMessage,
+                    )
 
                 if (isCreateComment) {
                     commentRepository.createReplyComment(
                         postId = commentDetailRoute.postId,
                         commentId = parentComment.comment.commentId,
                         content = tagMessage.trim(),
-                        mentionIds = selectedMentionUsers.map { it.userId }
+                        mentionIds = selectedMentionUsers.map { it.userId },
                     )
                 } else {
                     commentRepository.updateComment(
                         commentId = updateComment.commentId,
                         content = tagMessage.trim(),
-                        mentionIds = selectedMentionUsers.map { it.userId }
+                        mentionIds = selectedMentionUsers.map { it.userId },
                     )
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                     uiState.checkState<CommentDetailUiState.Success> {
                         when (result) {
-                            is Result.Loading -> return@collect
+                            is Result.Loading -> {
+                                return@collect
+                            }
 
                             is Result.Success -> {
                                 val comment = parentComment.comment
 
                                 if (isCreateComment) {
                                     commentEventBus.send(
-                                        CommentAction.CommentCreate(commentUiModel = result.data.createCommentUiModel())
+                                        CommentAction.CommentCreate(commentUiModel = result.data.createCommentUiModel()),
                                     )
                                     commentEventBus.send(
                                         CommentAction.CommentUpdate(
-                                            commentUiModel = parentComment.copy(comment = comment.copy(replayCount = comment.replayCount.plus(1)))
-                                        )
+                                            commentUiModel =
+                                                parentComment.copy(
+                                                    comment = comment.copy(replayCount = comment.replayCount.plus(1)),
+                                                ),
+                                        ),
                                     )
 
                                     commentState.clearText()
@@ -324,12 +345,14 @@ class CommentDetailViewModel @AssistedInject constructor(
                                         copy(
                                             selectedUpdateComment = null,
                                             selectedMentions = emptyList(),
-                                        )
+                                        ),
                                     )
                                 }
                             }
 
-                            is Result.Error -> showErrorToast(result.exception)
+                            is Result.Error -> {
+                                showErrorToast(result.exception)
+                            }
                         }
                     }
                 }
@@ -346,7 +369,9 @@ class CommentDetailViewModel @AssistedInject constructor(
                 .collect { result ->
                     uiState.checkState<CommentDetailUiState.Success> {
                         when (result) {
-                            is Result.Loading -> return@collect
+                            is Result.Loading -> {
+                                return@collect
+                            }
 
                             is Result.Success -> {
                                 commentEventBus.send(CommentAction.CommentDelete(commentId = comment.commentId))
@@ -359,13 +384,18 @@ class CommentDetailViewModel @AssistedInject constructor(
                                     val replyCount = parentComment.comment.replayCount.minus(1)
                                     commentEventBus.send(
                                         CommentAction.CommentUpdate(
-                                            commentUiModel = parentComment.copy(comment = parentComment.comment.copy(replayCount = replyCount))
-                                        )
+                                            commentUiModel =
+                                                parentComment.copy(
+                                                    comment = parentComment.comment.copy(replayCount = replyCount),
+                                                ),
+                                        ),
                                     )
                                 }
                             }
 
-                            is Result.Error -> showErrorToast(result.exception)
+                            is Result.Error -> {
+                                showErrorToast(result.exception)
+                            }
                         }
                     }
                 }
@@ -393,11 +423,12 @@ class CommentDetailViewModel @AssistedInject constructor(
     private fun setSelectedUser(user: User) {
         uiState.checkState<CommentDetailUiState.Success> {
             val selectMentions = selectedMentions.toMutableList().apply { add(user) }.distinct()
-            val mentionText = insertTextAtCursor(
-                inputKeyword = user.nickname,
-                currentMessage = commentState.text.toString(),
-                currentSelection = commentState.selection.start
-            )
+            val mentionText =
+                insertTextAtCursor(
+                    inputKeyword = user.nickname,
+                    currentMessage = commentState.text.toString(),
+                    currentSelection = commentState.selection.start,
+                )
 
             commentState.clearText()
             commentState.edit { insert(0, mentionText) }
@@ -406,8 +437,8 @@ class CommentDetailViewModel @AssistedInject constructor(
                 copy(
                     selectedMentions = selectMentions,
                     searchMentions = emptyList(),
-                    isShowMentionDialog = false
-                )
+                    isShowMentionDialog = false,
+                ),
             )
         }
     }
@@ -434,48 +465,59 @@ class CommentDetailViewModel @AssistedInject constructor(
             "$beforeMatch$inputKeyword $afterCursor"
         } else {
             currentMessage.take(insertPosition) +
-                    inputKeyword + " " +
-                    currentMessage.substring(insertPosition)
+                inputKeyword + " " +
+                currentMessage.substring(insertPosition)
         }
     }
 
     private fun showMentionDialog(keyword: String?) {
         searchJob.cancelIfActive()
-        searchJob = viewModelScope.launch {
-            delay(400)
-            uiState.checkState<CommentDetailUiState.Success> {
-                val userList = if (keyword != null) {
-                    meetingParticipants.filter { it.nickname.contains(keyword) }
-                } else {
-                    emptyList()
-                }
+        searchJob =
+            viewModelScope.launch {
+                delay(400)
+                uiState.checkState<CommentDetailUiState.Success> {
+                    val userList =
+                        if (keyword != null) {
+                            meetingParticipants.filter { it.nickname.contains(keyword) }
+                        } else {
+                            emptyList()
+                        }
 
-                setUiState(
-                    copy(
-                        searchMentions = userList,
-                        isShowMentionDialog = userList.isNotEmpty()
+                    setUiState(
+                        copy(
+                            searchMentions = userList,
+                            isShowMentionDialog = userList.isNotEmpty(),
+                        ),
                     )
-                )
+                }
             }
-        }
     }
 
-    private fun navigateToImageViewerForUser(userImageUrl: String, userName: String) {
+    private fun navigateToImageViewerForUser(
+        userImageUrl: String,
+        userName: String,
+    ) {
         setUiEvent(
             CommentDetailUiEvent.NavigateToImageViewerForUser(
                 image = userImageUrl,
-                userName = userName
-            )
+                userName = userName,
+            ),
         )
     }
 
-    private fun showCommentEditDialog(isShow: Boolean, comment: Comment?) {
+    private fun showCommentEditDialog(
+        isShow: Boolean,
+        comment: Comment?,
+    ) {
         uiState.checkState<CommentDetailUiState.Success> {
             setUiState(copy(isShowCommentEditDialog = isShow, selectedComment = comment))
         }
     }
 
-    private fun showCommentReportDialog(isShow: Boolean, comment: Comment?) {
+    private fun showCommentReportDialog(
+        isShow: Boolean,
+        comment: Comment?,
+    ) {
         uiState.checkState<CommentDetailUiState.Success> {
             setUiState(copy(isShowCommentReportDialog = isShow, selectedComment = comment))
         }
@@ -488,12 +530,9 @@ class CommentDetailViewModel @AssistedInject constructor(
         }
     }
 
-
     @AssistedFactory
     interface Factory {
-        fun create(
-            commentDetailRoute: DetailRoute.CommentDetail
-        ): CommentDetailViewModel
+        fun create(commentDetailRoute: DetailRoute.CommentDetail): CommentDetailViewModel
     }
 }
 
@@ -526,50 +565,50 @@ sealed interface CommentDetailAction : UiAction {
     data object OnClickRefresh : CommentDetailAction
 
     data class OnClickMentionUser(
-        val user: User
+        val user: User,
     ) : CommentDetailAction
 
     data class OnClickUserProfileImage(
         val imageUrl: String,
-        val userName: String
+        val userName: String,
     ) : CommentDetailAction
 
     data class OnClickCommentLike(
-        val comment: Comment
+        val comment: Comment,
     ) : CommentDetailAction
 
     data class OnClickCommentReport(
-        val comment: Comment
+        val comment: Comment,
     ) : CommentDetailAction
 
     data class OnClickCommentUpdate(
-        val comment: Comment
+        val comment: Comment,
     ) : CommentDetailAction
 
     data class OnClickCommentDelete(
-        val comment: Comment
+        val comment: Comment,
     ) : CommentDetailAction
 
     data class OnClickCommentUpload(
-        val updateComment: Comment?
+        val updateComment: Comment?,
     ) : CommentDetailAction
 
     data class OnClickCommentWebLink(
-        val webLink: String
+        val webLink: String,
     ) : CommentDetailAction
 
     data class OnShowMentionDialog(
-        val keyword: String?
+        val keyword: String?,
     ) : CommentDetailAction
 
     data class OnShowCommentEditDialog(
         val isShow: Boolean,
-        val comment: Comment?
+        val comment: Comment?,
     ) : CommentDetailAction
 
     data class OnShowCommentReportDialog(
         val isShow: Boolean,
-        val comment: Comment?
+        val comment: Comment?,
     ) : CommentDetailAction
 }
 
@@ -578,14 +617,14 @@ sealed interface CommentDetailUiEvent : UiEvent {
 
     data class NavigateToImageViewerForUser(
         val image: String,
-        val userName: String
+        val userName: String,
     ) : CommentDetailUiEvent
 
     data class NavigateToWebBrowser(
-        val webLink: String
+        val webLink: String,
     ) : CommentDetailUiEvent
 
     data class ShowToastMessage(
-        val message: ToastMessage
+        val message: ToastMessage,
     ) : CommentDetailUiEvent
 }

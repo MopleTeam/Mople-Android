@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 fun MapDetailRoute(
     padding: PaddingValues,
     viewModel: MapDetailViewModel = hiltViewModel(),
-    navigateToBack: () -> Unit
+    navigateToBack: () -> Unit,
 ) {
     val context = LocalContext.current
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
@@ -41,7 +41,10 @@ fun MapDetailRoute(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is MapDetailUiEvent.NavigateToBack -> navigateToBack()
+            is MapDetailUiEvent.NavigateToBack -> {
+                navigateToBack()
+            }
+
             is MapDetailUiEvent.NavigateToMapApp -> {
                 val latitude = event.latitude.toString()
                 val longitude = event.longitude.toString()
@@ -71,7 +74,7 @@ fun MapDetailRoute(
         MapDetailScreen(
             modifier = modifier,
             uiState = it,
-            onUiAction = viewModel::onUiAction
+            onUiAction = viewModel::onUiAction,
         )
     }
 }
@@ -85,11 +88,11 @@ fun MapDetailScreen(
     TrackScreenViewEvent(screenName = "map_detail")
 
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         MoimTopAppbar(
             title = stringResource(R.string.map_detail_title),
-            onClickNavigate = { onUiAction(MapDetailUiAction.OnClickBack) }
+            onClickNavigate = { onUiAction(MapDetailUiAction.OnClickBack) },
         )
 
         Box {
@@ -103,7 +106,7 @@ fun MapDetailScreen(
                 MapDetailPlaceInfoDialog(
                     placeName = uiState.placeName,
                     address = uiState.address,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
 

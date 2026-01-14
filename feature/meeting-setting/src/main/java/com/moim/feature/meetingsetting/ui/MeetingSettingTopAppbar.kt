@@ -11,7 +11,7 @@ import com.moim.feature.meetingsetting.OnMeetingSettingUiAction
 @Composable
 fun MeetingSettingTopAppbar(
     modifier: Modifier = Modifier,
-    onUiAction: OnMeetingSettingUiAction = {}
+    onUiAction: OnMeetingSettingUiAction = {},
 ) {
     MoimTopAppbar(
         modifier = modifier,

@@ -50,7 +50,7 @@ fun WebViewRoute(
     WebViewScreen(
         modifier = modifier,
         uiState = webViewUiState,
-        onUiAction = viewModel::onUiAction
+        onUiAction = viewModel::onUiAction,
     )
 }
 
@@ -58,7 +58,7 @@ fun WebViewRoute(
 fun WebViewScreen(
     modifier: Modifier = Modifier,
     uiState: WebViewUiState,
-    onUiAction: (WebViewUiAction) -> Unit
+    onUiAction: (WebViewUiAction) -> Unit,
 ) {
     MoimScaffold(
         modifier = modifier.fillMaxSize(),
@@ -67,7 +67,7 @@ fun WebViewScreen(
                 MoimTopAppbar(
                     modifier = Modifier.fillMaxWidth(),
                     title = uiState.webTitle,
-                    onClickNavigate = { onUiAction(WebViewUiAction.OnClickBack) }
+                    onClickNavigate = { onUiAction(WebViewUiAction.OnClickBack) },
                 )
                 AnimatedVisibility(uiState.loadProgress < 1f) {
                     LinearProgressIndicator(
@@ -85,9 +85,9 @@ fun WebViewScreen(
                 modifier = Modifier.padding(it),
                 webUrl = uiState.webUrl,
                 onProgress = { onUiAction(WebViewUiAction.UpdatedProgress(it)) },
-                onWebTitle = { onUiAction(WebViewUiAction.UpdatedWebTitle(it)) }
+                onWebTitle = { onUiAction(WebViewUiAction.UpdatedWebTitle(it)) },
             )
-        }
+        },
     )
 }
 
@@ -113,10 +113,11 @@ private fun WebViewContainer(
             domStorageEnabled = true
         }
         webView.apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-            )
+            layoutParams =
+                ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                )
             webViewClient =
                 object : WebViewClient() {
                     override fun shouldOverrideUrlLoading(
@@ -167,7 +168,7 @@ private fun WebViewScreenPreview() {
         WebViewScreen(
             modifier = Modifier.containerScreen(),
             uiState = WebViewUiState(webUrl = "", webTitle = "공지사항"),
-            onUiAction = {}
+            onUiAction = {},
         )
     }
 }

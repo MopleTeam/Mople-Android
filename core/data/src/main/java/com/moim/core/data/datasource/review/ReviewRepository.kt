@@ -6,7 +6,6 @@ import com.moim.core.common.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface ReviewRepository {
-
     suspend fun getReviews(
         meetingId: String,
         cursor: String,
@@ -23,7 +22,10 @@ interface ReviewRepository {
         size: Int,
     ): PaginationContainer<List<User>>
 
-    fun deleteReviewImage(reviewId: String, images: List<String>): Flow<Unit>
+    fun deleteReviewImage(
+        reviewId: String,
+        images: List<String>,
+    ): Flow<Unit>
 
     fun deleteReview(reviewId: String): Flow<Unit>
 

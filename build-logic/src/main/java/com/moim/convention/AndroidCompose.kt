@@ -8,9 +8,7 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-internal fun Project.configureAndroidCompose(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
-) {
+internal fun Project.configureAndroidCompose(commonExtension: CommonExtension<*, *, *, *, *, *>) {
     commonExtension.apply {
         configure<ComposeCompilerGradlePluginExtension> {
             includeSourceInformation.set(true)

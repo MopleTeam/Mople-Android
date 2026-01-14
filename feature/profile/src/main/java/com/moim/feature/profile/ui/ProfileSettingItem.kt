@@ -25,26 +25,27 @@ import com.moim.feature.profile.ProfileUiAction
 @Composable
 fun ProfileSettingContainer(
     modifier: Modifier = Modifier,
-    onUiAction: OnProfileUiAction
+    onUiAction: OnProfileUiAction,
 ) {
     val prefix = if (BuildConfig.DEBUG) "[DEV] " else ""
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
     ) {
         ProfileSettingItem(
             text = stringResource(R.string.profile_alarm),
-            onClick = { onUiAction(ProfileUiAction.OnClickAlarmSetting) }
+            onClick = { onUiAction(ProfileUiAction.OnClickAlarmSetting) },
         )
         ProfileSettingItem(
             text = stringResource(R.string.profile_privacy_policy),
-            onClick = { onUiAction(ProfileUiAction.OnClickPrivacyPolicy) }
+            onClick = { onUiAction(ProfileUiAction.OnClickPrivacyPolicy) },
         )
         ProfileSettingItem(
             text = stringResource(R.string.profile_version),
-            subText = prefix + BuildConfig.VERSION_NAME
+            subText = prefix + BuildConfig.VERSION_NAME,
         )
     }
 }
@@ -57,10 +58,11 @@ fun ProfileSettingItem(
     onClick: () -> Unit = {},
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .onSingleClick(enabled = subText == null, onClick = onClick)
-            .padding(vertical = 16.dp, horizontal = 20.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .onSingleClick(enabled = subText == null, onClick = onClick)
+                .padding(vertical = 16.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         MoimText(
@@ -68,7 +70,7 @@ fun ProfileSettingItem(
             text = text,
             singleLine = false,
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.gray.gray01
+            color = MoimTheme.colors.gray.gray01,
         )
 
         Spacer(Modifier.width(4.dp))
@@ -77,14 +79,14 @@ fun ProfileSettingItem(
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_next),
                 contentDescription = "",
-                tint = MoimTheme.colors.icon
+                tint = MoimTheme.colors.icon,
             )
         } else {
             MoimText(
                 text = subText,
                 singleLine = false,
                 style = MoimTheme.typography.title03.medium,
-                color = MoimTheme.colors.gray.gray06
+                color = MoimTheme.colors.gray.gray06,
             )
         }
     }

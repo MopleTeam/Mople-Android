@@ -29,17 +29,18 @@ fun ProfileUpdateNicknameTextField(
     MoimText(
         text = stringResource(R.string.profile_update_nickname),
         style = MoimTheme.typography.title03.semiBold,
-        color = MoimTheme.colors.gray.gray01
+        color = MoimTheme.colors.gray.gray01,
     )
 
     Spacer(Modifier.height(8.dp))
 
     MoimTextField(
         hintText = stringResource(R.string.profile_update_hint),
-        textFieldColors = moimTextFieldColors().copy(
-            focusedSupportingTextColor = color_34C759,
-            unfocusedSupportingTextColor = color_34C759,
-        ),
+        textFieldColors =
+            moimTextFieldColors().copy(
+                focusedSupportingTextColor = color_34C759,
+                unfocusedSupportingTextColor = color_34C759,
+            ),
         isError = isDuplicated == true || isRegexError,
         errorMessage = stringResource(if (isRegexError) R.string.profile_update_regex_error else R.string.profile_update_duplicate_error),
         supportText = if (isDuplicated == false) stringResource(R.string.profile_update_pass) else null,
@@ -48,7 +49,7 @@ fun ProfileUpdateNicknameTextField(
         onTextChanged = { onUiAction(ProfileUpdateUiAction.OnChangeNickname(it)) },
         trailingIcon = {
             Box(
-                modifier = Modifier.padding(end = 16.dp)
+                modifier = Modifier.padding(end = 16.dp),
             ) {
                 MoimPrimaryButton(
                     modifier = Modifier,
@@ -56,9 +57,9 @@ fun ProfileUpdateNicknameTextField(
                     verticalPadding = 8.dp,
                     text = stringResource(R.string.profile_update_duplicate_check),
                     style = MoimTheme.typography.body01.semiBold,
-                    onClick = { onUiAction(ProfileUpdateUiAction.OnClickDuplicatedCheck) }
+                    onClick = { onUiAction(ProfileUpdateUiAction.OnClickDuplicatedCheck) },
                 )
             }
-        }
+        },
     )
 }

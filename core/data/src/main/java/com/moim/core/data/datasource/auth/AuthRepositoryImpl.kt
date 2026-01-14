@@ -18,52 +18,69 @@ internal class AuthRepositoryImpl @Inject constructor(
     private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource,
     private val preferenceStorage: PreferenceStorage,
 ) : AuthRepository {
+    override fun getToken(): Flow<Token?> = preferenceStorage.token
 
-    override fun getToken(): Flow<Token?> {
-        return preferenceStorage.token
-    }
-
-    override fun signUp(socialType: String, token: String, email: String, nickname: String, profileUrl: String?) = catchFlow {
+    override fun signUp(
+        socialType: String,
+        token: String,
+        email: String,
+        nickname: String,
+        profileUrl: String?,
+    ) = catchFlow {
         val uploadProfileUrl = imageUploadRemoteDataSource.uploadImage(profileUrl, "profile")
-        val authToken = authApi.signUp(
-            params = jsonOf(
-                KEY_SOCIAL_PROVIDER to socialType,
-                KEY_PROVIDER_TOKEN to token,
-                KEY_EMAIL to email,
-                KEY_NICKNAME to nickname,
-                KEY_IMAGE to uploadProfileUrl,
-                KEY_DEVICE_TYPE to DEVICE_TYPE_ANDROID
-            )
-        ).asItem().also { preferenceStorage.saveUserToken(it) }
+        val authToken =
+            authApi
+                .signUp(
+                    params =
+                        jsonOf(
+                            KEY_SOCIAL_PROVIDER to socialType,
+                            KEY_PROVIDER_TOKEN to token,
+                            KEY_EMAIL to email,
+                            KEY_NICKNAME to nickname,
+                            KEY_IMAGE to uploadProfileUrl,
+                            KEY_DEVICE_TYPE to DEVICE_TYPE_ANDROID,
+                        ),
+                ).asItem()
+                .also { preferenceStorage.saveUserToken(it) }
 
         emit(authToken)
     }
 
-    override fun signIn(socialType: String, token: String, email: String) = catchFlow {
-        val authToken = authApi.signIn(
-            params = jsonOf(
-                KEY_SOCIAL_PROVIDER to socialType,
-                KEY_PROVIDER_TOKEN to token,
-                KEY_EMAIL to email
-            )
-        ).asItem().also { preferenceStorage.saveUserToken(it) }
+    override fun signIn(
+        socialType: String,
+        token: String,
+        email: String,
+    ) = catchFlow {
+        val authToken =
+            authApi
+                .signIn(
+                    params =
+                        jsonOf(
+                            KEY_SOCIAL_PROVIDER to socialType,
+                            KEY_PROVIDER_TOKEN to token,
+                            KEY_EMAIL to email,
+                        ),
+                ).asItem()
+                .also { preferenceStorage.saveUserToken(it) }
 
         emit(authToken)
     }
 
-    override fun signOut(userId: String): Flow<Unit> = catchFlow {
-        val token = preferenceStorage.token.first()?.accessToken
+    override fun signOut(userId: String): Flow<Unit> =
+        catchFlow {
+            val token = preferenceStorage.token.first()?.accessToken
 
-        emit(
-            authApi.signOut(
-                token = token.convertToToken(),
-                params = jsonOf(
-                    KEY_ID to userId,
-                    KEY_ROLE to "ADMIN"
-                )
+            emit(
+                authApi.signOut(
+                    token = token.convertToToken(),
+                    params =
+                        jsonOf(
+                            KEY_ID to userId,
+                            KEY_ROLE to "ADMIN",
+                        ),
+                ),
             )
-        )
-    }
+        }
 
     companion object {
         private const val KEY_SOCIAL_PROVIDER = "socialProvider"

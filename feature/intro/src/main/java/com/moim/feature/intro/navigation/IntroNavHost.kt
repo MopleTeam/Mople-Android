@@ -13,9 +13,7 @@ import com.moim.feature.intro.screen.signup.SignUpViewModel
 import com.moim.feature.intro.screen.splash.SplashRoute
 
 @Composable
-fun IntroNavHost(
-    navigateToMain: () -> Unit
-) {
+fun IntroNavHost(navigateToMain: () -> Unit) {
     val backStack = remember { mutableStateListOf<IntroRoute>(IntroRoute.Splash) }
 
     NavDisplay(
@@ -30,7 +28,7 @@ fun IntroNavHost(
                                 backStack.clear()
                                 backStack.add(IntroRoute.SignIn)
                             },
-                            navigateToMain = { navigateToMain() }
+                            navigateToMain = { navigateToMain() },
                         )
                     }
                 }
@@ -44,7 +42,7 @@ fun IntroNavHost(
                             },
                             navigateToMain = {
                                 navigateToMain()
-                            }
+                            },
                         )
                     }
                 }
@@ -55,15 +53,16 @@ fun IntroNavHost(
                             navigateToMain = {
                                 navigateToMain()
                             },
-                            viewModel = hiltViewModel<SignUpViewModel, SignUpViewModel.Factory>(
-                                key = key.token,
-                            ) { factory ->
-                                factory.create(key)
-                            },
+                            viewModel =
+                                hiltViewModel<SignUpViewModel, SignUpViewModel.Factory>(
+                                    key = key.token,
+                                ) { factory ->
+                                    factory.create(key)
+                                },
                         )
                     }
                 }
             }
-        }
+        },
     )
 }

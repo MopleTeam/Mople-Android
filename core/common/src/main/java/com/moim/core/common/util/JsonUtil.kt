@@ -8,25 +8,22 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
 object JsonUtil {
+    val json =
+        Json {
+            isLenient = true
+            coerceInputValues = true
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+        }
 
-    val json = Json {
-        isLenient = true
-        coerceInputValues = true
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
+    inline fun <reified T> T.toJson(): String = json.encodeToString(this)
 
-    inline fun <reified T> T.toJson(): String {
-        return json.encodeToString(this)
-    }
-
-    inline fun <reified T> String.toObject(): T? {
-        return try {
+    inline fun <reified T> String.toObject(): T? =
+        try {
             json.decodeFromString<T>(this)
         } catch (error: Exception) {
             throw error
         }
-    }
 
     fun jsonOf(vararg pairs: Pair<String, *>): JsonObject {
         val map = mutableMapOf<String, JsonElement>()
@@ -34,8 +31,8 @@ object JsonUtil {
         return JsonObject(map)
     }
 
-    private fun Any?.toJsonElement(): JsonElement {
-        return when (this) {
+    private fun Any?.toJsonElement(): JsonElement =
+        when (this) {
             is Number -> JsonPrimitive(this)
             is Boolean -> JsonPrimitive(this)
             is String -> JsonPrimitive(this)
@@ -45,7 +42,6 @@ object JsonUtil {
             is JsonElement -> this
             else -> JsonNull
         }
-    }
 
     private fun Array<*>.toJsonArray(): JsonArray {
         val array = mutableListOf<JsonElement>()
@@ -66,5 +62,4 @@ object JsonUtil {
         }
         return JsonObject(map)
     }
-
 }

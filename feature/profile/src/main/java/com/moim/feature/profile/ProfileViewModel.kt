@@ -23,11 +23,11 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
 ) : BaseViewModel() {
-
     private val userResult =
-        userRepository.getUser()
+        userRepository
+            .getUser()
             .asResult()
             .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
@@ -71,16 +71,25 @@ class ProfileViewModel @Inject constructor(
     private fun logout() {
         viewModelScope.launch {
             uiState.checkState<ProfileUiState.Success> {
-                authRepository.signOut(user.userId)
+                authRepository
+                    .signOut(user.userId)
                     .asResult()
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
                         when (result) {
-                            is Result.Loading -> return@collect
-                            is Result.Success -> clearUserData()
-                            is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            is Result.Loading -> {
+                                return@collect
+                            }
+
+                            is Result.Success -> {
+                                clearUserData()
+                            }
+
+                            is Result.Error -> {
+                                when (result.exception) {
+                                    is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                    else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                                }
                             }
                         }
                     }
@@ -91,16 +100,25 @@ class ProfileViewModel @Inject constructor(
     private fun deleteUser() {
         viewModelScope.launch {
             uiState.checkState<ProfileUiState.Success> {
-                userRepository.deleteUser()
+                userRepository
+                    .deleteUser()
                     .asResult()
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
                         when (result) {
-                            is Result.Loading -> return@collect
-                            is Result.Success -> clearUserData()
-                            is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            is Result.Loading -> {
+                                return@collect
+                            }
+
+                            is Result.Success -> {
+                                clearUserData()
+                            }
+
+                            is Result.Error -> {
+                                when (result.exception) {
+                                    is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                    else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                                }
                             }
                         }
                     }
@@ -120,7 +138,7 @@ sealed interface ProfileUiState : UiState {
     data class Success(
         val user: User,
         val isShowUserLogoutDialog: Boolean = false,
-        val isShowUserDeleteDialog: Boolean = false
+        val isShowUserDeleteDialog: Boolean = false,
     ) : ProfileUiState
 
     data object Error : ProfileUiState
@@ -140,11 +158,11 @@ sealed interface ProfileUiAction : UiAction {
     data object OnClickRefresh : ProfileUiAction
 
     data class OnShowUserLogoutDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : ProfileUiAction
 
     data class OnShowUserDeleteDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : ProfileUiAction
 }
 
@@ -158,6 +176,6 @@ sealed interface ProfileUiEvent : UiEvent {
     data object NavigateToIntro : ProfileUiEvent
 
     data class ShowToastMessage(
-        val message: ToastMessage
+        val message: ToastMessage,
     ) : ProfileUiEvent
 }

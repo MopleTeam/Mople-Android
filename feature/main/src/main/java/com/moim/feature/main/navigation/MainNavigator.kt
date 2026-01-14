@@ -12,8 +12,9 @@ import com.moim.core.ui.route.MainRoute
 /**
  * 네비게이션 이벤트를 처리하고 NavigationState를 업데이트
  */
-class MainNavigator(val state: MainNavigationState) {
-
+class MainNavigator(
+    val state: MainNavigationState,
+) {
     /**
      * 라우트로 네비게이션
      */
@@ -23,6 +24,7 @@ class MainNavigator(val state: MainNavigationState) {
             is MainRoute -> {
                 state.topLevelRoute = route
             }
+
             // DetailRoute이면 현재 스택에 추가
             else -> {
                 state.backStacks[state.topLevelRoute]?.add(route)
@@ -60,50 +62,49 @@ class MainNavigator(val state: MainNavigationState) {
 
     // === Main Tab Navigation ===
     fun navigateToHome() = navigate(MainRoute.Home)
+
     fun navigateToMeeting() = navigate(MainRoute.Meeting)
+
     fun navigateToCalendar() = navigate(MainRoute.Calendar)
+
     fun navigateToProfile() = navigate(MainRoute.Profile)
 
     // === Detail Navigation ===
-    fun navigateToMeetingDetail(meetingId: String) =
-        navigate(DetailRoute.MeetingDetail(meetingId))
+    fun navigateToMeetingDetail(meetingId: String) = navigate(DetailRoute.MeetingDetail(meetingId))
 
-    fun navigateToMeetingWrite(meeting: Meeting? = null) =
-        navigate(DetailRoute.MeetingWrite(meeting))
+    fun navigateToMeetingWrite(meeting: Meeting? = null) = navigate(DetailRoute.MeetingWrite(meeting))
 
-    fun navigateToMeetingSetting(meeting: Meeting) =
-        navigate(DetailRoute.MeetingSetting(meeting))
+    fun navigateToMeetingSetting(meeting: Meeting) = navigate(DetailRoute.MeetingSetting(meeting))
 
     fun navigateToMapDetail(
         placeName: String,
         address: String,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
     ) = navigate(DetailRoute.MapDetail(placeName, address, latitude, longitude))
 
-    fun navigateToPlanDetail(viewIdType: ViewIdType) =
-        navigate(DetailRoute.PlanDetail(viewIdType))
+    fun navigateToPlanDetail(viewIdType: ViewIdType) = navigate(DetailRoute.PlanDetail(viewIdType))
 
     fun navigateToCommentDetail(
         meetId: String,
         postId: String,
-        comment: Comment? = null
+        comment: Comment? = null,
     ) = navigate(DetailRoute.CommentDetail(meetId, postId, comment))
 
-    fun navigateToPlanWrite(planItem: PlanItem? = null) =
-        navigate(DetailRoute.PlanWrite(planItem))
+    fun navigateToPlanWrite(planItem: PlanItem? = null) = navigate(DetailRoute.PlanWrite(planItem))
 
-    fun navigateToReviewWrite(postId: String, isUpdated: Boolean = false) =
-        navigate(DetailRoute.ReviewWrite(postId, isUpdated))
+    fun navigateToReviewWrite(
+        postId: String,
+        isUpdated: Boolean = false,
+    ) = navigate(DetailRoute.ReviewWrite(postId, isUpdated))
 
-    fun navigateToParticipantList(viewIdType: ViewIdType) =
-        navigate(DetailRoute.ParticipantList(viewIdType))
+    fun navigateToParticipantList(viewIdType: ViewIdType) = navigate(DetailRoute.ParticipantList(viewIdType))
 
     fun navigateToImageViewer(
         title: String,
         images: List<String>,
         position: Int,
-        @DrawableRes defaultImage: Int? = null
+        @DrawableRes defaultImage: Int? = null,
     ) = navigate(DetailRoute.ImageViewer(title, images, position, defaultImage))
 
     fun navigateToProfileUpdate() = navigate(DetailRoute.ProfileUpdate)

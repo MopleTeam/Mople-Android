@@ -6,7 +6,8 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface LocationApi {
-
     @POST("location/kakao")
-    suspend fun getSearchLocation(@Body params: JsonObject): PlaceResponseContainer
+    suspend fun getSearchLocation(
+        @Body params: JsonObject,
+    ): PlaceResponseContainer
 }

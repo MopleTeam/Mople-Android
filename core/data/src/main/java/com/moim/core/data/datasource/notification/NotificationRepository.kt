@@ -5,7 +5,6 @@ import com.moim.core.common.model.PaginationContainer
 import kotlinx.coroutines.flow.Flow
 
 interface NotificationRepository {
-
     suspend fun getNotifications(
         cursor: String,
         size: Int,

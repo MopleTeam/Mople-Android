@@ -43,15 +43,16 @@ fun MapDetailPlaceInfoDialog(
         },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.Center
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+            verticalArrangement = Arrangement.Center,
         ) {
             MoimText(
                 text = placeName,
                 style = MoimTheme.typography.title02.semiBold,
-                color = MoimTheme.colors.gray.gray02
+                color = MoimTheme.colors.gray.gray02,
             )
             Spacer(Modifier.height(16.dp))
 
@@ -59,25 +60,26 @@ fun MapDetailPlaceInfoDialog(
                 text = address,
                 singleLine = false,
                 style = MoimTheme.typography.body01.regular,
-                color = MoimTheme.colors.gray.gray05
+                color = MoimTheme.colors.gray.gray05,
             )
 
             Spacer(Modifier.height(20.dp))
 
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
-                buttonColors = moimButtomColors().copy(
-                    containerColor = MoimTheme.colors.tertiary,
-                    contentColor = MoimTheme.colors.gray.gray01
-                ),
+                buttonColors =
+                    moimButtomColors().copy(
+                        containerColor = MoimTheme.colors.tertiary,
+                        contentColor = MoimTheme.colors.gray.gray01,
+                    ),
                 onClick = {
                     onUiAction(MapDetailUiAction.OnShowMapAppDialog(true))
                     onUiAction(dismissAction)
-                }
+                },
             ) {
                 Text(
                     text = stringResource(R.string.map_detail_find_location),
-                    style = MoimTheme.typography.title03.semiBold
+                    style = MoimTheme.typography.title03.semiBold,
                 )
             }
         }

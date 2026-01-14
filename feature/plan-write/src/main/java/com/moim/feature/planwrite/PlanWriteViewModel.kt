@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okio.IOException
+import timber.log.Timber
 import java.time.ZonedDateTime
 
 @HiltViewModel(assistedFactory = PlanWriteViewModel.Factory::class)
@@ -47,12 +48,15 @@ class PlanWriteViewModel @AssistedInject constructor(
     private val planItem = planWriteRoute.planItem
     private val selectedMeetingId = MutableStateFlow<String?>(null)
 
-    private val meetings = getMeetingsUseCase()
-        .mapLatest { it.map { meeting -> MeetingUiModel(meeting) } }
-        .cachedIn(viewModelScope)
-        .combine(selectedMeetingId) { meetings, selectedMeetingId ->
-            meetings.map { pagingData -> pagingData.copy(isSelected = pagingData.meeting.id == selectedMeetingId) }
-        }.cachedIn(viewModelScope)
+    private val meetings =
+        getMeetingsUseCase()
+            .mapLatest { it.map { meeting -> MeetingUiModel(meeting) } }
+            .cachedIn(viewModelScope)
+            .combine(selectedMeetingId) { meetings, selectedMeetingId ->
+                meetings.map { pagingData ->
+                    pagingData.copy(isSelected = pagingData.meeting.id == selectedMeetingId)
+                }
+            }.cachedIn(viewModelScope)
 
     init {
         viewModelScope.launch {
@@ -72,8 +76,8 @@ class PlanWriteViewModel @AssistedInject constructor(
                         selectMeetingId = plan.meetingId,
                         selectMeetingName = plan.meetingName,
                         enableMeetingSelected = false,
-                        enabledSubmit = plan.postId.isNotEmpty()
-                    )
+                        enabledSubmit = plan.postId.isNotEmpty(),
+                    ),
                 )
                 selectedMeetingId.update { plan.meetingId }
             } ?: run { setUiState(PlanWriteUiState.PlanWrite()) }
@@ -108,8 +112,8 @@ class PlanWriteViewModel @AssistedInject constructor(
                     planLongitude = place.xPoint.toDouble(),
                     planLatitude = place.yPoint.toDouble(),
                     isShowPlaceInfoDialog = true,
-                    isShowMapSearchScreen = false
-                )
+                    isShowMapSearchScreen = false,
+                ),
             )
         }
     }
@@ -124,8 +128,8 @@ class PlanWriteViewModel @AssistedInject constructor(
                     planLongitude = place.xPoint.toDouble(),
                     planLatitude = place.yPoint.toDouble(),
                     selectedPlace = null,
-                    isShowMapScreen = false
-                )
+                    isShowMapScreen = false,
+                ),
             )
         }
     }
@@ -168,39 +172,52 @@ class PlanWriteViewModel @AssistedInject constructor(
 
     private fun setPlanCreateEnabled() {
         uiState.checkState<PlanWriteUiState.PlanWrite> {
-            val enable = planName.isNullOrEmpty().not()
-                    && selectMeetingId.isNullOrEmpty().not()
-                    && planDate != null
-                    && planTime != null
+            val enable =
+                planName.isNullOrEmpty().not() &&
+                    selectMeetingId.isNullOrEmpty().not() &&
+                    planDate != null &&
+                    planTime != null
 
             setUiState(copy(enabledSubmit = enable))
         }
     }
 
-    private fun getSearchPlace(keyword: String, x: String, y: String) {
+    private fun getSearchPlace(
+        keyword: String,
+        x: String,
+        y: String,
+    ) {
         viewModelScope.launch {
             uiState.checkState<PlanWriteUiState.PlanWrite> {
                 val trimKeyword = keyword.trim()
 
                 if (trimKeyword == searchKeyword) return@launch setUiState(copy(isShowMapSearchScreen = true))
 
-                planRepository.getSearchPlace(trimKeyword, x, y)
+                planRepository
+                    .getSearchPlace(trimKeyword, x, y)
                     .asResult()
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
                         when (result) {
-                            is Result.Loading -> return@collect
-                            is Result.Success -> setUiState(
-                                copy(
-                                    searchKeyword = trimKeyword,
-                                    isShowMapSearchScreen = true,
-                                    searchPlaces = result.data.filter { it.roadAddress.isNotEmpty() }.distinctBy { it.roadAddress }
-                                )
-                            )
+                            is Result.Loading -> {
+                                return@collect
+                            }
 
-                            is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            is Result.Success -> {
+                                setUiState(
+                                    copy(
+                                        searchKeyword = trimKeyword,
+                                        isShowMapSearchScreen = true,
+                                        searchPlaces = result.data.filter { it.roadAddress.isNotEmpty() }.distinctBy { it.roadAddress },
+                                    ),
+                                )
+                            }
+
+                            is Result.Error -> {
+                                when (result.exception) {
+                                    is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                    is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                                }
                             }
                         }
                     }
@@ -246,9 +263,13 @@ class PlanWriteViewModel @AssistedInject constructor(
                         )
                 }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
                     when (result) {
-                        is Result.Loading -> return@collect
+                        is Result.Loading -> {
+                            return@collect
+                        }
+
                         is Result.Success -> {
                             if (planId.isNullOrEmpty()) {
+                                Timber.e("test call= ${result.data.planAt}")
                                 planEventBus.send(PlanAction.PlanCreate(planItem = result.data.asPlanItem()))
                             } else {
                                 planEventBus.send(PlanAction.PlanUpdate(planItem = result.data.asPlanItem()))
@@ -256,9 +277,11 @@ class PlanWriteViewModel @AssistedInject constructor(
                             setUiEvent(PlanWriteUiEvent.NavigateToBack)
                         }
 
-                        is Result.Error -> when (result.exception) {
-                            is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                            is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                        is Result.Error -> {
+                            when (result.exception) {
+                                is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
                         }
                     }
                 }
@@ -292,8 +315,8 @@ class PlanWriteViewModel @AssistedInject constructor(
                     isShowMapSearchScreen = isShow,
                     searchKeyword = null,
                     selectedPlace = null,
-                    searchPlaces = emptyList()
-                )
+                    searchPlaces = emptyList(),
+                ),
             )
         }
     }
@@ -304,8 +327,8 @@ class PlanWriteViewModel @AssistedInject constructor(
                 setUiState(
                     copy(
                         isShowMeetingDialog = isShow,
-                        meetings = if (isShow) this@PlanWriteViewModel.meetings else null
-                    )
+                        meetings = if (isShow) this@PlanWriteViewModel.meetings else null,
+                    ),
                 )
             }
         }
@@ -327,9 +350,7 @@ class PlanWriteViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(
-            planWriteRoute: DetailRoute.PlanWrite
-        ): PlanWriteViewModel
+        fun create(planWriteRoute: DetailRoute.PlanWrite): PlanWriteViewModel
     }
 }
 
@@ -370,55 +391,55 @@ sealed interface PlanWriteUiAction : UiAction {
     data class OnClickPlanPlaceSearch(
         val keyword: String,
         val xPoint: String,
-        val yPoint: String
+        val yPoint: String,
     ) : PlanWriteUiAction
 
     data class OnClickSearchPlace(
-        val place: Place
+        val place: Place,
     ) : PlanWriteUiAction
 
     data class OnClickPlanPlace(
-        val place: Place
+        val place: Place,
     ) : PlanWriteUiAction
 
     data class OnClickPlanMeeting(
-        val meeting: Meeting
+        val meeting: Meeting,
     ) : PlanWriteUiAction
 
     data class OnClickPlanDate(
-        val date: ZonedDateTime
+        val date: ZonedDateTime,
     ) : PlanWriteUiAction
 
     data class OnClickPlanTime(
-        val date: ZonedDateTime
+        val date: ZonedDateTime,
     ) : PlanWriteUiAction
 
     data class OnShowMeetingsDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : PlanWriteUiAction
 
     data class OnShowDatePickerDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : PlanWriteUiAction
 
     data class OnShowTimePickerDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : PlanWriteUiAction
 
     data class OnShowPlaceInfoDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : PlanWriteUiAction
 
     data class OnShowPlaceMapScreen(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : PlanWriteUiAction
 
     data class OnChangePlanName(
-        val name: String
+        val name: String,
     ) : PlanWriteUiAction
 
     data class OnChangePlanDescription(
-        val description: String
+        val description: String,
     ) : PlanWriteUiAction
 }
 
@@ -426,6 +447,6 @@ sealed interface PlanWriteUiEvent : UiEvent {
     data object NavigateToBack : PlanWriteUiEvent
 
     data class ShowToastMessage(
-        val message: ToastMessage
+        val message: ToastMessage,
     ) : PlanWriteUiEvent
 }

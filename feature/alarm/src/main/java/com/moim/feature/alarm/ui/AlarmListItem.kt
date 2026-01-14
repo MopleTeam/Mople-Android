@@ -34,13 +34,14 @@ import java.time.ZonedDateTime
 fun AlarmListItem(
     modifier: Modifier = Modifier,
     alarm: AlarmUiModel,
-    onUiAction: (AlarmUiAction) -> Unit
+    onUiAction: (AlarmUiAction) -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .onSingleClick { onUiAction(AlarmUiAction.OnClickAlarm(alarm)) }
-            .padding(20.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .onSingleClick { onUiAction(AlarmUiAction.OnClickAlarm(alarm)) }
+                .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NetworkImage(
@@ -50,7 +51,7 @@ fun AlarmListItem(
                     .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(10.dp))
                     .size(40.dp),
             imageUrl = alarm.meetImageUrl,
-            errorImage = painterResource(R.drawable.ic_empty_meeting)
+            errorImage = painterResource(R.drawable.ic_empty_meeting),
         )
         Spacer(Modifier.size(16.dp))
 
@@ -58,20 +59,32 @@ fun AlarmListItem(
             MoimText(
                 text =
                     buildAnnotatedString {
-                        withStyle(style = MoimTheme.typography.title03.bold.toSpanStyle()) {
+                        withStyle(
+                            style =
+                                MoimTheme.typography
+                                    .title03
+                                    .bold
+                                    .toSpanStyle(),
+                        ) {
                             append(alarm.targetKeyword)
                         }
 
-                        withStyle(style = MoimTheme.typography.title03.medium.toSpanStyle()) {
+                        withStyle(
+                            style =
+                                MoimTheme.typography
+                                    .title03
+                                    .medium
+                                    .toSpanStyle(),
+                        ) {
                             append(alarm.title)
                         }
                     },
                 color = MoimTheme.colors.gray.gray02,
-                maxLine = 2
+                maxLine = 2,
             )
             Spacer(Modifier.size(4.dp))
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 MoimText(
                     text = alarm.meetName,
@@ -115,7 +128,7 @@ private fun AlarmListItemPreview() {
                     planDate = ZonedDateTime.now(),
                     sendAt = ZonedDateTime.now(),
                 ),
-            onUiAction = {}
+            onUiAction = {},
         )
     }
 }

@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 internal class PolicyRepositoryImpl @Inject constructor(
-    private val policyApi: PolicyApi
+    private val policyApi: PolicyApi,
 ) : PolicyRepository {
-
-    override fun getForceUpdateInfo(): Flow<ForceUpdateInfo> = catchFlow {
-        emit(policyApi.getForceUpdateInfo().asItem())
-    }
+    override fun getForceUpdateInfo(): Flow<ForceUpdateInfo> =
+        catchFlow {
+            emit(policyApi.getForceUpdateInfo().asItem())
+        }
 }

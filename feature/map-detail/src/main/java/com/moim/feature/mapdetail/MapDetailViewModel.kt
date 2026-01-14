@@ -14,17 +14,16 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @HiltViewModel(assistedFactory = MapDetailViewModel.Factory::class)
 class MapDetailViewModel @AssistedInject constructor(
-    @Assisted val mapDetail: DetailRoute.MapDetail
+    @Assisted val mapDetail: DetailRoute.MapDetail,
 ) : BaseViewModel() {
-
     init {
         setUiState(
             MapDetailUiState(
                 placeName = mapDetail.placeName,
                 address = mapDetail.address,
                 longitude = mapDetail.longitude,
-                latitude = mapDetail.latitude
-            )
+                latitude = mapDetail.latitude,
+            ),
         )
     }
 
@@ -44,8 +43,8 @@ class MapDetailViewModel @AssistedInject constructor(
                     mapType = mapType,
                     latitude = latitude,
                     longitude = longitude,
-                    address = address
-                )
+                    address = address,
+                ),
             )
         }
     }
@@ -64,9 +63,7 @@ class MapDetailViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(
-            mapDetail: DetailRoute.MapDetail,
-        ): MapDetailViewModel
+        fun create(mapDetail: DetailRoute.MapDetail): MapDetailViewModel
     }
 }
 
@@ -83,15 +80,15 @@ sealed interface MapDetailUiAction : UiAction {
     data object OnClickBack : MapDetailUiAction
 
     data class OnClickMapAddress(
-        val mapType: MapType
+        val mapType: MapType,
     ) : MapDetailUiAction
 
     data class OnShowPlaceInfoDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : MapDetailUiAction
 
     data class OnShowMapAppDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : MapDetailUiAction
 }
 
@@ -102,6 +99,6 @@ sealed interface MapDetailUiEvent : UiEvent {
         val mapType: MapType,
         val latitude: Double,
         val longitude: Double,
-        val address: String
+        val address: String,
     ) : MapDetailUiEvent
 }

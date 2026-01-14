@@ -26,22 +26,24 @@ import com.moim.feature.intro.screen.signup.SignUpUiAction
 fun ProfileImage(
     modifier: Modifier = Modifier,
     profileUrl: String?,
-    onUiAction: OnSignUpUiAction = {}
+    onUiAction: OnSignUpUiAction = {},
 ) {
     Column(
-        modifier = modifier
-            .padding(vertical = 24.dp)
-            .fillMaxWidth()
-            .padding(vertical = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier =
+            modifier
+                .padding(vertical = 24.dp)
+                .fillMaxWidth()
+                .padding(vertical = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box {
             NetworkImage(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(100))
-                    .align(Alignment.Center)
-                    .onSingleClick { onUiAction(SignUpUiAction.OnShowProfileEditDialog(true)) },
+                modifier =
+                    Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(100))
+                        .align(Alignment.Center)
+                        .onSingleClick { onUiAction(SignUpUiAction.OnShowProfileEditDialog(true)) },
                 imageUrl = profileUrl,
                 errorImage = painterResource(R.drawable.ic_empty_user_logo),
             )
@@ -50,7 +52,7 @@ fun ProfileImage(
                 modifier = Modifier.align(Alignment.BottomEnd),
                 imageVector = ImageVector.vectorResource(R.drawable.ic_edit),
                 contentDescription = null,
-                tint = Color.Unspecified
+                tint = Color.Unspecified,
             )
         }
     }

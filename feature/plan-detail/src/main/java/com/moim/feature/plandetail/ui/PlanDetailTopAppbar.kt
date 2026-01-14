@@ -13,7 +13,7 @@ import com.moim.feature.plandetail.PlanDetailUiAction
 fun PlanDetailTopAppbar(
     modifier: Modifier = Modifier,
     isMyPlan: Boolean,
-    onUiAction: OnPlanDetailUiAction
+    onUiAction: OnPlanDetailUiAction,
 ) {
     MoimTopAppbar(
         modifier = modifier,
@@ -28,8 +28,8 @@ fun PlanDetailTopAppbar(
                     } else {
                         onUiAction(PlanDetailUiAction.OnShowPlanReportDialog(true))
                     }
-                }
+                },
             )
-        }
+        },
     )
 }

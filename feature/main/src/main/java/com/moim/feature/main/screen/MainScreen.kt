@@ -55,68 +55,75 @@ fun MainScreen(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is MainUiEvent.NavigateToPlanDetail ->
+            is MainUiEvent.NavigateToPlanDetail -> {
                 navigator.navigateToPlanDetail(event.viewIdType)
+            }
 
-            is MainUiEvent.NavigateToMeetingDetail ->
+            is MainUiEvent.NavigateToMeetingDetail -> {
                 navigator.navigateToMeetingDetail(event.meetingId)
+            }
         }
     }
 
     MoimScaffold(
         content = { innerPadding ->
-            val entryProvider = entryProvider {
-                // Main Tabs
-                homeScreenEntry(navigator, innerPadding)
-                meetingScreenEntry(navigator, innerPadding)
-                calendarScreenEntry(navigator, innerPadding)
-                profileScreenEntry(navigator, innerPadding, navigateToIntro)
+            val entryProvider =
+                entryProvider {
+                    // Main Tabs
+                    homeScreenEntry(navigator, innerPadding)
+                    meetingScreenEntry(navigator, innerPadding)
+                    calendarScreenEntry(navigator, innerPadding)
+                    profileScreenEntry(navigator, innerPadding, navigateToIntro)
 
-                // Detail Screens
-                meetingDetailScreenEntry(navigator, innerPadding)
-                meetingWriteScreenEntry(navigator, innerPadding)
-                meetingSettingScreenEntry(navigator, innerPadding)
-                mapDetailScreenEntry(navigator, innerPadding)
-                planDetailScreenEntry(navigator, innerPadding)
-                commentDetailScreenEntry(navigator, innerPadding)
-                planWriteScreenEntry(navigator, innerPadding)
-                reviewWriteScreenEntry(navigator, innerPadding)
-                participantListScreenEntry(navigator, innerPadding)
-                imageViewerScreenEntry(navigator, innerPadding)
-                profileUpdateScreenEntry(navigator, innerPadding)
-                alarmScreenEntry(navigator, innerPadding)
-                alarmSettingScreenEntry(navigator, innerPadding)
-                webViewScreenEntry(navigator, innerPadding)
-            }
+                    // Detail Screens
+                    meetingDetailScreenEntry(navigator, innerPadding)
+                    meetingWriteScreenEntry(navigator, innerPadding)
+                    meetingSettingScreenEntry(navigator, innerPadding)
+                    mapDetailScreenEntry(navigator, innerPadding)
+                    planDetailScreenEntry(navigator, innerPadding)
+                    commentDetailScreenEntry(navigator, innerPadding)
+                    planWriteScreenEntry(navigator, innerPadding)
+                    reviewWriteScreenEntry(navigator, innerPadding)
+                    participantListScreenEntry(navigator, innerPadding)
+                    imageViewerScreenEntry(navigator, innerPadding)
+                    profileUpdateScreenEntry(navigator, innerPadding)
+                    alarmScreenEntry(navigator, innerPadding)
+                    alarmSettingScreenEntry(navigator, innerPadding)
+                    webViewScreenEntry(navigator, innerPadding)
+                }
 
             NavDisplay(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MoimTheme.colors.white),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MoimTheme.colors.white),
                 entries = navigationState.toEntries(entryProvider),
                 onBack = { navigator.goBack() },
                 transitionSpec = {
                     fadeIn(
-                        animationSpec = tween(NAV_ANIMATION_DELAY)
-                    ) togetherWith fadeOut(
-                        animationSpec = tween(NAV_ANIMATION_DELAY)
-                    )
+                        animationSpec = tween(NAV_ANIMATION_DELAY),
+                    ) togetherWith
+                        fadeOut(
+                            animationSpec = tween(NAV_ANIMATION_DELAY),
+                        )
                 },
                 popTransitionSpec = {
                     fadeIn(
-                        animationSpec = tween(NAV_ANIMATION_DELAY)
-                    ) togetherWith fadeOut(
-                        animationSpec = tween(NAV_ANIMATION_DELAY)
-                    )
+                        animationSpec = tween(NAV_ANIMATION_DELAY),
+                    ) togetherWith
+                        fadeOut(
+                            animationSpec = tween(NAV_ANIMATION_DELAY),
+                        )
                 },
                 predictivePopTransitionSpec = {
                     // Fade in for predictive back gesture
                     fadeIn(
-                        animationSpec = tween(NAV_ANIMATION_DELAY)
-                    ) togetherWith fadeOut(
-                        animationSpec = tween(NAV_ANIMATION_DELAY)
-                    )
-                }
+                        animationSpec = tween(NAV_ANIMATION_DELAY),
+                    ) togetherWith
+                        fadeOut(
+                            animationSpec = tween(NAV_ANIMATION_DELAY),
+                        )
+                },
             )
         },
         bottomBar = {
@@ -131,6 +138,6 @@ fun MainScreen(
                     onTabSelected = mainNavController::navigate,
                 )
             }
-        }
+        },
     )
 }

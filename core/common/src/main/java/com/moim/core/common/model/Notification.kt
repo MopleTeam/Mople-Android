@@ -12,7 +12,7 @@ enum class NotificationType {
     REVIEW_UPDATE,
     COMMENT_MENTION,
     COMMENT_REPLY,
-    NONE
+    NONE,
 }
 
 data class Notification(

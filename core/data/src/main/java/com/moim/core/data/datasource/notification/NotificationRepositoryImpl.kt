@@ -13,38 +13,41 @@ import javax.inject.Inject
 internal class NotificationRepositoryImpl @Inject constructor(
     private val notificationApi: NotificationApi,
 ) : NotificationRepository {
-
     override suspend fun getNotifications(
         cursor: String,
-        size: Int
-    ): PaginationContainer<List<Notification>> {
-        return try {
-            notificationApi.getNotifications(
-                cursor = cursor,
-                size= size
-            ).asItem {
-                it.map(NotificationResponse::asItem)
-            }
+        size: Int,
+    ): PaginationContainer<List<Notification>> =
+        try {
+            notificationApi
+                .getNotifications(
+                    cursor = cursor,
+                    size = size,
+                ).asItem {
+                    it.map(NotificationResponse::asItem)
+                }
         } catch (e: Exception) {
             throw converterException(e)
         }
-    }
 
-    override fun getNotificationSubscribes() = catchFlow {
-        emit(notificationApi.getNotificationSubscribes())
-    }
+    override fun getNotificationSubscribes() =
+        catchFlow {
+            emit(notificationApi.getNotificationSubscribes())
+        }
 
-    override fun setNotificationSubscribe(topic: String) = catchFlow {
-        emit(notificationApi.setNotificationSubscribe(jsonOf(KEY_TOPIC to listOf(topic))))
-    }
+    override fun setNotificationSubscribe(topic: String) =
+        catchFlow {
+            emit(notificationApi.setNotificationSubscribe(jsonOf(KEY_TOPIC to listOf(topic))))
+        }
 
-    override fun setNotificationUnSubscribe(topic: String) = catchFlow {
-        emit(notificationApi.setNotificationUnSubscribe(jsonOf(KEY_TOPIC to listOf(topic))))
-    }
+    override fun setNotificationUnSubscribe(topic: String) =
+        catchFlow {
+            emit(notificationApi.setNotificationUnSubscribe(jsonOf(KEY_TOPIC to listOf(topic))))
+        }
 
-    override fun clearNotificationCount() = catchFlow {
-        emit(notificationApi.clearNotificationCount())
-    }
+    override fun clearNotificationCount() =
+        catchFlow {
+            emit(notificationApi.clearNotificationCount())
+        }
 
     companion object {
         private const val KEY_TOPIC = "topics"

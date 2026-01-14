@@ -35,7 +35,7 @@ fun PlaceMapScreen(
     markerLongitude: Double?,
     markerLatitude: Double?,
     onLocationChange: (Location) -> Unit,
-    onUiAction: (PlanWriteUiAction) -> Unit
+    onUiAction: (PlanWriteUiAction) -> Unit,
 ) {
     val cameraPositionState = rememberCameraPositionState()
     val markerState = rememberUpdatedMarkerState(position = LatLng(markerLatitude ?: 0.0, markerLongitude ?: 0.0))
@@ -57,16 +57,17 @@ fun PlaceMapScreen(
 
     NaverMap(
         modifier = modifier.fillMaxSize(),
-        uiSettings = MapUiSettings(
-            isZoomControlEnabled = false,
-            isScaleBarEnabled = false,
-            isLogoClickEnabled = false,
-            isCompassEnabled = false
-        ),
+        uiSettings =
+            MapUiSettings(
+                isZoomControlEnabled = false,
+                isScaleBarEnabled = false,
+                isLogoClickEnabled = false,
+                isCompassEnabled = false,
+            ),
         cameraPositionState = cameraPositionState,
         locationSource = rememberFusedLocationSource(),
         properties = MapProperties(locationTrackingMode = LocationTrackingMode.Follow),
-        onLocationChange = onLocationChange
+        onLocationChange = onLocationChange,
     ) {
         if (markerLongitude != 0.0 && markerLatitude != 0.0) {
             MarkerComposable(
@@ -75,13 +76,13 @@ fun PlaceMapScreen(
                 onClick = {
                     onUiAction(PlanWriteUiAction.OnShowPlaceInfoDialog(true))
                     true
-                }
+                },
             ) {
                 Icon(
                     modifier = Modifier.size(54.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_location),
                     contentDescription = "",
-                    tint = MoimTheme.colors.primary.primary
+                    tint = MoimTheme.colors.primary.primary,
                 )
             }
         }

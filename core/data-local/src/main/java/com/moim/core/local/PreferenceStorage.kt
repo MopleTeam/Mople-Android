@@ -5,7 +5,6 @@ import com.moim.core.common.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface PreferenceStorage {
-
     val user: Flow<User?>
 
     suspend fun saveUser(user: User)

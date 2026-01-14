@@ -45,33 +45,34 @@ fun HomePlanCard(
     modifier: Modifier = Modifier,
     isHost: Boolean,
     plan: Plan,
-    onUiAction: OnHomeUiAction = {}
+    onUiAction: OnHomeUiAction = {},
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(HomeUiAction.OnClickPlan(planId = plan.planId, isPlan = true)) }
+        onClick = { onUiAction(HomeUiAction.OnClickPlan(planId = plan.planId, isPlan = true)) },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
         ) {
             MeetingInfoTopAppbar(
                 groupName = plan.meetingName,
-                meetingProfile = plan.meetingImageUrl
+                meetingProfile = plan.meetingImageUrl,
             )
             Spacer(Modifier.height(16.dp))
 
             MoimText(
                 text = plan.planName,
                 style = MoimTheme.typography.title01.bold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
             Spacer(Modifier.height(16.dp))
 
             MeetingInfoText(
                 iconRes = R.drawable.ic_meeting,
-                text = stringResource(R.string.unit_participants_count, plan.planMemberCount)
+                text = stringResource(R.string.unit_participants_count, plan.planMemberCount),
             )
 
             MeetingInfoText(
@@ -104,21 +105,23 @@ private fun MeetingInfoTopAppbar(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         NetworkImage(
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(6.dp))
-                .size(28.dp),
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(6.dp))
+                    .size(28.dp),
             imageUrl = meetingProfile,
-            errorImage = painterResource(R.drawable.ic_empty_meeting)
+            errorImage = painterResource(R.drawable.ic_empty_meeting),
         )
 
         MoimText(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
             text = groupName,
             style = MoimTheme.typography.body02.semiBold,
             color = MoimTheme.colors.gray.gray04,
@@ -127,7 +130,7 @@ private fun MeetingInfoTopAppbar(
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_next),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
     }
 }
@@ -142,19 +145,20 @@ private fun MeetingInfoText(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = verticalGravity
+        verticalAlignment = verticalGravity,
     ) {
         Icon(
             modifier = Modifier.size(18.dp),
             imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
 
         MoimText(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 4.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp),
             text = text,
             style = MoimTheme.typography.body02.medium,
             color = MoimTheme.colors.gray.gray04,
@@ -170,64 +174,69 @@ private fun MeetingWeatherInfo(
     isHost: Boolean,
     temperature: Float,
     address: String,
-    weatherUrl: String
+    weatherUrl: String,
 ) {
-    val notFoundText = if (address.isEmpty()) {
-        if (isHost) {
-            stringResource(R.string.common_empty_place_for_host)
+    val notFoundText =
+        if (address.isEmpty()) {
+            if (isHost) {
+                stringResource(R.string.common_empty_place_for_host)
+            } else {
+                stringResource(R.string.common_empty_place_for_guest)
+            }
+        } else if (weatherUrl.isEmpty()) {
+            stringResource(R.string.common_weather_not_found)
         } else {
-            stringResource(R.string.common_empty_place_for_guest)
+            ""
         }
-    } else if (weatherUrl.isEmpty()) {
-        stringResource(R.string.common_weather_not_found)
-    } else {
-        ""
-    }
 
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(color = color_F6F8FA, shape = RoundedCornerShape(10.dp))
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(color = color_F6F8FA, shape = RoundedCornerShape(10.dp))
+                .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .size(32.dp)
-                .background(MoimTheme.colors.white)
-                .padding(4.dp)
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .size(32.dp)
+                    .background(MoimTheme.colors.white)
+                    .padding(4.dp),
         ) {
             NetworkImage(
                 imageUrl = WEATHER_ICON_URL.format(weatherUrl),
-                errorImage = painterResource(R.drawable.ic_empty_weather)
+                errorImage = painterResource(R.drawable.ic_empty_weather),
             )
         }
 
         if (notFoundText.isNotEmpty()) {
             MoimText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 32.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(end = 32.dp),
                 text = notFoundText,
                 textAlign = TextAlign.Center,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04
+                color = MoimTheme.colors.gray.gray04,
             )
         } else {
             MoimText(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp),
                 text = stringResource(R.string.unit_weather, temperature.decimalFormatString()),
                 style = MoimTheme.typography.body01.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
 
             MoimText(
                 text = address,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04
+                color = MoimTheme.colors.gray.gray04,
             )
         }
     }
@@ -239,14 +248,15 @@ private fun HomeMeetingPlanCardPreview() {
     MoimTheme {
         HomePlanCard(
             isHost = false,
-            plan = Plan(
-                meetingId = "1",
-                meetingName = "우리중학교 동창1",
-                planName = "술 한잔 하는 날",
-                planMemberCount = 3,
-                planAddress = "",
-                planAt = ZonedDateTime.now()
-            ),
+            plan =
+                Plan(
+                    meetingId = "1",
+                    meetingName = "우리중학교 동창1",
+                    planName = "술 한잔 하는 날",
+                    planMemberCount = 3,
+                    planAddress = "",
+                    planAt = ZonedDateTime.now(),
+                ),
         )
     }
 }
