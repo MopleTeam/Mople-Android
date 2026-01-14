@@ -27,6 +27,7 @@ internal class AndroidFeatureConventionPlugin : Plugin<Project> {
                 implementation(project(":core:designsystem"))
                 implementation(project(":core:ui"))
                 implementation(project(":core:analytics"))
+                implementation(project(":core:crashreport"))
 
                 // AndroidX
                 implementation(libs.androidx.core.ktx)

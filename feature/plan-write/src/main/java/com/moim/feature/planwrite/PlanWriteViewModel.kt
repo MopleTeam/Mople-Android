@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okio.IOException
-import timber.log.Timber
 import java.time.ZonedDateTime
 
 @HiltViewModel(assistedFactory = PlanWriteViewModel.Factory::class)
@@ -269,7 +268,6 @@ class PlanWriteViewModel @AssistedInject constructor(
 
                         is Result.Success -> {
                             if (planId.isNullOrEmpty()) {
-                                Timber.e("test call= ${result.data.planAt}")
                                 planEventBus.send(PlanAction.PlanCreate(planItem = result.data.asPlanItem()))
                             } else {
                                 planEventBus.send(PlanAction.PlanUpdate(planItem = result.data.asPlanItem()))

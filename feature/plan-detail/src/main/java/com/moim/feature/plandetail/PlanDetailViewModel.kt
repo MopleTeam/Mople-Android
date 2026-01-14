@@ -21,6 +21,7 @@ import com.moim.core.common.model.item.CommentUiModel
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.crashreport.CrashReporter
 import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
@@ -77,6 +78,7 @@ class PlanDetailViewModel @AssistedInject constructor(
     private val getCommentsUseCase: GetCommentsUseCase,
     private val planEventBus: EventBus<PlanAction>,
     private val commentEventBus: EventBus<CommentAction>,
+    private val crashReporter: CrashReporter,
     @Assisted val planDetailRoute: DetailRoute.PlanDetail,
 ) : BaseViewModel() {
     private val viewIdType = planDetailRoute.viewIdType
@@ -215,9 +217,14 @@ class PlanDetailViewModel @AssistedInject constructor(
                         when (result.exception) {
                             is ForbiddenException,
                             is NotFoundException,
-                            -> PlanDetailUiState.NotFoundError
+                            -> {
+                                PlanDetailUiState.NotFoundError
+                            }
 
-                            else -> PlanDetailUiState.CommonError
+                            else -> {
+                                crashReporter.logException(result.exception)
+                                PlanDetailUiState.CommonError
+                            }
                         }
                     }
                 }
