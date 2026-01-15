@@ -20,7 +20,7 @@ fun MoimText(
     singleLine: Boolean = true,
     minLine: Int = 1,
     maxLine: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Ellipsis
+    overflow: TextOverflow = TextOverflow.Ellipsis,
 ) {
     val limitLine = if (singleLine) minLine else maxLine
 
@@ -32,7 +32,7 @@ fun MoimText(
         color = color,
         minLines = minLine,
         maxLines = limitLine,
-        overflow = overflow
+        overflow = overflow,
     )
 }
 
@@ -46,7 +46,7 @@ fun MoimText(
     singleLine: Boolean = true,
     minLine: Int = 1,
     maxLine: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Ellipsis
+    overflow: TextOverflow = TextOverflow.Ellipsis,
 ) {
     val limitLine = if (singleLine) minLine else maxLine
 
@@ -58,6 +58,6 @@ fun MoimText(
         color = color,
         minLines = minLine,
         maxLines = limitLine,
-        overflow = overflow
+        overflow = overflow,
     )
 }

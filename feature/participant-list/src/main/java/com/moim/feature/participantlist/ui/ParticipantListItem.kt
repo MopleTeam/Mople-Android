@@ -41,18 +41,27 @@ fun ParticipantListItem(
     onUiAction: (ParticipantListUiAction) -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box {
             NetworkImage(
-                modifier = Modifier
-                    .clip(shape = CircleShape)
-                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = CircleShape)
-                    .size(40.dp)
-                    .onSingleClick { onUiAction(ParticipantListUiAction.OnClickUserImage(userImage = participant.profileUrl, userName = participant.nickname)) },
+                modifier =
+                    Modifier
+                        .clip(shape = CircleShape)
+                        .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = CircleShape)
+                        .size(40.dp)
+                        .onSingleClick {
+                            onUiAction(
+                                ParticipantListUiAction.OnClickUserImage(
+                                    userImage = participant.profileUrl,
+                                    userName = participant.nickname,
+                                ),
+                            )
+                        },
                 imageUrl = participant.profileUrl,
                 errorImage = painterResource(R.drawable.ic_empty_user_logo),
             )
@@ -60,12 +69,12 @@ fun ParticipantListItem(
             if (participant.userRole == MEET_WRITER && isMeeting) {
                 CreatorIcon(
                     modifier = Modifier.align(Alignment.BottomEnd),
-                    isMeeting = true
+                    isMeeting = true,
                 )
             } else if (participant.userRole == PLAN_WRITER && !isMeeting) {
                 CreatorIcon(
                     modifier = Modifier.align(Alignment.BottomEnd),
-                    isMeeting = false
+                    isMeeting = false,
                 )
             }
         }
@@ -75,7 +84,7 @@ fun ParticipantListItem(
         MoimText(
             text = participant.nickname,
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.gray.gray02
+            color = MoimTheme.colors.gray.gray02,
         )
     }
 }
@@ -83,7 +92,7 @@ fun ParticipantListItem(
 @Composable
 private fun CreatorIcon(
     modifier: Modifier = Modifier,
-    isMeeting: Boolean
+    isMeeting: Boolean,
 ) {
     val creatorIcon = if (isMeeting) R.drawable.ic_crown else R.drawable.ic_editor
 
@@ -91,7 +100,7 @@ private fun CreatorIcon(
         modifier = modifier.size(16.dp),
         imageVector = ImageVector.vectorResource(creatorIcon),
         contentDescription = "",
-        tint = Color.Unspecified
+        tint = Color.Unspecified,
     )
 }
 
@@ -100,17 +109,19 @@ private fun CreatorIcon(
 private fun ParticipantListItemPreview() {
     MoimTheme {
         ParticipantListItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.white),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MoimTheme.colors.white),
             isMeeting = true,
-            participant = User(
-                userId = "",
-                profileUrl = "",
-                nickname = "퉁퉁이",
-                userRole = "HOST"
-            ),
-            onUiAction = {}
+            participant =
+                User(
+                    userId = "",
+                    profileUrl = "",
+                    nickname = "퉁퉁이",
+                    userRole = "HOST",
+                ),
+            onUiAction = {},
         )
     }
 }

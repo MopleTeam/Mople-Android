@@ -37,35 +37,38 @@ fun PlanDetailMapContent(
     longitude: Double,
     onUiAction: (PlanDetailUiAction) -> Unit,
 ) {
-    val cameraPositionState = rememberCameraPositionState().apply {
-        position = CameraPosition(LatLng(latitude, longitude), 15.2)
-    }
+    val cameraPositionState =
+        rememberCameraPositionState().apply {
+            position = CameraPosition(LatLng(latitude, longitude), 15.2)
+        }
     val markerState = rememberUpdatedMarkerState(position = LatLng(latitude, longitude))
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(6.dp))
-            .border(BorderStroke(1.dp, MoimTheme.colors.stroke))
-            .aspectRatio(33f / 16f)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(6.dp))
+                .border(BorderStroke(1.dp, MoimTheme.colors.stroke))
+                .aspectRatio(33f / 16f),
     ) {
         NaverMap(
-            uiSettings = MapUiSettings(
-                isScrollGesturesEnabled = false,
-                isZoomGesturesEnabled = false,
-                isTiltGesturesEnabled = false,
-                isRotateGesturesEnabled = false,
-                isStopGesturesEnabled = false,
-                isZoomControlEnabled = false,
-                isCompassEnabled = false,
-                isScaleBarEnabled = false,
-                isLocationButtonEnabled = false,
-                isLogoClickEnabled = false,
-            ),
+            uiSettings =
+                MapUiSettings(
+                    isScrollGesturesEnabled = false,
+                    isZoomGesturesEnabled = false,
+                    isTiltGesturesEnabled = false,
+                    isRotateGesturesEnabled = false,
+                    isStopGesturesEnabled = false,
+                    isZoomControlEnabled = false,
+                    isCompassEnabled = false,
+                    isScaleBarEnabled = false,
+                    isLocationButtonEnabled = false,
+                    isLogoClickEnabled = false,
+                ),
             onMapClick = { _, _ -> onUiAction(PlanDetailUiAction.OnClickMapDetail) },
             cameraPositionState = cameraPositionState,
             locationSource = rememberFusedLocationSource(),
             properties = MapProperties(locationTrackingMode = LocationTrackingMode.Follow),
-            onLocationChange = {}
+            onLocationChange = {},
         ) {
             MarkerComposable(
                 keys = arrayOf("location"),
@@ -75,7 +78,7 @@ fun PlanDetailMapContent(
                     modifier = Modifier.size(54.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_location),
                     contentDescription = "",
-                    tint = MoimTheme.colors.primary.primary
+                    tint = MoimTheme.colors.primary.primary,
                 )
             }
         }

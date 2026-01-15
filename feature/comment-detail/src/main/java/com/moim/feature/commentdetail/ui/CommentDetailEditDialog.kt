@@ -10,9 +10,9 @@ import com.moim.feature.commentdetail.CommentDetailAction
 @Composable
 fun CommentDetailEditDialog(
     comment: Comment,
-    onUiAction: (CommentDetailAction) -> Unit
+    onUiAction: (CommentDetailAction) -> Unit,
 ) {
-    val dismissAction = CommentDetailAction.OnShowCommentEditDialog(false,null)
+    val dismissAction = CommentDetailAction.OnShowCommentEditDialog(false, null)
 
     MoimAlertDialog(
         title = stringResource(R.string.comment_detail_edit),
@@ -30,11 +30,12 @@ fun CommentDetailEditDialog(
         },
     )
 }
+
 @Composable
 fun CommentDetailReportDialog(
     comment: Comment,
-    onUiAction: (CommentDetailAction) -> Unit
-)  {
+    onUiAction: (CommentDetailAction) -> Unit,
+) {
     val dismissAction = CommentDetailAction.OnShowCommentReportDialog(false, null)
 
     MoimAlertDialog(

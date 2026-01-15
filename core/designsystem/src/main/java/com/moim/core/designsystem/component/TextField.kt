@@ -144,13 +144,14 @@ fun MoimTextField(
     }
 
     MoimOutlinedTextField(
-        modifier = modifier.onKeyEvent {
-            val pressedEnter = (it.key == Key.Enter && imeAction == ImeAction.Done)
-            if (pressedEnter) {
-                onTextTriggered()
-            }
-            pressedEnter
-        },
+        modifier =
+            modifier.onKeyEvent {
+                val pressedEnter = (it.key == Key.Enter && imeAction == ImeAction.Done)
+                if (pressedEnter) {
+                    onTextTriggered()
+                }
+                pressedEnter
+            },
         colors = textFieldColors,
         value = dummyText,
         enabled = enabled,
@@ -168,22 +169,22 @@ fun MoimTextField(
                 overflow = TextOverflow.Ellipsis,
             )
         },
-
         visualTransformation = visualTransformation,
         textStyle = textStyle,
         isError = isError,
         shape = shape,
-
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = imeAction,
-            keyboardType = keyboardType
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                onTextChanged(dummyText)
-                focusManager.clearFocus()
-            }
-        ),
+        keyboardOptions =
+            KeyboardOptions.Default.copy(
+                imeAction = imeAction,
+                keyboardType = keyboardType,
+            ),
+        keyboardActions =
+            KeyboardActions(
+                onDone = {
+                    onTextChanged(dummyText)
+                    focusManager.clearFocus()
+                },
+            ),
         supportingText = if (isError && errorMessage != null) errorMessage else supportText,
         maxLines = maxLine,
         singleLine = singleLine,
@@ -240,13 +241,14 @@ fun MoimTextField(
     }
 
     MoimOutlinedTextField(
-        modifier = modifier.onKeyEvent {
-            val pressedEnter = (it.key == Key.Enter && imeAction == ImeAction.Done)
-            if (pressedEnter) {
-                onTextTriggered()
-            }
-            pressedEnter
-        },
+        modifier =
+            modifier.onKeyEvent {
+                val pressedEnter = (it.key == Key.Enter && imeAction == ImeAction.Done)
+                if (pressedEnter) {
+                    onTextTriggered()
+                }
+                pressedEnter
+            },
         colors = textFieldColors,
         value = dummyText,
         enabled = enabled,
@@ -264,22 +266,22 @@ fun MoimTextField(
                 overflow = TextOverflow.Ellipsis,
             )
         },
-
         visualTransformation = visualTransformation,
         textStyle = textStyle,
         isError = isError,
         shape = shape,
-
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = imeAction,
-            keyboardType = keyboardType
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                onTextChanged(dummyText)
-                focusManager.clearFocus()
-            }
-        ),
+        keyboardOptions =
+            KeyboardOptions.Default.copy(
+                imeAction = imeAction,
+                keyboardType = keyboardType,
+            ),
+        keyboardActions =
+            KeyboardActions(
+                onDone = {
+                    onTextChanged(dummyText)
+                    focusManager.clearFocus()
+                },
+            ),
         supportingText = if (isError && errorMessage != null) errorMessage else supportText,
         maxLines = maxLine,
         singleLine = singleLine,
@@ -296,11 +298,12 @@ fun MoimTextField(
 private fun MoimTextFieldPreview() {
     MoimTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.white)
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MoimTheme.colors.white)
+                    .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             MoimTextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -309,7 +312,7 @@ private fun MoimTextFieldPreview() {
                 singleLine = false,
                 supportText = "dummy support message",
                 errorMessage = "dummy error message",
-                isError = true
+                isError = true,
             )
 
             MoimTextField(
@@ -319,7 +322,7 @@ private fun MoimTextFieldPreview() {
                 singleLine = false,
                 supportText = "dummy support message",
                 errorMessage = "dummy error message",
-                isError = false
+                isError = false,
             )
 
             MoimTextField(
@@ -329,14 +332,14 @@ private fun MoimTextFieldPreview() {
                 leadingIcon = {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_search),
-                        contentDescription = ""
+                        contentDescription = "",
                     )
                 },
                 trailingIcon = {
                     IconButton(onClick = {}) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_close),
-                            contentDescription = ""
+                            contentDescription = "",
                         )
                     }
                 },
@@ -346,15 +349,16 @@ private fun MoimTextFieldPreview() {
             )
 
             MoimTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 139.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 139.dp),
                 text = "This is Multi Line\nThis is Multi Line\nThis is Multi Line\nThis is Multi Line",
                 hintText = "This is Multi Line",
                 singleLine = false,
                 supportText = "dummy support message",
                 errorMessage = "dummy error message",
-                isError = true
+                isError = true,
             )
         }
     }

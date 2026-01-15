@@ -41,41 +41,45 @@ fun MeetingDetailHeader(
     onUiAction: (MeetingDetailUiAction) -> Unit,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(20.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(20.dp),
     ) {
         MeetingDetailInfo(
             meeting = meeting,
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
         Spacer(Modifier.height(24.dp))
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = MoimTheme.colors.bg.primary, shape = RoundedCornerShape(8.dp))
-                .padding(6.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(color = MoimTheme.colors.bg.primary, shape = RoundedCornerShape(8.dp))
+                    .padding(6.dp),
         ) {
             MoimPrimaryButton(
                 modifier = Modifier.weight(1f),
-                buttonColors = moimButtomColors().copy(
-                    containerColor = if (isSelectedFuturePlan) MoimTheme.colors.primary.primary else MoimTheme.colors.bg.primary,
-                    contentColor = if (isSelectedFuturePlan) MoimTheme.colors.white else MoimTheme.colors.gray.gray04,
-                ),
+                buttonColors =
+                    moimButtomColors().copy(
+                        containerColor = if (isSelectedFuturePlan) MoimTheme.colors.primary.primary else MoimTheme.colors.bg.primary,
+                        contentColor = if (isSelectedFuturePlan) MoimTheme.colors.white else MoimTheme.colors.gray.gray04,
+                    ),
                 text = stringResource(R.string.meeting_detail_future_plan),
-                onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanTab(true)) }
+                onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanTab(true)) },
             )
 
             Spacer(Modifier.width(8.dp))
 
             MoimPrimaryButton(
                 modifier = Modifier.weight(1f),
-                buttonColors = moimButtomColors().copy(
-                    containerColor = if (isSelectedFuturePlan) MoimTheme.colors.bg.primary else MoimTheme.colors.primary.primary,
-                    contentColor = if (isSelectedFuturePlan) MoimTheme.colors.gray.gray04 else MoimTheme.colors.white,
-                ),
+                buttonColors =
+                    moimButtomColors().copy(
+                        containerColor = if (isSelectedFuturePlan) MoimTheme.colors.bg.primary else MoimTheme.colors.primary.primary,
+                        contentColor = if (isSelectedFuturePlan) MoimTheme.colors.gray.gray04 else MoimTheme.colors.white,
+                    ),
                 text = stringResource(R.string.meeting_detail_past_plan),
-                onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanTab(false)) }
+                onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanTab(false)) },
             )
         }
     }
@@ -89,73 +93,75 @@ private fun MeetingDetailInfo(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         NetworkImage(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(12.dp))
-                .size(56.dp)
-                .onSingleClick { onUiAction(MeetingDetailUiAction.OnClickMeetingImage(meeting.imageUrl, meeting.name)) },
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(12.dp))
+                    .size(56.dp)
+                    .onSingleClick { onUiAction(MeetingDetailUiAction.OnClickMeetingImage(meeting.imageUrl, meeting.name)) },
             imageUrl = meeting.imageUrl,
-            errorImage = painterResource(R.drawable.ic_empty_meeting)
+            errorImage = painterResource(R.drawable.ic_empty_meeting),
         )
 
         Spacer(Modifier.width(12.dp))
 
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             MoimText(
                 modifier = Modifier.fillMaxWidth(),
                 text = meeting.name,
                 singleLine = false,
                 style = MoimTheme.typography.title02.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
             Spacer(Modifier.height(4.dp))
 
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     modifier = Modifier.size(20.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_menu_meeting),
                     contentDescription = "",
-                    tint = MoimTheme.colors.icon
+                    tint = MoimTheme.colors.icon,
                 )
                 Spacer(Modifier.width(4.dp))
                 MoimText(
                     text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
                     style = MoimTheme.typography.body02.medium,
-                    color = MoimTheme.colors.gray.gray04
+                    color = MoimTheme.colors.gray.gray04,
                 )
 
                 MoimText(
                     modifier = Modifier.padding(horizontal = 4.dp),
                     text = stringResource(R.string.unit_dot),
                     style = MoimTheme.typography.body02.medium,
-                    color = MoimTheme.colors.gray.gray04
+                    color = MoimTheme.colors.gray.gray04,
                 )
 
                 Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .onSingleClick { onUiAction(MeetingDetailUiAction.OnClickMeetingInvite) },
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier =
+                        Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .onSingleClick { onUiAction(MeetingDetailUiAction.OnClickMeetingInvite) },
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     MoimText(
                         text = stringResource(R.string.common_invite),
                         style = MoimTheme.typography.body02.medium,
-                        color = MoimTheme.colors.gray.gray04
+                        color = MoimTheme.colors.gray.gray04,
                     )
 
                     Icon(
                         modifier = Modifier.size(20.dp),
                         imageVector = ImageVector.vectorResource(R.drawable.ic_next),
                         contentDescription = "",
-                        tint = MoimTheme.colors.icon
+                        tint = MoimTheme.colors.icon,
                     )
                 }
             }

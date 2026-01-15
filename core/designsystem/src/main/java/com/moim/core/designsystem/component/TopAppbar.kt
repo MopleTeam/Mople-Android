@@ -52,9 +52,10 @@ fun MoimTopAppbar(
     val keyboardController = LocalSoftwareKeyboardController.current
     Column {
         CenterAlignedTopAppBar(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(backgroundColor),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .background(backgroundColor),
             title = title,
             navigationIcon = {
                 if (isNavigationIconVisible) {
@@ -64,7 +65,7 @@ fun MoimTopAppbar(
                             keyboardController?.hide()
                             focusManager.clearFocus()
                             onClickNavigate()
-                        }
+                        },
                     ) {
                         navigationIcon()
                     }
@@ -72,12 +73,13 @@ fun MoimTopAppbar(
             },
             actions = actions,
             windowInsets = WindowInsets(top = 0.dp),
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                navigationIconContentColor = MoimTheme.colors.secondary,
-                titleContentColor = MoimTheme.colors.gray.gray01,
-                actionIconContentColor = MoimTheme.colors.icon
-            )
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    navigationIconContentColor = MoimTheme.colors.secondary,
+                    titleContentColor = MoimTheme.colors.gray.gray01,
+                    actionIconContentColor = MoimTheme.colors.icon,
+                ),
         )
 
         if (thickness != 0.dp) {
@@ -109,15 +111,16 @@ fun MoimTopAppbar(
     val keyboardController = LocalSoftwareKeyboardController.current
     Column {
         CenterAlignedTopAppBar(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(backgroundColor),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .background(backgroundColor),
             title = {
                 Text(
                     text = title,
                     style = titleStyle,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             },
             navigationIcon = {
@@ -128,7 +131,7 @@ fun MoimTopAppbar(
                             keyboardController?.hide()
                             focusManager.clearFocus()
                             onClickNavigate()
-                        }
+                        },
                     ) {
                         navigationIcon()
                     }
@@ -143,12 +146,13 @@ fun MoimTopAppbar(
                 }
             },
             windowInsets = WindowInsets(top = 0.dp),
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = Color.Transparent,
-                navigationIconContentColor = MoimTheme.colors.secondary,
-                titleContentColor = titleColor,
-                actionIconContentColor = MoimTheme.colors.icon
-            )
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    navigationIconContentColor = MoimTheme.colors.secondary,
+                    titleContentColor = titleColor,
+                    actionIconContentColor = MoimTheme.colors.icon,
+                ),
         )
 
         if (thickness != 0.dp) {
@@ -169,10 +173,10 @@ private fun MoimTopAppbarPreview() {
                 IconButton(onClick = {}) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
-                        contentDescription = ""
+                        contentDescription = "",
                     )
                 }
-            }
+            },
         )
     }
 }

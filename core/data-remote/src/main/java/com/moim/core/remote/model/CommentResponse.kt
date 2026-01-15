@@ -41,8 +41,8 @@ data class WriterResponse(
     val image: String? = null,
 )
 
-fun CommentResponse.asItem(openGraph: OpenGraph?): Comment {
-    return Comment(
+fun CommentResponse.asItem(openGraph: OpenGraph?): Comment =
+    Comment(
         postId = postId,
         commentId = commentId,
         content = content,
@@ -53,14 +53,12 @@ fun CommentResponse.asItem(openGraph: OpenGraph?): Comment {
         writer = writer.asItem(),
         mentions = mentions.map(WriterResponse::asItem),
         commentAt = commentAt.parseZonedDateTime(),
-        openGraph = openGraph
+        openGraph = openGraph,
     )
-}
 
-fun WriterResponse.asItem(): Writer {
-    return Writer(
+fun WriterResponse.asItem(): Writer =
+    Writer(
         userId = userId,
         nickname = nickname,
-        imageUrl = image ?: ""
+        imageUrl = image ?: "",
     )
-}

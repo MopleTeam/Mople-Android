@@ -53,11 +53,11 @@ data class ReviewImageResponse(
     @SerialName("imageId")
     val imageId: String,
     @SerialName("reviewImg")
-    val reviewImageUrl: String
+    val reviewImageUrl: String,
 )
 
-fun ReviewResponse.asItem(): Review {
-    return Review(
+fun ReviewResponse.asItem(): Review =
+    Review(
         userId = userId,
         meetingId = meetingId,
         meetingName = meetingName,
@@ -76,13 +76,11 @@ fun ReviewResponse.asItem(): Review {
         temperature = temperature,
         weatherAddress = weatherAddress,
         weatherIcon = weatherIcon,
-        reviewAt = reviewAt.parseZonedDateTime()
+        reviewAt = reviewAt.parseZonedDateTime(),
     )
-}
 
-fun ReviewImageResponse.asItem(): ReviewImage {
-    return ReviewImage(
+fun ReviewImageResponse.asItem(): ReviewImage =
+    ReviewImage(
         imageId = imageId,
-        imageUrl = reviewImageUrl
+        imageUrl = reviewImageUrl,
     )
-}

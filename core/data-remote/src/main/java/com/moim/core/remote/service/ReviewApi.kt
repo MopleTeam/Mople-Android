@@ -13,7 +13,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ReviewApi {
-
     @GET("review/list/{meetId}")
     suspend fun getReviews(
         @Path("meetId") id: String,
@@ -22,7 +21,9 @@ interface ReviewApi {
     ): PaginationContainerResponse<List<ReviewResponse>>
 
     @GET("review/{reviewId}")
-    suspend fun getReview(@Path("reviewId") id: String): ReviewResponse
+    suspend fun getReview(
+        @Path("reviewId") id: String,
+    ): ReviewResponse
 
     @GET("review/post/{postId}")
     suspend fun gerReviewForPostId(
@@ -37,11 +38,18 @@ interface ReviewApi {
     ): PaginationContainerResponse<List<UserResponse>>
 
     @HTTP(method = "DELETE", path = "review/images/{reviewId}", hasBody = true)
-    suspend fun deleteReviewImage(@Path("reviewId") id: String, @Body params: JsonObject)
+    suspend fun deleteReviewImage(
+        @Path("reviewId") id: String,
+        @Body params: JsonObject,
+    )
 
     @DELETE("review/{reviewId}")
-    suspend fun deleteReview(@Path("reviewId") id: String)
+    suspend fun deleteReview(
+        @Path("reviewId") id: String,
+    )
 
     @POST("review/report")
-    suspend fun reportReview(@Body params: JsonObject)
+    suspend fun reportReview(
+        @Body params: JsonObject,
+    )
 }

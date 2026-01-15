@@ -10,9 +10,7 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
-) {
+internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension<*, *, *, *, *, *>) {
     commonExtension.apply {
         defaultConfig {
             minSdk = MoimConfig.MIN_SDK
@@ -66,7 +64,6 @@ private fun Project.configureKotlin() {
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
                 "-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi",
                 "-opt-in=androidx.lifecycle.compose.ExperimentalLifecycleComposeApi",
-
                 // Enable Annotation API
                 "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode",
             )

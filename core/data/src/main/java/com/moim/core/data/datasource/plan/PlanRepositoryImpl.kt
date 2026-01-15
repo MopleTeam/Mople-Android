@@ -21,44 +21,53 @@ internal class PlanRepositoryImpl @Inject constructor(
     private val planApi: PlanApi,
     private val locationApi: LocationApi,
 ) : PlanRepository {
-
-    override fun getCurrentPlans() = catchFlow {
-        emit(planApi.getCurrentPlan().asItem())
-    }
+    override fun getCurrentPlans() =
+        catchFlow {
+            emit(planApi.getCurrentPlan().asItem())
+        }
 
     override suspend fun getPlans(
         meetingId: String,
         cursor: String,
-        size: Int
-    ): PaginationContainer<List<Plan>> {
-        return try {
-            planApi.getPlans(
-                id = meetingId,
-                cursor = cursor,
-                size = size
-            ).asItem { it.map(PlanResponse::asItem) }
+        size: Int,
+    ): PaginationContainer<List<Plan>> =
+        try {
+            planApi
+                .getPlans(
+                    id = meetingId,
+                    cursor = cursor,
+                    size = size,
+                ).asItem { it.map(PlanResponse::asItem) }
         } catch (e: Exception) {
             throw converterException(e)
         }
-    }
 
-    override fun getPlan(planId: String) = catchFlow {
-        emit(planApi.getPlan(planId).asItem())
-    }
+    override fun getPlan(planId: String) =
+        catchFlow {
+            emit(planApi.getPlan(planId).asItem())
+        }
 
-    override fun getPlansForCalendar(date: String): Flow<PlanReviewContainer> = catchFlow {
-        emit(planApi.getPlansForCalendar(date).asItem())
-    }
+    override fun getPlansForCalendar(date: String): Flow<PlanReviewContainer> =
+        catchFlow {
+            emit(planApi.getPlansForCalendar(date).asItem())
+        }
 
-    override fun getSearchPlace(keyword: String, xPoint: String, yPoint: String) = catchFlow {
+    override fun getSearchPlace(
+        keyword: String,
+        xPoint: String,
+        yPoint: String,
+    ) = catchFlow {
         emit(
-            locationApi.getSearchLocation(
-                params = jsonOf(
-                    KEY_QUERY to keyword,
-                    KEY_X_POINT to xPoint,
-                    KEY_Y_POINT to yPoint,
-                )
-            ).locations.map(PlaceResponse::asItem)
+            locationApi
+                .getSearchLocation(
+                    params =
+                        jsonOf(
+                            KEY_QUERY to keyword,
+                            KEY_X_POINT to xPoint,
+                            KEY_Y_POINT to yPoint,
+                        ),
+                ).locations
+                .map(PlaceResponse::asItem),
         )
     }
 
@@ -66,27 +75,29 @@ internal class PlanRepositoryImpl @Inject constructor(
         planId: String,
         cursor: String,
         size: Int,
-    ): PaginationContainer<List<User>> {
-        return try {
-            planApi.getPlanParticipants(
-                planId = planId,
-                cursor = cursor,
-                size = size,
-            ).asItem {
-                it.map(UserResponse::asItem)
-            }
+    ): PaginationContainer<List<User>> =
+        try {
+            planApi
+                .getPlanParticipants(
+                    planId = planId,
+                    cursor = cursor,
+                    size = size,
+                ).asItem {
+                    it.map(UserResponse::asItem)
+                }
         } catch (e: Exception) {
             throw converterException(e)
         }
-    }
 
-    override fun joinPlan(planId: String) = catchFlow {
-        emit(planApi.joinPlan(planId))
-    }
+    override fun joinPlan(planId: String) =
+        catchFlow {
+            emit(planApi.joinPlan(planId))
+        }
 
-    override fun leavePlan(planId: String) = catchFlow {
-        emit(planApi.leavePlan(planId))
-    }
+    override fun leavePlan(planId: String) =
+        catchFlow {
+            emit(planApi.leavePlan(planId))
+        }
 
     override fun createPlan(
         meetingId: String,
@@ -97,22 +108,23 @@ internal class PlanRepositoryImpl @Inject constructor(
         planDescription: String?,
         title: String,
         longitude: Double?,
-        latitude: Double?
+        latitude: Double?,
     ) = catchFlow {
         emit(
-            planApi.createPlan(
-                jsonOf(
-                    KEY_MEETING_ID to meetingId,
-                    KEY_NAME to planName,
-                    KEY_PLAN_TIME to planTime,
-                    KEY_PLAN_ADDRESS to planAddress,
-                    KEY_TITLE to title,
-                    KEY_LOT to longitude,
-                    KEY_LAT to latitude,
-                    KEY_WEATHER_ADDRESS to planWeatherAddress,
-                    KEY_DESCRIPTION to planDescription,
-                )
-            ).asItem()
+            planApi
+                .createPlan(
+                    jsonOf(
+                        KEY_MEETING_ID to meetingId,
+                        KEY_NAME to planName,
+                        KEY_PLAN_TIME to planTime,
+                        KEY_PLAN_ADDRESS to planAddress,
+                        KEY_TITLE to title,
+                        KEY_LOT to longitude,
+                        KEY_LAT to latitude,
+                        KEY_WEATHER_ADDRESS to planWeatherAddress,
+                        KEY_DESCRIPTION to planDescription,
+                    ),
+                ).asItem(),
         )
     }
 
@@ -125,38 +137,41 @@ internal class PlanRepositoryImpl @Inject constructor(
         planDescription: String?,
         title: String,
         longitude: Double?,
-        latitude: Double?
+        latitude: Double?,
     ) = catchFlow {
         emit(
-            planApi.updatePlan(
-                jsonOf(
-                    KEY_PLAN_ID to planId,
-                    KEY_NAME to planName,
-                    KEY_PLAN_TIME to planTime,
-                    KEY_PLAN_ADDRESS to planAddress,
-                    KEY_LOT to longitude,
-                    KEY_LAT to latitude,
-                    KEY_WEATHER_ADDRESS to planWeatherAddress,
-                    KEY_DESCRIPTION to planDescription,
-                )
-            ).asItem()
+            planApi
+                .updatePlan(
+                    jsonOf(
+                        KEY_PLAN_ID to planId,
+                        KEY_NAME to planName,
+                        KEY_PLAN_TIME to planTime,
+                        KEY_PLAN_ADDRESS to planAddress,
+                        KEY_LOT to longitude,
+                        KEY_LAT to latitude,
+                        KEY_WEATHER_ADDRESS to planWeatherAddress,
+                        KEY_DESCRIPTION to planDescription,
+                    ),
+                ).asItem(),
         )
     }
 
-    override fun deletePlan(planId: String) = catchFlow {
-        emit(planApi.deletePlan(planId))
-    }
+    override fun deletePlan(planId: String) =
+        catchFlow {
+            emit(planApi.deletePlan(planId))
+        }
 
-    override fun reportPlan(planId: String) = catchFlow {
-        emit(
-            planApi.reportPlan(
-                jsonOf(
-                    KEY_PLAN_ID to planId,
-                    KEY_REASON to "",
-                )
+    override fun reportPlan(planId: String) =
+        catchFlow {
+            emit(
+                planApi.reportPlan(
+                    jsonOf(
+                        KEY_PLAN_ID to planId,
+                        KEY_REASON to "",
+                    ),
+                ),
             )
-        )
-    }
+        }
 
     companion object {
         private const val KEY_QUERY = "query"

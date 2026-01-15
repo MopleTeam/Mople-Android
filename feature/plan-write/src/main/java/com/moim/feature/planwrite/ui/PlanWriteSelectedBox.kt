@@ -34,18 +34,18 @@ fun PlanWriteSelectedBox(
     value: String? = null,
     @DrawableRes iconRes: Int? = null,
     enable: Boolean = true,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             MoimText(
                 text = title,
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
 
             if (titleOption != null) {
@@ -53,31 +53,30 @@ fun PlanWriteSelectedBox(
                 MoimText(
                     text = titleOption,
                     style = MoimTheme.typography.body01.regular,
-                    color = MoimTheme.colors.gray.gray04
+                    color = MoimTheme.colors.gray.gray04,
                 )
             }
         }
         Spacer(Modifier.height(8.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(if (enable) MoimTheme.colors.bg.input else MoimTheme.colors.input.disable)
-                .onSingleClick(
-                    onClick = onClick,
-                    enabled = enable
-                )
-                .padding(horizontal = 16.dp, vertical = 18.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (enable) MoimTheme.colors.bg.input else MoimTheme.colors.input.disable)
+                    .onSingleClick(
+                        onClick = onClick,
+                        enabled = enable,
+                    ).padding(horizontal = 16.dp, vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-
             if (iconRes != null) {
                 Icon(
                     modifier = Modifier.size(20.dp),
                     imageVector = ImageVector.vectorResource(iconRes),
                     contentDescription = "",
-                    tint = if (enable) MoimTheme.colors.icon else MoimTheme.colors.gray.gray06
+                    tint = if (enable) MoimTheme.colors.icon else MoimTheme.colors.gray.gray06,
                 )
                 Spacer(Modifier.width(16.dp))
             }
@@ -97,10 +96,11 @@ fun PlanWriteSelectedBox(
 private fun PlanWriteSelectedBoxPreview() {
     MoimTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.white)
-                .padding(20.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MoimTheme.colors.white)
+                    .padding(20.dp),
         ) {
             PlanWriteSelectedBox(
                 title = "날짜 선택",

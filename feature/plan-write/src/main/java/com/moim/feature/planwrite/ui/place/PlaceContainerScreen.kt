@@ -46,9 +46,10 @@ fun PlaceContainerScreen(
     var currentY by remember { mutableDoubleStateOf(0.0) }
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .systemBarsPadding()
+        modifier =
+            modifier
+                .fillMaxSize()
+                .systemBarsPadding(),
     ) {
         MapTopAppbar(
             modifier = Modifier.fillMaxWidth(),
@@ -58,10 +59,10 @@ fun PlaceContainerScreen(
                     PlanWriteUiAction.OnClickPlanPlaceSearch(
                         keyword = it,
                         xPoint = currentX.toString(),
-                        yPoint = currentY.toString()
-                    )
+                        yPoint = currentY.toString(),
+                    ),
                 )
-            }
+            },
         )
 
         Box {
@@ -81,21 +82,22 @@ fun PlaceContainerScreen(
 
             if (isShowSearchScreen) {
                 PlaceSearchScreen(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .imePadding()
-                        .background(MoimTheme.colors.white),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .imePadding()
+                            .background(MoimTheme.colors.white),
                     isSearchResult = searchKeyword.isNullOrEmpty().not(),
                     searchPlaces = searchPlaces,
                     selectedPlace = selectedPlace,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
 
             if (isShowPlaceInfoDialog && selectedPlace != null) {
                 PlaceInfoDialog(
                     place = selectedPlace,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
         }
@@ -106,7 +108,7 @@ fun PlaceContainerScreen(
 fun MapTopAppbar(
     modifier: Modifier = Modifier,
     onClickBack: () -> Unit,
-    onClickSearch: (String) -> Unit
+    onClickSearch: (String) -> Unit,
 ) {
     var searchText by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
@@ -116,17 +118,19 @@ fun MapTopAppbar(
         modifier = modifier,
         title = {
             MoimTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
                 hintText = stringResource(R.string.plan_write_place_search_hint),
                 text = searchText,
                 shape = RoundedCornerShape(8.dp),
                 trailingIcon = {
                     Box(
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .padding(vertical = 8.dp)
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .padding(vertical = 8.dp),
                     ) {
                         MoimPrimaryButton(
                             verticalPadding = 8.dp,
@@ -135,7 +139,7 @@ fun MapTopAppbar(
                                 keyboardController?.hide()
                                 focusManager.clearFocus()
                                 onClickSearch(searchText)
-                            }
+                            },
                         ) {
                             Text(
                                 text = stringResource(R.string.common_search),
@@ -144,7 +148,7 @@ fun MapTopAppbar(
                         }
                     }
                 },
-                onTextChanged = { searchText = it }
+                onTextChanged = { searchText = it },
             )
         },
         onClickNavigate = onClickBack,

@@ -31,12 +31,11 @@ import kotlinx.coroutines.delay
 fun Modifier.containerScreen(
     padding: PaddingValues = PaddingValues(),
     backgroundColor: Color = MoimTheme.colors.bg.primary,
-): Modifier {
-    return this
+): Modifier =
+    this
         .fillMaxSize()
         .background(backgroundColor)
         .padding(padding)
-}
 
 @ExperimentalFoundationApi
 @SuppressLint("ModifierFactoryUnreferencedReceiver")
@@ -48,30 +47,32 @@ fun Modifier.onLongClick(
     onLongClick: (() -> Unit)? = null,
     onDoubleClick: (() -> Unit)? = null,
     onClick: () -> Unit = {},
-): Modifier = composed(
-    inspectorInfo = debugInspectorInfo {
-        name = "combinedClickable"
-        properties["enabled"] = enabled
-        properties["onClickLabel"] = onClickLabel
-        properties["role"] = role
-        properties["onClick"] = onClick
-        properties["onDoubleClick"] = onDoubleClick
-        properties["onLongClick"] = onLongClick
-        properties["onLongClickLabel"] = onLongClickLabel
+): Modifier =
+    composed(
+        inspectorInfo =
+            debugInspectorInfo {
+                name = "combinedClickable"
+                properties["enabled"] = enabled
+                properties["onClickLabel"] = onClickLabel
+                properties["role"] = role
+                properties["onClick"] = onClick
+                properties["onDoubleClick"] = onDoubleClick
+                properties["onLongClick"] = onLongClick
+                properties["onLongClickLabel"] = onLongClickLabel
+            },
+    ) {
+        Modifier.combinedClickable(
+            enabled = enabled,
+            onClickLabel = onClickLabel,
+            onLongClickLabel = onLongClickLabel,
+            onLongClick = onLongClick,
+            onDoubleClick = onDoubleClick,
+            onClick = onClick,
+            role = role,
+            indication = LocalIndication.current,
+            interactionSource = remember { MutableInteractionSource() },
+        )
     }
-) {
-    Modifier.combinedClickable(
-        enabled = enabled,
-        onClickLabel = onClickLabel,
-        onLongClickLabel = onLongClickLabel,
-        onLongClick = onLongClick,
-        onDoubleClick = onDoubleClick,
-        onClick = onClick,
-        role = role,
-        indication = LocalIndication.current,
-        interactionSource = remember { MutableInteractionSource() }
-    )
-}
 
 @SuppressLint("ModifierFactoryUnreferencedReceiver")
 fun Modifier.onSingleClick(
@@ -82,37 +83,39 @@ fun Modifier.onSingleClick(
     role: Role? = null,
     delay: Long = DEFAULT_SINGLE_CLICK_DURATION,
     onClick: (() -> Unit),
-): Modifier = composed(
-    inspectorInfo = debugInspectorInfo {
-        name = "singleClickable"
-        properties["enabled"] = enabled
-        properties["onClickLabel"] = onClickLabel
-        properties["role"] = role
-        properties["onClick"] = onClick
-    }
-) {
-    var enableAgain by remember { mutableStateOf(true) }
+): Modifier =
+    composed(
+        inspectorInfo =
+            debugInspectorInfo {
+                name = "singleClickable"
+                properties["enabled"] = enabled
+                properties["onClickLabel"] = onClickLabel
+                properties["role"] = role
+                properties["onClick"] = onClick
+            },
+    ) {
+        var enableAgain by remember { mutableStateOf(true) }
 
-    LaunchedEffect(enableAgain) {
-        if (enableAgain) return@LaunchedEffect
-        delay(timeMillis = delay)
-        enableAgain = true
-    }
+        LaunchedEffect(enableAgain) {
+            if (enableAgain) return@LaunchedEffect
+            delay(timeMillis = delay)
+            enableAgain = true
+        }
 
-    Modifier.clickable(
-        enabled = enabled,
-        onClickLabel = onClickLabel,
-        onClick = {
-            if (enableAgain) {
-                enableAgain = false
-                onClick()
-            }
-        },
-        role = role,
-        indication = indication,
-        interactionSource = interactionSource
-    )
-}
+        Modifier.clickable(
+            enabled = enabled,
+            onClickLabel = onClickLabel,
+            onClick = {
+                if (enableAgain) {
+                    enableAgain = false
+                    onClick()
+                }
+            },
+            role = role,
+            indication = indication,
+            interactionSource = interactionSource,
+        )
+    }
 
 fun Modifier.onSingleClick(
     bounded: Boolean = true,
@@ -121,24 +124,26 @@ fun Modifier.onSingleClick(
     role: Role? = null,
     delay: Long = DEFAULT_SINGLE_CLICK_DURATION,
     onClick: () -> Unit,
-): Modifier = composed(
-    inspectorInfo = debugInspectorInfo {
-        name = "singleClickable"
-        properties["enabled"] = enabled
-        properties["onClickLabel"] = onClickLabel
-        properties["role"] = role
-        properties["onClick"] = onClick
+): Modifier =
+    composed(
+        inspectorInfo =
+            debugInspectorInfo {
+                name = "singleClickable"
+                properties["enabled"] = enabled
+                properties["onClickLabel"] = onClickLabel
+                properties["role"] = role
+                properties["onClick"] = onClick
+            },
+    ) {
+        onSingleClick(
+            enabled = enabled,
+            onClickLabel = onClickLabel,
+            onClick = onClick,
+            role = role,
+            delay = delay,
+            indication = ripple(bounded = bounded, color = color_222222),
+            interactionSource = remember { MutableInteractionSource() },
+        )
     }
-) {
-    onSingleClick(
-        enabled = enabled,
-        onClickLabel = onClickLabel,
-        onClick = onClick,
-        role = role,
-        delay = delay,
-        indication = ripple(bounded = bounded, color = color_222222),
-        interactionSource = remember { MutableInteractionSource() }
-    )
-}
 
 private const val DEFAULT_SINGLE_CLICK_DURATION = 500L

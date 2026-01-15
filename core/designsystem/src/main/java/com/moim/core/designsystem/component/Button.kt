@@ -53,7 +53,7 @@ fun MoimPrimaryButton(
     enable: Boolean = true,
     text: String = "",
     style: TextStyle = MoimTheme.typography.body01.semiBold,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     Button(
         modifier = modifier,
@@ -61,16 +61,17 @@ fun MoimPrimaryButton(
         colors = buttonColors,
         enabled = enable,
         shape = shapes,
-        contentPadding = PaddingValues(
-            vertical = verticalPadding,
-            horizontal = horizontalPadding
-        ),
+        contentPadding =
+            PaddingValues(
+                vertical = verticalPadding,
+                horizontal = horizontalPadding,
+            ),
         content = {
             Text(
                 text = text,
-                style = style
+                style = style,
             )
-        }
+        },
     )
 }
 
@@ -91,11 +92,12 @@ fun MoimPrimaryButton(
         colors = buttonColors,
         enabled = enable,
         shape = shapes,
-        contentPadding = PaddingValues(
-            vertical = verticalPadding,
-            horizontal = horizontalPadding
-        ),
-        content = content
+        contentPadding =
+            PaddingValues(
+                vertical = verticalPadding,
+                horizontal = horizontalPadding,
+            ),
+        content = content,
     )
 }
 
@@ -107,28 +109,28 @@ fun MoimIconButton(
     @DrawableRes iconRes: Int,
     iconColor: Color = Color.Unspecified,
     backgroundColor: Color = Color.Unspecified,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     Box(
-        modifier = modifier
-            .defaultMinSize(minHeight = 40.dp, minWidth = 40.dp)
-            .clip(shape)
-            .background(backgroundColor)
-            .onSingleClick(
-                enabled = enable,
-                onClick = onClick,
-                role = Role.Button,
-            ),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .defaultMinSize(minHeight = 40.dp, minWidth = 40.dp)
+                .clip(shape)
+                .background(backgroundColor)
+                .onSingleClick(
+                    enabled = enable,
+                    onClick = onClick,
+                    role = Role.Button,
+                ),
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = "",
-            tint = iconColor
+            tint = iconColor,
         )
     }
 }
-
 
 @Composable
 fun MoimFloatingActionButton(
@@ -155,14 +157,15 @@ fun MoimFloatingActionButton(
         tonalElevation = tonalElevation,
         shadowElevation = shadowElevation,
         interactionSource = interactionSource,
-        border = BorderStroke(borderStrokeSize, borderStrokeColor)
+        border = BorderStroke(borderStrokeSize, borderStrokeColor),
     ) {
         Box(
-            modifier = Modifier
-                .defaultMinSize(
-                    minWidth = minWidth,
-                    minHeight = minHeight,
-                ),
+            modifier =
+                Modifier
+                    .defaultMinSize(
+                        minWidth = minWidth,
+                        minHeight = minHeight,
+                    ),
             contentAlignment = Alignment.Center,
         ) {
             content()
@@ -175,62 +178,64 @@ fun MoimFloatingActionButton(
 private fun MoimPrimaryButtonPreview() {
     MoimTheme {
         Column(
-            modifier = Modifier
-                .background(MoimTheme.colors.white)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .background(MoimTheme.colors.white)
+                    .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
                 text = "Primary Button",
-                style = MoimTheme.typography.title03.semiBold
+                style = MoimTheme.typography.title03.semiBold,
             )
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = "로그인",
-                buttonColors = moimButtomColors()
+                buttonColors = moimButtomColors(),
             )
 
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
-                buttonColors = moimButtomColors().copy(
-                    containerColor = color_FEE500,
-                    contentColor = MoimTheme.colors.gray.gray01
-                ),
-                onClick = {}
+                buttonColors =
+                    moimButtomColors().copy(
+                        containerColor = color_FEE500,
+                        contentColor = MoimTheme.colors.gray.gray01,
+                    ),
+                onClick = {},
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_kakao),
-                        contentDescription = ""
+                        contentDescription = "",
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.sign_in_kakao),
-                        style = MoimTheme.typography.body01.semiBold
+                        style = MoimTheme.typography.body01.semiBold,
                     )
                 }
             }
 
             Text(
                 text = "Etc Button",
-                style = MoimTheme.typography.title03.semiBold
+                style = MoimTheme.typography.title03.semiBold,
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 MoimIconButton(
-                    iconRes = R.drawable.ic_alarm
+                    iconRes = R.drawable.ic_alarm,
                 )
 
                 MoimFloatingActionButton(
-                    onClick = {}
+                    onClick = {},
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_add),
-                        contentDescription = ""
+                        contentDescription = "",
                     )
                 }
             }

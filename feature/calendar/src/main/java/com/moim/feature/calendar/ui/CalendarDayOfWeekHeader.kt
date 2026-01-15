@@ -14,7 +14,7 @@ import java.time.DayOfWeek
 fun CalendarDayOfWeekHeader(
     modifier: Modifier = Modifier,
     daysOfWeek: List<DayOfWeek>,
-    selectedDayOfWeek: DayOfWeek? = null
+    selectedDayOfWeek: DayOfWeek? = null,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),

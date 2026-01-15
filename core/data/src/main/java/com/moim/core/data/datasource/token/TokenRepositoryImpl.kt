@@ -10,17 +10,17 @@ import javax.inject.Inject
 internal class TokenRepositoryImpl @Inject constructor(
     private val tokenApi: TokenApi,
 ) : TokenRepository {
-
-    override fun setFcmToken(): Flow<Unit> = catchFlow {
-        emit(
-            tokenApi.setFcmToken(
-                jsonOf(
-                    KEY_TOKEN to FirebaseUtil.getFirebaseMessageToken(),
-                    KEY_SUBSCRIBE to true
-                )
+    override fun setFcmToken(): Flow<Unit> =
+        catchFlow {
+            emit(
+                tokenApi.setFcmToken(
+                    jsonOf(
+                        KEY_TOKEN to FirebaseUtil.getFirebaseMessageToken(),
+                        KEY_SUBSCRIBE to true,
+                    ),
+                ),
             )
-        )
-    }
+        }
 
     companion object {
         private const val KEY_TOKEN = "token"

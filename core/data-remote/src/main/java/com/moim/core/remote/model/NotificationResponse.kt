@@ -30,8 +30,8 @@ data class NotificationResponse(
     val message: String? = null,
 )
 
-fun NotificationResponse.asItem(): Notification {
-    return Notification(
+fun NotificationResponse.asItem(): Notification =
+    Notification(
         notificationId = notificationId,
         meetName = meetName,
         meetImgUrl = meetImgUrl,
@@ -43,4 +43,3 @@ fun NotificationResponse.asItem(): Notification {
         planDate = planDate.parseZonedDateTime(),
         sendAt = sendAt.parseZonedDateTime(),
     )
-}

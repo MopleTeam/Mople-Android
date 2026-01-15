@@ -10,12 +10,11 @@ data class HolidayResponse(
     @SerialName("title")
     val title: String,
     @SerialName("date")
-    val date: String
+    val date: String,
 )
 
-fun HolidayResponse.asItem() : Holiday {
-    return Holiday(
+fun HolidayResponse.asItem(): Holiday =
+    Holiday(
         title = title,
-        date = date.parseDateStringToZonedDateTime()
+        date = date.parseDateStringToZonedDateTime(),
     )
-}

@@ -68,32 +68,61 @@ fun MeetingDetailRoute(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is MeetingDetailUiEvent.NavigateToBack -> navigateToBack()
-            is MeetingDetailUiEvent.NavigateToMeetingSetting -> navigateToMeetingSetting(event.meeting)
-            is MeetingDetailUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.viewIdType)
-            is MeetingDetailUiEvent.NavigateToPlanWrite -> navigateToPlanWrite(event.plan.asPlanItem())
-            is MeetingDetailUiEvent.NavigateToImageViewer -> navigateToImageViewer(event.meetingName, listOf(event.imageUrl), 0, R.drawable.ic_empty_meeting)
-            is MeetingDetailUiEvent.NavigateToExternalShareUrl -> context.externalShareForUrl(event.url)
-            is MeetingDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
+            is MeetingDetailUiEvent.NavigateToBack -> {
+                navigateToBack()
+            }
+
+            is MeetingDetailUiEvent.NavigateToMeetingSetting -> {
+                navigateToMeetingSetting(event.meeting)
+            }
+
+            is MeetingDetailUiEvent.NavigateToPlanDetail -> {
+                navigateToPlanDetail(event.viewIdType)
+            }
+
+            is MeetingDetailUiEvent.NavigateToPlanWrite -> {
+                navigateToPlanWrite(event.plan.asPlanItem())
+            }
+
+            is MeetingDetailUiEvent.NavigateToImageViewer -> {
+                navigateToImageViewer(
+                    event.meetingName,
+                    listOf(event.imageUrl),
+                    0,
+                    R.drawable.ic_empty_meeting,
+                )
+            }
+
+            is MeetingDetailUiEvent.NavigateToExternalShareUrl -> {
+                context.externalShareForUrl(event.url)
+            }
+
+            is MeetingDetailUiEvent.ShowToastMessage -> {
+                showToast(context, event.message)
+            }
         }
     }
 
     when (val uiState = meetingDetailUiState) {
-        is MeetingDetailUiState.Loading -> LoadingScreen(modifier)
+        is MeetingDetailUiState.Loading -> {
+            LoadingScreen(modifier)
+        }
 
         is MeetingDetailUiState.Success -> {
             MeetingDetailScreen(
                 modifier = modifier,
                 uiState = uiState,
                 isLoading = isLoading,
-                onUiAction = viewModel::onUiAction
+                onUiAction = viewModel::onUiAction,
             )
         }
 
-        is MeetingDetailUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(MeetingDetailUiAction.OnClickRefresh) }
-        )
+        is MeetingDetailUiState.Error -> {
+            ErrorScreen(
+                modifier = modifier,
+                onClickRefresh = { viewModel.onUiAction(MeetingDetailUiAction.OnClickRefresh) },
+            )
+        }
     }
 }
 
@@ -109,28 +138,29 @@ fun MeetingDetailScreen(
 
     TrackScreenViewEvent(screenName = "meet_detail")
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         MoimTopAppbar(
             actions = {
                 MoimIconButton(
                     iconRes = R.drawable.ic_burger,
-                    onClick = { onUiAction(MeetingDetailUiAction.OnClickMeetingSetting) }
+                    onClick = { onUiAction(MeetingDetailUiAction.OnClickMeetingSetting) },
                 )
             },
-            onClickNavigate = { onUiAction(MeetingDetailUiAction.OnClickBack) }
+            onClickNavigate = { onUiAction(MeetingDetailUiAction.OnClickBack) },
         )
 
         MeetingDetailHeader(
             meeting = uiState.meeting,
             isSelectedFuturePlan = uiState.isPlanSelected,
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MoimTheme.colors.bg.primary)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(MoimTheme.colors.bg.primary),
         ) {
             if (plans == null || reviews == null) return
 
@@ -138,7 +168,7 @@ fun MeetingDetailScreen(
                 modifier = Modifier.fillMaxSize(),
                 enter = fadeIn(),
                 exit = fadeOut(),
-                visible = plans.loadState.isSuccess() && reviews.loadState.isSuccess()
+                visible = plans.loadState.isSuccess() && reviews.loadState.isSuccess(),
             ) {
                 MeetingDetailPlanContent(
                     userId = uiState.userId,
@@ -147,7 +177,7 @@ fun MeetingDetailScreen(
                     isPlanSelected = uiState.isPlanSelected,
                     planTotalCount = uiState.planTotalCount,
                     reviewTotalCount = uiState.reviewTotalCount,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
             androidx.compose.animation.AnimatedVisibility(
@@ -156,9 +186,10 @@ fun MeetingDetailScreen(
                 visible = plans.loadState.isLoading() || reviews.loadState.isLoading(),
             ) {
                 PagingLoadingScreen(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .align(Alignment.Center)
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .align(Alignment.Center),
                 )
             }
 
@@ -166,22 +197,22 @@ fun MeetingDetailScreen(
                 modifier = Modifier.fillMaxSize(),
                 enter = fadeIn(),
                 exit = fadeOut(),
-                visible = plans.loadState.isError() || reviews.loadState.isError()
+                visible = plans.loadState.isError() || reviews.loadState.isError(),
             ) {
                 ErrorScreen(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MoimTheme.colors.bg.primary),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(MoimTheme.colors.bg.primary),
                     onClickRefresh = { onUiAction(MeetingDetailUiAction.OnClickRefresh) },
                 )
             }
 
-
             androidx.compose.animation.AnimatedVisibility(
                 modifier = Modifier.fillMaxSize(),
                 enter = fadeIn(),
                 exit = fadeOut(),
-                visible = uiState.isPlanSelected && plans.loadState.isSuccess() && plans.itemCount == 0
+                visible = uiState.isPlanSelected && plans.loadState.isSuccess() && plans.itemCount == 0,
             ) {
                 MeetingDetailPlanEmpty()
             }
@@ -190,21 +221,22 @@ fun MeetingDetailScreen(
                 modifier = Modifier.fillMaxSize(),
                 enter = fadeIn(),
                 exit = fadeOut(),
-                visible = !uiState.isPlanSelected && reviews.loadState.isSuccess() && reviews.itemCount == 0
+                visible = !uiState.isPlanSelected && reviews.loadState.isSuccess() && reviews.itemCount == 0,
             ) {
                 MeetingDetailPlanEmpty()
             }
 
             MoimFloatingActionButton(
-                modifier = Modifier
-                    .padding(end = 24.dp, bottom = 20.dp)
-                    .size(54.dp)
-                    .align(Alignment.BottomEnd),
-                onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanWrite) }
+                modifier =
+                    Modifier
+                        .padding(end = 24.dp, bottom = 20.dp)
+                        .size(54.dp)
+                        .align(Alignment.BottomEnd),
+                onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanWrite) },
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_add),
-                    contentDescription = ""
+                    contentDescription = "",
                 )
             }
         }
@@ -221,7 +253,7 @@ fun MeetingDetailScreen(
             onClickPositive = {
                 if (uiState.cancelPlanItem == null) return@MoimAlertDialog
                 onUiAction(MeetingDetailUiAction.OnClickPlanApply(uiState.cancelPlanItem, false))
-            }
+            },
         )
     }
 

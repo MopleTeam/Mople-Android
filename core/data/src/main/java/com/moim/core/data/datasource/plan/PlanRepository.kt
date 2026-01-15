@@ -9,7 +9,6 @@ import com.moim.core.common.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface PlanRepository {
-
     fun getCurrentPlans(): Flow<MeetingPlanContainer>
 
     fun getPlan(planId: String): Flow<Plan>
@@ -17,7 +16,7 @@ interface PlanRepository {
     suspend fun getPlans(
         meetingId: String,
         cursor: String,
-        size: Int
+        size: Int,
     ): PaginationContainer<List<Plan>>
 
     fun getPlansForCalendar(date: String): Flow<PlanReviewContainer>
@@ -25,7 +24,7 @@ interface PlanRepository {
     fun getSearchPlace(
         keyword: String,
         xPoint: String,
-        yPoint: String
+        yPoint: String,
     ): Flow<List<Place>>
 
     suspend fun getPlanParticipants(
@@ -46,13 +45,9 @@ interface PlanRepository {
         latitude: Double?,
     ): Flow<Plan>
 
-    fun joinPlan(
-        planId: String,
-    ): Flow<Unit>
+    fun joinPlan(planId: String): Flow<Unit>
 
-    fun leavePlan(
-        planId: String
-    ): Flow<Unit>
+    fun leavePlan(planId: String): Flow<Unit>
 
     fun updatePlan(
         planId: String,

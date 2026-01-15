@@ -15,7 +15,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface PlanApi {
-
     @GET("plan/view")
     suspend fun getCurrentPlan(): MeetingPlanContainerResponse
 
@@ -32,30 +31,44 @@ interface PlanApi {
     ): PlanReviewContainerResponse
 
     @GET("plan/detail/{planId}")
-    suspend fun getPlan(@Path("planId") planId: String): PlanResponse
+    suspend fun getPlan(
+        @Path("planId") planId: String,
+    ): PlanResponse
 
     @GET("plan/participants/{planId}")
     suspend fun getPlanParticipants(
         @Path("planId") planId: String,
         @Query("cursor") cursor: String,
         @Query("size") size: Int,
-    ) : PaginationContainerResponse<List<UserResponse>>
+    ): PaginationContainerResponse<List<UserResponse>>
 
     @POST("plan/join/{planId}")
-    suspend fun joinPlan(@Path("planId") id: String)
+    suspend fun joinPlan(
+        @Path("planId") id: String,
+    )
 
     @DELETE("plan/leave/{planId}")
-    suspend fun leavePlan(@Path("planId") id: String)
+    suspend fun leavePlan(
+        @Path("planId") id: String,
+    )
 
     @POST("plan/create")
-    suspend fun createPlan(@Body params: JsonObject): PlanResponse
+    suspend fun createPlan(
+        @Body params: JsonObject,
+    ): PlanResponse
 
     @PATCH("plan/update")
-    suspend fun updatePlan(@Body params: JsonObject): PlanResponse
+    suspend fun updatePlan(
+        @Body params: JsonObject,
+    ): PlanResponse
 
     @POST("plan/report")
-    suspend fun reportPlan(@Body params: JsonObject)
+    suspend fun reportPlan(
+        @Body params: JsonObject,
+    )
 
     @DELETE("plan/{planId}")
-    suspend fun deletePlan(@Path("planId") id: String)
+    suspend fun deletePlan(
+        @Path("planId") id: String,
+    )
 }

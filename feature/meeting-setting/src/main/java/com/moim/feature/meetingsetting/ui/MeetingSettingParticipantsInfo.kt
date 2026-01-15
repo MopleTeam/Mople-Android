@@ -22,39 +22,39 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.meetingsetting.MeetingSettingUiAction
 import com.moim.feature.meetingsetting.OnMeetingSettingUiAction
 
-
 @Composable
 fun MeetingSettingParticipantsInfo(
     meeting: Meeting,
-    onUiAction: OnMeetingSettingUiAction
+    onUiAction: OnMeetingSettingUiAction,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .onSingleClick { onUiAction(MeetingSettingUiAction.OnClickMeetingParticipants(ViewIdType.MeetId(meeting.id))) }
-            .padding(vertical = 16.dp, horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .onSingleClick { onUiAction(MeetingSettingUiAction.OnClickMeetingParticipants(ViewIdType.MeetId(meeting.id))) }
+                .padding(vertical = 16.dp, horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         MoimText(
             modifier = Modifier.weight(1f),
             text = stringResource(R.string.meeting_setting_participants),
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.gray.gray01
+            color = MoimTheme.colors.gray.gray01,
         )
 
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             MoimText(
                 text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
                 style = MoimTheme.typography.title03.medium,
-                color = MoimTheme.colors.gray.gray04
+                color = MoimTheme.colors.gray.gray04,
             )
             Spacer(Modifier.width(4.dp))
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_next),
                 contentDescription = "",
-                tint = MoimTheme.colors.icon
+                tint = MoimTheme.colors.icon,
             )
         }
     }

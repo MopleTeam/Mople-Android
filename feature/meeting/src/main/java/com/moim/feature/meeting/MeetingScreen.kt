@@ -55,7 +55,7 @@ fun MeetingRoute(
     viewModel: MeetingViewModel = hiltViewModel(),
     padding: PaddingValues,
     navigateToMeetingWrite: () -> Unit,
-    navigateToMeetingDetail: (String) -> Unit
+    navigateToMeetingDetail: (String) -> Unit,
 ) {
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
     val meetings = viewModel.meetings.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
@@ -71,7 +71,7 @@ fun MeetingRoute(
     MeetingScreen(
         modifier = modifier,
         meetings = meetings,
-        onUiAction = viewModel::onUiAction
+        onUiAction = viewModel::onUiAction,
     )
 }
 
@@ -79,7 +79,7 @@ fun MeetingRoute(
 fun MeetingScreen(
     modifier: Modifier = Modifier,
     meetings: LazyPagingItems<Meeting>,
-    onUiAction: (MeetingUiAction) -> Unit = {}
+    onUiAction: (MeetingUiAction) -> Unit = {},
 ) {
     TrackScreenViewEvent(screenName = "meet_list")
     MoimScaffold(
@@ -88,13 +88,14 @@ fun MeetingScreen(
         topBar = {
             MoimTopAppbar(
                 title = stringResource(R.string.meeting_title),
-                isNavigationIconVisible = false
+                isNavigationIconVisible = false,
             )
         },
         content = { padding ->
-            val contentModifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+            val contentModifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
 
             Box(
                 modifier = contentModifier,
@@ -103,11 +104,11 @@ fun MeetingScreen(
                     modifier = Modifier.fillMaxSize(),
                     enter = fadeIn(),
                     exit = fadeOut(),
-                    visible = meetings.loadState.isSuccess() && meetings.itemCount > 0
+                    visible = meetings.loadState.isSuccess() && meetings.itemCount > 0,
                 ) {
                     MeetingContent(
                         meetings = meetings,
-                        onUiAction = onUiAction
+                        onUiAction = onUiAction,
                     )
                 }
 
@@ -117,9 +118,10 @@ fun MeetingScreen(
                     visible = meetings.loadState.isLoading(),
                 ) {
                     PagingLoadingScreen(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .align(Alignment.Center)
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .align(Alignment.Center),
                     )
                 }
 
@@ -127,12 +129,13 @@ fun MeetingScreen(
                     modifier = Modifier.fillMaxSize(),
                     enter = fadeIn(),
                     exit = fadeOut(),
-                    visible = meetings.loadState.isError()
+                    visible = meetings.loadState.isError(),
                 ) {
                     ErrorScreen(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MoimTheme.colors.bg.primary),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(MoimTheme.colors.bg.primary),
                         onClickRefresh = { onUiAction(MeetingUiAction.OnClickRefresh) },
                     )
                 }
@@ -141,12 +144,13 @@ fun MeetingScreen(
                     modifier = Modifier.fillMaxSize(),
                     enter = fadeIn(),
                     exit = fadeOut(),
-                    visible = meetings.loadState.isSuccess() && meetings.itemCount == 0
+                    visible = meetings.loadState.isSuccess() && meetings.itemCount == 0,
                 ) {
                     MeetingEmptyScreen(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MoimTheme.colors.bg.primary)
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(MoimTheme.colors.bg.primary),
                     )
                 }
             }
@@ -155,14 +159,14 @@ fun MeetingScreen(
             MoimFloatingActionButton(
                 minWidth = 54.dp,
                 minHeight = 54.dp,
-                onClick = { onUiAction(MeetingUiAction.OnClickMeetingWrite) }
+                onClick = { onUiAction(MeetingUiAction.OnClickMeetingWrite) },
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_add),
-                    contentDescription = ""
+                    contentDescription = "",
                 )
             }
-        }
+        },
     )
 }
 
@@ -170,23 +174,23 @@ fun MeetingScreen(
 fun MeetingContent(
     modifier: Modifier = Modifier,
     meetings: LazyPagingItems<Meeting>,
-    onUiAction: (MeetingUiAction) -> Unit
+    onUiAction: (MeetingUiAction) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 28.dp, horizontal = 20.dp)
+        contentPadding = PaddingValues(vertical = 28.dp, horizontal = 20.dp),
     ) {
         items(
             count = meetings.itemCount,
             key = meetings.itemKey(),
-            contentType = meetings.itemContentType()
+            contentType = meetings.itemContentType(),
         ) { index ->
             val meeting = meetings[index] ?: return@items
             MeetingCard(
                 modifier = Modifier.animateItem(),
                 meeting = meeting,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         }
 
@@ -218,26 +222,24 @@ fun MeetingContent(
 }
 
 @Composable
-fun MeetingEmptyScreen(
-    modifier: Modifier = Modifier
-) {
+fun MeetingEmptyScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
             modifier = Modifier.size(80.dp),
             imageVector = ImageVector.vectorResource(R.drawable.ic_meeting),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
 
         MoimText(
             text = stringResource(R.string.meeting_new_meeting),
             singleLine = false,
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray06
+            color = MoimTheme.colors.gray.gray06,
         )
     }
 }

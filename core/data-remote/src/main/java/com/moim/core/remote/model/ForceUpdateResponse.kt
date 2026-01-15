@@ -14,10 +14,9 @@ data class ForceUpdateResponse(
     val message: String = "",
 )
 
-fun ForceUpdateResponse.asItem(): ForceUpdateInfo {
-    return ForceUpdateInfo(
+fun ForceUpdateResponse.asItem(): ForceUpdateInfo =
+    ForceUpdateInfo(
         isForceUpdate = isForceUpdate,
         minVersion = minVersion,
-        message = message
+        message = message,
     )
-}

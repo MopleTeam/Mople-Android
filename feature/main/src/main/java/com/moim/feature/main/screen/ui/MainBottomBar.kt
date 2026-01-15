@@ -1,21 +1,15 @@
 package com.moim.feature.main.screen.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -32,36 +26,19 @@ import com.moim.feature.main.navigation.MainTab
 
 @Composable
 fun MainBottomBar(
-    modifier: Modifier = Modifier,
-    isVisible: Boolean,
     tabs: List<MainTab>,
     currentTab: MainTab?,
     onTabSelected: (MainTab) -> Unit,
 ) {
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = EnterTransition.None,
-        exit = ExitTransition.None,
+    NavigationBar(
+        containerColor = MoimTheme.colors.white,
     ) {
-        Box(
-            modifier = modifier
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .background(MoimTheme.colors.white)
-                    .border(width = 1.dp, color = MoimTheme.colors.stroke),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                tabs.forEach { tab ->
-                    MainBottomBarItem(
-                        tab = tab,
-                        isSelected = tab == currentTab,
-                        onClick = { if (tab != currentTab) onTabSelected(tab) }
-                    )
-                }
-            }
+        tabs.forEach { tab ->
+            MainBottomBarItem(
+                tab = tab,
+                isSelected = currentTab == tab,
+                onClick = { onTabSelected(tab) },
+            )
         }
     }
 }
@@ -73,17 +50,18 @@ fun RowScope.MainBottomBarItem(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .weight(1f)
-            .clip(RoundedCornerShape(50))
-            .selectable(
-                selected = isSelected,
-                indication = ripple(bounded = true, color = MoimTheme.colors.gray.gray01),
-                role = null,
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(50))
+                .selectable(
+                    selected = isSelected,
+                    indication = ripple(bounded = true, color = MoimTheme.colors.gray.gray01),
+                    role = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = onClick,
+                ),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -97,7 +75,9 @@ fun RowScope.MainBottomBarItem(
 
             MoimText(
                 text = tab.label,
-                style = MoimTheme.typography.body02.regular.copy(fontSize = 10.sp),
+                style =
+                    MoimTheme.typography.body02.regular
+                        .copy(fontSize = 10.sp),
                 color = if (isSelected) MoimTheme.colors.secondary else MoimTheme.colors.gray.gray05,
             )
         }

@@ -29,17 +29,18 @@ fun NicknameTextField(
     MoimText(
         text = stringResource(R.string.sign_up_nickname),
         style = MoimTheme.typography.title03.semiBold,
-        color = MoimTheme.colors.gray.gray01
+        color = MoimTheme.colors.gray.gray01,
     )
 
     Spacer(Modifier.height(8.dp))
 
     MoimTextField(
         hintText = stringResource(R.string.sign_up_nickname_hint),
-        textFieldColors = moimTextFieldColors().copy(
-            focusedSupportingTextColor = color_34C759,
-            unfocusedSupportingTextColor = color_34C759,
-        ),
+        textFieldColors =
+            moimTextFieldColors().copy(
+                focusedSupportingTextColor = color_34C759,
+                unfocusedSupportingTextColor = color_34C759,
+            ),
         isError = isDuplicated == true || isRegexError,
         errorMessage = stringResource(if (isRegexError) R.string.sign_up_regex_error else R.string.sign_up_duplicate_error),
         supportText = if (isDuplicated == false) stringResource(R.string.sign_up_duplicate_pass) else null,
@@ -48,7 +49,7 @@ fun NicknameTextField(
         onTextChanged = { onUiAction(SignUpUiAction.OnChangeNickname(it)) },
         trailingIcon = {
             Box(
-                modifier = Modifier.padding(end = 16.dp)
+                modifier = Modifier.padding(end = 16.dp),
             ) {
                 MoimPrimaryButton(
                     modifier = Modifier,
@@ -56,9 +57,9 @@ fun NicknameTextField(
                     verticalPadding = 8.dp,
                     text = stringResource(R.string.sign_up_duplicate_check),
                     style = MoimTheme.typography.body01.semiBold,
-                    onClick = { onUiAction(SignUpUiAction.OnClickDuplicatedCheck) }
+                    onClick = { onUiAction(SignUpUiAction.OnClickDuplicatedCheck) },
                 )
             }
-        }
+        },
     )
 }

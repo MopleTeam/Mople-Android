@@ -35,8 +35,8 @@ data class PlanItem(
     var isDeleted: Boolean = false
 }
 
-fun PlanItem.asPlan(): Plan {
-    return Plan(
+fun PlanItem.asPlan(): Plan =
+    Plan(
         userId = userId,
         meetingId = meetingId,
         meetingName = meetingName,
@@ -56,10 +56,9 @@ fun PlanItem.asPlan(): Plan {
         temperature = temperature,
         commentCount = commentCount,
     )
-}
 
-fun PlanItem.asReview(): Review {
-    return Review(
+fun PlanItem.asReview(): Review =
+    Review(
         userId = userId,
         meetingId = meetingId,
         meetingName = meetingName,
@@ -77,10 +76,9 @@ fun PlanItem.asReview(): Review {
         images = reviewImages,
         commentCount = commentCount,
     )
-}
 
-fun Plan.asPlanItem(): PlanItem {
-    return PlanItem(
+fun Plan.asPlanItem(): PlanItem =
+    PlanItem(
         isPlanAtBefore = true,
         userId = userId,
         postId = planId,
@@ -103,10 +101,9 @@ fun Plan.asPlanItem(): PlanItem {
         reviewImages = emptyList(),
         commentCount = commentCount,
     )
-}
 
-fun Review.asPlanItem(): PlanItem {
-    return PlanItem(
+fun Review.asPlanItem(): PlanItem =
+    PlanItem(
         isPlanAtBefore = false,
         userId = userId,
         postId = reviewId,
@@ -128,4 +125,3 @@ fun Review.asPlanItem(): PlanItem {
         reviewImages = images,
         commentCount = commentCount,
     )
-}

@@ -9,12 +9,11 @@ data class PlanReviewContainerResponse(
     @SerialName("plans")
     val plans: List<PlanResponse>,
     @SerialName("reviews")
-    val reviews: List<ReviewResponse>
+    val reviews: List<ReviewResponse>,
 )
 
-fun PlanReviewContainerResponse.asItem(): PlanReviewContainer {
-    return PlanReviewContainer(
+fun PlanReviewContainerResponse.asItem(): PlanReviewContainer =
+    PlanReviewContainer(
         plans = plans.map(PlanResponse::asItem),
-        reviews = reviews.map(ReviewResponse::asItem)
+        reviews = reviews.map(ReviewResponse::asItem),
     )
-}

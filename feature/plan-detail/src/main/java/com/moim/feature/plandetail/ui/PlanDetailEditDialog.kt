@@ -11,9 +11,7 @@ import com.moim.feature.plandetail.OnPlanDetailUiAction
 import com.moim.feature.plandetail.PlanDetailUiAction
 
 @Composable
-fun PlanDetailEditDialog(
-    onUiAction: OnPlanDetailUiAction
-) {
+fun PlanDetailEditDialog(onUiAction: OnPlanDetailUiAction) {
     val dismissAction = PlanDetailUiAction.OnShowPlanEditDialog(false)
 
     MoimAlertDialog(
@@ -36,7 +34,7 @@ fun PlanDetailEditDialog(
 @Composable
 fun PlanDetailCommentEditDialog(
     comment: Comment,
-    onUiAction: OnPlanDetailUiAction
+    onUiAction: OnPlanDetailUiAction,
 ) {
     val dismissAction = PlanDetailUiAction.OnShowCommentEditDialog(false, null)
 
@@ -58,9 +56,7 @@ fun PlanDetailCommentEditDialog(
 }
 
 @Composable
-fun PlanDetailReportDialog(
-    onUiAction: OnPlanDetailUiAction
-) {
+fun PlanDetailReportDialog(onUiAction: OnPlanDetailUiAction) {
     val dismissAction = PlanDetailUiAction.OnShowPlanReportDialog(false)
 
     MoimAlertDialog(
@@ -81,7 +77,7 @@ fun PlanDetailReportDialog(
 @Composable
 fun PlanDetailCommentReportDialog(
     comment: Comment,
-    onUiAction: OnPlanDetailUiAction
+    onUiAction: OnPlanDetailUiAction,
 ) {
     val dismissAction = PlanDetailUiAction.OnShowCommentReportDialog(false, null)
 

@@ -22,9 +22,7 @@ data class Comment(
     val openGraph: OpenGraph? = null,
 )
 
-fun Comment.isChild(): Boolean {
-    return parentId != null
-}
+fun Comment.isChild(): Boolean = parentId != null
 
 @Stable
 @Serializable

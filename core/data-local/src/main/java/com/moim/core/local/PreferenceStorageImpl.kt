@@ -18,47 +18,50 @@ import javax.inject.Inject
 internal class PreferenceStorageImpl @Inject constructor(
     private val preference: DataStore<Preferences>,
 ) : PreferenceStorage {
-
     object PreferenceKeys {
         val PREF_USER = stringPreferencesKey("pref_user")
         val PREF_USER_TOKEN = stringPreferencesKey("pref_user_token")
     }
 
-    override val user: Flow<User?> = preference.data.map {
-        try {
-            it[PREF_USER]?.toObject<User>()
-        } catch (e: Exception) {
-            null
+    override val user: Flow<User?> =
+        preference.data.map {
+            try {
+                it[PREF_USER]?.toObject<User>()
+            } catch (e: Exception) {
+                null
+            }
         }
-    }
 
     override suspend fun saveUser(user: User) {
         preference.edit {
-            it[PREF_USER] = try {
-                user.toJson()
-            } catch (e: Exception) {
-                Timber.e("[saveUser Exception]:$e")
-                ""
-            }
+            it[PREF_USER] =
+                try {
+                    user.toJson()
+                } catch (e: Exception) {
+                    Timber.e("[saveUser Exception]:$e")
+                    ""
+                }
         }
     }
 
-    override val token: Flow<Token?> = preference.data.map {
-        try {
-            it[PREF_USER_TOKEN]?.toObject<Token>()
-        } catch (e: Exception) {
-            null
+    override val token: Flow<Token?> =
+        preference.data.map {
+            try {
+                it[PREF_USER_TOKEN]?.toObject<Token>()
+            } catch (e: Exception) {
+                null
+            }
         }
-    }
 
     override suspend fun saveUserToken(token: Token) {
         preference.edit {
-            it[PREF_USER_TOKEN] = try {
-                token.toJson()
-            } catch (e: Exception) {
-                Timber.e("[saveUserToken Exception]:$e")
-                ""
-            }
+            it[PREF_USER_TOKEN] =
+                try {
+                    token.toJson()
+                } catch (e: Exception) {
+                    Timber.e("[saveUserToken Exception]:$e")
+                    ""
+                }
         }
     }
 

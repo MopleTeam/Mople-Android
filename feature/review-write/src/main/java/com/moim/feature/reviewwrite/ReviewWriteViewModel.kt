@@ -1,6 +1,5 @@
 package com.moim.feature.reviewwrite
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.model.Review
 import com.moim.core.common.model.ReviewImage
@@ -11,6 +10,7 @@ import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.domain.usecase.UpdateReviewImagesUseCase
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
@@ -18,29 +18,28 @@ import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
 import com.moim.core.ui.view.restartableStateIn
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
-import javax.inject.Inject
 
-@HiltViewModel
-class ReviewWriteViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = ReviewWriteViewModel.Factory::class)
+class ReviewWriteViewModel @AssistedInject constructor(
     reviewRepository: ReviewRepository,
     private val updateReviewImagesUseCase: UpdateReviewImagesUseCase,
     private val planEventBus: EventBus<PlanAction>,
+    @Assisted val reviewWriteRoute: DetailRoute.ReviewWrite,
 ) : BaseViewModel() {
-
-    private val postId
-        get() = savedStateHandle.get<String>(KEY_POST_ID) ?: ""
-
-    private val isUpdated
-        get() = savedStateHandle.get<Boolean>(KEY_IS_UPDATED) ?: false
+    private val postId = reviewWriteRoute.postId
+    private val isUpdated = reviewWriteRoute.isUpdated
 
     private val reviewWriteResult =
-        reviewRepository.getReview(postId)
+        reviewRepository
+            .getReview(postId)
             .asResult()
             .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
@@ -48,7 +47,9 @@ class ReviewWriteViewModel @Inject constructor(
         viewModelScope.launch {
             reviewWriteResult.collect { result ->
                 when (result) {
-                    is Result.Loading -> setUiState(ReviewWriteUiState.Loading)
+                    is Result.Loading -> {
+                        setUiState(ReviewWriteUiState.Loading)
+                    }
 
                     is Result.Success -> {
                         val images = result.data.images
@@ -59,12 +60,14 @@ class ReviewWriteViewModel @Inject constructor(
                                 isUpdated = isUpdated,
                                 uploadImages = images,
                                 removeImageIds = emptyList(),
-                                enableSubmit = images.isNotEmpty()
-                            )
+                                enableSubmit = images.isNotEmpty(),
+                            ),
                         )
                     }
 
-                    is Result.Error -> setUiState(ReviewWriteUiState.Error)
+                    is Result.Error -> {
+                        setUiState(ReviewWriteUiState.Error)
+                    }
                 }
             }
         }
@@ -84,18 +87,19 @@ class ReviewWriteViewModel @Inject constructor(
 
     private fun addUploadImages(images: List<String>) {
         uiState.checkState<ReviewWriteUiState.Success> {
-            val addImages = images.map {
-                ReviewImage(
-                    imageId = "",
-                    imageUrl = it
-                )
-            }
+            val addImages =
+                images.map {
+                    ReviewImage(
+                        imageId = "",
+                        imageUrl = it,
+                    )
+                }
 
             setUiState(
                 copy(
                     uploadImages = uploadImages + addImages,
-                    enableSubmit = true
-                )
+                    enableSubmit = true,
+                ),
             )
         }
     }
@@ -109,8 +113,8 @@ class ReviewWriteViewModel @Inject constructor(
                 copy(
                     uploadImages = uploadImages,
                     removeImageIds = removeImageIds,
-                    enableSubmit = uploadImages.isNotEmpty() || removeImageIds.isNotEmpty()
-                )
+                    enableSubmit = uploadImages.isNotEmpty() || removeImageIds.isNotEmpty(),
+                ),
             )
         }
     }
@@ -122,22 +126,26 @@ class ReviewWriteViewModel @Inject constructor(
                     UpdateReviewImagesUseCase.Params(
                         reviewId = review.reviewId,
                         uploadImages = uploadImages.map { it.imageUrl },
-                        removeImageIds = removeImageIds
-                    )
-                )
-                    .asResult()
+                        removeImageIds = removeImageIds,
+                    ),
+                ).asResult()
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
                         when (result) {
-                            is Result.Loading -> return@collect
+                            is Result.Loading -> {
+                                return@collect
+                            }
+
                             is Result.Success -> {
                                 planEventBus.send(PlanAction.PlanInvalidate())
                                 setUiEvent(ReviewWriteUiEvent.NavigateToBack)
                             }
 
-                            is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(ReviewWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                else -> setUiEvent(ReviewWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            is Result.Error -> {
+                                when (result.exception) {
+                                    is IOException -> setUiEvent(ReviewWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                    else -> setUiEvent(ReviewWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                                }
                             }
                         }
                     }
@@ -145,9 +153,9 @@ class ReviewWriteViewModel @Inject constructor(
         }
     }
 
-    companion object {
-        private const val KEY_POST_ID = "postId"
-        private const val KEY_IS_UPDATED = "isUpdated"
+    @AssistedFactory
+    interface Factory {
+        fun create(reviewWriteRoute: DetailRoute.ReviewWrite): ReviewWriteViewModel
     }
 }
 
@@ -173,11 +181,11 @@ sealed interface ReviewWriteUiAction : UiAction {
     data object OnClickImageUpload : ReviewWriteUiAction
 
     data class OnClickAddImages(
-        val imageUrls: List<String>
+        val imageUrls: List<String>,
     ) : ReviewWriteUiAction
 
     data class OnClickRemoveImage(
-        val reviewImage: ReviewImage
+        val reviewImage: ReviewImage,
     ) : ReviewWriteUiAction
 
     data object OnClickParticipants : ReviewWriteUiAction
@@ -191,10 +199,10 @@ sealed interface ReviewWriteUiEvent : UiEvent {
     data object NavigateToPhotoPicker : ReviewWriteUiEvent
 
     data class NavigateToParticipants(
-        val viewIdType: ViewIdType
+        val viewIdType: ViewIdType,
     ) : ReviewWriteUiEvent
 
     data class ShowToastMessage(
-        val toastMessage: ToastMessage
+        val toastMessage: ToastMessage,
     ) : ReviewWriteUiEvent
 }

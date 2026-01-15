@@ -31,58 +31,57 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 internal abstract class DataModule {
-
-    //================================ Auth ============================================//
+    // ================================ Auth ============================================//
     @Singleton
     @Binds
     abstract fun bindAuthRepository(authRepositoryImpl: AuthRepositoryImpl): AuthRepository
 
-    //================================ Policy ============================================//
+    // ================================ Policy ============================================//
     @Singleton
     @Binds
     abstract fun bindPolicyRepository(policyRepositoryImpl: PolicyRepositoryImpl): PolicyRepository
 
-    //================================ Token ============================================//
+    // ================================ Token ============================================//
     @Singleton
     @Binds
     abstract fun bindTokenRepository(tokenRepositoryImpl: TokenRepositoryImpl): TokenRepository
 
-    //================================ User ============================================//
+    // ================================ User ============================================//
     @Singleton
     @Binds
     abstract fun bindUserRepository(userRepositoryImpl: UserRepositoryImpl): UserRepository
 
-    //================================ Meeting ============================================//
+    // ================================ Meeting ============================================//
     @Singleton
     @Binds
     abstract fun bindMeetingRepository(meetingRepositoryImpl: MeetingRepositoryImpl): MeetingRepository
 
-    //================================ Plan ============================================//
+    // ================================ Plan ============================================//
     @Singleton
     @Binds
     abstract fun bindPlanRepository(planRepositoryImpl: PlanRepositoryImpl): PlanRepository
 
-    //================================ Review ============================================//
+    // ================================ Review ============================================//
     @Singleton
     @Binds
     abstract fun bindReviewRepository(reviewRepositoryImpl: ReviewRepositoryImpl): ReviewRepository
 
-    //================================ Comment ============================================//
+    // ================================ Comment ============================================//
     @Singleton
     @Binds
     abstract fun bindCommentRepository(commentRepositoryImpl: CommentRepositoryImpl): CommentRepository
 
-    //================================ Notification ============================================//
+    // ================================ Notification ============================================//
     @Singleton
     @Binds
     abstract fun bindNotificationRepository(notificationRepositoryImpl: NotificationRepositoryImpl): NotificationRepository
 
-    //================================ Holiday ============================================//
+    // ================================ Holiday ============================================//
     @Singleton
     @Binds
-    abstract fun bindHolidayRepository(holidayRepositoryImpl: HolidayRepositoryImpl) : HolidayRepository
+    abstract fun bindHolidayRepository(holidayRepositoryImpl: HolidayRepositoryImpl): HolidayRepository
 
-    //================================ UserDataUtil ============================================//
+    // ================================ UserDataUtil ============================================//
     @Singleton
     @Binds
     abstract fun bindUserDataUtil(userDataUtilImpl: UserDataUtilImpl): UserDataUtil

@@ -35,19 +35,20 @@ class HomeViewModel @Inject constructor(
     meetingEventBus: EventBus<MeetingAction>,
     planEventBus: EventBus<PlanAction>,
 ) : BaseViewModel() {
-
-    private val meetingActionReceiver = meetingEventBus
-        .action
-        .actionStateIn(viewModelScope, MeetingAction.None)
-    private val planActionReceiver = planEventBus
-        .action
-        .actionStateIn(viewModelScope, PlanAction.None)
+    private val meetingActionReceiver =
+        meetingEventBus
+            .action
+            .actionStateIn(viewModelScope, MeetingAction.None)
+    private val planActionReceiver =
+        planEventBus
+            .action
+            .actionStateIn(viewModelScope, PlanAction.None)
 
     private val meetingPlansResult =
         combine(
             userRepository.getUser(),
             planRepository.getCurrentPlans(),
-            ::Pair
+            ::Pair,
         ).mapLatest { (user, meetContainer) -> user to meetContainer }
             .asResult()
             .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
@@ -57,7 +58,10 @@ class HomeViewModel @Inject constructor(
             launch {
                 meetingPlansResult.collect { result ->
                     when (result) {
-                        is Result.Loading -> setUiState(HomeUiState.Loading)
+                        is Result.Loading -> {
+                            setUiState(HomeUiState.Loading)
+                        }
+
                         is Result.Success -> {
                             val (user, meetContainer) = result.data
 
@@ -66,11 +70,13 @@ class HomeViewModel @Inject constructor(
                                     user = user,
                                     plans = meetContainer.plans,
                                     meetings = meetContainer.meetings,
-                                )
+                                ),
                             )
                         }
 
-                        is Result.Error -> setUiState(HomeUiState.Error)
+                        is Result.Error -> {
+                            setUiState(HomeUiState.Error)
+                        }
                     }
                 }
             }
@@ -85,28 +91,32 @@ class HomeViewModel @Inject constructor(
                             }
 
                             is MeetingAction.MeetingUpdate -> {
-                                val meetings = meetings.toMutableList().apply {
-                                    withIndex()
-                                        .firstOrNull { action.meeting.id == it.value.id }
-                                        ?.index
-                                        ?.let { index -> set(index, action.meeting) }
-                                }
-
-                                val plans = plans.map { plan ->
-                                    if (plan.meetingId == action.meeting.id) {
-                                        plan.copy(
-                                            meetingName = action.meeting.name,
-                                            meetingImageUrl = action.meeting.imageUrl,
-                                        )
-                                    } else {
-                                        plan
+                                val meetings =
+                                    meetings.toMutableList().apply {
+                                        withIndex()
+                                            .firstOrNull { action.meeting.id == it.value.id }
+                                            ?.index
+                                            ?.let { index -> set(index, action.meeting) }
                                     }
-                                }
+
+                                val plans =
+                                    plans.map { plan ->
+                                        if (plan.meetingId == action.meeting.id) {
+                                            plan.copy(
+                                                meetingName = action.meeting.name,
+                                                meetingImageUrl = action.meeting.imageUrl,
+                                            )
+                                        } else {
+                                            plan
+                                        }
+                                    }
 
                                 setUiState(copy(meetings = meetings, plans = plans))
                             }
 
-                            else -> return@collect
+                            else -> {
+                                return@collect
+                            }
                         }
                     }
                 }
@@ -117,17 +127,18 @@ class HomeViewModel @Inject constructor(
                     uiState.checkState<HomeUiState.Success> {
                         when (action) {
                             is PlanAction.PlanCreate -> {
-                                val plans = plans.toMutableList()
-                                    .apply {
-                                        withIndex()
-                                            .firstOrNull {
-                                                val newPlanTime = action.planItem.planAt
-                                                val currentPlanTime = it.value.planAt
-                                                newPlanTime.isBefore(currentPlanTime)
-                                            }
-                                            ?.let { add(it.index, action.planItem.asPlan()) }
-                                            ?: run { add(action.planItem.asPlan()) }
-                                    }.take(5)
+                                val plans =
+                                    plans
+                                        .toMutableList()
+                                        .apply {
+                                            withIndex()
+                                                .firstOrNull {
+                                                    val newPlanTime = action.planItem.planAt
+                                                    val currentPlanTime = it.value.planAt
+                                                    newPlanTime.isBefore(currentPlanTime)
+                                                }?.let { add(it.index, action.planItem.asPlan()) }
+                                                ?: run { add(action.planItem.asPlan()) }
+                                        }.take(5)
 
                                 setUiState(copy(plans = plans))
                             }
@@ -136,36 +147,44 @@ class HomeViewModel @Inject constructor(
                                 if (plans.isEmpty()) {
                                     meetingPlansResult.restart()
                                 } else {
-                                    val plans = plans.toMutableList().apply {
-                                        withIndex()
-                                            .firstOrNull { action.planItem.postId == it.value.planId }
-                                            ?.index
-                                            ?.let { index -> set(index, action.planItem.asPlan()) }
-                                            ?: run { add(action.planItem.asPlan()) }
-                                    }.sortedBy {
-                                        it.planAt
-                                    }.filter {
-                                        it.isParticipant || it.userId == user.userId
-                                    }
+                                    val plans =
+                                        plans
+                                            .toMutableList()
+                                            .apply {
+                                                withIndex()
+                                                    .firstOrNull { action.planItem.postId == it.value.planId }
+                                                    ?.index
+                                                    ?.let { index -> set(index, action.planItem.asPlan()) }
+                                                    ?: run { add(action.planItem.asPlan()) }
+                                            }.sortedBy {
+                                                it.planAt
+                                            }.filter {
+                                                it.isParticipant || it.userId == user.userId
+                                            }
 
                                     setUiState(copy(plans = plans))
                                 }
                             }
 
                             is PlanAction.PlanDelete -> {
-                                val plans = plans.toMutableList().apply {
-                                    withIndex()
-                                        .firstOrNull { action.postId == it.value.planId }
-                                        ?.index
-                                        ?.let { index -> removeAt(index) }
-                                }
+                                val plans =
+                                    plans.toMutableList().apply {
+                                        withIndex()
+                                            .firstOrNull { action.postId == it.value.planId }
+                                            ?.index
+                                            ?.let { index -> removeAt(index) }
+                                    }
 
                                 setUiState(copy(plans = plans))
                             }
 
-                            is PlanAction.PlanInvalidate -> meetingPlansResult.restart()
+                            is PlanAction.PlanInvalidate -> {
+                                meetingPlansResult.restart()
+                            }
 
-                            else -> return@collect
+                            else -> {
+                                return@collect
+                            }
                         }
                     }
                 }
@@ -228,7 +247,7 @@ sealed interface HomeUiAction : UiAction {
 
     data class OnClickPlan(
         val planId: String,
-        val isPlan: Boolean
+        val isPlan: Boolean,
     ) : HomeUiAction
 
     data object OnUpdatePermissionCheck : HomeUiAction
@@ -244,10 +263,10 @@ sealed interface HomeUiEvent : UiEvent {
     data object NavigateToCalendar : HomeUiEvent
 
     data class NavigateToPlanDetail(
-        val viewIdType: ViewIdType
+        val viewIdType: ViewIdType,
     ) : HomeUiEvent
 
     data class ShowToastMessage(
-        val message: ToastMessage
+        val message: ToastMessage,
     ) : HomeUiEvent
 }

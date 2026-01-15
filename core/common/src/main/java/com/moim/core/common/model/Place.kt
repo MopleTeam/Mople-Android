@@ -9,5 +9,5 @@ data class Place(
     val distance: String = "",
     val roadAddress: String = "",
     val xPoint: String = "",
-    val yPoint: String = ""
+    val yPoint: String = "",
 )

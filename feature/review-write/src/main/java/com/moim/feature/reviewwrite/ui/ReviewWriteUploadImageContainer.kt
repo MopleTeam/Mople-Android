@@ -41,16 +41,16 @@ import com.moim.feature.reviewwrite.ReviewWriteUiAction
 fun ReviewWriteUploadImageContainer(
     modifier: Modifier = Modifier,
     images: List<ReviewImage>,
-    onUiAction: (ReviewWriteUiAction) -> Unit = {}
+    onUiAction: (ReviewWriteUiAction) -> Unit = {},
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 28.dp, horizontal = 20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 28.dp, horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             MoimText(
@@ -76,7 +76,7 @@ fun ReviewWriteUploadImageContainer(
                 item {
                     ImageUploadBox(
                         modifier = Modifier.animateItem(),
-                        onUiAction = onUiAction
+                        onUiAction = onUiAction,
                     )
                 }
             }
@@ -87,7 +87,7 @@ fun ReviewWriteUploadImageContainer(
                 ReviewImageBox(
                     modifier = Modifier.animateItem(),
                     image = it,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
         }
@@ -98,20 +98,22 @@ fun ReviewWriteUploadImageContainer(
 @Composable
 private fun ImageUploadBox(
     modifier: Modifier = Modifier,
-    onUiAction: (ReviewWriteUiAction) -> Unit
+    onUiAction: (ReviewWriteUiAction) -> Unit,
 ) {
     Box(
-        modifier = modifier
-            .size(110.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .onSingleClick { onUiAction(ReviewWriteUiAction.OnClickImageUpload) }
-            .border(BorderStroke(1.dp, MoimTheme.colors.stroke))
-            .background(MoimTheme.colors.bg.primary)
+        modifier =
+            modifier
+                .size(110.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .onSingleClick { onUiAction(ReviewWriteUiAction.OnClickImageUpload) }
+                .border(BorderStroke(1.dp, MoimTheme.colors.stroke))
+                .background(MoimTheme.colors.bg.primary),
     ) {
         Icon(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(48.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.Center)
+                    .size(48.dp),
             imageVector = ImageVector.vectorResource(R.drawable.ic_add),
             contentDescription = "",
             tint = MoimTheme.colors.icon,
@@ -123,35 +125,38 @@ private fun ImageUploadBox(
 private fun ReviewImageBox(
     modifier: Modifier = Modifier,
     image: ReviewImage,
-    onUiAction: (ReviewWriteUiAction) -> Unit
+    onUiAction: (ReviewWriteUiAction) -> Unit,
 ) {
     Box(
         modifier = modifier,
     ) {
         NetworkImage(
-            modifier = Modifier
-                .size(110.dp)
-                .clip(RoundedCornerShape(8.dp)),
+            modifier =
+                Modifier
+                    .size(110.dp)
+                    .clip(RoundedCornerShape(8.dp)),
             imageUrl = image.imageUrl,
-            errorImage = painterResource(R.drawable.ic_empty_image)
+            errorImage = painterResource(R.drawable.ic_empty_image),
         )
 
         Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(8.dp)
-                .size(24.dp)
-                .clip(CircleShape)
-                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
-                .background(MoimTheme.colors.primary.primary)
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
+                    .background(MoimTheme.colors.primary.primary),
         ) {
             Icon(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .onSingleClick { onUiAction(ReviewWriteUiAction.OnClickRemoveImage(image)) },
+                modifier =
+                    Modifier
+                        .padding(4.dp)
+                        .onSingleClick { onUiAction(ReviewWriteUiAction.OnClickRemoveImage(image)) },
                 imageVector = ImageVector.vectorResource(R.drawable.ic_close),
                 contentDescription = "",
-                tint = MoimTheme.colors.white
+                tint = MoimTheme.colors.white,
             )
         }
     }
@@ -162,9 +167,10 @@ private fun ReviewImageBox(
 private fun ReviewWriteUploadImageContainerPreview() {
     MoimTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.white)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MoimTheme.colors.white),
         ) {
             ReviewWriteUploadImageContainer(
                 images = emptyList(),

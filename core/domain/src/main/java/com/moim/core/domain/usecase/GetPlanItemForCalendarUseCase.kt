@@ -13,10 +13,11 @@ import javax.inject.Inject
 
 class GetPlanItemForCalendarUseCase @Inject constructor(
     private val planRepository: PlanRepository,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
-    operator fun invoke(date: String) = flow {
-        val planAndReview = planRepository.getPlansForCalendar(date).first()
-        emit(planAndReview.plans.map(Plan::asPlanItem) + planAndReview.reviews.map(Review::asPlanItem))
-    }.flowOn(ioDispatcher)
+    operator fun invoke(date: String) =
+        flow {
+            val planAndReview = planRepository.getPlansForCalendar(date).first()
+            emit(planAndReview.plans.map(Plan::asPlanItem) + planAndReview.reviews.map(Review::asPlanItem))
+        }.flowOn(ioDispatcher)
 }

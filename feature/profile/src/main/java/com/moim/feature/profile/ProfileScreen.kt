@@ -61,24 +61,30 @@ fun ProfileRoute(
     }
 
     when (val uiState = profileUiState) {
-        is ProfileUiState.Loading -> LoadingScreen(modifier)
+        is ProfileUiState.Loading -> {
+            LoadingScreen(modifier)
+        }
 
-        is ProfileUiState.Success -> ProfileScreen(
-            modifier = modifier,
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is ProfileUiState.Success -> {
+            ProfileScreen(
+                modifier = modifier,
+                uiState = uiState,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction,
+            )
+        }
 
-        is ProfileUiState.Error -> ErrorScreen(
-            modifier = modifier,
-            onClickRefresh = { viewModel.onUiAction(ProfileUiAction.OnClickRefresh) }
-        )
+        is ProfileUiState.Error -> {
+            ErrorScreen(
+                modifier = modifier,
+                onClickRefresh = { viewModel.onUiAction(ProfileUiAction.OnClickRefresh) },
+            )
+        }
     }
 }
 
 @Composable
-fun ProfileScreen(
+private fun ProfileScreen(
     modifier: Modifier = Modifier,
     uiState: ProfileUiState.Success,
     isLoading: Boolean = false,
@@ -86,16 +92,17 @@ fun ProfileScreen(
 ) {
     TrackScreenViewEvent(screenName = "profile")
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         MoimTopAppbar(
             title = stringResource(R.string.profile_title),
-            isNavigationIconVisible = false
+            isNavigationIconVisible = false,
         )
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
         ) {
             ProfileImage(user = uiState.user, onUiAction = onUiAction)
             ProfileDivider()
@@ -114,7 +121,7 @@ fun ProfileScreen(
                 onUiAction(ProfileUiAction.OnClickLogout)
             },
             onClickNegative = { onUiAction(dismissAction) },
-            onDismiss = { onUiAction(dismissAction) }
+            onDismiss = { onUiAction(dismissAction) },
         )
     }
     if (uiState.isShowUserDeleteDialog) {
@@ -129,7 +136,7 @@ fun ProfileScreen(
                 onUiAction(ProfileUiAction.OnClickUserDelete)
             },
             onClickNegative = { onUiAction(dismissAction) },
-            onDismiss = { onUiAction(dismissAction) }
+            onDismiss = { onUiAction(dismissAction) },
         )
     }
 
@@ -137,11 +144,12 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileDivider() {
+private fun ProfileDivider() {
     Spacer(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(8.dp)
-            .background(MoimTheme.colors.bg.primary)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .background(MoimTheme.colors.bg.primary),
     )
 }

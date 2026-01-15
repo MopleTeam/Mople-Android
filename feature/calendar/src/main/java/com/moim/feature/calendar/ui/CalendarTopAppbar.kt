@@ -14,7 +14,7 @@ import java.time.ZonedDateTime
 fun CalendarTopAppbar(
     modifier: Modifier = Modifier,
     currentDate: ZonedDateTime,
-    onUiAction: OnCalendarUiAction = {}
+    onUiAction: OnCalendarUiAction = {},
 ) {
     MoimTopAppbar(
         modifier = modifier,
@@ -25,6 +25,6 @@ fun CalendarTopAppbar(
                 iconRes = R.drawable.ic_calendar,
                 onClick = { onUiAction(CalendarUiAction.OnClickExpandable(currentDate)) },
             )
-        }
+        },
     )
 }

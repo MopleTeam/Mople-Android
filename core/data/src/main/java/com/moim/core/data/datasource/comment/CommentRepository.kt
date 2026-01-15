@@ -5,7 +5,6 @@ import com.moim.core.common.model.PaginationContainer
 import kotlinx.coroutines.flow.Flow
 
 interface CommentRepository {
-
     suspend fun getComments(
         postId: String,
         cursor: String,

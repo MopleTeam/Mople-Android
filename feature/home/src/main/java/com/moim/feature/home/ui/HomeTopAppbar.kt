@@ -23,19 +23,20 @@ import com.moim.feature.home.OnHomeUiAction
 @Composable
 fun HomeTopAppbar(
     modifier: Modifier = Modifier,
-    onUiAction: OnHomeUiAction = {}
+    onUiAction: OnHomeUiAction = {},
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MoimTheme.colors.bg.primary)
-            .padding(horizontal = 20.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(MoimTheme.colors.bg.primary)
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_logo_name),
             contentDescription = "",
-            tint = Color.Unspecified
+            tint = Color.Unspecified,
         )
 
         Spacer(Modifier.weight(1f))

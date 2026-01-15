@@ -16,35 +16,43 @@ class GetNotificationsUseCase @Inject constructor(
     private val notificationRepository: NotificationRepository,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
+    operator fun invoke(params: Params = Params()) =
+        Pager(
+            config = PagingConfig(pageSize = params.size),
+        ) {
+            object : PagingSource<String, Notification>() {
+                override fun getRefreshKey(state: PagingState<String, Notification>): String? = null
 
-    operator fun invoke(params: Params = Params()) = Pager(
-        config = PagingConfig(pageSize = params.size)
-    ) {
-        object : PagingSource<String, Notification>() {
-            override fun getRefreshKey(state: PagingState<String, Notification>): String? = null
+                override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, Notification> {
+                    val page = loadParams.key ?: ""
 
-            override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, Notification> {
-                val page = loadParams.key ?: ""
+                    return try {
+                        val notificationContainer =
+                            notificationRepository.getNotifications(
+                                cursor = page,
+                                size = params.size,
+                            )
+                        val nextCursor = notificationContainer.page.nextCursor
 
-                return try {
-                    val notificationContainer = notificationRepository.getNotifications(
-                        cursor = page,
-                        size = params.size
-                    )
-                    val nextCursor = notificationContainer.page.nextCursor
-
-                    LoadResult.Page(
-                        data = notificationContainer.content,
-                        prevKey = null,
-                        nextKey = if (notificationContainer.page.isNext && notificationContainer.page.size >= params.size) nextCursor else null
-                    )
-                } catch (e: Exception) {
-                    Timber.e("[GetNotificationsUseCase] error $e")
-                    LoadResult.Error(e)
+                        LoadResult.Page(
+                            data = notificationContainer.content,
+                            prevKey = null,
+                            nextKey =
+                                if (notificationContainer.page.isNext &&
+                                    notificationContainer.page.size >= params.size
+                                ) {
+                                    nextCursor
+                                } else {
+                                    null
+                                },
+                        )
+                    } catch (e: Exception) {
+                        Timber.e("[GetNotificationsUseCase] error $e")
+                        LoadResult.Error(e)
+                    }
                 }
             }
-        }
-    }.flow.flowOn(ioDispatcher)
+        }.flow.flowOn(ioDispatcher)
 
     data class Params(
         val size: Int = 30,

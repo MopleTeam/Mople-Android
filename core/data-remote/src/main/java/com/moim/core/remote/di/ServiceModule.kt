@@ -27,7 +27,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 internal object ServiceModule {
-
     @Provides
     @Singleton
     fun provideJson(): Json =
@@ -48,20 +47,21 @@ internal object ServiceModule {
     fun provideOkHttpClient(
         httpLoggingInterceptor: HttpLoggingInterceptor,
         headerInterceptor: Interceptor,
-    ): OkHttpClient {
-        return OkHttpClient.Builder()
+    ): OkHttpClient =
+        OkHttpClient
+            .Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(headerInterceptor)
             .addInterceptor(httpLoggingInterceptor)
             .build()
-    }
 
     @Provides
-    fun provideHeaderInterceptor(): Interceptor = Interceptor { chain ->
-        chain.proceed(chain.addHeaders())
-    }
+    fun provideHeaderInterceptor(): Interceptor =
+        Interceptor { chain ->
+            chain.proceed(chain.addHeaders())
+        }
 
     @MoimApiOkHttp
     @Singleton
@@ -70,16 +70,18 @@ internal object ServiceModule {
         httpLoggingInterceptor: HttpLoggingInterceptor,
         headerInterceptor: Interceptor,
         tokenInterceptor: TokenInterceptor,
-        tokenAuthenticator: TokenAuthenticator
-    ): Call.Factory = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.MINUTES)
-        .readTimeout(10, TimeUnit.MINUTES)
-        .writeTimeout(10, TimeUnit.MINUTES)
-        .addInterceptor(httpLoggingInterceptor)
-        .addInterceptor(tokenInterceptor)
-        .authenticator(tokenAuthenticator)
-        .addInterceptor(headerInterceptor)
-        .build()
+        tokenAuthenticator: TokenAuthenticator,
+    ): Call.Factory =
+        OkHttpClient
+            .Builder()
+            .connectTimeout(10, TimeUnit.MINUTES)
+            .readTimeout(10, TimeUnit.MINUTES)
+            .writeTimeout(10, TimeUnit.MINUTES)
+            .addInterceptor(httpLoggingInterceptor)
+            .addInterceptor(tokenInterceptor)
+            .authenticator(tokenAuthenticator)
+            .addInterceptor(headerInterceptor)
+            .build()
 
     @NormalApiOkHttp
     @Singleton
@@ -87,13 +89,15 @@ internal object ServiceModule {
     fun provideNormalApiOkHttpCallFactory(
         httpLoggingInterceptor: HttpLoggingInterceptor,
         headerInterceptor: Interceptor,
-    ): Call.Factory = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.MINUTES)
-        .readTimeout(10, TimeUnit.MINUTES)
-        .writeTimeout(10, TimeUnit.MINUTES)
-        .addInterceptor(httpLoggingInterceptor)
-        .addInterceptor(headerInterceptor)
-        .build()
+    ): Call.Factory =
+        OkHttpClient
+            .Builder()
+            .connectTimeout(10, TimeUnit.MINUTES)
+            .readTimeout(10, TimeUnit.MINUTES)
+            .writeTimeout(10, TimeUnit.MINUTES)
+            .addInterceptor(httpLoggingInterceptor)
+            .addInterceptor(headerInterceptor)
+            .build()
 
     // header Token이 필요한 API에 사용하는 Retrofit 입니다.
     @MoimApi
@@ -105,7 +109,8 @@ internal object ServiceModule {
     ): Retrofit {
         val contentType = "application/json".toMediaType()
 
-        return Retrofit.Builder()
+        return Retrofit
+            .Builder()
             .callFactory(okHttpCallFactory)
             .addConverterFactory(json.asConverterFactory(contentType))
             .baseUrl(BuildConfig.API_URL)
@@ -122,15 +127,19 @@ internal object ServiceModule {
     ): Retrofit {
         val contentType = "application/json".toMediaType()
 
-        return Retrofit.Builder()
+        return Retrofit
+            .Builder()
             .callFactory(okHttpCallFactory)
             .addConverterFactory(json.asConverterFactory(contentType))
             .baseUrl(BuildConfig.API_URL)
             .build()
     }
 
-    private fun Interceptor.Chain.addHeaders(): Request = this.request().newBuilder()
-        .addHeader("os", "android")
-        .addHeader("version", BuildConfig.VERSION_NAME)
-        .build()
+    private fun Interceptor.Chain.addHeaders(): Request =
+        this
+            .request()
+            .newBuilder()
+            .addHeader("os", "android")
+            .addHeader("version", BuildConfig.VERSION_NAME)
+            .build()
 }

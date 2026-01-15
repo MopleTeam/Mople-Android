@@ -18,12 +18,11 @@ data class UserResponse(
     val userRole: String = "",
 )
 
-fun UserResponse.asItem(): User {
-    return User(
+fun UserResponse.asItem(): User =
+    User(
         userId = userId,
         nickname = nickname,
         profileUrl = profileUrl,
         badgeCount = badgeCount,
-        userRole = userRole
+        userRole = userRole,
     )
-}

@@ -35,15 +35,15 @@ fun PlanWriteTextField(
     onTextChange: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             MoimText(
                 text = title,
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
 
             if (titleOption != null) {
@@ -51,7 +51,7 @@ fun PlanWriteTextField(
                 MoimText(
                     text = titleOption,
                     style = MoimTheme.typography.body01.regular,
-                    color = MoimTheme.colors.gray.gray04
+                    color = MoimTheme.colors.gray.gray04,
                 )
             }
         }
@@ -64,17 +64,18 @@ fun PlanWriteTextField(
                 textMaxLength = maxLength,
                 hintText = hint,
                 singleLine = isSingleLine,
-                onTextChanged = onTextChange
+                onTextChanged = onTextChange,
             )
 
             if (!isSingleLine) {
                 MoimText(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = 16.dp, bottom = 18.dp),
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(end = 16.dp, bottom = 18.dp),
                     text = "${value.length}/$maxLength",
                     style = MoimTheme.typography.body01.regular,
-                    color = MoimTheme.colors.gray.gray05
+                    color = MoimTheme.colors.gray.gray05,
                 )
             }
         }
@@ -86,7 +87,7 @@ fun PlanWriteTextField(
 private fun PlanWriteTextFieldPreview() {
     MoimTheme {
         Column(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(20.dp),
         ) {
             PlanWriteTextField(
                 title = stringResource(R.string.plan_write_name),
@@ -98,16 +99,17 @@ private fun PlanWriteTextFieldPreview() {
             Spacer(Modifier.height(20.dp))
 
             PlanWriteTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 144.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 144.dp),
                 title = stringResource(R.string.plan_write_plan_info),
                 titleOption = stringResource(R.string.plan_write_select_option),
                 hint = stringResource(R.string.plan_write_plan_info_hint),
                 maxLength = 100,
                 isSingleLine = false,
                 value = "모임 정보는 공백 포함 100자로 부탁드립니다.모임 정보는 공백 포함 100자로 부탁드립니다.모임 정보는 공백 포함 100자로 부탁드립니다.",
-                onTextChange = {}
+                onTextChange = {},
             )
         }
     }

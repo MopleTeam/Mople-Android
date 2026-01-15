@@ -27,22 +27,21 @@ fun CalendarMonthCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         enable = false,
-        color = MoimTheme.colors.bg.primary
+        color = MoimTheme.colors.bg.primary,
     ) {
-
-
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
         ) {
             MoimText(
                 text = selectDate.parseDateString(stringResource(R.string.regex_date_year_month)),
                 singleLine = false,
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
         }
     }
@@ -53,7 +52,7 @@ fun CalendarMonthCard(
 private fun CalendarMonthCardPreview() {
     MoimTheme {
         CalendarMonthCard(
-            selectDate = ZonedDateTime.now()
+            selectDate = ZonedDateTime.now(),
         )
     }
 }

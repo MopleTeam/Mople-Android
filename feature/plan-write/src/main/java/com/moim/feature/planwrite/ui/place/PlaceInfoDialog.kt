@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 fun PlaceInfoDialog(
     modifier: Modifier = Modifier,
     place: Place,
-    onUiAction: (PlanWriteUiAction) -> Unit
+    onUiAction: (PlanWriteUiAction) -> Unit,
 ) {
     val dismissAction = PlanWriteUiAction.OnShowPlaceInfoDialog(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
@@ -39,18 +39,19 @@ fun PlaceInfoDialog(
             coroutineScope
                 .launch { sheetState.hide() }
                 .invokeOnCompletion { onUiAction(dismissAction) }
-        }
+        },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.Center
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+            verticalArrangement = Arrangement.Center,
         ) {
             MoimText(
                 text = place.title,
                 style = MoimTheme.typography.title02.semiBold,
-                color = MoimTheme.colors.gray.gray02
+                color = MoimTheme.colors.gray.gray02,
             )
             Spacer(Modifier.height(16.dp))
 
@@ -58,7 +59,7 @@ fun PlaceInfoDialog(
                 text = place.roadAddress,
                 singleLine = false,
                 style = MoimTheme.typography.body01.regular,
-                color = MoimTheme.colors.gray.gray05
+                color = MoimTheme.colors.gray.gray05,
             )
 
             Spacer(Modifier.height(20.dp))
@@ -68,11 +69,11 @@ fun PlaceInfoDialog(
                 onClick = {
                     onUiAction(PlanWriteUiAction.OnClickPlanPlace(place))
                     onUiAction(dismissAction)
-                }
+                },
             ) {
                 Text(
                     text = stringResource(R.string.plan_write_place_select),
-                    style = MoimTheme.typography.body01.semiBold
+                    style = MoimTheme.typography.body01.semiBold,
                 )
             }
         }

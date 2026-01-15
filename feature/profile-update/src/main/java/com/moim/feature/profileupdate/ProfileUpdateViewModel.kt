@@ -23,11 +23,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileUpdateViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) : BaseViewModel() {
-
     private val userResult =
-        userRepository.getUser()
+        userRepository
+            .getUser()
             .asResult()
             .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
 
@@ -35,7 +35,10 @@ class ProfileUpdateViewModel @Inject constructor(
         viewModelScope.launch {
             userResult.collect { result ->
                 when (result) {
-                    is Result.Loading -> setUiState(ProfileUpdateUiState.Loading)
+                    is Result.Loading -> {
+                        setUiState(ProfileUpdateUiState.Loading)
+                    }
+
                     is Result.Success -> {
                         val user = result.data
 
@@ -44,12 +47,14 @@ class ProfileUpdateViewModel @Inject constructor(
                                 profileUrl = user.profileUrl,
                                 currentNickname = user.nickname,
                                 nickname = user.nickname,
-                                enableProfileUpdate = false
-                            )
+                                enableProfileUpdate = false,
+                            ),
                         )
                     }
 
-                    is Result.Error -> setUiState(ProfileUpdateUiState.Error)
+                    is Result.Error -> {
+                        setUiState(ProfileUpdateUiState.Error)
+                    }
                 }
             }
         }
@@ -90,8 +95,8 @@ class ProfileUpdateViewModel @Inject constructor(
                     nickname = trimNickname,
                     isDuplicatedName = null,
                     isRegexError = if (trimNickname.isEmpty()) false else Pattern.matches(PATTERN_NICKNAME, nickname).not(),
-                    enableProfileUpdate = false
-                )
+                    enableProfileUpdate = false,
+                ),
             )
         }
     }
@@ -106,11 +111,26 @@ class ProfileUpdateViewModel @Inject constructor(
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
                         when (result) {
-                            is Result.Loading -> return@collect
-                            is Result.Success -> setUiState(copy(isDuplicatedName = result.data, enableProfileUpdate = result.data.not()))
-                            is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                is NetworkException -> setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            is Result.Loading -> {
+                                return@collect
+                            }
+
+                            is Result.Success -> {
+                                setUiState(copy(isDuplicatedName = result.data, enableProfileUpdate = result.data.not()))
+                            }
+
+                            is Result.Error -> {
+                                when (result.exception) {
+                                    is IOException -> {
+                                        setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                    }
+
+                                    is NetworkException -> {
+                                        setUiEvent(
+                                            ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage),
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -121,16 +141,32 @@ class ProfileUpdateViewModel @Inject constructor(
     private fun updateUser() {
         viewModelScope.launch {
             uiState.checkState<ProfileUpdateUiState.Success> {
-                userRepository.updateUser(profileUrl = profileUrl, nickname = nickname)
+                userRepository
+                    .updateUser(profileUrl = profileUrl, nickname = nickname)
                     .asResult()
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
                         when (result) {
-                            is Result.Loading -> return@collect
-                            is Result.Success -> setUiEvent(ProfileUpdateUiEvent.NavigateToBack)
-                            is Result.Error -> when (result.exception) {
-                                is IOException -> setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                is NetworkException -> setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            is Result.Loading -> {
+                                return@collect
+                            }
+
+                            is Result.Success -> {
+                                setUiEvent(ProfileUpdateUiEvent.NavigateToBack)
+                            }
+
+                            is Result.Error -> {
+                                when (result.exception) {
+                                    is IOException -> {
+                                        setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                    }
+
+                                    is NetworkException -> {
+                                        setUiEvent(
+                                            ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage),
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -165,19 +201,18 @@ sealed interface ProfileUpdateUiAction : UiAction {
     data object OnClickRefresh : ProfileUpdateUiAction
 
     data class OnChangeProfileUrl(
-        val profileUrl: String?
+        val profileUrl: String?,
     ) : ProfileUpdateUiAction
 
     data class OnChangeNickname(
-        val nickname: String
+        val nickname: String,
     ) : ProfileUpdateUiAction
 
     data class OnShowProfileEditDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : ProfileUpdateUiAction
 
     data object OnNavigatePhotoPicker : ProfileUpdateUiAction
-
 }
 
 sealed interface ProfileUpdateUiEvent : UiEvent {
@@ -186,6 +221,6 @@ sealed interface ProfileUpdateUiEvent : UiEvent {
     data object NavigateToPhotoPicker : ProfileUpdateUiEvent
 
     data class ShowToastMessage(
-        val message: ToastMessage
+        val message: ToastMessage,
     ) : ProfileUpdateUiEvent
 }

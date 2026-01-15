@@ -28,7 +28,7 @@ data class PlanResponse(
     @SerialName("title")
     val placeName: String = "",
     @SerialName("description")
-    val description : String = "",
+    val description: String = "",
     @SerialName("lot")
     val planLongitude: Double = 0.0,
     @SerialName("lat")
@@ -45,8 +45,8 @@ data class PlanResponse(
     val commentCount: Int = 0,
 )
 
-fun PlanResponse.asItem(): Plan {
-    return Plan(
+fun PlanResponse.asItem(): Plan =
+    Plan(
         userId = userId,
         meetingId = meetingId,
         meetingName = meetingName,
@@ -66,4 +66,3 @@ fun PlanResponse.asItem(): Plan {
         commentCount = commentCount,
         planAt = planTime.parseZonedDateTime(),
     )
-}

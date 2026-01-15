@@ -35,20 +35,20 @@ fun HomeCreateCards(
 ) {
     Row(
         modifier = modifier.padding(20.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         HomeCreateCard(
             modifier = Modifier.weight(1f),
             iconRes = R.drawable.ic_new_meeting,
             text = stringResource(R.string.home_new_meeting_created),
-            onClick = { onUiAction(HomeUiAction.OnClickMeetingWrite) }
+            onClick = { onUiAction(HomeUiAction.OnClickMeetingWrite) },
         )
 
         HomeCreateCard(
             modifier = Modifier.weight(1f),
             iconRes = R.drawable.ic_new_calendar,
             text = stringResource(R.string.home_new_plan_created),
-            onClick = { onUiAction(HomeUiAction.OnClickPlanWrite) }
+            onClick = { onUiAction(HomeUiAction.OnClickPlanWrite) },
         )
     }
 }
@@ -58,33 +58,35 @@ fun HomeCreateCard(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
     text: String,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     MoimCard(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        onClick = onClick
+        onClick = onClick,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
         ) {
             MoimText(
                 text = text,
                 singleLine = false,
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
             Spacer(Modifier.height(4.dp))
 
             Icon(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .size(40.dp),
+                modifier =
+                    Modifier
+                        .align(Alignment.End)
+                        .size(40.dp),
                 imageVector = ImageVector.vectorResource(iconRes),
                 contentDescription = "",
-                tint = Color.Unspecified
+                tint = Color.Unspecified,
             )
         }
     }
@@ -95,9 +97,10 @@ fun HomeCreateCard(
 private fun HomeCreateCardPreview() {
     MoimTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.bg.primary),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MoimTheme.colors.bg.primary),
         ) {
             HomeCreateCards()
         }

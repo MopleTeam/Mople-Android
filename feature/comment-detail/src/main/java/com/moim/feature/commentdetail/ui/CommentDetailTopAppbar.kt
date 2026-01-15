@@ -10,7 +10,7 @@ import com.moim.feature.commentdetail.CommentDetailAction
 @Composable
 fun CommentDetailTopAppbar(
     modifier: Modifier = Modifier,
-    onUiAction: (CommentDetailAction) -> Unit
+    onUiAction: (CommentDetailAction) -> Unit,
 ) {
     MoimTopAppbar(
         modifier = modifier,

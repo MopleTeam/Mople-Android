@@ -31,53 +31,57 @@ import com.moim.feature.meetingwrite.OnMeetingWriteUiAction
 fun MeetingWriteImage(
     modifier: Modifier = Modifier,
     meetingImageUrl: String?,
-    onUiAction: OnMeetingWriteUiAction
+    onUiAction: OnMeetingWriteUiAction,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier.align(Alignment.CenterHorizontally),
         ) {
             if (meetingImageUrl.isNullOrEmpty()) {
                 Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(color = MoimTheme.colors.bg.primary)
-                        .align(Alignment.Center)
-                        .onSingleClick { onUiAction(MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(true)) }
+                    modifier =
+                        Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(color = MoimTheme.colors.bg.primary)
+                            .align(Alignment.Center)
+                            .onSingleClick { onUiAction(MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(true)) },
                 ) {
                     Icon(
                         modifier = Modifier.align(Alignment.Center),
                         imageVector = ImageVector.vectorResource(R.drawable.ic_empty_meeting),
                         contentDescription = "",
-                        tint = Color.Unspecified
+                        tint = Color.Unspecified,
                     )
                 }
             } else {
                 NetworkImage(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(20.dp))
-                        .size(80.dp)
-                        .align(Alignment.Center)
-                        .onSingleClick { onUiAction(MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(true)) },
+                    modifier =
+                        Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(20.dp))
+                            .size(80.dp)
+                            .align(Alignment.Center)
+                            .onSingleClick { onUiAction(MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(true)) },
                     imageUrl = meetingImageUrl,
                     errorImage = painterResource(R.drawable.ic_empty_image),
                 )
             }
 
             Icon(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(start = 65.dp),
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(start = 65.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.ic_edit),
                 contentDescription = null,
-                tint = Color.Unspecified
+                tint = Color.Unspecified,
             )
         }
     }
@@ -88,13 +92,14 @@ fun MeetingWriteImage(
 private fun MeetingWriteImagePreview() {
     MoimTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MoimTheme.colors.white)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MoimTheme.colors.white),
         ) {
             MeetingWriteImage(
                 meetingImageUrl = null,
-                onUiAction = {}
+                onUiAction = {},
             )
         }
     }

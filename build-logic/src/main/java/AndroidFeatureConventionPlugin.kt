@@ -8,7 +8,6 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
 internal class AndroidFeatureConventionPlugin : Plugin<Project> {
-
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply {
@@ -28,6 +27,7 @@ internal class AndroidFeatureConventionPlugin : Plugin<Project> {
                 implementation(project(":core:designsystem"))
                 implementation(project(":core:ui"))
                 implementation(project(":core:analytics"))
+                implementation(project(":core:crashreport"))
 
                 // AndroidX
                 implementation(libs.androidx.core.ktx)
@@ -36,7 +36,8 @@ internal class AndroidFeatureConventionPlugin : Plugin<Project> {
                 // AndroidX Paging
                 implementation(libs.bundles.androidx.paging)
                 // AndroidX Navigation
-                implementation(libs.androidx.navigation.compose)
+                implementation(libs.androidx.navigation3.runtime)
+                implementation(libs.androidx.navigation3.ui)
 
                 // AndroidX Compose material3
                 implementation(libs.androidx.compose.material3)

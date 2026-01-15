@@ -24,23 +24,25 @@ fun MoimCard(
     color: Color = MoimTheme.colors.white,
     onClick: () -> Unit = {},
     enable: Boolean = true,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Box(
-        modifier = modifier
-            .clip(shape)
-            .onSingleClick(enabled = enable, onClick = onClick)
+        modifier =
+            modifier
+                .clip(shape)
+                .onSingleClick(enabled = enable, onClick = onClick),
     ) {
         Card(
             modifier = modifier,
-            colors = CardDefaults.cardColors(
-                containerColor = color,
-                contentColor = color,
-            ),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = color,
+                    contentColor = color,
+                ),
             elevation = elevation,
             shape = shape,
             border = border,
-            content = content
+            content = content,
         )
     }
 }

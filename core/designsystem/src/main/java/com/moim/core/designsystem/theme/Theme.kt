@@ -8,26 +8,27 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 
-private val LightColorScheme = lightColorScheme(
-    background = color_FFFFFF,
-    surfaceTint = color_000000
-)
+private val LightColorScheme =
+    lightColorScheme(
+        background = color_FFFFFF,
+        surfaceTint = color_000000,
+    )
 
 @Composable
 fun MoimTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colorScheme = LightColorScheme
 
     CompositionLocalProvider(
         LocalDensity provides Density(density = LocalDensity.current.density, fontScale = 1f),
         LocalTypography provides Typography,
-        LocalMoimColors provides MoimColor()
+        LocalMoimColors provides MoimColor(),
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            content = content
+            content = content,
         )
     }
 }

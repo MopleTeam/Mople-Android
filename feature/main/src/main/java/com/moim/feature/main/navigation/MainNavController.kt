@@ -2,55 +2,46 @@ package com.moim.feature.main.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navOptions
-import com.moim.feature.calendar.navigateToCalendar
-import com.moim.feature.home.navigateToHome
-import com.moim.feature.meeting.navigateToMeeting
-import com.moim.feature.profile.navigateToProfile
+import com.moim.core.ui.route.MainRoute
 
+/**
+ * MainNavigator와 MainNavigationState를 통합하는 래퍼 클래스
+ */
 class MainNavController(
-    val navController: NavHostController,
+    val navigationState: MainNavigationState,
+    val navigator: MainNavigator,
 ) {
-    private val currentDestination: NavDestination?
-        @Composable
-        get() = navController.currentBackStackEntryAsState().value?.destination
-
+    /**
+     * 현재 선택된 MainTab
+     */
     val currentTab: MainTab?
         @Composable
-        get() = MainTab.find { tab -> currentDestination?.hasRoute(tab::class) == true }
+        get() = navigationState.currentTab
 
-    val startDestination = MainTab.Home.route
+    /**
+     * 시작 라우트
+     */
+    val startDestination: MainRoute
+        get() = navigationState.startRoute
 
-    fun navigate(tab: MainTab) {
-        val navOptions = navOptions {
-            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-            launchSingleTop = true
-            restoreState = true
-        }
+    /**
+     * MainTab으로 네비게이션
+     */
+    fun navigate(tab: MainTab) = navigator.navigate(tab)
 
-        when (tab) {
-            MainTab.Home -> navController.navigateToHome(navOptions)
-            MainTab.Meeting -> navController.navigateToMeeting(navOptions)
-            MainTab.Calendar -> navController.navigateToCalendar(navOptions)
-            MainTab.Profile -> navController.navigateToProfile(navOptions)
-        }
-    }
-
+    /**
+     * Bottom Bar 표시 여부
+     */
     @Composable
-    fun shouldShowBottomBar() = MainTab.contains {
-        currentDestination?.hasRoute(it::class) == true
-    }
+    fun shouldShowBottomBar() = navigationState.shouldShowBottomBar
 }
 
 @Composable
-fun rememberMainNavController(
-    navController: NavHostController = rememberNavController(),
-): MainNavController {
-    return remember(navController) { MainNavController(navController) }
+fun rememberMainNavController(): MainNavController {
+    val navigationState = rememberMainNavigationState()
+    val navigator = remember(navigationState) { MainNavigator(navigationState) }
+
+    return remember(navigationState, navigator) {
+        MainNavController(navigationState, navigator)
+    }
 }

@@ -81,7 +81,7 @@ fun AlarmRoute(
         modifier = modifier,
         totalCount = totalCount,
         alarmItems = notifications,
-        onUiAction = viewModel::onUiAction
+        onUiAction = viewModel::onUiAction,
     )
 }
 
@@ -90,16 +90,16 @@ fun AlarmScreen(
     modifier: Modifier = Modifier,
     totalCount: Int,
     alarmItems: LazyPagingItems<AlarmUiModel>,
-    onUiAction: (AlarmUiAction) -> Unit
+    onUiAction: (AlarmUiAction) -> Unit,
 ) {
     TrackScreenViewEvent(screenName = "notification")
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         MoimTopAppbar(
             modifier = Modifier,
             title = stringResource(R.string.alarm_title),
-            onClickNavigate = { onUiAction(AlarmUiAction.OnClickBack) }
+            onClickNavigate = { onUiAction(AlarmUiAction.OnClickBack) },
         )
 
         AlarmCount(alarmCount = totalCount)
@@ -108,29 +108,30 @@ fun AlarmScreen(
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = alarmItems.loadState.isSuccess() && alarmItems.itemCount > 0
+            visible = alarmItems.loadState.isSuccess() && alarmItems.itemCount > 0,
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 64.dp)
+                contentPadding = PaddingValues(bottom = 64.dp),
             ) {
                 items(
                     count = alarmItems.itemCount,
                     key = alarmItems.itemKey(),
-                    contentType = alarmItems.itemContentType()
+                    contentType = alarmItems.itemContentType(),
                 ) { index ->
                     val alarmUiModel = alarmItems[index] ?: return@items
                     AlarmListItem(
                         alarm = alarmUiModel,
-                        onUiAction = onUiAction
+                        onUiAction = onUiAction,
                     )
                 }
 
                 item {
                     Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 24.dp),
                         text = stringResource(R.string.alarm_deadline_description),
                         style = MoimTheme.typography.body01.regular,
                         color = MoimTheme.colors.gray.gray04,
@@ -169,7 +170,7 @@ fun AlarmScreen(
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = alarmItems.loadState.isLoading()
+            visible = alarmItems.loadState.isLoading(),
         ) {
             PagingLoadingScreen(modifier = Modifier.fillMaxSize())
         }
@@ -178,12 +179,13 @@ fun AlarmScreen(
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = alarmItems.loadState.isError()
+            visible = alarmItems.loadState.isError(),
         ) {
             ErrorScreen(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MoimTheme.colors.bg.primary),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MoimTheme.colors.bg.primary),
                 onClickRefresh = { onUiAction(AlarmUiAction.OnClickRefresh) },
             )
         }
@@ -192,12 +194,13 @@ fun AlarmScreen(
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = alarmItems.loadState.isSuccess() && alarmItems.itemCount == 0
+            visible = alarmItems.loadState.isSuccess() && alarmItems.itemCount == 0,
         ) {
             AlarmEmptyScreen(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MoimTheme.colors.bg.primary)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MoimTheme.colors.bg.primary),
             )
         }
     }
@@ -209,22 +212,23 @@ fun AlarmCount(
     alarmCount: Int,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(top = 28.dp, bottom = 16.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(top = 28.dp, bottom = 16.dp),
     ) {
         MoimText(
             modifier = Modifier.weight(1f),
             text = stringResource(R.string.alarm_new),
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray01
+            color = MoimTheme.colors.gray.gray01,
         )
 
         MoimText(
             text = stringResource(R.string.unit_count, alarmCount.decimalFormatString()),
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray01
+            color = MoimTheme.colors.gray.gray01,
         )
     }
 }

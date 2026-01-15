@@ -34,18 +34,19 @@ fun MoimDialog(
     content: @Composable () -> Unit,
 ) {
     Dialog(
-        properties = DialogProperties(
-            dismissOnBackPress = dismissOnBackPress,
-            dismissOnClickOutside = dismissOnClickOutside,
-            usePlatformDefaultWidth = usePlatformDefaultWidth,
-            decorFitsSystemWindows = decorFitsSystemWindows
-        ),
+        properties =
+            DialogProperties(
+                dismissOnBackPress = dismissOnBackPress,
+                dismissOnClickOutside = dismissOnClickOutside,
+                usePlatformDefaultWidth = usePlatformDefaultWidth,
+                decorFitsSystemWindows = decorFitsSystemWindows,
+            ),
         onDismissRequest = onDismiss,
         content = {
             MoimTheme {
                 content()
             }
-        }
+        },
     )
 }
 
@@ -57,7 +58,7 @@ fun MoimAlertDialog(
     cancelable: Boolean = true,
     negativeText: String = stringResource(id = R.string.common_negative),
     positiveText: String = stringResource(id = R.string.common_positive),
-    positiveButtonColors : ButtonColors = moimButtomColors(),
+    positiveButtonColors: ButtonColors = moimButtomColors(),
     onClickNegative: () -> Unit = {},
     onClickPositive: () -> Unit = {},
     onDismiss: () -> Unit = {},
@@ -68,18 +69,19 @@ fun MoimAlertDialog(
         content = {
             MoimTheme {
                 Column(
-                    modifier = Modifier
-                        .background(MoimTheme.colors.white, RoundedCornerShape(10.dp))
-                        .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp)
-                        .fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .background(MoimTheme.colors.white, RoundedCornerShape(10.dp))
+                            .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp)
+                            .fillMaxWidth(),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     MoimText(
                         text = title,
                         singleLine = false,
                         style = MoimTheme.typography.title02.semiBold,
-                        color = MoimTheme.colors.gray.gray01
+                        color = MoimTheme.colors.gray.gray01,
                     )
 
                     if (description.isNotEmpty()) {
@@ -89,13 +91,13 @@ fun MoimAlertDialog(
                             singleLine = false,
                             style = MoimTheme.typography.body01.regular,
                             color = MoimTheme.colors.gray.gray02,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (isNegative) {
                             MoimPrimaryButton(
@@ -104,10 +106,11 @@ fun MoimAlertDialog(
                                 verticalPadding = 16.dp,
                                 text = negativeText,
                                 style = MoimTheme.typography.title03.semiBold,
-                                buttonColors = moimButtomColors().copy(
-                                    containerColor = MoimTheme.colors.tertiary,
-                                    contentColor = MoimTheme.colors.gray.gray01
-                                )
+                                buttonColors =
+                                    moimButtomColors().copy(
+                                        containerColor = MoimTheme.colors.tertiary,
+                                        contentColor = MoimTheme.colors.gray.gray01,
+                                    ),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                         }
@@ -123,7 +126,7 @@ fun MoimAlertDialog(
                     }
                 }
             }
-        }
+        },
     )
 }
 
@@ -131,11 +134,11 @@ fun MoimAlertDialog(
 @Composable
 private fun MoimAlertDialogPreview() {
     Column(
-        modifier = Modifier.containerScreen()
+        modifier = Modifier.containerScreen(),
     ) {
         MoimAlertDialog(
             title = "정말 탈퇴하시겠어요?",
-            description = "회원 탈퇴하면 모임과 일정을 복구할 수 없어요"
+            description = "회원 탈퇴하면 모임과 일정을 복구할 수 없어요",
         )
     }
 }

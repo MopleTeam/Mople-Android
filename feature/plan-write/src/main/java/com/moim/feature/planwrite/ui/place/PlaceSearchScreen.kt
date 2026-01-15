@@ -37,23 +37,23 @@ fun PlaceSearchScreen(
     isSearchResult: Boolean = false,
     searchPlaces: List<Place>,
     selectedPlace: Place? = null,
-    onUiAction: OnPlanWriteUiAction = {}
+    onUiAction: OnPlanWriteUiAction = {},
 ) {
     TrackScreenViewEvent(screenName = "plan_write_map_search")
 
     if (searchPlaces.isNotEmpty()) {
         LazyColumn(
             modifier = modifier,
-            contentPadding = PaddingValues(bottom = 24.dp)
+            contentPadding = PaddingValues(bottom = 24.dp),
         ) {
             items(
                 items = searchPlaces,
-                key = { it.roadAddress }
+                key = { it.roadAddress },
             ) {
                 PlaceItem(
                     place = it,
                     selectedPlace = selectedPlace,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
         }
@@ -61,19 +61,22 @@ fun PlaceSearchScreen(
         Column(
             modifier = modifier,
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_location_search),
                 contentDescription = "",
-                tint = MoimTheme.colors.icon
+                tint = MoimTheme.colors.icon,
             )
 
             MoimText(
-                text = stringResource(if (isSearchResult) R.string.plan_write_place_search_empty else R.string.plan_write_place_search_hint),
+                text =
+                    stringResource(
+                        if (isSearchResult) R.string.plan_write_place_search_empty else R.string.plan_write_place_search_hint,
+                    ),
                 singleLine = false,
                 style = MoimTheme.typography.body01.medium,
-                color = MoimTheme.colors.gray.gray06
+                color = MoimTheme.colors.gray.gray06,
             )
         }
     }
@@ -87,23 +90,24 @@ fun PlaceItem(
     onUiAction: OnPlanWriteUiAction = {},
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(if (selectedPlace?.roadAddress == place.roadAddress) MoimTheme.colors.bg.primary else MoimTheme.colors.white)
-            .onSingleClick { onUiAction(PlanWriteUiAction.OnClickSearchPlace(place)) }
-            .padding(20.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(if (selectedPlace?.roadAddress == place.roadAddress) MoimTheme.colors.bg.primary else MoimTheme.colors.white)
+                .onSingleClick { onUiAction(PlanWriteUiAction.OnClickSearchPlace(place)) }
+                .padding(20.dp),
     ) {
         Icon(
             modifier = Modifier.size(24.dp),
             imageVector = ImageVector.vectorResource(R.drawable.ic_location),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
 
         Spacer(Modifier.width(16.dp))
 
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             MoimText(
                 modifier = Modifier.fillMaxWidth(),
@@ -127,11 +131,12 @@ fun PlaceItem(
 private fun PlaceItemPreview() {
     MoimTheme {
         PlaceSearchScreen(
-            searchPlaces = listOf(
-                Place(title = "시티극장", roadAddress = "서울 강남구 강남대로 422 지하 2층"),
-                Place(title = "CGV 청담씨네마시티", roadAddress = "서울 강남구 도산대로 323 8층"),
-                Place(title = "메가박스 센트럴", roadAddress = "서울 서초구 신반포로 176 센트럴시티빌딩 지하1층"),
-            ),
+            searchPlaces =
+                listOf(
+                    Place(title = "시티극장", roadAddress = "서울 강남구 강남대로 422 지하 2층"),
+                    Place(title = "CGV 청담씨네마시티", roadAddress = "서울 강남구 도산대로 323 8층"),
+                    Place(title = "메가박스 센트럴", roadAddress = "서울 서초구 신반포로 176 센트럴시티빌딩 지하1층"),
+                ),
             selectedPlace = Place(title = "메가박스 센트럴", roadAddress = "서울 서초구 신반포로 176 센트럴시티빌딩 지하1층"),
         )
     }

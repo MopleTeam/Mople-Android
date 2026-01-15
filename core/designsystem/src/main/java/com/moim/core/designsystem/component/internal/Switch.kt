@@ -60,28 +60,28 @@ internal fun MoimSwitchImpl(
 
     Box(
         modifier =
-        modifier
-            .minimumInteractiveComponentSize()
-            .toggleable(
-                value = checked,
-                onValueChange = onCheckedChange,
-                enabled = true,
-                role = Role.Switch,
-                interactionSource = interactionSource,
-                indication = null,
-            ).border(TrackOutlineWidth, borderColor, trackShape)
-            .requiredSize(SwitchWidth, SwitchHeight)
-            .background(trackColor, trackShape),
+            modifier
+                .minimumInteractiveComponentSize()
+                .toggleable(
+                    value = checked,
+                    onValueChange = onCheckedChange,
+                    enabled = true,
+                    role = Role.Switch,
+                    interactionSource = interactionSource,
+                    indication = null,
+                ).border(TrackOutlineWidth, borderColor, trackShape)
+                .requiredSize(SwitchWidth, SwitchHeight)
+                .background(trackColor, trackShape),
     ) {
         Box(
             modifier =
-            Modifier
-                .align(Alignment.CenterStart)
-                .then(ThumbElement(interactionSource, checked))
-                .indication(
-                    interactionSource = interactionSource,
-                    indication = rippleOrFallbackImplementation(bounded = false, radius = 40.dp),
-                ).background(resolvedThumbColor, CircleShape),
+                Modifier
+                    .align(Alignment.CenterStart)
+                    .then(ThumbElement(interactionSource, checked))
+                    .indication(
+                        interactionSource = interactionSource,
+                        indication = rippleOrFallbackImplementation(bounded = false, radius = 40.dp),
+                    ).background(resolvedThumbColor, CircleShape),
         )
     }
 }

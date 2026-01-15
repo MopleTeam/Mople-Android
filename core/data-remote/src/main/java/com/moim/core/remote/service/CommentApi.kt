@@ -12,7 +12,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface CommentApi {
-
     @GET("comment/{postId}")
     suspend fun getComments(
         @Path("postId") postId: String,
@@ -31,20 +30,20 @@ interface CommentApi {
     @POST("comment/{postId}")
     suspend fun createComment(
         @Path("postId") postId: String,
-        @Body params: JsonObject
+        @Body params: JsonObject,
     ): CommentResponse
 
     @POST("comment/{postId}/{commentId}")
     suspend fun createReplyComment(
         @Path("postId") postId: String,
         @Path("commentId") commentId: String,
-        @Body params: JsonObject
+        @Body params: JsonObject,
     ): CommentResponse
 
     @PATCH("comment/{commentId}")
     suspend fun updateComment(
         @Path("commentId") commentId: String,
-        @Body params: JsonObject
+        @Body params: JsonObject,
     ): CommentResponse
 
     @POST("comment/{commentId}/likes")
@@ -53,8 +52,12 @@ interface CommentApi {
     ): CommentResponse
 
     @DELETE("comment/{commentId}")
-    suspend fun deleteComment(@Path("commentId") commentId: String)
+    suspend fun deleteComment(
+        @Path("commentId") commentId: String,
+    )
 
     @POST("comment/report")
-    suspend fun reportComment(@Body params: JsonObject)
+    suspend fun reportComment(
+        @Body params: JsonObject,
+    )
 }

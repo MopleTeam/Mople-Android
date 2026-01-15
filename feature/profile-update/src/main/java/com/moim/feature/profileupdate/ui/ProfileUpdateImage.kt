@@ -25,36 +25,37 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.profileupdate.OnProfileUpdateUiAction
 import com.moim.feature.profileupdate.ProfileUpdateUiAction
 
-
 @Composable
 fun ProfileUpdateImage(
     modifier: Modifier = Modifier,
     profileUrl: String?,
-    onUiAction: OnProfileUpdateUiAction = {}
+    onUiAction: OnProfileUpdateUiAction = {},
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box {
             NetworkImage(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
-                    .size(80.dp)
-                    .align(Alignment.Center)
-                    .onSingleClick { onUiAction(ProfileUpdateUiAction.OnShowProfileEditDialog(true)) },
+                modifier =
+                    Modifier
+                        .clip(CircleShape)
+                        .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
+                        .size(80.dp)
+                        .align(Alignment.Center)
+                        .onSingleClick { onUiAction(ProfileUpdateUiAction.OnShowProfileEditDialog(true)) },
                 imageUrl = profileUrl,
-                errorImage = painterResource(R.drawable.ic_empty_user_logo)
+                errorImage = painterResource(R.drawable.ic_empty_user_logo),
             )
 
             Icon(
                 modifier = Modifier.align(Alignment.BottomEnd),
                 imageVector = ImageVector.vectorResource(R.drawable.ic_edit),
                 contentDescription = null,
-                tint = Color.Unspecified
+                tint = Color.Unspecified,
             )
         }
     }

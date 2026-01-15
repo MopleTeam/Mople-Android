@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
 fun PlanWriteMeetingsDialog(
     modifier: Modifier = Modifier,
     meetings: LazyPagingItems<MeetingUiModel>,
-    onUiAction: OnPlanWriteUiAction
+    onUiAction: OnPlanWriteUiAction,
 ) {
     val dismissAction = PlanWriteUiAction.OnShowMeetingsDialog(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
@@ -67,12 +67,12 @@ fun PlanWriteMeetingsDialog(
         },
     ) {
         PlanWriteMeetingsTopAppbar(
-            onClick = { onUiAction(dismissAction) }
+            onClick = { onUiAction(dismissAction) },
         )
 
         PlanWriteMeetingsScreen(
             meetings = meetings,
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
     }
 }
@@ -83,21 +83,22 @@ fun PlanWriteMeetingsTopAppbar(
     onClick: () -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, end = 12.dp, top = 22.dp, bottom = 18.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 12.dp, top = 22.dp, bottom = 18.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         MoimText(
             modifier = Modifier.weight(1f),
             text = stringResource(R.string.plan_write_meeting_select),
             style = MoimTheme.typography.title02.semiBold,
-            color = MoimTheme.colors.gray.gray02
+            color = MoimTheme.colors.gray.gray02,
         )
 
         MoimIconButton(
             iconRes = R.drawable.ic_close,
-            onClick = onClick
+            onClick = onClick,
         )
     }
 }
@@ -106,25 +107,25 @@ fun PlanWriteMeetingsTopAppbar(
 fun PlanWriteMeetingsScreen(
     modifier: Modifier = Modifier,
     meetings: LazyPagingItems<MeetingUiModel>,
-    onUiAction: OnPlanWriteUiAction
+    onUiAction: OnPlanWriteUiAction,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(bottom = 60.dp)
+            contentPadding = PaddingValues(bottom = 60.dp),
         ) {
             items(
                 count = meetings.itemCount,
                 key = meetings.itemKey(),
-                contentType = meetings.itemContentType()
+                contentType = meetings.itemContentType(),
             ) { index ->
                 val meetingUiModel = meetings[index] ?: return@items
                 PlanWriteMeetingInfo(
                     meeting = meetingUiModel.meeting,
                     isSelected = meetingUiModel.isSelected,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
 
@@ -155,7 +156,7 @@ fun PlanWriteMeetingsScreen(
 
             item {
                 AnimatedVisibility(
-                    visible = meetings.loadState.isLoading()
+                    visible = meetings.loadState.isLoading(),
                 ) {
                     PagingLoadingScreen()
                 }
@@ -164,7 +165,7 @@ fun PlanWriteMeetingsScreen(
             item {
                 AnimatedVisibility(
                     modifier = Modifier.fillMaxWidth(),
-                    visible = meetings.loadState.isError()
+                    visible = meetings.loadState.isError(),
                 ) {
                     PagingErrorScreen(
                         modifier = modifier,
@@ -181,26 +182,27 @@ fun PlanWriteMeetingInfo(
     modifier: Modifier = Modifier,
     meeting: Meeting,
     isSelected: Boolean,
-    onUiAction: OnPlanWriteUiAction
+    onUiAction: OnPlanWriteUiAction,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(color = if (isSelected) MoimTheme.colors.bg.input else MoimTheme.colors.white)
-            .onSingleClick {
-                onUiAction(PlanWriteUiAction.OnClickPlanMeeting(meeting))
-                onUiAction(PlanWriteUiAction.OnShowMeetingsDialog(false))
-            }
-            .padding(vertical = 16.dp, horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(color = if (isSelected) MoimTheme.colors.bg.input else MoimTheme.colors.white)
+                .onSingleClick {
+                    onUiAction(PlanWriteUiAction.OnClickPlanMeeting(meeting))
+                    onUiAction(PlanWriteUiAction.OnShowMeetingsDialog(false))
+                }.padding(vertical = 16.dp, horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         NetworkImage(
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(6.dp))
-                .size(22.dp),
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(6.dp))
+                    .size(22.dp),
             imageUrl = meeting.imageUrl,
-            errorImage = painterResource(R.drawable.ic_empty_meeting)
+            errorImage = painterResource(R.drawable.ic_empty_meeting),
         )
 
         Spacer(Modifier.width(8.dp))

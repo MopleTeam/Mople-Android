@@ -20,24 +20,22 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
 
 @Composable
-fun MeetingDetailPlanEmpty(
-    modifier: Modifier = Modifier
-) {
+fun MeetingDetailPlanEmpty(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_empty_calendar),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
         MoimText(
             text = stringResource(R.string.meeting_detail_plan_empty),
             singleLine = false,
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.gray.gray06
+            color = MoimTheme.colors.gray.gray06,
         )
         Spacer(Modifier.height(80.dp))
     }
@@ -48,7 +46,7 @@ fun MeetingDetailPlanEmpty(
 fun MeetingDetailPlanEmptyPreview() {
     MoimTheme {
         MeetingDetailPlanEmpty(
-            modifier = Modifier.background(MoimTheme.colors.bg.primary)
+            modifier = Modifier.background(MoimTheme.colors.bg.primary),
         )
     }
 }

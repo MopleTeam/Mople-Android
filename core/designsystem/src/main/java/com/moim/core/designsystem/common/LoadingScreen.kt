@@ -18,9 +18,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.moim.core.designsystem.theme.MoimTheme
 
 @Composable
-fun LoadingScreen(
-    modifier: Modifier = Modifier,
-) {
+fun LoadingScreen(modifier: Modifier = Modifier) {
     Box(modifier = modifier) {
         Box(
             modifier =
@@ -49,11 +47,12 @@ fun LoadingDialog(isShow: Boolean) {
     AnimatedVisibility(visible = isShow) {
         Dialog(
             onDismissRequest = {},
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false
-            ),
+            properties =
+                DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    dismissOnBackPress = false,
+                    dismissOnClickOutside = false,
+                ),
         ) {
             Box {
                 Box(

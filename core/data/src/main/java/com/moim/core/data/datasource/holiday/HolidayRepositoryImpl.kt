@@ -12,8 +12,8 @@ import javax.inject.Inject
 internal class HolidayRepositoryImpl @Inject constructor(
     private val holidayApi: HolidayApi,
 ) : HolidayRepository {
-
-    override fun getHolidays(currentYear: ZonedDateTime): Flow<List<Holiday>> = catchFlow {
-        emit(holidayApi.getHolidays(year = currentYear.year.toString()).map(HolidayResponse::asItem))
-    }
+    override fun getHolidays(currentYear: ZonedDateTime): Flow<List<Holiday>> =
+        catchFlow {
+            emit(holidayApi.getHolidays(year = currentYear.year.toString()).map(HolidayResponse::asItem))
+        }
 }

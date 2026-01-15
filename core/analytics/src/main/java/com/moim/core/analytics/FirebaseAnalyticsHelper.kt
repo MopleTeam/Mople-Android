@@ -7,7 +7,6 @@ import javax.inject.Inject
 internal class FirebaseAnalyticsHelper @Inject constructor(
     private val firebaseAnalytics: FirebaseAnalytics,
 ) : AnalyticsHelper {
-
     override fun logEvent(event: AnalyticsEvent) {
         if (BuildConfig.DEBUG) return
         firebaseAnalytics.logEvent(event.type) {

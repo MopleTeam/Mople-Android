@@ -49,7 +49,7 @@ fun ImageViewerRoute(
             ImageViewerScreen(
                 modifier = modifier,
                 uiState = uiState,
-                onUiAction = viewModel::onUiAction
+                onUiAction = viewModel::onUiAction,
             )
         }
     }
@@ -62,10 +62,11 @@ fun ImageViewerScreen(
     onUiAction: (ImageViewerUiAction) -> Unit,
 ) {
     val pageSize = uiState.images.size
-    val pagerState = rememberPagerState(
-        pageCount = { pageSize },
-        initialPage = uiState.position
-    )
+    val pagerState =
+        rememberPagerState(
+            pageCount = { pageSize },
+            initialPage = uiState.position,
+        )
     val zoomState = rememberZoomState(initialScale = 1.0f)
 
     TrackScreenViewEvent(screenName = "image_viewer")
@@ -78,25 +79,26 @@ fun ImageViewerScreen(
                 title = uiState.title,
                 currentIndex = pagerState.currentPage + 1,
                 totalIndex = pageSize,
-                onClickDismiss = { onUiAction(ImageViewerUiAction.OnClickBack) }
+                onClickDismiss = { onUiAction(ImageViewerUiAction.OnClickBack) },
             )
         },
         content = {
             HorizontalPager(
                 modifier = Modifier.fillMaxWidth(),
-                state = pagerState
+                state = pagerState,
             ) { index ->
                 NetworkImage(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(vertical = 20.dp)
-                        .zoomable(zoomState = zoomState),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(vertical = 20.dp)
+                            .zoomable(zoomState = zoomState),
                     imageUrl = uiState.images[index],
                     errorImage = painterResource(uiState.defaultImage ?: R.drawable.ic_empty_logo),
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.Fit,
                 )
             }
-        }
+        },
     )
 }
 
@@ -106,7 +108,7 @@ private fun ImageViewerTopAppbar(
     title: String,
     currentIndex: Int,
     totalIndex: Int,
-    onClickDismiss: () -> Unit
+    onClickDismiss: () -> Unit,
 ) {
     MoimTopAppbar(
         modifier = modifier,
@@ -115,7 +117,7 @@ private fun ImageViewerTopAppbar(
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_back),
                 contentDescription = "",
-                tint = MoimTheme.colors.white
+                tint = MoimTheme.colors.white,
             )
         },
         onClickNavigate = onClickDismiss,
@@ -129,6 +131,6 @@ private fun ImageViewerTopAppbar(
                     color = MoimTheme.colors.gray.gray04,
                 )
             }
-        }
+        },
     )
 }

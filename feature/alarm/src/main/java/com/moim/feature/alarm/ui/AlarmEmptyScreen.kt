@@ -18,13 +18,11 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
 
 @Composable
-fun AlarmEmptyScreen(
-    modifier: Modifier = Modifier
-) {
+fun AlarmEmptyScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.weight(1f))
 
@@ -32,12 +30,12 @@ fun AlarmEmptyScreen(
             modifier = Modifier.size(80.dp),
             imageVector = ImageVector.vectorResource(R.drawable.ic_alarm),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
         MoimText(
             text = stringResource(R.string.alarm_empty),
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray06
+            color = MoimTheme.colors.gray.gray06,
         )
 
         Spacer(Modifier.weight(2f))

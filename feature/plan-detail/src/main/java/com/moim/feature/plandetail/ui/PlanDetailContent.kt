@@ -44,26 +44,28 @@ fun PlanDetailContent(
     isMyPlan: Boolean,
     planItem: PlanItem,
     isShowApplyButton: Boolean,
-    onUiAction: OnPlanDetailUiAction = {}
+    onUiAction: OnPlanDetailUiAction = {},
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
     ) {
         Spacer(Modifier.height(20.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             NetworkImage(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
-                    .size(20.dp),
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
+                        .size(20.dp),
                 imageUrl = planItem.meetingImageUrl,
-                errorImage = painterResource(R.drawable.ic_empty_meeting)
+                errorImage = painterResource(R.drawable.ic_empty_meeting),
             )
 
             Spacer(Modifier.width(8.dp))
@@ -71,7 +73,7 @@ fun PlanDetailContent(
             MoimText(
                 text = planItem.meetingName,
                 style = MoimTheme.typography.body02.semiBold,
-                color = MoimTheme.colors.gray.gray04
+                color = MoimTheme.colors.gray.gray04,
             )
         }
 
@@ -101,7 +103,7 @@ fun PlanDetailContent(
             endIconRes = R.drawable.ic_next,
             enable = true,
             text = stringResource(R.string.unit_participants_count, planItem.participantsCount),
-            onClick = { onUiAction(PlanDetailUiAction.OnClickParticipants) }
+            onClick = { onUiAction(PlanDetailUiAction.OnClickParticipants) },
         )
 
         PlanInfoItem(
@@ -124,16 +126,17 @@ fun PlanDetailContent(
         } else if (isMyPlan && planItem.isPlanAtBefore) {
             Spacer(Modifier.height(20.dp))
             PlanPlaceEmptyCard(
-                onClick = { onUiAction(PlanDetailUiAction.OnClickPlanUpdate) }
+                onClick = { onUiAction(PlanDetailUiAction.OnClickPlanUpdate) },
             )
         }
 
         if (isShowApplyButton) {
             val btnTextRes = if (planItem.isParticipant) R.string.plan_detail_plan_apply_done else R.string.plan_detail_plan_apply
-            val buttonColors = moimButtomColors().copy(
-                containerColor = if (planItem.isParticipant) MoimTheme.colors.tertiary else MoimTheme.colors.primary.primary,
-                contentColor = if (planItem.isParticipant) MoimTheme.colors.gray.gray03 else MoimTheme.colors.white
-            )
+            val buttonColors =
+                moimButtomColors().copy(
+                    containerColor = if (planItem.isParticipant) MoimTheme.colors.tertiary else MoimTheme.colors.primary.primary,
+                    contentColor = if (planItem.isParticipant) MoimTheme.colors.gray.gray03 else MoimTheme.colors.white,
+                )
 
             Spacer(Modifier.height(16.dp))
             MoimPrimaryButton(
@@ -146,7 +149,7 @@ fun PlanDetailContent(
                     } else {
                         onUiAction(PlanDetailUiAction.OnClickPlanApply(true))
                     }
-                }
+                },
             )
         }
 
@@ -161,20 +164,21 @@ private fun PlanInfoItem(
     @DrawableRes endIconRes: Int? = null,
     enable: Boolean = false,
     text: String,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp))
-            .onSingleClick(enabled = enable, onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(4.dp))
+                .onSingleClick(enabled = enable, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             modifier = Modifier.size(24.dp),
             imageVector = ImageVector.vectorResource(startIconRes),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
 
         MoimText(
@@ -182,7 +186,7 @@ private fun PlanInfoItem(
             text = text,
             style = MoimTheme.typography.body01.medium,
             color = MoimTheme.colors.gray.gray03,
-            maxLine = 2
+            maxLine = 2,
         )
 
         if (endIconRes != null) {
@@ -190,23 +194,22 @@ private fun PlanInfoItem(
                 modifier = Modifier.size(20.dp),
                 imageVector = ImageVector.vectorResource(endIconRes),
                 contentDescription = "",
-                tint = MoimTheme.colors.icon
+                tint = MoimTheme.colors.icon,
             )
         }
     }
 }
 
 @Composable
-private fun PlanPlaceEmptyCard(
-    onClick: () -> Unit,
-) {
+private fun PlanPlaceEmptyCard(onClick: () -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(160.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(MoimTheme.colors.bg.input)
-            .onSingleClick(onClick = onClick),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .heightIn(160.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MoimTheme.colors.bg.input)
+                .onSingleClick(onClick = onClick),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -214,7 +217,7 @@ private fun PlanPlaceEmptyCard(
             modifier = Modifier.size(24.dp),
             imageVector = ImageVector.vectorResource(R.drawable.ic_add),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
         Spacer(Modifier.height(8.dp))
         MoimText(
@@ -231,13 +234,14 @@ private fun PlanDetailContentPreview() {
     MoimTheme {
         PlanDetailContent(
             isMyPlan = true,
-            planItem = PlanItem(
-                isPlanAtBefore = true,
-                meetingName = "크리스마스 모험가 클럽",
-                planName = "연말 파티",
-                placeName = "",
-                description = "대신귀\n여운알\n파카를\n드리겠\n습니다",
-            ),
+            planItem =
+                PlanItem(
+                    isPlanAtBefore = true,
+                    meetingName = "크리스마스 모험가 클럽",
+                    planName = "연말 파티",
+                    placeName = "",
+                    description = "대신귀\n여운알\n파카를\n드리겠\n습니다",
+                ),
             isShowApplyButton = false,
             onUiAction = {},
         )

@@ -7,6 +7,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.net.Uri
 import android.provider.OpenableColumns
+import androidx.core.graphics.createBitmap
+import androidx.core.net.toUri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import timber.log.Timber
 import java.io.ByteArrayInputStream
@@ -17,13 +19,10 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
-import androidx.core.net.toUri
-import androidx.core.graphics.createBitmap
 
 internal class FileUtil @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
 ) {
-
     private val contentResolver = context.contentResolver
 
     fun from(path: String): File {
@@ -35,13 +34,18 @@ internal class FileUtil @Inject constructor(
             val fileName = getFileName(uri)
             val splitName = splitFileName(fileName)
 
-            val inputStream: InputStream? = try {
-                contentResolver.openInputStream(uri)
-            } catch (e: FileNotFoundException) {
-                dummyFileInputStream()
-            }
+            val inputStream: InputStream? =
+                try {
+                    contentResolver.openInputStream(uri)
+                } catch (e: FileNotFoundException) {
+                    dummyFileInputStream()
+                }
 
-            val tempFile = rename(File.createTempFile(DEFAULT_PREFIX_FILE.plus(DEFAULT_PREFIX_FILE), splitName[1]), fileName).also { it.deleteOnExit() }
+            val tempFile =
+                rename(
+                    File.createTempFile(DEFAULT_PREFIX_FILE.plus(DEFAULT_PREFIX_FILE), splitName[1]),
+                    fileName,
+                ).also { it.deleteOnExit() }
 
             var out: FileOutputStream? = null
             try {
@@ -65,7 +69,7 @@ internal class FileUtil @Inject constructor(
         var extension: String? = ""
         val i = fileName!!.lastIndexOf(".")
         if (i != -1) {
-            name = fileName.substring(0, i)
+            name = fileName.take(i)
             extension = fileName.substring(i)
         }
         return arrayOf(name, extension)
@@ -84,15 +88,18 @@ internal class FileUtil @Inject constructor(
 
         if (result == null) {
             result = uri.path
-            val cut = result!!.lastIndexOf(File.separator)
+            val cut = requireNotNull(result).lastIndexOf(File.separator)
             if (cut != -1) {
-                result = result!!.substring(cut + 1)
+                result = result.substring(cut + 1)
             }
         }
-        return result!!
+        return result
     }
 
-    private fun rename(file: File, newName: String): File {
+    private fun rename(
+        file: File,
+        newName: String,
+    ): File {
         val newFile = File(file.parent, newName)
         if (newFile != file) {
             if (newFile.exists() && newFile.delete()) {
@@ -122,7 +129,10 @@ internal class FileUtil @Inject constructor(
         return ByteArrayInputStream(bos.toByteArray())
     }
 
-    private fun copy(input: InputStream, output: OutputStream): Long {
+    private fun copy(
+        input: InputStream,
+        output: OutputStream,
+    ): Long {
         var count: Long = 0
         var n: Int
         val buffer = ByteArray(DEFAULT_BUFFER_SIZE)

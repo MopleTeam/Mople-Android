@@ -25,14 +25,13 @@ data class MeetingResponse(
     val sinceDays: Int = 0,
 )
 
-fun MeetingResponse.asItem(): Meeting {
-    return Meeting(
+fun MeetingResponse.asItem(): Meeting =
+    Meeting(
         id = id,
         creatorId = creatorId,
         name = name,
         imageUrl = imageUrl,
         memberCount = memberCount,
         lastPlanAt = lastPlanAt?.parseZonedDateTime(),
-        sinceDays = sinceDays
+        sinceDays = sinceDays,
     )
-}

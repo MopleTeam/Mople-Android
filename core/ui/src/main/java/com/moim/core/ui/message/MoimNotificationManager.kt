@@ -15,7 +15,6 @@ import javax.inject.Inject
 class MoimNotificationManager @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-
     private val notificationManager by lazy {
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
@@ -31,33 +30,40 @@ class MoimNotificationManager @Inject constructor(
     }
 
     private fun createChannels() {
-        val inviteChannel = NotificationChannel(CHANNEL_ID, NOTIFICATION_DESCRIPTION, NotificationManager.IMPORTANCE_HIGH)
-            .apply {
-                group = NOTIFICATION_GROUP_ID
-                description = NOTIFICATION_DESCRIPTION
-                lockscreenVisibility = NotificationCompat.VISIBILITY_PRIVATE
-                setShowBadge(false)
-                enableVibration(true)
-            }
+        val inviteChannel =
+            NotificationChannel(CHANNEL_ID, NOTIFICATION_DESCRIPTION, NotificationManager.IMPORTANCE_HIGH)
+                .apply {
+                    group = NOTIFICATION_GROUP_ID
+                    description = NOTIFICATION_DESCRIPTION
+                    lockscreenVisibility = NotificationCompat.VISIBILITY_PRIVATE
+                    setShowBadge(false)
+                    enableVibration(true)
+                }
 
         notificationManager.createNotificationChannels(listOf(inviteChannel))
     }
 
-    fun createNotificationBuilder(channelId: String = CHANNEL_ID): NotificationCompat.Builder {
-        return NotificationCompat.Builder(context, channelId)
+    fun createNotificationBuilder(channelId: String = CHANNEL_ID): NotificationCompat.Builder =
+        NotificationCompat
+            .Builder(context, channelId)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setSilent(true)
             .setAutoCancel(true)
-    }
 
-    fun getNotificationContentIntent(requestCode: Int, bundle: Bundle): PendingIntent {
+    fun getNotificationContentIntent(
+        requestCode: Int,
+        bundle: Bundle,
+    ): PendingIntent {
         val contentIntent = Intent(context, Class.forName(MAIN_ACTIVITY_NAME)).apply { putExtras(bundle) }
         val pendingIntentFlag = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
         return PendingIntent.getActivity(context, requestCode, contentIntent, pendingIntentFlag)
     }
 
-    fun notify(id: Int, builder: NotificationCompat.Builder) = notificationManager.notify(id, builder.build())
+    fun notify(
+        id: Int,
+        builder: NotificationCompat.Builder,
+    ) = notificationManager.notify(id, builder.build())
 
     companion object {
         private const val NOTIFICATION_NAME = "mople"

@@ -11,5 +11,5 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 internal abstract class PreferenceStorageModule {
     @Binds
-    abstract fun bindPreferenceStorage(preferenceStorageImpl: PreferenceStorageImpl) : PreferenceStorage
+    abstract fun bindPreferenceStorage(preferenceStorageImpl: PreferenceStorageImpl): PreferenceStorage
 }

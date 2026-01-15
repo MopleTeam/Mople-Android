@@ -7,9 +7,8 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class UserDataUtilImpl @Inject constructor(
-    private val preferenceStorage: PreferenceStorage
+    private val preferenceStorage: PreferenceStorage,
 ) : UserDataUtil {
-
     override val token: Flow<Token?> = preferenceStorage.token
 
     override suspend fun saveUserToken(token: Token) {

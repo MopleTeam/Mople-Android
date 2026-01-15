@@ -27,7 +27,6 @@ class SignInViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val tokenRepository: TokenRepository,
 ) : BaseViewModel() {
-
     fun onUiAction(uiAction: SignInUiAction) {
         when (uiAction) {
             is SignInUiAction.OnClickKakaoLogin -> signInForKakao(uiAction.context)
@@ -38,44 +37,77 @@ class SignInViewModel @Inject constructor(
         if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
             UserApiClient.instance.loginWithKakaoTalk(
                 context = context,
-                callback = { token, exception -> checkedKakaoToken(token, exception) }
+                callback = { token, exception -> checkedKakaoToken(token, exception) },
             )
         } else {
             UserApiClient.instance.loginWithKakaoAccount(
                 context = context,
-                callback = { token, exception -> checkedKakaoToken(token, exception) }
+                callback = { token, exception -> checkedKakaoToken(token, exception) },
             )
         }
     }
 
-    private fun checkedKakaoToken(token: OAuthToken?, exception: Throwable?) {
+    private fun checkedKakaoToken(
+        token: OAuthToken?,
+        exception: Throwable?,
+    ) {
         when {
-            exception != null -> setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.SocialLoginErrorMessage))
-
-            token != null -> UserApiClient.instance.me { user, _ ->
-                if (user == null) return@me setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.SocialLoginErrorMessage))
-                signIn(token.idToken.toString(), user.kakaoAccount?.email.toString())
+            exception != null -> {
+                setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.SocialLoginErrorMessage))
             }
 
-            else -> setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.SocialLoginErrorMessage))
+            token != null -> {
+                UserApiClient.instance.me { user, _ ->
+                    if (user == null) return@me setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.SocialLoginErrorMessage))
+                    signIn(token.idToken.toString(), user.kakaoAccount?.email.toString())
+                }
+            }
+
+            else -> {
+                setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.SocialLoginErrorMessage))
+            }
         }
     }
 
-    private fun signIn(accessToken: String, email: String) {
+    private fun signIn(
+        accessToken: String,
+        email: String,
+    ) {
         viewModelScope.launch {
-            authRepository.signIn(socialType = SOCIAL_TYPE_KAKAO, token = accessToken, email = email)
+            authRepository
+                .signIn(socialType = SOCIAL_TYPE_KAKAO, token = accessToken, email = email)
                 .flatMapLatest { tokenRepository.setFcmToken() }
                 .asResult()
                 .onEach { setLoading(it is Result.Loading) }
                 .collect { result ->
                     when (result) {
-                        is Result.Loading -> return@collect
-                        is Result.Success -> setUiEvent(SignInUiEvent.NavigateToMain)
-                        is Result.Error -> when (result.exception) {
-                            is IOException -> setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                            is NetworkException -> when (result.exception) {
-                                is NotFoundException -> setUiEvent(SignInUiEvent.NavigateToSignUp(email = email, token = accessToken))
-                                else -> setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                        is Result.Loading -> {
+                            return@collect
+                        }
+
+                        is Result.Success -> {
+                            setUiEvent(SignInUiEvent.NavigateToMain)
+                        }
+
+                        is Result.Error -> {
+                            when (result.exception) {
+                                is IOException -> {
+                                    setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                }
+
+                                is NetworkException -> {
+                                    when (result.exception) {
+                                        is NotFoundException -> {
+                                            setUiEvent(
+                                                SignInUiEvent.NavigateToSignUp(email = email, token = accessToken),
+                                            )
+                                        }
+
+                                        else -> {
+                                            setUiEvent(SignInUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -86,19 +118,19 @@ class SignInViewModel @Inject constructor(
 
 sealed interface SignInUiAction : UiAction {
     data class OnClickKakaoLogin(
-        val context: Context
+        val context: Context,
     ) : SignInUiAction
 }
 
 sealed interface SignInUiEvent : UiEvent {
     data class NavigateToSignUp(
         val email: String,
-        val token: String
+        val token: String,
     ) : SignInUiEvent
 
     data object NavigateToMain : SignInUiEvent
 
     data class ShowToastMessage(
-        val message: ToastMessage
+        val message: ToastMessage,
     ) : SignInUiEvent
 }

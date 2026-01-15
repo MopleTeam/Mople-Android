@@ -26,7 +26,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import com.moim.core.ui.util.toValidUrl
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -37,6 +36,7 @@ import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.core.ui.util.toValidUrl
 import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PAGING_ERROR
 import com.moim.core.ui.view.PAGING_LOADING
@@ -61,7 +61,7 @@ fun CommentDetailRoute(
         title: String,
         images: List<String>,
         position: Int,
-        defaultImage: Int
+        defaultImage: Int,
     ) -> Unit,
 ) {
     val context = LocalContext.current
@@ -71,7 +71,9 @@ fun CommentDetailRoute(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is CommentDetailUiEvent.NavigateToBack -> navigateToBack()
+            is CommentDetailUiEvent.NavigateToBack -> {
+                navigateToBack()
+            }
 
             is CommentDetailUiEvent.NavigateToImageViewerForUser -> {
                 navigateToImageViewer(event.userName, listOf(event.image), 0, R.drawable.ic_empty_user_logo)
@@ -85,7 +87,9 @@ fun CommentDetailRoute(
                 }
             }
 
-            is CommentDetailUiEvent.ShowToastMessage -> showToast(context, event.message)
+            is CommentDetailUiEvent.ShowToastMessage -> {
+                showToast(context, event.message)
+            }
         }
     }
 
@@ -99,7 +103,7 @@ fun CommentDetailRoute(
                 modifier = modifier,
                 uiState = uiState,
                 isLoading = isLoading,
-                onUiAction = viewModel::onUiAction
+                onUiAction = viewModel::onUiAction,
             )
         }
 
@@ -107,14 +111,14 @@ fun CommentDetailRoute(
             NotFoundErrorScreen(
                 modifier = modifier,
                 description = stringResource(R.string.comment_detail_not_found_error),
-                onClickBack = { viewModel.onUiAction(CommentDetailAction.OnClickBack) }
+                onClickBack = { viewModel.onUiAction(CommentDetailAction.OnClickBack) },
             )
         }
 
         is CommentDetailUiState.CommonError -> {
             ErrorScreen(
                 modifier = modifier,
-                onClickRefresh = { viewModel.onUiAction(CommentDetailAction.OnClickRefresh) }
+                onClickRefresh = { viewModel.onUiAction(CommentDetailAction.OnClickRefresh) },
             )
         }
     }
@@ -125,28 +129,30 @@ fun CommentDetailScreen(
     modifier: Modifier = Modifier,
     uiState: CommentDetailUiState.Success,
     isLoading: Boolean,
-    onUiAction: (CommentDetailAction) -> Unit
+    onUiAction: (CommentDetailAction) -> Unit,
 ) {
     val comments = uiState.replyComments?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
 
     MoimScaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .imePadding(),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .imePadding(),
         topBar = {
             CommentDetailTopAppbar(
                 modifier = Modifier.fillMaxWidth(),
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         },
         content = {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(it),
             ) {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) {
                     if (comments != null) {
                         items(
@@ -160,7 +166,7 @@ fun CommentDetailScreen(
                                 modifier = Modifier.animateItem(),
                                 userId = uiState.user.userId,
                                 comment = comment,
-                                onUiAction = onUiAction
+                                onUiAction = onUiAction,
                             )
                         }
 
@@ -204,7 +210,7 @@ fun CommentDetailScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 enter = fadeIn(),
                                 exit = fadeOut(),
-                                visible = comments.loadState.isError()
+                                visible = comments.loadState.isError(),
                             ) {
                                 PagingErrorScreen(
                                     modifier = modifier,
@@ -217,11 +223,12 @@ fun CommentDetailScreen(
 
                 if (uiState.isShowMentionDialog) {
                     CommentDetailMentionDialog(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(horizontal = 20.dp, vertical = 8.dp),
                         userList = uiState.searchMentions,
-                        onUiAction = onUiAction
+                        onUiAction = onUiAction,
                     )
                 }
             }
@@ -231,22 +238,22 @@ fun CommentDetailScreen(
                 updateComment = uiState.selectedUpdateComment,
                 commentState = uiState.commentState,
                 selectedMentions = uiState.selectedMentions,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
-        }
+        },
     )
 
     if (uiState.isShowCommentEditDialog && uiState.selectedComment != null) {
         CommentDetailEditDialog(
             comment = uiState.selectedComment,
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
     }
 
     if (uiState.isShowCommentReportDialog && uiState.selectedComment != null) {
         CommentDetailReportDialog(
             comment = uiState.selectedComment,
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
     }
 

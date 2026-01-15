@@ -32,7 +32,6 @@ import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
-import com.moim.core.ui.util.toValidUrl
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -45,6 +44,7 @@ import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
+import com.moim.core.ui.util.toValidUrl
 import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PAGING_ERROR
 import com.moim.core.ui.view.PAGING_LOADING
@@ -76,27 +76,27 @@ fun PlanDetailRoute(
         placeName: String,
         address: String,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
     ) -> Unit,
     navigateToParticipants: (ViewIdType) -> Unit,
     navigateToPlanWrite: (
-        planItem: PlanItem
+        planItem: PlanItem,
     ) -> Unit,
     navigateToCommentDetail: (
         meetId: String,
         postId: String,
-        comment: Comment
+        comment: Comment,
     ) -> Unit,
     navigateToReviewWrite: (
         id: String,
-        isUpdated: Boolean
+        isUpdated: Boolean,
     ) -> Unit,
     navigateToImageViewer: (
         title: String,
         images: List<String>,
         position: Int,
-        defaultImage: Int
-    ) -> Unit
+        defaultImage: Int,
+    ) -> Unit,
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
@@ -130,7 +130,12 @@ fun PlanDetailRoute(
             }
 
             is PlanDetailUiEvent.NavigateToImageViewerForReview -> {
-                navigateToImageViewer(context.getString(R.string.plan_detail_image), event.images, event.position, R.drawable.ic_empty_user_logo)
+                navigateToImageViewer(
+                    context.getString(R.string.plan_detail_image),
+                    event.images,
+                    event.position,
+                    R.drawable.ic_empty_user_logo,
+                )
             }
 
             is PlanDetailUiEvent.NavigateToImageViewerForUser -> {
@@ -161,21 +166,21 @@ fun PlanDetailRoute(
                 modifier = modifier,
                 uiState = uiState,
                 isLoading = isLoading,
-                onUiAction = viewModel::onUiAction
+                onUiAction = viewModel::onUiAction,
             )
         }
 
         is PlanDetailUiState.NotFoundError -> {
             NotFoundErrorScreen(
                 modifier = modifier,
-                onClickBack = { viewModel.onUiAction(PlanDetailUiAction.OnClickBack) }
+                onClickBack = { viewModel.onUiAction(PlanDetailUiAction.OnClickBack) },
             )
         }
 
         is PlanDetailUiState.CommonError -> {
             ErrorScreen(
                 modifier = modifier,
-                onClickRefresh = { viewModel.onUiAction(PlanDetailUiAction.OnClickRefresh) }
+                onClickRefresh = { viewModel.onUiAction(PlanDetailUiAction.OnClickRefresh) },
             )
         }
     }
@@ -186,37 +191,39 @@ fun PlanDetailScreen(
     modifier: Modifier = Modifier,
     uiState: PlanDetailUiState.Success,
     isLoading: Boolean,
-    onUiAction: OnPlanDetailUiAction
+    onUiAction: OnPlanDetailUiAction,
 ) {
     val screenName = if (uiState.planItem.isPlanAtBefore) "plan_detail" else "review_detail"
     val comments = uiState.comments?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
 
     TrackScreenViewEvent(screenName = screenName)
     MoimScaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .imePadding(),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .imePadding(),
         topBar = {
             PlanDetailTopAppbar(
                 isMyPlan = uiState.user.userId == uiState.planItem.userId,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         },
         content = {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(it),
             ) {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) {
                     item {
                         PlanDetailContent(
                             isMyPlan = uiState.user.userId == uiState.planItem.userId,
                             planItem = uiState.planItem,
                             isShowApplyButton = uiState.isShowApplyButton,
-                            onUiAction = onUiAction
+                            onUiAction = onUiAction,
                         )
                     }
 
@@ -227,7 +234,7 @@ fun PlanDetailScreen(
                     item {
                         PlanDetailReviewImages(
                             images = uiState.planItem.reviewImages,
-                            onUiAction = onUiAction
+                            onUiAction = onUiAction,
                         )
                     }
 
@@ -237,7 +244,7 @@ fun PlanDetailScreen(
 
                     item {
                         PlanDetailCommentHeader(
-                            commentCount = uiState.planItem.commentCount
+                            commentCount = uiState.planItem.commentCount,
                         )
                     }
 
@@ -252,7 +259,7 @@ fun PlanDetailScreen(
                                 modifier = Modifier.animateItem(),
                                 userId = uiState.user.userId,
                                 comment = comment,
-                                onUiAction = onUiAction
+                                onUiAction = onUiAction,
                             )
                         }
 
@@ -281,7 +288,6 @@ fun PlanDetailScreen(
                             }
                         }
 
-
                         item {
                             AnimatedVisibility(
                                 enter = fadeIn(),
@@ -297,7 +303,7 @@ fun PlanDetailScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 enter = fadeIn(),
                                 exit = fadeOut(),
-                                visible = comments.loadState.isError()
+                                visible = comments.loadState.isError(),
                             ) {
                                 PagingErrorScreen(
                                     modifier = modifier,
@@ -310,11 +316,12 @@ fun PlanDetailScreen(
 
                 if (uiState.isShowMentionDialog) {
                     PlanDetailMentionDialog(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(horizontal = 20.dp, vertical = 8.dp),
                         userList = uiState.searchMentions,
-                        onUiAction = onUiAction
+                        onUiAction = onUiAction,
                     )
                 }
             }
@@ -324,9 +331,9 @@ fun PlanDetailScreen(
                 updateComment = uiState.selectedUpdateComment,
                 commentState = uiState.commentState,
                 selectedMentions = uiState.selectedMentions,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
-        }
+        },
     )
 
     if (uiState.isShowApplyCancelDialog) {
@@ -337,33 +344,33 @@ fun PlanDetailScreen(
             positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
             onDismiss = { onUiAction(dismissAction) },
             onClickNegative = { onUiAction(dismissAction) },
-            onClickPositive = { onUiAction(PlanDetailUiAction.OnClickPlanApply(false)) }
+            onClickPositive = { onUiAction(PlanDetailUiAction.OnClickPlanApply(false)) },
         )
     }
 
     if (uiState.isShowPlanEditDialog) {
         PlanDetailEditDialog(
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
     }
 
     if (uiState.isShowPlanReportDialog) {
         PlanDetailReportDialog(
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
     }
 
     if (uiState.isShowCommentEditDialog && uiState.selectedComment != null) {
         PlanDetailCommentEditDialog(
             comment = uiState.selectedComment,
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
     }
 
     if (uiState.isShowCommentReportDialog && uiState.selectedComment != null) {
         PlanDetailCommentReportDialog(
             comment = uiState.selectedComment,
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
     }
 
@@ -373,9 +380,10 @@ fun PlanDetailScreen(
 @Composable
 private fun PlanDetailSpacer() {
     Spacer(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(8.dp)
-            .background(MoimTheme.colors.stroke)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .background(MoimTheme.colors.stroke),
     )
 }

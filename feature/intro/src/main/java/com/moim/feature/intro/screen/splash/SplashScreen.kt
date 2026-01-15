@@ -20,33 +20,37 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavOptions
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.route.IntroRoute
 import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
 
 @Composable
 fun SplashRoute(
     viewModel: SplashViewModel = hiltViewModel(),
-    navigateToSignIn: (NavOptions) -> Unit,
+    navigateToSignIn: () -> Unit,
     navigateToMain: () -> Unit,
 ) {
     val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val activity = LocalContext.current as Activity
-    val options = NavOptions.Builder()
-        .setPopUpTo(IntroRoute.Splash, inclusive = true)
-        .build()
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is SplashUiEvent.NavigateToSignIn -> navigateToSignIn(options)
-            is SplashUiEvent.NavigateToMain -> navigateToMain()
-            is SplashUiEvent.NavigateToExit -> activity.finish()
+            is SplashUiEvent.NavigateToSignIn -> {
+                navigateToSignIn()
+            }
+
+            is SplashUiEvent.NavigateToMain -> {
+                navigateToMain()
+            }
+
+            is SplashUiEvent.NavigateToExit -> {
+                activity.finish()
+            }
+
             is SplashUiEvent.NavigateToPlayStore -> {
                 val packageName = activity.packageName.replace(".dev", "")
                 try {
@@ -62,29 +66,32 @@ fun SplashRoute(
     BackHandler {}
 
     when (val uiState = splashUiState) {
-        is SplashUiState.Splash -> SplashScreen(
-            uiState = uiState,
-            onUiAction = viewModel::onUiAction
-        )
+        is SplashUiState.Splash -> {
+            SplashScreen(
+                uiState = uiState,
+                onUiAction = viewModel::onUiAction,
+            )
+        }
     }
 }
 
 @Composable
 private fun SplashScreen(
     uiState: SplashUiState.Splash,
-    onUiAction: (SplashUiAction) -> Unit
+    onUiAction: (SplashUiAction) -> Unit,
 ) {
     TrackScreenViewEvent(screenName = "splash")
     Box(
-        modifier = Modifier
-            .containerScreen(backgroundColor = MoimTheme.colors.white)
-            .systemBarsPadding()
+        modifier =
+            Modifier
+                .containerScreen(backgroundColor = MoimTheme.colors.white)
+                .systemBarsPadding(),
     ) {
         Icon(
             modifier = Modifier.align(Alignment.Center),
             imageVector = ImageVector.vectorResource(R.drawable.ic_logo_full),
             contentDescription = "",
-            tint = Color.Unspecified
+            tint = Color.Unspecified,
         )
     }
 
@@ -95,7 +102,7 @@ private fun SplashScreen(
             isNegative = false,
             cancelable = false,
             positiveText = stringResource(R.string.common_confirm),
-            onClickPositive = { onUiAction(SplashUiAction.OnClickExit) }
+            onClickPositive = { onUiAction(SplashUiAction.OnClickExit) },
         )
     }
 
@@ -106,7 +113,7 @@ private fun SplashScreen(
             isNegative = false,
             cancelable = false,
             positiveText = stringResource(R.string.common_confirm),
-            onClickPositive = { onUiAction(SplashUiAction.OnClickForceUpdate) }
+            onClickPositive = { onUiAction(SplashUiAction.OnClickForceUpdate) },
         )
     }
 }
@@ -116,6 +123,6 @@ private fun SplashScreen(
 private fun SplashScreenPreview() {
     SplashScreen(
         uiState = SplashUiState.Splash(isShowForceUpdateDialog = true),
-        onUiAction = {}
+        onUiAction = {},
     )
 }

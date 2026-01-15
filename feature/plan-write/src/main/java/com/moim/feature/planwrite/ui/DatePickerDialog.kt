@@ -27,18 +27,20 @@ fun MoimDatePickerDialog(
     modifier: Modifier = Modifier,
     date: Long,
     onDateSelected: (date: ZonedDateTime) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val currentTime = ZonedDateTime.now().default()
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = date,
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val selectableDate = utcTimeMillis.parseZonedDateTime().default()
-                return selectableDate.isEqual(currentTime) || selectableDate.isAfter(currentTime)
-            }
-        }
-    )
+    val datePickerState =
+        rememberDatePickerState(
+            initialSelectedDateMillis = date,
+            selectableDates =
+                object : SelectableDates {
+                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                        val selectableDate = utcTimeMillis.parseZonedDateTime().default()
+                        return selectableDate.isEqual(currentTime) || selectableDate.isAfter(currentTime)
+                    }
+                },
+        )
 
     DatePickerDialog(
         modifier = modifier,
@@ -49,12 +51,12 @@ fun MoimDatePickerDialog(
                     val longTime = datePickerState.selectedDateMillis ?: System.currentTimeMillis()
                     onDateSelected(longTime.parseZonedDateTime().default())
                     onDismiss()
-                }
+                },
             ) {
                 Text(
                     text = stringResource(id = R.string.common_confirm),
                     style = MoimTheme.typography.title03.bold,
-                    color = MoimTheme.colors.gray.gray01
+                    color = MoimTheme.colors.gray.gray01,
                 )
             }
         },
@@ -63,15 +65,15 @@ fun MoimDatePickerDialog(
                 Text(
                     text = stringResource(id = R.string.common_cancel),
                     style = MoimTheme.typography.title03.bold,
-                    color = MoimTheme.colors.gray.gray01
+                    color = MoimTheme.colors.gray.gray01,
                 )
             }
-        }
+        },
     ) {
         MoimTheme {
             DatePicker(
                 state = datePickerState,
-                colors = DatePickerDefaults.colors()
+                colors = DatePickerDefaults.colors(),
             )
         }
     }
@@ -82,13 +84,14 @@ fun MoimTimePickerDialog(
     modifier: Modifier = Modifier,
     date: ZonedDateTime,
     onDateSelected: (date: ZonedDateTime) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
-    val timePickerState = rememberTimePickerState(
-        initialHour = date.hour,
-        initialMinute = date.minute,
-        is24Hour = false,
-    )
+    val timePickerState =
+        rememberTimePickerState(
+            initialHour = date.hour,
+            initialMinute = date.minute,
+            is24Hour = false,
+        )
 
     DatePickerDialog(
         modifier = modifier,
@@ -98,12 +101,12 @@ fun MoimTimePickerDialog(
                 onClick = {
                     onDateSelected(date.withHour(timePickerState.hour).withMinute(timePickerState.minute))
                     onDismiss()
-                }
+                },
             ) {
                 Text(
                     text = stringResource(id = R.string.common_confirm),
                     style = MoimTheme.typography.title03.bold,
-                    color = MoimTheme.colors.gray.gray01
+                    color = MoimTheme.colors.gray.gray01,
                 )
             }
         },
@@ -112,17 +115,18 @@ fun MoimTimePickerDialog(
                 Text(
                     text = stringResource(id = R.string.common_cancel),
                     style = MoimTheme.typography.title03.bold,
-                    color = MoimTheme.colors.gray.gray01
+                    color = MoimTheme.colors.gray.gray01,
                 )
             }
-        }
+        },
     ) {
         TimePicker(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
             state = timePickerState,
-            colors = TimePickerDefaults.colors()
+            colors = TimePickerDefaults.colors(),
         )
     }
 }

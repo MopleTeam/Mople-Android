@@ -4,12 +4,14 @@ import com.moim.core.common.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
-
     fun getUser(): Flow<User>
 
     fun fetchUser(): Flow<User>
 
-    fun updateUser(profileUrl: String?, nickname: String): Flow<User>
+    fun updateUser(
+        profileUrl: String?,
+        nickname: String,
+    ): Flow<User>
 
     fun deleteUser(): Flow<Unit>
 

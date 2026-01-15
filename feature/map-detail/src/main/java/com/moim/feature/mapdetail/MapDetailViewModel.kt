@@ -1,40 +1,29 @@
 package com.moim.feature.mapdetail
 
-import androidx.lifecycle.SavedStateHandle
 import com.moim.core.common.model.MapType
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 
-@HiltViewModel
-class MapDetailViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = MapDetailViewModel.Factory::class)
+class MapDetailViewModel @AssistedInject constructor(
+    @Assisted val mapDetail: DetailRoute.MapDetail,
 ) : BaseViewModel() {
-
-    private val placeName
-        get() = savedStateHandle.get<String>(KEY_PLACE_NAME) ?: ""
-
-    private val address
-        get() = savedStateHandle.get<String>(KEY_ADDRESS) ?: ""
-
-    private val longitude
-        get() = savedStateHandle.get<Double>(KEY_LONGITUDE) ?: 0.0
-
-    private val latitude
-        get() = savedStateHandle.get<Double>(KEY_LATITUDE) ?: 0.0
-
     init {
         setUiState(
             MapDetailUiState(
-                placeName = placeName,
-                address = address,
-                longitude = longitude,
-                latitude = latitude
-            )
+                placeName = mapDetail.placeName,
+                address = mapDetail.address,
+                longitude = mapDetail.longitude,
+                latitude = mapDetail.latitude,
+            ),
         )
     }
 
@@ -54,8 +43,8 @@ class MapDetailViewModel @Inject constructor(
                     mapType = mapType,
                     latitude = latitude,
                     longitude = longitude,
-                    address = address
-                )
+                    address = address,
+                ),
             )
         }
     }
@@ -72,11 +61,9 @@ class MapDetailViewModel @Inject constructor(
         }
     }
 
-    companion object {
-        private const val KEY_LONGITUDE = "longitude"
-        private const val KEY_LATITUDE = "latitude"
-        private const val KEY_PLACE_NAME = "placeName"
-        private const val KEY_ADDRESS = "address"
+    @AssistedFactory
+    interface Factory {
+        fun create(mapDetail: DetailRoute.MapDetail): MapDetailViewModel
     }
 }
 
@@ -93,15 +80,15 @@ sealed interface MapDetailUiAction : UiAction {
     data object OnClickBack : MapDetailUiAction
 
     data class OnClickMapAddress(
-        val mapType: MapType
+        val mapType: MapType,
     ) : MapDetailUiAction
 
     data class OnShowPlaceInfoDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : MapDetailUiAction
 
     data class OnShowMapAppDialog(
-        val isShow: Boolean
+        val isShow: Boolean,
     ) : MapDetailUiAction
 }
 
@@ -112,6 +99,6 @@ sealed interface MapDetailUiEvent : UiEvent {
         val mapType: MapType,
         val latitude: Double,
         val longitude: Double,
-        val address: String
+        val address: String,
     ) : MapDetailUiEvent
 }

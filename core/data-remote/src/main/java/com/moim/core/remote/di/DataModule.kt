@@ -10,19 +10,16 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-
 @InstallIn(SingletonComponent::class)
 @Module
 internal abstract class DataModule {
-
-    //================================ OpenGraph ============================================//
+    // ================================ OpenGraph ============================================//
     @Singleton
     @Binds
     abstract fun bindOpenGraphRemoteDataSource(openGraphRemoteDataSourceImpl: OpenGraphRemoteDataSourceImpl): OpenGraphRemoteDataSource
 
-    //================================ Image ============================================//
+    // ================================ Image ============================================//
     @Singleton
     @Binds
     abstract fun bindImageUploadRemoteDataSource(imageUploadRemoteDataSource: ImageUploadRemoteDataSourceImpl): ImageUploadRemoteDataSource
-
 }

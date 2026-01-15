@@ -16,71 +16,78 @@ import javax.inject.Inject
 
 internal class ReviewRepositoryImpl @Inject constructor(
     private val reviewApi: ReviewApi,
-    private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource
+    private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource,
 ) : ReviewRepository {
-
     override suspend fun getReviews(
         meetingId: String,
         cursor: String,
-        size: Int
-    ): PaginationContainer<List<Review>> {
-        return try {
-            reviewApi.getReviews(
-                id = meetingId,
-                cursor = cursor,
-                size = size
-            ).asItem {
-                it.map(ReviewResponse::asItem)
-            }
+        size: Int,
+    ): PaginationContainer<List<Review>> =
+        try {
+            reviewApi
+                .getReviews(
+                    id = meetingId,
+                    cursor = cursor,
+                    size = size,
+                ).asItem {
+                    it.map(ReviewResponse::asItem)
+                }
         } catch (e: Exception) {
             throw converterException(e)
         }
-    }
 
-    override fun getReview(reviewId: String) = catchFlow {
-        emit(reviewApi.getReview(reviewId).asItem())
-    }
+    override fun getReview(reviewId: String) =
+        catchFlow {
+            emit(reviewApi.getReview(reviewId).asItem())
+        }
 
-    override fun getReviewForPostId(postId: String) = catchFlow {
-        emit(reviewApi.gerReviewForPostId(postId).asItem())
-    }
+    override fun getReviewForPostId(postId: String) =
+        catchFlow {
+            emit(reviewApi.gerReviewForPostId(postId).asItem())
+        }
 
     override suspend fun getReviewParticipants(
         reviewId: String,
         cursor: String,
         size: Int,
-    ): PaginationContainer<List<User>> {
-        return try {
-            reviewApi.getReviewParticipant(
-                id = reviewId,
-                cursor = cursor,
-                size = size,
-            ).asItem {
-                it.map(UserResponse::asItem)
-            }
+    ): PaginationContainer<List<User>> =
+        try {
+            reviewApi
+                .getReviewParticipant(
+                    id = reviewId,
+                    cursor = cursor,
+                    size = size,
+                ).asItem {
+                    it.map(UserResponse::asItem)
+                }
         } catch (e: Exception) {
             throw converterException(e)
         }
-    }
 
-    override fun deleteReviewImage(reviewId: String, images: List<String>): Flow<Unit> = catchFlow {
-        emit(reviewApi.deleteReviewImage(reviewId, jsonOf(KEY_REVIEW_IMAGES to images)))
-    }
+    override fun deleteReviewImage(
+        reviewId: String,
+        images: List<String>,
+    ): Flow<Unit> =
+        catchFlow {
+            emit(reviewApi.deleteReviewImage(reviewId, jsonOf(KEY_REVIEW_IMAGES to images)))
+        }
 
-    override fun deleteReview(reviewId: String) = catchFlow {
-        emit(reviewApi.deleteReview(reviewId))
-    }
+    override fun deleteReview(reviewId: String) =
+        catchFlow {
+            emit(reviewApi.deleteReview(reviewId))
+        }
 
-    override fun reportReview(reviewId: String) = catchFlow {
-        emit(
-            reviewApi.reportReview(
-                jsonOf(
-                    KEY_REVIEW_ID to reviewId,
-                    KEY_REASON to ""
-                )
+    override fun reportReview(reviewId: String) =
+        catchFlow {
+            emit(
+                reviewApi.reportReview(
+                    jsonOf(
+                        KEY_REVIEW_ID to reviewId,
+                        KEY_REASON to "",
+                    ),
+                ),
             )
-        )
-    }
+        }
 
     override fun updateReviewImages(
         reviewId: String,

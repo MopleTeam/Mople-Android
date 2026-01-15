@@ -4,6 +4,5 @@ import com.moim.core.common.model.ForceUpdateInfo
 import kotlinx.coroutines.flow.Flow
 
 interface PolicyRepository {
-
-    fun getForceUpdateInfo() : Flow<ForceUpdateInfo>
+    fun getForceUpdateInfo(): Flow<ForceUpdateInfo>
 }

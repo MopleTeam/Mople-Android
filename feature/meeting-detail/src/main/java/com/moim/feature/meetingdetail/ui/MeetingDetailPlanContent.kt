@@ -60,61 +60,62 @@ fun MeetingDetailPlanContent(
     onUiAction: (MeetingDetailUiAction) -> Unit,
 ) {
     LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(top = 28.dp, bottom = 64.dp)
+        contentPadding = PaddingValues(top = 28.dp, bottom = 64.dp),
     ) {
         item {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 MoimText(
                     modifier = Modifier.weight(1f),
                     text = stringResource(if (isPlanSelected) R.string.meeting_detail_future_plan else R.string.meeting_detail_past_plan),
                     style = MoimTheme.typography.body01.medium,
-                    color = MoimTheme.colors.gray.gray04
+                    color = MoimTheme.colors.gray.gray04,
                 )
 
                 MoimText(
                     text = stringResource(R.string.unit_count, if (isPlanSelected) planTotalCount else reviewTotalCount),
                     style = MoimTheme.typography.body01.medium,
-                    color = MoimTheme.colors.gray.gray04
+                    color = MoimTheme.colors.gray.gray04,
                 )
             }
         }
-
 
         if (isPlanSelected) {
             items(
                 count = plans.itemCount,
                 key = plans.itemKey(),
-                contentType = plans.itemContentType()
+                contentType = plans.itemContentType(),
             ) { index ->
                 val plan = plans[index] ?: return@items
 
                 MeetingDetailPlanItem(
                     userId = userId,
                     plan = plan,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
         } else {
             items(
                 count = reviews.itemCount,
                 key = reviews.itemKey(),
-                contentType = reviews.itemContentType()
+                contentType = reviews.itemContentType(),
             ) { index ->
                 val review = reviews[index] ?: return@items
                 MeetingDetailReviewItem(
                     userId = userId,
                     review = review,
-                    onUiAction = onUiAction
+                    onUiAction = onUiAction,
                 )
             }
         }
@@ -130,10 +131,10 @@ fun MeetingDetailPlanItem(
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(ViewIdType.PlanId(plan.postId))) }
+        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(ViewIdType.PlanId(plan.postId))) },
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             MeetingDetailPlanHeader(time = plan.planAt)
             Spacer(Modifier.height(16.dp))
@@ -147,28 +148,29 @@ fun MeetingDetailPlanItem(
                     modifier = Modifier.fillMaxWidth(),
                     text = plan.planName,
                     style = MoimTheme.typography.title03.semiBold,
-                    color = MoimTheme.colors.gray.gray01
+                    color = MoimTheme.colors.gray.gray01,
                 )
             }
             Spacer(Modifier.height(4.dp))
 
             PlanParticipantCount(
-                count = plan.participantsCount
+                count = plan.participantsCount,
             )
             Spacer(Modifier.height(16.dp))
 
             MeetingWeatherInfo(
                 temperature = plan.temperature,
                 address = plan.weatherAddress,
-                weatherIconUrl = plan.weatherIconUrl
+                weatherIconUrl = plan.weatherIconUrl,
             )
             Spacer(Modifier.height(16.dp))
 
             if (plan.planAt.isBefore(ZonedDateTime.now())) {
                 MoimText(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
                     text = stringResource(R.string.meeting_detail_plan_disable),
                     style = MoimTheme.typography.body01.medium,
                     color = MoimTheme.colors.gray.gray05,
@@ -178,19 +180,20 @@ fun MeetingDetailPlanItem(
                 if (plan.isParticipant) {
                     MoimPrimaryButton(
                         modifier = Modifier.fillMaxWidth(),
-                        buttonColors = moimButtomColors().copy(
-                            containerColor = MoimTheme.colors.tertiary,
-                            contentColor = MoimTheme.colors.gray.gray03
-                        ),
+                        buttonColors =
+                            moimButtomColors().copy(
+                                containerColor = MoimTheme.colors.tertiary,
+                                contentColor = MoimTheme.colors.gray.gray03,
+                            ),
                         text = stringResource(R.string.meeting_detail_plan_apply_done),
                         onClick = {
                             onUiAction(
                                 MeetingDetailUiAction.OnShowPlanApplyCancelDialog(
                                     isShow = true,
-                                    cancelPlanItem = plan
-                                )
+                                    cancelPlanItem = plan,
+                                ),
                             )
-                        }
+                        },
                     )
                 } else {
                     MoimPrimaryButton(
@@ -201,10 +204,10 @@ fun MeetingDetailPlanItem(
                             onUiAction(
                                 MeetingDetailUiAction.OnClickPlanApply(
                                     isApply = true,
-                                    planItem = plan
-                                )
+                                    planItem = plan,
+                                ),
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -221,22 +224,22 @@ fun MeetingDetailReviewItem(
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(ViewIdType.ReviewId(review.postId))) }
+        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(ViewIdType.ReviewId(review.postId))) },
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             MeetingDetailPlanHeader(time = review.planAt)
             Spacer(Modifier.height(10.dp))
 
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (review.userId == userId) {
                             MyPostIcon()
@@ -245,13 +248,13 @@ fun MeetingDetailReviewItem(
                         MoimText(
                             text = review.planName,
                             style = MoimTheme.typography.title03.semiBold,
-                            color = MoimTheme.colors.gray.gray01
+                            color = MoimTheme.colors.gray.gray01,
                         )
                     }
                     Spacer(Modifier.height(4.dp))
 
                     PlanParticipantCount(
-                        count = review.participantsCount
+                        count = review.participantsCount,
                     )
                 }
 
@@ -260,29 +263,31 @@ fun MeetingDetailReviewItem(
 
                     Box {
                         NetworkImage(
-                            modifier = Modifier
-                                .padding(end = 4.dp, bottom = 4.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
-                                .size(50.dp),
+                            modifier =
+                                Modifier
+                                    .padding(end = 4.dp, bottom = 4.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
+                                    .size(50.dp),
                             imageUrl = review.reviewImages.first().imageUrl,
-                            errorImage = painterResource(R.drawable.ic_empty_image)
+                            errorImage = painterResource(R.drawable.ic_empty_image),
                         )
 
                         Row(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .background(MoimTheme.colors.primary.disable, shape = CircleShape)
-                                .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
-                                .size(24.dp),
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .background(MoimTheme.colors.primary.disable, shape = CircleShape)
+                                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
+                                    .size(24.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                            horizontalArrangement = Arrangement.Center,
                         ) {
                             MoimText(
                                 text = review.reviewImages.size.toString(),
                                 textAlign = TextAlign.Center,
                                 style = MoimTheme.typography.body01.medium,
-                                color = MoimTheme.colors.primary.primary
+                                color = MoimTheme.colors.primary.primary,
                             )
                         }
                     }
@@ -295,19 +300,21 @@ fun MeetingDetailReviewItem(
 @Composable
 private fun MyPostIcon() {
     Box(
-        modifier = Modifier
-            .size(20.dp)
-            .padding(2.dp)
-            .clip(CircleShape)
-            .background(MoimTheme.colors.primary.primary)
+        modifier =
+            Modifier
+                .size(20.dp)
+                .padding(2.dp)
+                .clip(CircleShape)
+                .background(MoimTheme.colors.primary.primary),
     ) {
         Icon(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(14.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.Center)
+                    .size(14.dp),
             imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
             contentDescription = "",
-            tint = MoimTheme.colors.white
+            tint = MoimTheme.colors.white,
         )
     }
 
@@ -317,10 +324,10 @@ private fun MyPostIcon() {
 @Composable
 private fun MeetingDetailPlanHeader(
     modifier: Modifier = Modifier,
-    time: ZonedDateTime
+    time: ZonedDateTime,
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         MoimText(
             modifier = modifier.weight(1f),
@@ -331,7 +338,7 @@ private fun MeetingDetailPlanHeader(
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_next),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
     }
 }
@@ -343,22 +350,21 @@ private fun PlanParticipantCount(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             modifier = Modifier.size(20.dp),
             imageVector = ImageVector.vectorResource(R.drawable.ic_menu_meeting),
             contentDescription = "",
-            tint = MoimTheme.colors.icon
+            tint = MoimTheme.colors.icon,
         )
         Spacer(Modifier.width(4.dp))
         MoimText(
             text = stringResource(R.string.unit_participants_count, count),
             style = MoimTheme.typography.body02.medium,
-            color = MoimTheme.colors.gray.gray04
+            color = MoimTheme.colors.gray.gray04,
         )
     }
-
 }
 
 @Composable
@@ -368,58 +374,62 @@ private fun MeetingWeatherInfo(
     address: String,
     weatherIconUrl: String,
 ) {
-    val notFoundText = if (address.isEmpty()) {
-        stringResource(R.string.common_empty_place_for_guest)
-    } else if (weatherIconUrl.isEmpty()) {
-        stringResource(R.string.common_weather_not_found)
-    } else {
-        ""
-    }
+    val notFoundText =
+        if (address.isEmpty()) {
+            stringResource(R.string.common_empty_place_for_guest)
+        } else if (weatherIconUrl.isEmpty()) {
+            stringResource(R.string.common_weather_not_found)
+        } else {
+            ""
+        }
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(color = color_F6F8FA, shape = RoundedCornerShape(10.dp))
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(color = color_F6F8FA, shape = RoundedCornerShape(10.dp))
+                .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-
         Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .size(32.dp)
-                .background(MoimTheme.colors.white)
-                .padding(4.dp)
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .size(32.dp)
+                    .background(MoimTheme.colors.white)
+                    .padding(4.dp),
         ) {
             NetworkImage(
                 imageUrl = WEATHER_ICON_URL.format(weatherIconUrl),
-                errorImage = painterResource(R.drawable.ic_empty_weather)
+                errorImage = painterResource(R.drawable.ic_empty_weather),
             )
         }
 
         if (notFoundText.isNotEmpty()) {
             MoimText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 32.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(end = 32.dp),
                 text = notFoundText,
                 textAlign = TextAlign.Center,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04
+                color = MoimTheme.colors.gray.gray04,
             )
         } else {
             MoimText(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp),
                 text = stringResource(R.string.unit_weather, temperature.decimalFormatString()),
                 style = MoimTheme.typography.body01.semiBold,
-                color = MoimTheme.colors.gray.gray01
+                color = MoimTheme.colors.gray.gray01,
             )
 
             MoimText(
                 text = address,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04
+                color = MoimTheme.colors.gray.gray04,
             )
         }
     }

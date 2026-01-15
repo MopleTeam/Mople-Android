@@ -54,21 +54,37 @@ fun MeetingSettingRoute(
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is MeetingSettingUiEvent.NavigateToBack -> navigateToBack(false)
-            is MeetingSettingUiEvent.NavigateToBackForDelete -> navigateToBack(true)
-            is MeetingSettingUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite(event.meeting)
-            is MeetingSettingUiEvent.NavigateToMeetingParticipants -> navigateToParticipants(event.viewIdType)
-            is MeetingSettingUiEvent.ShowToastMessage -> showToast(context, event.message)
+            is MeetingSettingUiEvent.NavigateToBack -> {
+                navigateToBack(false)
+            }
+
+            is MeetingSettingUiEvent.NavigateToBackForDelete -> {
+                navigateToBack(true)
+            }
+
+            is MeetingSettingUiEvent.NavigateToMeetingWrite -> {
+                navigateToMeetingWrite(event.meeting)
+            }
+
+            is MeetingSettingUiEvent.NavigateToMeetingParticipants -> {
+                navigateToParticipants(event.viewIdType)
+            }
+
+            is MeetingSettingUiEvent.ShowToastMessage -> {
+                showToast(context, event.message)
+            }
         }
     }
 
     when (val uiState = meetingUiState) {
-        is MeetingSettingUiState.MeetingSetting -> MeetingSettingScreen(
-            modifier = Modifier.containerScreen(padding, MoimTheme.colors.white),
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is MeetingSettingUiState.MeetingSetting -> {
+            MeetingSettingScreen(
+                modifier = Modifier.containerScreen(padding, MoimTheme.colors.white),
+                uiState = uiState,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction,
+            )
+        }
     }
 }
 
@@ -77,7 +93,7 @@ fun MeetingSettingScreen(
     modifier: Modifier = Modifier,
     uiState: MeetingSettingUiState.MeetingSetting,
     isLoading: Boolean,
-    onUiAction: OnMeetingSettingUiAction
+    onUiAction: OnMeetingSettingUiAction,
 ) {
     TrackScreenViewEvent(screenName = "meet_setting")
     Column(
@@ -85,9 +101,10 @@ fun MeetingSettingScreen(
     ) {
         MeetingSettingTopAppbar(onUiAction = onUiAction)
         Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize(),
         ) {
             MeetingSettingProfile(
                 meeting = uiState.meeting,
@@ -95,18 +112,19 @@ fun MeetingSettingScreen(
                 onUiAction = onUiAction,
             )
             Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .background(MoimTheme.colors.stroke)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .background(MoimTheme.colors.stroke),
             )
             MeetingSettingParticipantsInfo(
                 meeting = uiState.meeting,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
             MeetingSettingExit(
                 isHostUser = uiState.isHostUser,
-                onUiAction = onUiAction
+                onUiAction = onUiAction,
             )
         }
     }
@@ -115,7 +133,7 @@ fun MeetingSettingScreen(
         MeetingExitDialog(
             isDelete = false,
             dismissAction = MeetingSettingUiAction.OnShowMeetingExitDialog(false),
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
     }
 
@@ -123,7 +141,7 @@ fun MeetingSettingScreen(
         MeetingExitDialog(
             isDelete = true,
             dismissAction = MeetingSettingUiAction.OnShowMeetingDeleteDialog(false),
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
     }
 
@@ -146,33 +164,33 @@ fun MeetingExitDialog(
             onUiAction(MeetingSettingUiAction.OnClickMeetingExit)
         },
         onClickNegative = { onUiAction(dismissAction) },
-        onDismiss = { onUiAction(dismissAction) }
+        onDismiss = { onUiAction(dismissAction) },
     )
 }
 
 @Composable
 fun MeetingSettingExit(
     isHostUser: Boolean,
-    onUiAction: OnMeetingSettingUiAction
+    onUiAction: OnMeetingSettingUiAction,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .onSingleClick {
-                if (isHostUser) {
-                    onUiAction(MeetingSettingUiAction.OnShowMeetingDeleteDialog(true))
-                } else {
-                    onUiAction(MeetingSettingUiAction.OnShowMeetingExitDialog(true))
-                }
-            }
-            .padding(vertical = 16.dp, horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .onSingleClick {
+                    if (isHostUser) {
+                        onUiAction(MeetingSettingUiAction.OnShowMeetingDeleteDialog(true))
+                    } else {
+                        onUiAction(MeetingSettingUiAction.OnShowMeetingExitDialog(true))
+                    }
+                }.padding(vertical = 16.dp, horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         MoimText(
             modifier = Modifier.weight(1f),
             text = stringResource(if (isHostUser) R.string.meeting_setting_delete_btn else R.string.meeting_setting_exit),
             style = MoimTheme.typography.title03.medium,
-            color = if (isHostUser) MoimTheme.colors.red else MoimTheme.colors.gray.gray01
+            color = if (isHostUser) MoimTheme.colors.red else MoimTheme.colors.gray.gray01,
         )
     }
 }
@@ -183,15 +201,17 @@ private fun MeetingSettingScreenPreview() {
     MoimTheme {
         MeetingSettingScreen(
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
-            uiState = MeetingSettingUiState.MeetingSetting(
-                meeting = Meeting(
-                    name = "우리중학교 동창",
-                    sinceDays = 12,
+            uiState =
+                MeetingSettingUiState.MeetingSetting(
+                    meeting =
+                        Meeting(
+                            name = "우리중학교 동창",
+                            sinceDays = 12,
+                        ),
+                    isHostUser = true,
                 ),
-                isHostUser = true
-            ),
             isLoading = false,
-            onUiAction = {}
+            onUiAction = {},
         )
     }
 }

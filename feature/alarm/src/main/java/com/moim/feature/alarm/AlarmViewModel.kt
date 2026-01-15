@@ -31,7 +31,6 @@ class AlarmViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
     getNotificationsUseCase: GetNotificationsUseCase,
 ) : BaseViewModel() {
-
     val alarmItems =
         getNotificationsUseCase()
             .map { pagingData -> pagingData.map { it.asUiModel() } }
@@ -59,19 +58,22 @@ class AlarmViewModel @Inject constructor(
         }
     }
 
-    private fun getNotificationTotalCount() = flow<Int> {
-        emit(
-            notificationRepository.getNotifications(
-                cursor = "",
-                size = 1,
-            ).totalCount
-        )
-    }.asResult()
+    private fun getNotificationTotalCount() =
+        flow {
+            emit(
+                notificationRepository
+                    .getNotifications(
+                        cursor = "",
+                        size = 1,
+                    ).totalCount,
+            )
+        }.asResult()
 
     private fun navigateToNotifyTarget(alarmUiModel: AlarmUiModel) {
         when (alarmUiModel.type) {
             NotificationType.MEET_NEW_MEMBER,
-            NotificationType.PLAN_DELETE -> {
+            NotificationType.PLAN_DELETE,
+            -> {
                 setUiEvent(AlarmUiEvent.NavigateToMeetingDetail(requireNotNull(alarmUiModel.meetId)))
             }
 
@@ -81,14 +83,16 @@ class AlarmViewModel @Inject constructor(
             NotificationType.PLAN_UPDATE,
             NotificationType.PLAN_REMIND,
             NotificationType.REVIEW_REMIND,
-            NotificationType.REVIEW_UPDATE -> {
-                val viewIdType = if (alarmUiModel.planId != null) {
-                    ViewIdType.PlanId(requireNotNull(alarmUiModel.planId))
-                } else if (alarmUiModel.reviewId != null) {
-                    ViewIdType.ReviewId(requireNotNull(alarmUiModel.reviewId))
-                } else {
-                    return
-                }
+            NotificationType.REVIEW_UPDATE,
+            -> {
+                val viewIdType =
+                    if (alarmUiModel.planId != null) {
+                        ViewIdType.PlanId(requireNotNull(alarmUiModel.planId))
+                    } else if (alarmUiModel.reviewId != null) {
+                        ViewIdType.ReviewId(requireNotNull(alarmUiModel.reviewId))
+                    } else {
+                        return
+                    }
 
                 val isPlan = (alarmUiModel.planDate?.toLocalDate()?.isAfter(LocalDate.now()) == true)
 
@@ -99,7 +103,9 @@ class AlarmViewModel @Inject constructor(
                 }
             }
 
-            NotificationType.NONE -> return
+            NotificationType.NONE -> {
+                return
+            }
         }
     }
 }
@@ -110,7 +116,7 @@ sealed interface AlarmUiAction : UiAction {
     data object OnClickRefresh : AlarmUiAction
 
     data class OnClickAlarm(
-        val item: AlarmUiModel
+        val item: AlarmUiModel,
     ) : AlarmUiAction
 
     data object OnUpdateNotificationCount : AlarmUiAction
@@ -120,11 +126,11 @@ sealed interface AlarmUiEvent : UiEvent {
     data object NavigateToBack : AlarmUiEvent
 
     data class NavigateToMeetingDetail(
-        val meetingId: String
+        val meetingId: String,
     ) : AlarmUiEvent
 
     data class NavigateToPlanDetail(
-        val viewIdType: ViewIdType
+        val viewIdType: ViewIdType,
     ) : AlarmUiEvent
 
     data object RefreshPagingData : AlarmUiEvent

@@ -1,28 +1,24 @@
 package com.moim.feature.webview
 
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
+import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class WebViewViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle
+@HiltViewModel(assistedFactory = WebViewViewModel.Factory::class)
+class WebViewViewModel @AssistedInject constructor(
+    @Assisted val webViewRoute: DetailRoute.WebView,
 ) : BaseViewModel() {
-
-    private val webUrl: String
-        get() = savedStateHandle.get<String>(KEY_WEB_URL) ?: ""
+    private val webUrl = webViewRoute.webUrl
 
     init {
-        viewModelScope.launch {
-            setUiState(WebViewUiState(webUrl = webUrl, loadProgress = 0f))
-        }
+        setUiState(WebViewUiState(webUrl = webUrl, loadProgress = 0f))
     }
 
     fun onUiAction(uiAction: WebViewUiAction) {
@@ -46,8 +42,9 @@ class WebViewViewModel @Inject constructor(
         }
     }
 
-    companion object {
-        private const val KEY_WEB_URL = "webUrl"
+    @AssistedFactory
+    interface Factory {
+        fun create(webViewRoute: DetailRoute.WebView): WebViewViewModel
     }
 }
 

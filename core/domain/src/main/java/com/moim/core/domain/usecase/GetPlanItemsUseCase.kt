@@ -19,63 +19,64 @@ import javax.inject.Inject
 class GetPlanItemsUseCase @Inject constructor(
     private val planRepository: PlanRepository,
     private val reviewRepository: ReviewRepository,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
     var loadedAt: ZonedDateTime = ZonedDateTime.now()
 
-    operator fun invoke(params: Params) = Pager(
-        config = PagingConfig(pageSize = params.size)
-    ) {
-        object : PagingSource<String, PlanItem>() {
+    operator fun invoke(params: Params) =
+        Pager(
+            config = PagingConfig(pageSize = params.size),
+        ) {
+            object : PagingSource<String, PlanItem>() {
+                init {
+                    loadedAt = ZonedDateTime.now()
+                }
 
-            init {
-                loadedAt = ZonedDateTime.now()
-            }
+                override fun getRefreshKey(state: PagingState<String, PlanItem>) = null
 
-            override fun getRefreshKey(state: PagingState<String, PlanItem>) = null
+                override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, PlanItem> {
+                    val page = loadParams.key ?: ""
 
-            override suspend fun load(loadParams: LoadParams<String>): LoadResult<String, PlanItem> {
-                val page = loadParams.key ?: ""
+                    if (params.isPlanAtBefore) {
+                        return try {
+                            val planContainer =
+                                planRepository.getPlans(
+                                    meetingId = params.meetId,
+                                    cursor = page,
+                                    size = params.size,
+                                )
+                            val nextCursor = planContainer.page.nextCursor
 
-                if (params.isPlanAtBefore) {
-                    return try {
-                        val planContainer = planRepository.getPlans(
-                            meetingId = params.meetId,
-                            cursor = page,
-                            size = params.size
-                        )
-                        val nextCursor = planContainer.page.nextCursor
+                            LoadResult.Page(
+                                data = planContainer.content.map(Plan::asPlanItem),
+                                prevKey = null,
+                                nextKey = if (planContainer.page.isNext && planContainer.page.size >= params.size) nextCursor else null,
+                            )
+                        } catch (e: Exception) {
+                            LoadResult.Error(e)
+                        }
+                    } else {
+                        return try {
+                            val reviewContainer =
+                                reviewRepository.getReviews(
+                                    meetingId = params.meetId,
+                                    cursor = page,
+                                    size = params.size,
+                                )
+                            val nextCursor = reviewContainer.page.nextCursor
 
-
-                        LoadResult.Page(
-                            data = planContainer.content.map(Plan::asPlanItem),
-                            prevKey = null,
-                            nextKey = if (planContainer.page.isNext && planContainer.page.size >= params.size) nextCursor else null
-                        )
-                    } catch (e: Exception) {
-                        LoadResult.Error(e)
-                    }
-                } else {
-                    return try {
-                        val reviewContainer = reviewRepository.getReviews(
-                            meetingId = params.meetId,
-                            cursor = page,
-                            size = params.size
-                        )
-                        val nextCursor = reviewContainer.page.nextCursor
-
-                        LoadResult.Page(
-                            data = reviewContainer.content.map(Review::asPlanItem),
-                            prevKey = null,
-                            nextKey = if (reviewContainer.page.isNext && reviewContainer.page.size >= params.size) nextCursor else null
-                        )
-                    } catch (e: Exception) {
-                        LoadResult.Error(e)
+                            LoadResult.Page(
+                                data = reviewContainer.content.map(Review::asPlanItem),
+                                prevKey = null,
+                                nextKey = if (reviewContainer.page.isNext && reviewContainer.page.size >= params.size) nextCursor else null,
+                            )
+                        } catch (e: Exception) {
+                            LoadResult.Error(e)
+                        }
                     }
                 }
             }
-        }
-    }.flow.flowOn(ioDispatcher)
+        }.flow.flowOn(ioDispatcher)
 
     data class Params(
         val meetId: String,

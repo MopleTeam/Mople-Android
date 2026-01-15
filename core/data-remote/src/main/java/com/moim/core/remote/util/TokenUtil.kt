@@ -16,20 +16,26 @@ import javax.inject.Inject
 
 internal class TokenAuthenticator @Inject constructor(
     private val userDataUtil: UserDataUtil,
-    private val authTokenApi: AuthTokenApi
+    private val authTokenApi: AuthTokenApi,
 ) : Authenticator {
     private val mutex: Mutex = Mutex()
 
-    override fun authenticate(route: Route?, response: Response): Request? {
-        return runBlocking {
+    override fun authenticate(
+        route: Route?,
+        response: Response,
+    ): Request? =
+        runBlocking {
             mutex.withLock {
                 val refreshToken = userDataUtil.token.first()?.refreshToken ?: ""
 
                 try {
-                    val token = authTokenApi.getRefreshToken(refreshToken)
-                        .also { userDataUtil.saveUserToken(it.asItem()) }
+                    val token =
+                        authTokenApi
+                            .getRefreshToken(refreshToken)
+                            .also { userDataUtil.saveUserToken(it.asItem()) }
 
-                    response.request.newBuilder()
+                    response.request
+                        .newBuilder()
                         .header("Authorization", token.accessToken.convertToToken())
                         .build()
                 } catch (e: Exception) {
@@ -38,32 +44,31 @@ internal class TokenAuthenticator @Inject constructor(
                 }
             }
         }
-    }
 }
 
 internal class TokenInterceptor @Inject constructor(
-    private val userDataUtil: UserDataUtil
+    private val userDataUtil: UserDataUtil,
 ) : Interceptor {
-
     override fun intercept(chain: Interceptor.Chain): Response {
-        val accessToken = runBlocking {
-            try {
-                userDataUtil.token.first()?.accessToken ?: ""
-            } catch (e: Exception) {
-                Timber.e("[TokenInterceptor Exception]:${e.message}")
-                ""
+        val accessToken =
+            runBlocking {
+                try {
+                    userDataUtil.token.first()?.accessToken ?: ""
+                } catch (e: Exception) {
+                    Timber.e("[TokenInterceptor Exception]:${e.message}")
+                    ""
+                }
             }
-        }
 
-        val request: Request = chain.request()
-            .newBuilder()
-            .apply { if (accessToken.isNotEmpty()) addHeader("Authorization", accessToken.convertToToken()) }
-            .build()
+        val request: Request =
+            chain
+                .request()
+                .newBuilder()
+                .apply { if (accessToken.isNotEmpty()) addHeader("Authorization", accessToken.convertToToken()) }
+                .build()
 
         return chain.proceed(request)
     }
 }
 
-fun String?.convertToToken(): String {
-    return "Bearer $this"
-}
+fun String?.convertToToken(): String = "Bearer $this"

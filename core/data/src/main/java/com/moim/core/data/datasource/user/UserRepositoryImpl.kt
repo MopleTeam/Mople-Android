@@ -16,38 +16,45 @@ import javax.inject.Inject
 internal class UserRepositoryImpl @Inject constructor(
     private val userApi: UserApi,
     private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource,
-    private val preferenceStorage: PreferenceStorage
+    private val preferenceStorage: PreferenceStorage,
 ) : UserRepository {
-
-    override fun getUser(): Flow<User> {
-        return preferenceStorage.user
+    override fun getUser(): Flow<User> =
+        preferenceStorage.user
             .onEach { if (it == null) fetchUser().first() }
             .filterNotNull()
-    }
 
-    override fun fetchUser(): Flow<User> = catchFlow {
-        emit(userApi.getUser().asItem().also { preferenceStorage.saveUser(it) })
-    }
+    override fun fetchUser(): Flow<User> =
+        catchFlow {
+            emit(userApi.getUser().asItem().also { preferenceStorage.saveUser(it) })
+        }
 
-    override fun updateUser(profileUrl: String?, nickname: String): Flow<User> = catchFlow {
-        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(url = profileUrl, folderName = "profile")
-        emit(
-            userApi.updateUser(
-                jsonOf(
-                    KEY_IMAGE to uploadImageUrl,
-                    KEY_NICKNAME to nickname
-                )
-            ).asItem().also { preferenceStorage.saveUser(it) }
-        )
-    }
+    override fun updateUser(
+        profileUrl: String?,
+        nickname: String,
+    ): Flow<User> =
+        catchFlow {
+            val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(url = profileUrl, folderName = "profile")
+            emit(
+                userApi
+                    .updateUser(
+                        jsonOf(
+                            KEY_IMAGE to uploadImageUrl,
+                            KEY_NICKNAME to nickname,
+                        ),
+                    ).asItem()
+                    .also { preferenceStorage.saveUser(it) },
+            )
+        }
 
-    override fun deleteUser() = catchFlow {
-        emit(userApi.deleteUser())
-    }
+    override fun deleteUser() =
+        catchFlow {
+            emit(userApi.deleteUser())
+        }
 
-    override fun checkedNickname(nickname: String) = catchFlow {
-        emit(userApi.checkedNickname(nickname))
-    }
+    override fun checkedNickname(nickname: String) =
+        catchFlow {
+            emit(userApi.checkedNickname(nickname))
+        }
 
     override suspend fun clearMoimStorage() {
         preferenceStorage.clearMoimStorage()

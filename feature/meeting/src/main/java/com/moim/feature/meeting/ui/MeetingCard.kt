@@ -40,41 +40,43 @@ import kotlin.math.absoluteValue
 fun MeetingCard(
     modifier: Modifier = Modifier,
     meeting: Meeting,
-    onUiAction: (MeetingUiAction) -> Unit = {}
+    onUiAction: (MeetingUiAction) -> Unit = {},
 ) {
-    val (count, comment) = meeting.lastPlanAt
-        ?.let { lastDate ->
-            val day = getDateTimeBetweenDay(endDate = lastDate)
-            when {
-                day == 0 -> stringResource(R.string.meeting_plan_today_count) to stringResource(R.string.meeting_plan_comment)
-                day > 0 -> stringResource(R.string.meeting_plan_after_count, day) to stringResource(R.string.meeting_plan_comment)
-                else -> null to stringResource(R.string.meeting_plan_before, day.absoluteValue)
-            }
-        } ?: run { null to stringResource(R.string.meeting_plan_new) }
+    val (count, comment) =
+        meeting.lastPlanAt
+            ?.let { lastDate ->
+                val day = getDateTimeBetweenDay(endDate = lastDate)
+                when {
+                    day == 0 -> stringResource(R.string.meeting_plan_today_count) to stringResource(R.string.meeting_plan_comment)
+                    day > 0 -> stringResource(R.string.meeting_plan_after_count, day) to stringResource(R.string.meeting_plan_comment)
+                    else -> null to stringResource(R.string.meeting_plan_before, day.absoluteValue)
+                }
+            } ?: run { null to stringResource(R.string.meeting_plan_new) }
 
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingUiAction.OnClickMeeting(meetingId = meeting.id)) }
+        onClick = { onUiAction(MeetingUiAction.OnClickMeeting(meetingId = meeting.id)) },
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 NetworkImage(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(12.dp))
-                        .size(56.dp),
+                    modifier =
+                        Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(12.dp))
+                            .size(56.dp),
                     imageUrl = meeting.imageUrl,
-                    errorImage = painterResource(R.drawable.ic_empty_meeting)
+                    errorImage = painterResource(R.drawable.ic_empty_meeting),
                 )
 
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     MoimText(
                         text = meeting.name,
@@ -86,19 +88,19 @@ fun MeetingCard(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Icon(
                             modifier = Modifier.size(20.dp),
                             imageVector = ImageVector.vectorResource(R.drawable.ic_meeting),
                             contentDescription = "",
-                            tint = MoimTheme.colors.icon
+                            tint = MoimTheme.colors.icon,
                         )
 
                         MoimText(
                             text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
                             style = MoimTheme.typography.body02.medium,
-                            color = MoimTheme.colors.gray.gray04
+                            color = MoimTheme.colors.gray.gray04,
                         )
                     }
                 }
@@ -106,27 +108,29 @@ fun MeetingCard(
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_next),
                     contentDescription = "",
-                    tint = MoimTheme.colors.icon
+                    tint = MoimTheme.colors.icon,
                 )
             }
 
             Spacer(Modifier.height(12.dp))
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = MoimTheme.colors.bg.input, shape = RoundedCornerShape(8.dp)),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .background(color = MoimTheme.colors.bg.input, shape = RoundedCornerShape(8.dp)),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
             ) {
                 MoimText(
                     modifier = Modifier.padding(12.dp),
-                    text = buildAnnotatedString {
-                        if (count != null) {
-                            withStyle(style = SpanStyle(color = MoimTheme.colors.primary.primary)) { append(count.plus(" ")) }
-                        }
-                        append(comment)
-                    },
+                    text =
+                        buildAnnotatedString {
+                            if (count != null) {
+                                withStyle(style = SpanStyle(color = MoimTheme.colors.primary.primary)) { append(count.plus(" ")) }
+                            }
+                            append(comment)
+                        },
                     style = MoimTheme.typography.body01.medium,
                     color = MoimTheme.colors.gray.gray04,
                 )
@@ -140,13 +144,14 @@ fun MeetingCard(
 private fun MeetingCardPreview() {
     MoimTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = MoimTheme.colors.bg.primary)
-                .padding(12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(color = MoimTheme.colors.bg.primary)
+                    .padding(12.dp),
         ) {
             MeetingCard(
-                meeting = Meeting(name = "우리중학교 동창")
+                meeting = Meeting(name = "우리중학교 동창"),
             )
         }
     }

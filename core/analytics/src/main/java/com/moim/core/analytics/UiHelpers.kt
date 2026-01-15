@@ -6,6 +6,7 @@ class NoOpAnalyticsHelper : AnalyticsHelper {
     override fun logEvent(event: AnalyticsEvent) = Unit
 }
 
-val LocalAnalyticsHelper = staticCompositionLocalOf<AnalyticsHelper> {
-    NoOpAnalyticsHelper()
-}
+val LocalAnalyticsHelper =
+    staticCompositionLocalOf<AnalyticsHelper> {
+        NoOpAnalyticsHelper()
+    }

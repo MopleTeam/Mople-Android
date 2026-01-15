@@ -58,15 +58,16 @@ fun ParticipantListRoute(
         title: String,
         images: List<String>,
         position: Int,
-        defaultImage: Int
-    ) -> Unit
+        defaultImage: Int,
+    ) -> Unit,
 ) {
     val context = LocalContext.current
     val participantListUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(
-        backgroundColor = MoimTheme.colors.white,
-        padding = padding
-    )
+    val modifier =
+        Modifier.containerScreen(
+            backgroundColor = MoimTheme.colors.white,
+            padding = padding,
+        )
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
@@ -79,7 +80,7 @@ fun ParticipantListRoute(
                     event.userName,
                     listOf(event.userImage),
                     0,
-                    R.drawable.ic_empty_user_logo
+                    R.drawable.ic_empty_user_logo,
                 )
             }
 
@@ -93,12 +94,11 @@ fun ParticipantListRoute(
         }
     }
 
-
     (participantListUiState as? ParticipantListUiState)?.let { uiState ->
         ParticipantListScreen(
             modifier = modifier,
             uiState = uiState,
-            onUiAction = viewModel::onUiAction
+            onUiAction = viewModel::onUiAction,
         )
     }
 }
@@ -107,52 +107,53 @@ fun ParticipantListRoute(
 fun ParticipantListScreen(
     modifier: Modifier = Modifier,
     uiState: ParticipantListUiState,
-    onUiAction: (ParticipantListUiAction) -> Unit
+    onUiAction: (ParticipantListUiAction) -> Unit,
 ) {
-    val participants = uiState.participant
-        ?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
-        ?: return
+    val participants =
+        uiState.participant
+            ?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
+            ?: return
 
     TrackScreenViewEvent(screenName = "participant_list")
     Box(
-        modifier = modifier
+        modifier = modifier,
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             MoimTopAppbar(
                 title = stringResource(R.string.participant_list_title),
-                onClickNavigate = { onUiAction(ParticipantListUiAction.OnClickBack) }
+                onClickNavigate = { onUiAction(ParticipantListUiAction.OnClickBack) },
             )
             Spacer(Modifier.height(28.dp))
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 MoimText(
                     modifier = Modifier.weight(1f),
                     text = stringResource(R.string.participant_list_title),
                     style = MoimTheme.typography.body01.medium,
-                    color = MoimTheme.colors.gray.gray04
+                    color = MoimTheme.colors.gray.gray04,
                 )
                 MoimText(
                     text = stringResource(R.string.unit_participants_count_short, uiState.totalCount),
                     style = MoimTheme.typography.body01.medium,
-                    color = MoimTheme.colors.gray.gray04
+                    color = MoimTheme.colors.gray.gray04,
                 )
             }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-
                 if (uiState.isMeeting) {
                     item {
                         ParticipantMeetingInviteItem(
-                            onUiAction = onUiAction
+                            onUiAction = onUiAction,
                         )
                     }
                 }
@@ -160,14 +161,14 @@ fun ParticipantListScreen(
                 items(
                     count = participants.itemCount,
                     key = participants.itemKey(),
-                    contentType = participants.itemContentType()
+                    contentType = participants.itemContentType(),
                 ) { index ->
                     val participant = participants[index] ?: return@items
                     ParticipantListItem(
                         modifier = Modifier.animateItem(),
                         isMeeting = uiState.isMeeting,
                         participant = participant,
-                        onUiAction = onUiAction
+                        onUiAction = onUiAction,
                     )
                 }
 
@@ -202,7 +203,7 @@ fun ParticipantListScreen(
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = participants.loadState.isLoading()
+            visible = participants.loadState.isLoading(),
         ) {
             PagingLoadingScreen(modifier = Modifier.fillMaxSize())
         }
@@ -211,15 +212,15 @@ fun ParticipantListScreen(
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(),
             exit = fadeOut(),
-            visible = participants.loadState.isError()
+            visible = participants.loadState.isError(),
         ) {
             ErrorScreen(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MoimTheme.colors.white),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MoimTheme.colors.white),
                 onClickRefresh = { participants.refresh() },
             )
         }
     }
 }
-

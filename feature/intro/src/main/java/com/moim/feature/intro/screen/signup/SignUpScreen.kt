@@ -38,32 +38,45 @@ internal typealias OnSignUpUiAction = (SignUpUiAction) -> Unit
 @Composable
 fun SignUpRoute(
     viewModel: SignUpViewModel = hiltViewModel(),
-    navigateToMain: () -> Unit
+    navigateToMain: () -> Unit,
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val signUpUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> if (uri != null) viewModel.onUiAction(SignUpUiAction.OnChangeProfileUrl(uri.toString())) }
-    )
+    val singlePhotoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia(),
+            onResult = { uri -> if (uri != null) viewModel.onUiAction(SignUpUiAction.OnChangeProfileUrl(uri.toString())) },
+        )
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
-            is SignUpUiEvent.NavigateToPhotoPicker -> singlePhotoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            is SignUpUiEvent.NavigateToMain -> navigateToMain()
-            is SignUpUiEvent.ShowToastMessage -> showToast(context, event.message)
+            is SignUpUiEvent.NavigateToPhotoPicker -> {
+                singlePhotoPickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
+            }
+
+            is SignUpUiEvent.NavigateToMain -> {
+                navigateToMain()
+            }
+
+            is SignUpUiEvent.ShowToastMessage -> {
+                showToast(context, event.message)
+            }
         }
     }
 
     when (val uiState = signUpUiState) {
-        is SignUpUiState.SignUp -> SignUpScreen(
-            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction
-        )
+        is SignUpUiState.SignUp -> {
+            SignUpScreen(
+                modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
+                uiState = uiState,
+                isLoading = isLoading,
+                onUiAction = viewModel::onUiAction,
+            )
+        }
     }
 }
 
@@ -72,41 +85,43 @@ fun SignUpScreen(
     modifier: Modifier = Modifier,
     uiState: SignUpUiState.SignUp = SignUpUiState.SignUp(),
     isLoading: Boolean = false,
-    onUiAction: OnSignUpUiAction = {}
+    onUiAction: OnSignUpUiAction = {},
 ) {
     TrackScreenViewEvent(screenName = "sign_up")
     Column(
-        modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .systemBarsPadding()
-            .imePadding()
-            .padding(horizontal = 20.dp, vertical = 28.dp),
+        modifier =
+            modifier
+                .verticalScroll(rememberScrollState())
+                .systemBarsPadding()
+                .imePadding()
+                .padding(horizontal = 20.dp, vertical = 28.dp),
     ) {
         MoimText(
             text = stringResource(R.string.sign_up_title),
             singleLine = false,
             style = MoimTheme.typography.heading.bold,
-            color = MoimTheme.colors.gray.gray01
+            color = MoimTheme.colors.gray.gray01,
         )
 
         ProfileImage(
             profileUrl = uiState.profileUrl,
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
 
         NicknameTextField(
             nickname = uiState.nickname,
             isDuplicated = uiState.isDuplicatedName,
             isRegexError = uiState.isRegexError,
-            onUiAction = onUiAction
+            onUiAction = onUiAction,
         )
 
         Spacer(Modifier.weight(1f))
 
         MoimPrimaryButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 28.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 28.dp),
             enable = uiState.enableSignUp,
             text = stringResource(R.string.sign_up_start),
             onClick = { onUiAction(SignUpUiAction.OnClickSignUp) },
@@ -126,7 +141,7 @@ private fun SignUpScreenPreview() {
     MoimTheme {
         SignUpScreen(
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
-            uiState = SignUpUiState.SignUp(enableSignUp = true)
+            uiState = SignUpUiState.SignUp(enableSignUp = true),
         )
     }
 }
