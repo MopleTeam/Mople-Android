@@ -71,7 +71,7 @@ fun SignUpRoute(
     when (val uiState = signUpUiState) {
         is SignUpUiState.SignUp -> {
             SignUpScreen(
-                modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
+                modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
                 uiState = uiState,
                 isLoading = isLoading,
                 onUiAction = viewModel::onUiAction,
@@ -100,7 +100,7 @@ fun SignUpScreen(
             text = stringResource(R.string.sign_up_title),
             singleLine = false,
             style = MoimTheme.typography.heading.bold,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         ProfileImage(
@@ -140,7 +140,7 @@ fun SignUpScreen(
 private fun SignUpScreenPreview() {
     MoimTheme {
         SignUpScreen(
-            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
             uiState = SignUpUiState.SignUp(enableSignUp = true),
         )
     }

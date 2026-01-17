@@ -37,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.OpenGraph
@@ -46,6 +45,7 @@ import com.moim.core.common.model.item.CommentTextUiModel
 import com.moim.core.common.model.item.CommentUiModel
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
@@ -72,7 +72,7 @@ fun PlanDetailCommentHeader(
         MoimText(
             text = stringResource(R.string.plan_detail_comment),
             style = MoimTheme.typography.title03.semiBold,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         Spacer(Modifier.weight(1f))
@@ -80,7 +80,7 @@ fun PlanDetailCommentHeader(
         MoimText(
             text = stringResource(R.string.unit_count, commentCount.decimalFormatString()),
             style = MoimTheme.typography.title03.semiBold,
-            color = MoimTheme.colors.gray.gray04,
+            color = MoimTheme.colors.text.text03,
         )
     }
 }
@@ -171,7 +171,7 @@ private fun CommentHeader(
         MoimText(
             text = comment.writer.nickname,
             style = MoimTheme.typography.body01.semiBold,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         Spacer(Modifier.width(8.dp))
@@ -180,7 +180,7 @@ private fun CommentHeader(
             modifier = Modifier.weight(1f),
             text = comment.commentAt.parseDateString(stringResource(R.string.regex_date_month_day)),
             style = MoimTheme.typography.body02.regular,
-            color = MoimTheme.colors.gray.gray04,
+            color = MoimTheme.colors.text.text03,
         )
 
         MoimIconButton(
@@ -214,7 +214,7 @@ private fun CommentText(
     val text = texts.joinToString("") { it.content }
     val spanStyle =
         SpanStyle(
-            color = MoimTheme.colors.gray.gray03,
+            color = MoimTheme.colors.text.text02,
             fontFamily = FontFamily(Font(R.font.pretendard_medium, FontWeight.W600)),
             fontWeight = FontWeight.W600,
             textDecoration = TextDecoration.None,
@@ -230,7 +230,7 @@ private fun CommentText(
                     }
 
                     is CommentTextUiModel.MentionText -> {
-                        withStyle(style = spanStyle.copy(color = MoimTheme.colors.primary.primary)) {
+                        withStyle(style = spanStyle.copy(color = MoimTheme.colors.global.primary)) {
                             append(uiModel.content)
                         }
                     }
@@ -241,7 +241,7 @@ private fun CommentText(
                         withStyle(
                             style =
                                 spanStyle.copy(
-                                    color = MoimTheme.colors.primary.primary,
+                                    color = MoimTheme.colors.global.primary,
                                     textDecoration = TextDecoration.Underline,
                                 ),
                         ) {
@@ -300,14 +300,14 @@ private fun CommentOpenGraph(
                 MoimText(
                     text = openGraph.title ?: "",
                     style = MoimTheme.typography.body02.semiBold,
-                    color = MoimTheme.colors.black,
+                    color = MoimTheme.colors.text.text01,
                 )
                 Spacer(Modifier.height(4.dp))
             }
             MoimText(
                 text = openGraph.description ?: "",
                 style = MoimTheme.typography.body02.regular,
-                color = MoimTheme.colors.black,
+                color = MoimTheme.colors.text.text01,
             )
         }
     }
@@ -318,17 +318,18 @@ private fun CommentFooter(
     comment: Comment,
     onUiAction: OnPlanDetailUiAction,
 ) {
-    val likeResource =
+    val likeColor =
         if (comment.isLike) {
-            R.drawable.ic_thumb_up_fill
+            MoimTheme.colors.secondary
         } else {
-            R.drawable.ic_thumb_up
+            MoimTheme.colors.icon
         }
-    val replyResource =
+
+    val replyColor =
         if (comment.replayCount > 0) {
-            R.drawable.ic_chat_add_fill
+            MoimTheme.colors.secondary
         } else {
-            R.drawable.ic_chat_add
+            MoimTheme.colors.icon
         }
 
     Column {
@@ -339,14 +340,16 @@ private fun CommentFooter(
         ) {
             CommentIcon(
                 modifier = Modifier.padding(end = 8.dp),
-                iconRes = likeResource,
+                iconRes = R.drawable.ic_thumb_up,
                 iconCount = comment.likeCount,
+                iconColor = likeColor,
                 onClick = { onUiAction(PlanDetailUiAction.OnClickCommentLike(comment = comment)) },
             )
 
             CommentIcon(
-                iconRes = replyResource,
+                iconRes = R.drawable.ic_chat_add,
                 iconCount = comment.replayCount,
+                iconColor = replyColor,
                 onClick = { onUiAction(PlanDetailUiAction.OnClickCommentAddReply(comment)) },
             )
         }
@@ -358,6 +361,7 @@ private fun CommentIcon(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
     iconCount: Int,
+    iconColor: Color,
     onClick: () -> Unit,
 ) {
     Row(
@@ -372,14 +376,14 @@ private fun CommentIcon(
         Icon(
             imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = "",
-            tint = Color.Unspecified,
+            tint = iconColor,
         )
 
         if (iconCount > 0) {
             Text(
                 text = iconCount.decimalFormatString(),
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -387,7 +391,7 @@ private fun CommentIcon(
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun PlanDetailCommentItemPreview() {
     val comment =

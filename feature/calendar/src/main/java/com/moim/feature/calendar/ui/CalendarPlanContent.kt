@@ -37,7 +37,6 @@ import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.ui.util.decimalFormatString
 import com.moim.feature.calendar.CalendarUiAction
 import com.moim.feature.calendar.OnCalendarUiAction
@@ -85,7 +84,7 @@ fun CalendarPlanContent(
 }
 
 @Composable
-fun CalendarPlanItem(
+private fun CalendarPlanItem(
     modifier: Modifier = Modifier,
     plan: PlanItem,
     onUiAction: OnCalendarUiAction = {},
@@ -108,7 +107,7 @@ fun CalendarPlanItem(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .background(MoimTheme.colors.white)
+                    .background(MoimTheme.colors.bg.primary)
                     .padding(16.dp),
         ) {
             MeetingInfoTopAppbar(
@@ -121,7 +120,7 @@ fun CalendarPlanItem(
                 text = plan.planName,
                 singleLine = false,
                 style = MoimTheme.typography.title02.bold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
             Spacer(Modifier.height(4.dp))
 
@@ -143,7 +142,7 @@ fun CalendarPlanItem(
                             .padding(start = 4.dp),
                     text = stringResource(R.string.unit_participants_count, plan.participantsCount),
                     style = MoimTheme.typography.body02.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
             }
             Spacer(Modifier.height(16.dp))
@@ -185,7 +184,7 @@ private fun MeetingInfoTopAppbar(
                     .padding(horizontal = 8.dp),
             text = groupName,
             style = MoimTheme.typography.body02.semiBold,
-            color = MoimTheme.colors.gray.gray04,
+            color = MoimTheme.colors.text.text03,
         )
 
         Icon(
@@ -216,7 +215,7 @@ private fun MeetingWeatherInfo(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(color = color_F6F8FA, shape = RoundedCornerShape(10.dp))
+                .background(color = MoimTheme.colors.bg.input, shape = RoundedCornerShape(10.dp))
                 .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -225,7 +224,7 @@ private fun MeetingWeatherInfo(
                 Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .size(32.dp)
-                    .background(MoimTheme.colors.white)
+                    .background(MoimTheme.colors.bg.primary)
                     .padding(4.dp),
         ) {
             NetworkImage(
@@ -243,7 +242,7 @@ private fun MeetingWeatherInfo(
                 text = notFoundText,
                 textAlign = TextAlign.Center,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         } else {
             MoimText(
@@ -254,14 +253,14 @@ private fun MeetingWeatherInfo(
                 text = stringResource(R.string.unit_weather, temperature.decimalFormatString()),
                 singleLine = false,
                 style = MoimTheme.typography.body01.semiBold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
 
             MoimText(
                 text = address,
                 singleLine = false,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
     }

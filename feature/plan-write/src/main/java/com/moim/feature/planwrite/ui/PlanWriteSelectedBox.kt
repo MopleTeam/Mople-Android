@@ -21,6 +21,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
@@ -45,7 +46,7 @@ fun PlanWriteSelectedBox(
             MoimText(
                 text = title,
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
 
             if (titleOption != null) {
@@ -53,7 +54,7 @@ fun PlanWriteSelectedBox(
                 MoimText(
                     text = titleOption,
                     style = MoimTheme.typography.body01.regular,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
             }
         }
@@ -85,13 +86,13 @@ fun PlanWriteSelectedBox(
                 modifier = Modifier.fillMaxWidth(),
                 text = if (value.isNullOrEmpty()) hint else value,
                 style = MoimTheme.typography.body01.regular,
-                color = if (value.isNullOrEmpty()) MoimTheme.colors.gray.gray05 else MoimTheme.colors.gray.gray01,
+                color = if (value.isNullOrEmpty()) MoimTheme.colors.text.text04 else MoimTheme.colors.text.text01,
             )
         }
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun PlanWriteSelectedBoxPreview() {
     MoimTheme {
@@ -99,14 +100,14 @@ private fun PlanWriteSelectedBoxPreview() {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .background(MoimTheme.colors.white)
+                    .background(MoimTheme.colors.bg.primary)
                     .padding(20.dp),
         ) {
             PlanWriteSelectedBox(
                 title = "날짜 선택",
                 titleOption = "(선택)",
                 hint = "날짜를 선택해주세요",
-                enable = false,
+                enable = true,
                 iconRes = R.drawable.ic_calendar,
                 onClick = {},
             )

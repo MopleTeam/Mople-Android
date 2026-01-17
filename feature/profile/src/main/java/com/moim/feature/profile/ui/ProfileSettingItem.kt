@@ -70,7 +70,7 @@ fun ProfileSettingItem(
             text = text,
             singleLine = false,
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         Spacer(Modifier.width(4.dp))
@@ -86,7 +86,7 @@ fun ProfileSettingItem(
                 text = subText,
                 singleLine = false,
                 style = MoimTheme.typography.title03.medium,
-                color = MoimTheme.colors.gray.gray06,
+                color = MoimTheme.colors.text.text04,
             )
         }
     }

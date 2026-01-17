@@ -19,7 +19,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.consts.NOTION_URL
+import com.moim.core.common.model.User
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
@@ -48,7 +50,7 @@ fun ProfileRoute(
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val profileUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
+    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary, padding = padding)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
@@ -150,6 +152,27 @@ private fun ProfileDivider() {
             Modifier
                 .fillMaxWidth()
                 .height(8.dp)
-                .background(MoimTheme.colors.bg.primary),
+                .background(MoimTheme.colors.bg.secondary),
     )
+}
+
+@ThemePreviews
+@Composable
+private fun ProfileScreenPreview() {
+    MoimTheme {
+        ProfileScreen(
+            uiState =
+                ProfileUiState.Success(
+                    user =
+                        User(
+                            userId = "",
+                            nickname = "옥수수붕어빵",
+                        ),
+                    isShowUserLogoutDialog = false,
+                    isShowUserDeleteDialog = false,
+                ),
+            isLoading = false,
+            onUiAction = {},
+        )
+    }
 }

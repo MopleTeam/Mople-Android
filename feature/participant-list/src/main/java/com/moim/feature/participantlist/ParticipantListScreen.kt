@@ -65,7 +65,7 @@ fun ParticipantListRoute(
     val participantListUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val modifier =
         Modifier.containerScreen(
-            backgroundColor = MoimTheme.colors.white,
+            backgroundColor = MoimTheme.colors.bg.primary,
             padding = padding,
         )
 
@@ -137,12 +137,12 @@ fun ParticipantListScreen(
                     modifier = Modifier.weight(1f),
                     text = stringResource(R.string.participant_list_title),
                     style = MoimTheme.typography.body01.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
                 MoimText(
                     text = stringResource(R.string.unit_participants_count_short, uiState.totalCount),
                     style = MoimTheme.typography.body01.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
             }
             LazyColumn(
@@ -178,7 +178,7 @@ fun ParticipantListScreen(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .background(MoimTheme.colors.white)
+                                    .background(MoimTheme.colors.bg.primary)
                                     .animateItem(),
                         )
                     }
@@ -190,7 +190,7 @@ fun ParticipantListScreen(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .background(MoimTheme.colors.white)
+                                    .background(MoimTheme.colors.bg.primary)
                                     .animateItem(),
                             onClickRetry = participants::retry,
                         )
@@ -218,7 +218,7 @@ fun ParticipantListScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(MoimTheme.colors.white),
+                        .background(MoimTheme.colors.bg.primary),
                 onClickRefresh = { participants.refresh() },
             )
         }

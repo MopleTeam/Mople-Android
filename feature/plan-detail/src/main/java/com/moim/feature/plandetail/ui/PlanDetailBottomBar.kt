@@ -87,7 +87,7 @@ fun PlanDetailBottomBar(
                         .padding(vertical = 4.dp, horizontal = 8.dp),
                 text = stringResource(R.string.plan_detail_comment_update_typing),
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
 
@@ -129,7 +129,7 @@ fun PlanDetailBottomBar(
                         .size(40.dp)
                         .align(Alignment.CenterEnd),
                 iconRes = R.drawable.ic_arrow_up,
-                backgroundColor = if (commentState.text.isNotEmpty()) MoimTheme.colors.primary.primary else MoimTheme.colors.primary.disable,
+                backgroundColor = if (commentState.text.isNotEmpty()) MoimTheme.colors.global.primary else MoimTheme.colors.primary.disable,
                 enable = commentState.text.isNotEmpty(),
                 onClick = {
                     keyboardController?.hide()
@@ -146,8 +146,8 @@ fun HighlightTextView(
     keywords: List<String>,
     currentMessage: String,
     modifier: Modifier = Modifier,
-    highlightColor: Color = MoimTheme.colors.primary.primary,
-    textColor: Color = MoimTheme.colors.gray.gray01,
+    highlightColor: Color = MoimTheme.colors.global.primary,
+    textColor: Color = MoimTheme.colors.text.text01,
 ) {
     val annotatedString =
         buildAnnotatedString {
@@ -222,7 +222,7 @@ private fun PlanDetailBottomBarPreview() {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .background(MoimTheme.colors.white),
+                    .background(MoimTheme.colors.bg.primary),
         ) {
             PlanDetailBottomBar(
                 commentState =

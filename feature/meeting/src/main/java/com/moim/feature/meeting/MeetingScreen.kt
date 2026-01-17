@@ -57,7 +57,7 @@ fun MeetingRoute(
     navigateToMeetingWrite: () -> Unit,
     navigateToMeetingDetail: (String) -> Unit,
 ) {
-    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
     val meetings = viewModel.meetings.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
@@ -84,11 +84,12 @@ fun MeetingScreen(
     TrackScreenViewEvent(screenName = "meet_list")
     MoimScaffold(
         modifier = modifier,
-        backgroundColor = MoimTheme.colors.bg.primary,
+        backgroundColor = MoimTheme.colors.bg.secondary,
         topBar = {
             MoimTopAppbar(
                 title = stringResource(R.string.meeting_title),
                 isNavigationIconVisible = false,
+                backgroundColor = MoimTheme.colors.bg.primary,
             )
         },
         content = { padding ->
@@ -200,7 +201,7 @@ fun MeetingContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .background(MoimTheme.colors.white)
+                            .background(MoimTheme.colors.bg.primary)
                             .animateItem(),
                 )
             }
@@ -212,7 +213,7 @@ fun MeetingContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .background(MoimTheme.colors.white)
+                            .background(MoimTheme.colors.bg.primary)
                             .animateItem(),
                     onClickRetry = meetings::retry,
                 )
@@ -239,7 +240,7 @@ fun MeetingEmptyScreen(modifier: Modifier = Modifier) {
             text = stringResource(R.string.meeting_new_meeting),
             singleLine = false,
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray06,
+            color = MoimTheme.colors.text.text04,
         )
     }
 }

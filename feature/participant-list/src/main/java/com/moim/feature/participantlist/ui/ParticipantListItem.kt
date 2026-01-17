@@ -112,7 +112,7 @@ private fun ParticipantListItemPreview() {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .background(MoimTheme.colors.white),
+                    .background(MoimTheme.colors.bg.primary),
             isMeeting = true,
             participant =
                 User(

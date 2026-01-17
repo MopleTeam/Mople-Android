@@ -134,7 +134,7 @@ private fun CommentHeader(
         MoimText(
             text = comment.writer.nickname,
             style = MoimTheme.typography.body01.semiBold,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         Spacer(Modifier.width(8.dp))
@@ -143,7 +143,7 @@ private fun CommentHeader(
             modifier = Modifier.weight(1f),
             text = comment.commentAt.parseDateString(stringResource(R.string.regex_date_month_day)),
             style = MoimTheme.typography.body02.regular,
-            color = MoimTheme.colors.gray.gray04,
+            color = MoimTheme.colors.text.text03,
         )
 
         MoimIconButton(
@@ -177,7 +177,7 @@ private fun CommentText(
     val text = texts.joinToString("") { it.content }
     val spanStyle =
         SpanStyle(
-            color = MoimTheme.colors.gray.gray03,
+            color = MoimTheme.colors.text.text02,
             fontFamily = FontFamily(Font(R.font.pretendard_medium, FontWeight.W600)),
             fontWeight = FontWeight.W600,
             textDecoration = TextDecoration.None,
@@ -193,7 +193,7 @@ private fun CommentText(
                     }
 
                     is CommentTextUiModel.MentionText -> {
-                        withStyle(style = spanStyle.copy(color = MoimTheme.colors.primary.primary)) {
+                        withStyle(style = spanStyle.copy(color = MoimTheme.colors.global.primary)) {
                             append(uiModel.content)
                         }
                     }
@@ -204,7 +204,7 @@ private fun CommentText(
                         withStyle(
                             style =
                                 spanStyle.copy(
-                                    color = MoimTheme.colors.primary.primary,
+                                    color = MoimTheme.colors.global.primary,
                                     textDecoration = TextDecoration.Underline,
                                 ),
                         ) {
@@ -263,14 +263,14 @@ private fun CommentOpenGraph(
                 MoimText(
                     text = openGraph.title ?: "",
                     style = MoimTheme.typography.body02.semiBold,
-                    color = MoimTheme.colors.black,
+                    color = MoimTheme.colors.global.black,
                 )
                 Spacer(Modifier.height(4.dp))
             }
             MoimText(
                 text = openGraph.description ?: "",
                 style = MoimTheme.typography.body02.regular,
-                color = MoimTheme.colors.black,
+                color = MoimTheme.colors.global.black,
             )
         }
     }
@@ -281,11 +281,11 @@ private fun CommentFooter(
     comment: Comment,
     onUiAction: (CommentDetailAction) -> Unit,
 ) {
-    val likeResource =
+    val iconColor =
         if (comment.isLike) {
-            R.drawable.ic_thumb_up_fill
+            MoimTheme.colors.secondary
         } else {
-            R.drawable.ic_thumb_up
+            MoimTheme.colors.icon
         }
 
     Column {
@@ -296,8 +296,9 @@ private fun CommentFooter(
         ) {
             CommentIcon(
                 modifier = Modifier.padding(end = 8.dp),
-                iconRes = likeResource,
+                iconRes = R.drawable.ic_thumb_up,
                 iconCount = comment.likeCount,
+                iconColor = iconColor,
                 onClick = { onUiAction(CommentDetailAction.OnClickCommentLike(comment = comment)) },
             )
         }
@@ -309,6 +310,7 @@ private fun CommentIcon(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
     iconCount: Int,
+    iconColor: Color,
     onClick: () -> Unit,
 ) {
     Row(
@@ -323,14 +325,14 @@ private fun CommentIcon(
         Icon(
             imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = "",
-            tint = Color.Unspecified,
+            tint = iconColor,
         )
 
         if (iconCount > 0) {
             Text(
                 text = iconCount.decimalFormatString(),
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

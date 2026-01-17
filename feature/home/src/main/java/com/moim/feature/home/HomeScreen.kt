@@ -75,7 +75,11 @@ fun HomeRoute(
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(padding)
+    val modifier =
+        Modifier.containerScreen(
+            backgroundColor = MoimTheme.colors.bg.secondary,
+            padding = padding,
+        )
 
     var isPostNotificationPermission by remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -174,7 +178,7 @@ fun HomePlanEmpty(modifier: Modifier = Modifier) {
             modifier
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
-                .background(color = MoimTheme.colors.white, shape = RoundedCornerShape(12.dp))
+                .background(color = MoimTheme.colors.bg.primary, shape = RoundedCornerShape(12.dp))
                 .aspectRatio(1.25f),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -189,7 +193,7 @@ fun HomePlanEmpty(modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center,
             singleLine = false,
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray06,
+            color = MoimTheme.colors.text.text04,
         )
     }
 }
@@ -241,7 +245,10 @@ fun HomePlanPager(
 private fun HomeScreenPreview() {
     MoimTheme {
         HomeScreen(
-            modifier = Modifier.containerScreen(),
+            modifier =
+                Modifier.containerScreen(
+                    backgroundColor = MoimTheme.colors.bg.secondary,
+                ),
             uiState =
                 HomeUiState.Success(
                     user = User(userId = ""),

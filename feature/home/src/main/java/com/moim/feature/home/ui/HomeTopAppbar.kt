@@ -29,7 +29,7 @@ fun HomeTopAppbar(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(MoimTheme.colors.bg.primary)
+                .background(MoimTheme.colors.bg.secondary)
                 .padding(horizontal = 20.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

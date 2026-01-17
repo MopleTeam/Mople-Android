@@ -43,7 +43,7 @@ fun CommentDetailMentionDialog(
                 .fillMaxWidth()
                 .shadow(elevation = 12.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(MoimTheme.colors.white),
+                .background(MoimTheme.colors.bg.primary),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),

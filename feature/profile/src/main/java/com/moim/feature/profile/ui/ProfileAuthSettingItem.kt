@@ -57,7 +57,7 @@ fun ProfileAuthSettingItem(
                     .padding(vertical = 16.dp, horizontal = 20.dp),
             text = text,
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
     }
 }

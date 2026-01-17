@@ -2,6 +2,7 @@ package com.moim.feature.planwrite.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -56,7 +57,7 @@ fun MoimDatePickerDialog(
                 Text(
                     text = stringResource(id = R.string.common_confirm),
                     style = MoimTheme.typography.title03.bold,
-                    color = MoimTheme.colors.gray.gray01,
+                    color = MoimTheme.colors.global.black,
                 )
             }
         },
@@ -65,7 +66,7 @@ fun MoimDatePickerDialog(
                 Text(
                     text = stringResource(id = R.string.common_cancel),
                     style = MoimTheme.typography.title03.bold,
-                    color = MoimTheme.colors.gray.gray01,
+                    color = MoimTheme.colors.global.black,
                 )
             }
         },
@@ -106,7 +107,7 @@ fun MoimTimePickerDialog(
                 Text(
                     text = stringResource(id = R.string.common_confirm),
                     style = MoimTheme.typography.title03.bold,
-                    color = MoimTheme.colors.gray.gray01,
+                    color = MoimTheme.colors.global.black,
                 )
             }
         },
@@ -115,7 +116,7 @@ fun MoimTimePickerDialog(
                 Text(
                     text = stringResource(id = R.string.common_cancel),
                     style = MoimTheme.typography.title03.bold,
-                    color = MoimTheme.colors.gray.gray01,
+                    color = MoimTheme.colors.global.black,
                 )
             }
         },

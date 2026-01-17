@@ -21,7 +21,7 @@ fun MoimCard(
     shape: Shape = RoundedCornerShape(12.dp),
     border: BorderStroke? = null,
     elevation: CardElevation = CardDefaults.cardElevation(),
-    color: Color = MoimTheme.colors.white,
+    color: Color = MoimTheme.colors.bg.primary,
     onClick: () -> Unit = {},
     enable: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,

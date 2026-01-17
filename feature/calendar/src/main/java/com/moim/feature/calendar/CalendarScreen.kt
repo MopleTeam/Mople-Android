@@ -71,7 +71,7 @@ fun CalendarRoute(
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val calendarUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
@@ -289,7 +289,7 @@ fun CalendarWeek(
                     text = stringResource(R.string.calendar_empty),
                     textAlign = TextAlign.Center,
                     style = MoimTheme.typography.title03.medium,
-                    color = MoimTheme.colors.gray.gray06,
+                    color = MoimTheme.colors.text.text04,
                 )
             }
         }

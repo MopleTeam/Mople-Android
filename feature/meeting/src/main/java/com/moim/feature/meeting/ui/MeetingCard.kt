@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.util.getDateTimeBetweenDay
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
@@ -81,7 +82,7 @@ fun MeetingCard(
                     MoimText(
                         text = meeting.name,
                         style = MoimTheme.typography.title03.semiBold,
-                        color = MoimTheme.colors.gray.gray01,
+                        color = MoimTheme.colors.text.text01,
                     )
 
                     Spacer(Modifier.height(4.dp))
@@ -100,7 +101,7 @@ fun MeetingCard(
                         MoimText(
                             text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
                             style = MoimTheme.typography.body02.medium,
-                            color = MoimTheme.colors.gray.gray04,
+                            color = MoimTheme.colors.text.text03,
                         )
                     }
                 }
@@ -127,19 +128,19 @@ fun MeetingCard(
                     text =
                         buildAnnotatedString {
                             if (count != null) {
-                                withStyle(style = SpanStyle(color = MoimTheme.colors.primary.primary)) { append(count.plus(" ")) }
+                                withStyle(style = SpanStyle(color = MoimTheme.colors.global.primary)) { append(count.plus(" ")) }
                             }
                             append(comment)
                         },
                     style = MoimTheme.typography.body01.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
             }
         }
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun MeetingCardPreview() {
     MoimTheme {

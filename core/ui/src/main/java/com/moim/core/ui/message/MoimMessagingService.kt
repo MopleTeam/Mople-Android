@@ -31,7 +31,7 @@ class MoimMessagingService : FirebaseMessagingService() {
         val notificationBuilder =
             moimNotificationManager
                 .createNotificationBuilder()
-                .setSmallIcon(R.drawable.ic_logo_full)
+                .setSmallIcon(R.drawable.ic_logo_full_light)
                 .setContentTitle(notifyTitle)
                 .setContentText(notifyBody)
                 .setContentIntent(moimNotificationManager.getNotificationContentIntent(REQUEST_CODE, bundle))

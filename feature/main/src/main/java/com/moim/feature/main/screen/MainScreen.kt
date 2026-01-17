@@ -96,7 +96,7 @@ fun MainScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(MoimTheme.colors.white),
+                        .background(MoimTheme.colors.bg.primary),
                 entries = navigationState.toEntries(entryProvider),
                 onBack = { navigator.goBack() },
                 transitionSpec = {

@@ -25,10 +25,10 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.theme.MoimTheme
 
 @Composable
@@ -37,7 +37,7 @@ fun MoimTopAppbar(
     thickness: Dp = 0.dp,
     dividerColor: Color = MoimTheme.colors.stroke,
     title: @Composable () -> Unit = {},
-    backgroundColor: Color = MoimTheme.colors.white,
+    backgroundColor: Color = MoimTheme.colors.bg.primary,
     isNavigationIconVisible: Boolean = true,
     onClickNavigate: () -> Unit = {},
     navigationIcon: @Composable () -> Unit = {
@@ -77,7 +77,7 @@ fun MoimTopAppbar(
                 TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
                     navigationIconContentColor = MoimTheme.colors.secondary,
-                    titleContentColor = MoimTheme.colors.gray.gray01,
+                    titleContentColor = MoimTheme.colors.text.text01,
                     actionIconContentColor = MoimTheme.colors.icon,
                 ),
         )
@@ -95,8 +95,8 @@ fun MoimTopAppbar(
     dividerColor: Color = MoimTheme.colors.stroke,
     title: String = "",
     titleStyle: TextStyle = MoimTheme.typography.title02.bold,
-    titleColor: Color = MoimTheme.colors.gray.gray01,
-    backgroundColor: Color = MoimTheme.colors.white,
+    titleColor: Color = MoimTheme.colors.text.text01,
+    backgroundColor: Color = MoimTheme.colors.bg.primary,
     isNavigationIconVisible: Boolean = true,
     onClickNavigate: () -> Unit = {},
     navigationIcon: @Composable () -> Unit = {
@@ -161,7 +161,7 @@ fun MoimTopAppbar(
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun MoimTopAppbarPreview() {
     MoimTheme {

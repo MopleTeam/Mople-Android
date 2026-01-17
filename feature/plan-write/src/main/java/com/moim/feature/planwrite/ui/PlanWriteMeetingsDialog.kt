@@ -93,7 +93,6 @@ fun PlanWriteMeetingsTopAppbar(
             modifier = Modifier.weight(1f),
             text = stringResource(R.string.plan_write_meeting_select),
             style = MoimTheme.typography.title02.semiBold,
-            color = MoimTheme.colors.gray.gray02,
         )
 
         MoimIconButton(
@@ -135,7 +134,7 @@ fun PlanWriteMeetingsScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .background(MoimTheme.colors.white)
+                                .background(MoimTheme.colors.bg.primary)
                                 .animateItem(),
                     )
                 }
@@ -147,7 +146,7 @@ fun PlanWriteMeetingsScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .background(MoimTheme.colors.white)
+                                .background(MoimTheme.colors.bg.primary)
                                 .animateItem(),
                         onClickRetry = meetings::retry,
                     )
@@ -188,7 +187,7 @@ fun PlanWriteMeetingInfo(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(color = if (isSelected) MoimTheme.colors.bg.input else MoimTheme.colors.white)
+                .background(color = if (isSelected) MoimTheme.colors.bg.input else MoimTheme.colors.bg.primary)
                 .onSingleClick {
                     onUiAction(PlanWriteUiAction.OnClickPlanMeeting(meeting))
                     onUiAction(PlanWriteUiAction.OnShowMeetingsDialog(false))
