@@ -33,6 +33,7 @@ import com.moim.feature.profile.ProfileRoute
 import com.moim.feature.profileupdate.ProfileUpdateRoute
 import com.moim.feature.reviewwrite.ReviewWriteRoute
 import com.moim.feature.reviewwrite.ReviewWriteViewModel
+import com.moim.feature.themesetting.ThemeSettingRoute
 import com.moim.feature.webview.WebViewRoute
 import com.moim.feature.webview.WebViewViewModel
 
@@ -88,6 +89,7 @@ fun EntryProviderScope<NavKey>.profileScreenEntry(
             navigateToProfileUpdate = navigator::navigateToProfileUpdate,
             navigateToAlarmSetting = navigator::navigateToAlarmSetting,
             navigateToPrivacyPolicy = navigator::navigateToWebView,
+            navigateToThemeSetting = navigator::navigateToThemeSetting,
             navigateToIntro = navigateToIntro,
         )
     }
@@ -324,6 +326,18 @@ fun EntryProviderScope<NavKey>.alarmSettingScreenEntry(
 ) {
     entry<DetailRoute.AlarmSetting> {
         AlarmSettingRoute(
+            padding = paddingValues,
+            navigateToBack = navigator::goBack,
+        )
+    }
+}
+
+fun EntryProviderScope<NavKey>.themeSettingScreenEntry(
+    navigator: MainNavigator,
+    paddingValues: PaddingValues,
+) {
+    entry<DetailRoute.ThemeSetting> {
+        ThemeSettingRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
         )

@@ -53,7 +53,7 @@ fun CalendarPlanContent(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(MoimTheme.colors.bg.primary),
+                .background(MoimTheme.colors.bg.secondary),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(vertical = 28.dp, horizontal = 20.dp),

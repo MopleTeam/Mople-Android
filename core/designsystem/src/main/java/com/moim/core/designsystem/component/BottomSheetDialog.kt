@@ -39,7 +39,9 @@ fun MoimBottomSheetDialog(
         },
         dragHandle = dragHandle,
     ) {
-        MoimTheme {
+        MoimTheme(
+            darkTheme = MoimTheme.isDarkTheme,
+        ) {
             content()
         }
     }

@@ -1,5 +1,6 @@
 package com.moim.core.local
 
+import com.moim.core.common.model.Theme
 import com.moim.core.common.model.Token
 import com.moim.core.common.model.User
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,10 @@ interface PreferenceStorage {
     val token: Flow<Token?>
 
     suspend fun saveUserToken(token: Token)
+
+    fun getTheme(): Flow<Theme>
+
+    suspend fun setTheme(value: Theme)
 
     suspend fun clearMoimStorage()
 }

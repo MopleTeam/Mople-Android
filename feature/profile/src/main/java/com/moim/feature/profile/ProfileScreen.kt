@@ -44,6 +44,7 @@ fun ProfileRoute(
     padding: PaddingValues,
     navigateToProfileUpdate: () -> Unit,
     navigateToAlarmSetting: () -> Unit,
+    navigateToThemeSetting: () -> Unit,
     navigateToPrivacyPolicy: (String) -> Unit,
     navigateToIntro: () -> Unit,
 ) {
@@ -57,6 +58,7 @@ fun ProfileRoute(
             is ProfileUiEvent.NavigateToProfileUpdate -> navigateToProfileUpdate()
             is ProfileUiEvent.NavigateToAlarmSetting -> navigateToAlarmSetting()
             is ProfileUiEvent.NavigateToPrivacyPolicy -> navigateToPrivacyPolicy(NOTION_URL)
+            is ProfileUiEvent.NavigateToThemeSetting -> navigateToThemeSetting()
             is ProfileUiEvent.NavigateToIntro -> navigateToIntro()
             is ProfileUiEvent.ShowToastMessage -> showToast(context, event.message)
         }

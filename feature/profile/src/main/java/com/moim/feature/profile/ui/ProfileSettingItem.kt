@@ -40,6 +40,10 @@ fun ProfileSettingContainer(
             onClick = { onUiAction(ProfileUiAction.OnClickAlarmSetting) },
         )
         ProfileSettingItem(
+            text = stringResource(R.string.profile_theme),
+            onClick = { onUiAction(ProfileUiAction.OnClickThemeSetting) },
+        )
+        ProfileSettingItem(
             text = stringResource(R.string.profile_privacy_policy),
             onClick = { onUiAction(ProfileUiAction.OnClickPrivacyPolicy) },
         )

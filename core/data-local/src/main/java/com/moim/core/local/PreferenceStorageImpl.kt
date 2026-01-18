@@ -4,10 +4,12 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.moim.core.common.model.Theme
 import com.moim.core.common.model.Token
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.toJson
 import com.moim.core.common.util.JsonUtil.toObject
+import com.moim.core.local.PreferenceStorageImpl.PreferenceKeys.PREF_THEME
 import com.moim.core.local.PreferenceStorageImpl.PreferenceKeys.PREF_USER
 import com.moim.core.local.PreferenceStorageImpl.PreferenceKeys.PREF_USER_TOKEN
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +23,7 @@ internal class PreferenceStorageImpl @Inject constructor(
     object PreferenceKeys {
         val PREF_USER = stringPreferencesKey("pref_user")
         val PREF_USER_TOKEN = stringPreferencesKey("pref_user_token")
+        val PREF_THEME = stringPreferencesKey("pref_theme")
     }
 
     override val user: Flow<User?> =
@@ -63,6 +66,15 @@ internal class PreferenceStorageImpl @Inject constructor(
                     ""
                 }
         }
+    }
+
+    override fun getTheme(): Flow<Theme> =
+        preference.data.map {
+            Theme.valueOf(it[PREF_THEME] ?: Theme.SYSTEM.name)
+        }
+
+    override suspend fun setTheme(value: Theme) {
+        preference.edit { it[PREF_THEME] = value.name }
     }
 
     override suspend fun clearMoimStorage() {

@@ -1,6 +1,7 @@
 package com.moim.core.designsystem.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,7 +44,9 @@ fun MoimDialog(
             ),
         onDismissRequest = onDismiss,
         content = {
-            MoimTheme {
+            MoimTheme(
+                darkTheme = MoimTheme.isDarkTheme,
+            ) {
                 content()
             }
         },
@@ -67,7 +70,7 @@ fun MoimAlertDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(dismissOnBackPress = cancelable, dismissOnClickOutside = cancelable),
         content = {
-            MoimTheme {
+            MoimTheme(darkTheme = MoimTheme.isDarkTheme) {
                 Column(
                     modifier =
                         Modifier

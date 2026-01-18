@@ -110,6 +110,9 @@ sealed interface DetailRoute : Route {
     data object AlarmSetting : DetailRoute
 
     @Serializable
+    data object ThemeSetting : DetailRoute
+
+    @Serializable
     data class WebView(
         val webUrl: String,
     ) : DetailRoute
