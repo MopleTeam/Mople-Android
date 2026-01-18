@@ -9,10 +9,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +41,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
@@ -59,8 +63,11 @@ fun AlarmSettingRoute(
     val alarmSettingUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
-
+    val modifier =
+        Modifier.containerScreen(
+            backgroundColor = MoimTheme.colors.bg.primary,
+            padding = padding,
+        )
     var isPostNotificationPermission by remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             mutableStateOf(
@@ -207,7 +214,7 @@ private fun AlarmSettingPermissionItem(
         MoimText(
             text = stringResource(R.string.alarm_setting_permission),
             style = MoimTheme.typography.body01.regular,
-            color = MoimTheme.colors.gray.gray04,
+            color = MoimTheme.colors.text.text03,
         )
     }
 }
@@ -233,13 +240,13 @@ private fun AlarmSettingSwitchItem(
             MoimText(
                 text = title,
                 style = MoimTheme.typography.title03.medium,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
             Spacer(Modifier.height(4.dp))
             MoimText(
                 text = description,
                 style = MoimTheme.typography.body02.regular,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
 
@@ -252,11 +259,11 @@ private fun AlarmSettingSwitchItem(
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun AlarmSettingScreenPreview() {
     MoimTheme {
-        val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white)
+        val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary)
 
         AlarmSettingScreen(
             modifier = modifier,

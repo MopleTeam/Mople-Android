@@ -79,7 +79,7 @@ fun MeetingSettingRoute(
     when (val uiState = meetingUiState) {
         is MeetingSettingUiState.MeetingSetting -> {
             MeetingSettingScreen(
-                modifier = Modifier.containerScreen(padding, MoimTheme.colors.white),
+                modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary),
                 uiState = uiState,
                 isLoading = isLoading,
                 onUiAction = viewModel::onUiAction,
@@ -190,7 +190,7 @@ fun MeetingSettingExit(
             modifier = Modifier.weight(1f),
             text = stringResource(if (isHostUser) R.string.meeting_setting_delete_btn else R.string.meeting_setting_exit),
             style = MoimTheme.typography.title03.medium,
-            color = if (isHostUser) MoimTheme.colors.red else MoimTheme.colors.gray.gray01,
+            color = if (isHostUser) MoimTheme.colors.global.red else MoimTheme.colors.text.text01,
         )
     }
 }
@@ -200,7 +200,7 @@ fun MeetingSettingExit(
 private fun MeetingSettingScreenPreview() {
     MoimTheme {
         MeetingSettingScreen(
-            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
             uiState =
                 MeetingSettingUiState.MeetingSetting(
                     meeting =

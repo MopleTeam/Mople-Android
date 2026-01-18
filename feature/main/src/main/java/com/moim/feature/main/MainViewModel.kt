@@ -3,6 +3,7 @@ package com.moim.feature.main
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.data.datasource.meeting.MeetingRepository
+import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
 import com.moim.core.ui.eventbus.PlanAction
@@ -15,10 +16,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    private val userRepository: UserRepository,
     private val meetingRepository: MeetingRepository,
     private val meetingEventBus: EventBus<MeetingAction>,
     private val planEventBus: EventBus<PlanAction>,
 ) : BaseViewModel() {
+    val them = userRepository.getTheme()
+
     fun setPlanId(planId: String) {
         planEventBus.send(PlanAction.PlanInvalidate())
         setUiEvent(MainUiEvent.NavigateToPlanDetail(ViewIdType.PlanId(planId)))

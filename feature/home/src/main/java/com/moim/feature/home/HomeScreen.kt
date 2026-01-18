@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -46,6 +45,7 @@ import com.moim.core.common.model.Plan
 import com.moim.core.common.model.User
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
@@ -75,7 +75,11 @@ fun HomeRoute(
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(padding)
+    val modifier =
+        Modifier.containerScreen(
+            backgroundColor = MoimTheme.colors.bg.secondary,
+            padding = padding,
+        )
 
     var isPostNotificationPermission by remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -174,7 +178,7 @@ fun HomePlanEmpty(modifier: Modifier = Modifier) {
             modifier
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
-                .background(color = MoimTheme.colors.white, shape = RoundedCornerShape(12.dp))
+                .background(color = MoimTheme.colors.bg.primary, shape = RoundedCornerShape(12.dp))
                 .aspectRatio(1.25f),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -189,7 +193,7 @@ fun HomePlanEmpty(modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center,
             singleLine = false,
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray06,
+            color = MoimTheme.colors.text.text04,
         )
     }
 }
@@ -236,12 +240,15 @@ fun HomePlanPager(
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun HomeScreenPreview() {
     MoimTheme {
         HomeScreen(
-            modifier = Modifier.containerScreen(),
+            modifier =
+                Modifier.containerScreen(
+                    backgroundColor = MoimTheme.colors.bg.secondary,
+                ),
             uiState =
                 HomeUiState.Success(
                     user = User(userId = ""),

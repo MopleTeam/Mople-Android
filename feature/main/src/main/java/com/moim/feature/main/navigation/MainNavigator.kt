@@ -113,5 +113,7 @@ class MainNavigator(
 
     fun navigateToAlarmSetting() = navigate(DetailRoute.AlarmSetting)
 
+    fun navigateToThemeSetting() = navigate(DetailRoute.ThemeSetting)
+
     fun navigateToWebView(webUrl: String) = navigate(DetailRoute.WebView(webUrl))
 }

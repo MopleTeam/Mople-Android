@@ -1,5 +1,6 @@
 package com.moim.core.data.datasource.user
 
+import com.moim.core.common.model.Theme
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
@@ -55,6 +56,12 @@ internal class UserRepositoryImpl @Inject constructor(
         catchFlow {
             emit(userApi.checkedNickname(nickname))
         }
+
+    override fun getTheme(): Flow<Theme> = preferenceStorage.getTheme()
+
+    override suspend fun setTheme(value: Theme) {
+        preferenceStorage.setTheme(value)
+    }
 
     override suspend fun clearMoimStorage() {
         preferenceStorage.clearMoimStorage()

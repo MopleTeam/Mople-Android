@@ -63,7 +63,7 @@ fun ReviewWritePlanInfo(
             MoimText(
                 text = review.meetingName,
                 style = MoimTheme.typography.body02.semiBold,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
 
@@ -72,7 +72,7 @@ fun ReviewWritePlanInfo(
         MoimText(
             text = review.reviewName,
             style = MoimTheme.typography.heading.bold,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
             maxLine = 2,
         )
 
@@ -126,7 +126,7 @@ private fun PlanInfoItem(
             modifier = Modifier.padding(horizontal = 4.dp),
             text = text,
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray03,
+            color = MoimTheme.colors.text.text02,
             maxLine = 2,
         )
 

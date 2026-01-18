@@ -52,7 +52,7 @@ fun MapDetailPlaceInfoDialog(
             MoimText(
                 text = placeName,
                 style = MoimTheme.typography.title02.semiBold,
-                color = MoimTheme.colors.gray.gray02,
+                color = MoimTheme.colors.text.text01,
             )
             Spacer(Modifier.height(16.dp))
 
@@ -60,7 +60,7 @@ fun MapDetailPlaceInfoDialog(
                 text = address,
                 singleLine = false,
                 style = MoimTheme.typography.body01.regular,
-                color = MoimTheme.colors.gray.gray05,
+                color = MoimTheme.colors.text.text04,
             )
 
             Spacer(Modifier.height(20.dp))
@@ -70,7 +70,7 @@ fun MapDetailPlaceInfoDialog(
                 buttonColors =
                     moimButtomColors().copy(
                         containerColor = MoimTheme.colors.tertiary,
-                        contentColor = MoimTheme.colors.gray.gray01,
+                        contentColor = MoimTheme.colors.text.text01,
                     ),
                 onClick = {
                     onUiAction(MapDetailUiAction.OnShowMapAppDialog(true))

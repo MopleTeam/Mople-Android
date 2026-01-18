@@ -13,7 +13,7 @@ import com.moim.core.designsystem.theme.MoimTheme
 @Composable
 fun MoimScaffold(
     modifier: Modifier = Modifier,
-    backgroundColor: Color = MoimTheme.colors.white,
+    backgroundColor: Color = MoimTheme.colors.bg.primary,
     topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},

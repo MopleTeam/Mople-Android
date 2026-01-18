@@ -38,6 +38,7 @@ import com.moim.feature.main.navigation.profileScreenEntry
 import com.moim.feature.main.navigation.profileUpdateScreenEntry
 import com.moim.feature.main.navigation.rememberMainNavController
 import com.moim.feature.main.navigation.reviewWriteScreenEntry
+import com.moim.feature.main.navigation.themeSettingScreenEntry
 import com.moim.feature.main.navigation.toEntries
 import com.moim.feature.main.navigation.webViewScreenEntry
 import com.moim.feature.main.screen.ui.MainBottomBar
@@ -89,6 +90,7 @@ fun MainScreen(
                     profileUpdateScreenEntry(navigator, innerPadding)
                     alarmScreenEntry(navigator, innerPadding)
                     alarmSettingScreenEntry(navigator, innerPadding)
+                    themeSettingScreenEntry(navigator, innerPadding)
                     webViewScreenEntry(navigator, innerPadding)
                 }
 
@@ -96,7 +98,7 @@ fun MainScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(MoimTheme.colors.white),
+                        .background(MoimTheme.colors.bg.primary),
                 entries = navigationState.toEntries(entryProvider),
                 onBack = { navigator.goBack() },
                 transitionSpec = {

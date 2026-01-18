@@ -57,13 +57,13 @@ fun ReviewWriteUploadImageContainer(
                 modifier = Modifier.weight(1f),
                 text = stringResource(R.string.review_write_photo_title),
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
 
             MoimText(
                 text = stringResource(R.string.unit_count, images.size.decimalFormatString()),
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
 
@@ -147,7 +147,7 @@ private fun ReviewImageBox(
                     .size(24.dp)
                     .clip(CircleShape)
                     .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
-                    .background(MoimTheme.colors.primary.primary),
+                    .background(MoimTheme.colors.global.primary),
         ) {
             Icon(
                 modifier =
@@ -156,7 +156,7 @@ private fun ReviewImageBox(
                         .onSingleClick { onUiAction(ReviewWriteUiAction.OnClickRemoveImage(image)) },
                 imageVector = ImageVector.vectorResource(R.drawable.ic_close),
                 contentDescription = "",
-                tint = MoimTheme.colors.white,
+                tint = MoimTheme.colors.bg.primary,
             )
         }
     }
@@ -170,7 +170,7 @@ private fun ReviewWriteUploadImageContainerPreview() {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .background(MoimTheme.colors.white),
+                    .background(MoimTheme.colors.bg.primary),
         ) {
             ReviewWriteUploadImageContainer(
                 images = emptyList(),

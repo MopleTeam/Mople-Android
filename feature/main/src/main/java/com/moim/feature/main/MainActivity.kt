@@ -9,14 +9,22 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.moim.core.analytics.AnalyticsHelper
 import com.moim.core.analytics.LocalAnalyticsHelper
 import com.moim.core.common.consts.INTRO_ACTIVITY_NAME
 import com.moim.core.common.consts.KEY_INVITE_CODE
+import com.moim.core.common.model.Theme
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.main.screen.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -33,7 +41,19 @@ class MainActivity : ComponentActivity() {
             CompositionLocalProvider(
                 LocalAnalyticsHelper provides analyticsHelper,
             ) {
-                MoimTheme {
+                val theme by viewModel.them.collectAsStateWithLifecycle(Theme.SYSTEM)
+                val isDarkTheme = shouldUseDarkTheme(theme)
+
+                LaunchedEffect(isDarkTheme) {
+                    enableEdgeToEdge(
+                        statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { isDarkTheme },
+                        navigationBarStyle = SystemBarStyle.auto(lightScrim, darkScrim) { isDarkTheme },
+                    )
+                }
+
+                MoimTheme(
+                    darkTheme = isDarkTheme,
+                ) {
                     MainScreen(
                         viewModel = viewModel,
                         navigateToIntro = ::navigateToIntro,
@@ -72,7 +92,18 @@ class MainActivity : ComponentActivity() {
         private const val NOTIFY_PLAN_ID = "planId"
         private const val NOTIFY_REVIEW_ID = "reviewId"
     }
+
+    @Composable
+    private fun shouldUseDarkTheme(theme: Theme): Boolean =
+        when (theme) {
+            Theme.SYSTEM -> isSystemInDarkTheme()
+            Theme.DARK -> true
+            Theme.LIGHT -> false
+        }
 }
+
+private val lightScrim = Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
+private val darkScrim = Color.argb(0x80, 0x1b, 0x1b, 0x1b)
 
 private fun Activity.navigateToIntro() {
     val intent = Intent(this, Class.forName(INTRO_ACTIVITY_NAME))

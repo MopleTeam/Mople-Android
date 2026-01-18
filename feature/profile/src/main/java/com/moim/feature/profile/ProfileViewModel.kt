@@ -47,6 +47,7 @@ class ProfileViewModel @Inject constructor(
         when (uiAction) {
             is ProfileUiAction.OnClickProfile -> setUiEvent(ProfileUiEvent.NavigateToProfileUpdate)
             is ProfileUiAction.OnClickAlarmSetting -> setUiEvent(ProfileUiEvent.NavigateToAlarmSetting)
+            is ProfileUiAction.OnClickThemeSetting -> setUiEvent(ProfileUiEvent.NavigateToThemeSetting)
             is ProfileUiAction.OnClickPrivacyPolicy -> setUiEvent(ProfileUiEvent.NavigateToPrivacyPolicy)
             is ProfileUiAction.OnClickLogout -> logout()
             is ProfileUiAction.OnClickUserDelete -> deleteUser()
@@ -149,6 +150,8 @@ sealed interface ProfileUiAction : UiAction {
 
     data object OnClickAlarmSetting : ProfileUiAction
 
+    data object OnClickThemeSetting : ProfileUiAction
+
     data object OnClickPrivacyPolicy : ProfileUiAction
 
     data object OnClickLogout : ProfileUiAction
@@ -170,6 +173,8 @@ sealed interface ProfileUiEvent : UiEvent {
     data object NavigateToProfileUpdate : ProfileUiEvent
 
     data object NavigateToAlarmSetting : ProfileUiEvent
+
+    data object NavigateToThemeSetting : ProfileUiEvent
 
     data object NavigateToPrivacyPolicy : ProfileUiEvent
 

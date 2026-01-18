@@ -22,12 +22,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
@@ -58,7 +58,7 @@ fun SignInRoute(
     }
 
     SignInScreen(
-        modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
+        modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
         isLoading = isLoading,
         onUiAction = viewModel::onUiAction,
     )
@@ -71,6 +71,13 @@ fun SignInScreen(
     onUiAction: OnSignInUiAction,
 ) {
     TrackScreenViewEvent(screenName = "sign_in")
+    val imageRes =
+        if (MoimTheme.isDarkTheme) {
+            R.drawable.ic_logo_full_dark
+        } else {
+            R.drawable.ic_logo_full_light
+        }
+
     Box(
         modifier =
             modifier
@@ -83,7 +90,7 @@ fun SignInScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_logo_full),
+                imageVector = ImageVector.vectorResource(imageRes),
                 contentDescription = "",
                 tint = Color.Unspecified,
             )
@@ -93,7 +100,7 @@ fun SignInScreen(
                 text = stringResource(R.string.app_description),
                 singleLine = false,
                 style = MoimTheme.typography.body01.regular,
-                color = MoimTheme.colors.gray.gray03,
+                color = MoimTheme.colors.text.text02,
             )
         }
 
@@ -115,7 +122,7 @@ private fun BoxScope.KakaoLoginButton(onUiAction: OnSignInUiAction) {
         buttonColors =
             moimButtomColors().copy(
                 containerColor = color_FEE500,
-                contentColor = MoimTheme.colors.gray.gray01,
+                contentColor = MoimTheme.colors.global.black,
             ),
         onClick = { onUiAction(SignInUiAction.OnClickKakaoLogin(context)) },
     ) {
@@ -135,12 +142,12 @@ private fun BoxScope.KakaoLoginButton(onUiAction: OnSignInUiAction) {
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun SignInScreenPreview() {
     MoimTheme {
         SignInScreen(
-            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
             onUiAction = {},
         )
     }

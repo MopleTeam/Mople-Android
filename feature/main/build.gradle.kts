@@ -25,6 +25,7 @@ dependencies {
     implementation(projects.feature.alarmSetting)
     implementation(projects.feature.webview)
     implementation(projects.feature.imageViewer)
+    implementation(projects.feature.themeSetting)
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)

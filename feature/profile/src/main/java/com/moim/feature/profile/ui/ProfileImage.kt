@@ -78,7 +78,7 @@ fun ProfileImage(
                     text = user.nickname,
                     singleLine = false,
                     style = MoimTheme.typography.title03.semiBold,
-                    color = MoimTheme.colors.gray.gray01,
+                    color = MoimTheme.colors.text.text01,
                 )
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_pen),

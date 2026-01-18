@@ -42,7 +42,6 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.ui.util.decimalFormatString
 import com.moim.feature.meetingdetail.MeetingDetailUiAction
@@ -80,13 +79,13 @@ fun MeetingDetailPlanContent(
                     modifier = Modifier.weight(1f),
                     text = stringResource(if (isPlanSelected) R.string.meeting_detail_future_plan else R.string.meeting_detail_past_plan),
                     style = MoimTheme.typography.body01.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
 
                 MoimText(
                     text = stringResource(R.string.unit_count, if (isPlanSelected) planTotalCount else reviewTotalCount),
                     style = MoimTheme.typography.body01.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
             }
         }
@@ -148,7 +147,7 @@ fun MeetingDetailPlanItem(
                     modifier = Modifier.fillMaxWidth(),
                     text = plan.planName,
                     style = MoimTheme.typography.title03.semiBold,
-                    color = MoimTheme.colors.gray.gray01,
+                    color = MoimTheme.colors.text.text01,
                 )
             }
             Spacer(Modifier.height(4.dp))
@@ -183,7 +182,7 @@ fun MeetingDetailPlanItem(
                         buttonColors =
                             moimButtomColors().copy(
                                 containerColor = MoimTheme.colors.tertiary,
-                                contentColor = MoimTheme.colors.gray.gray03,
+                                contentColor = MoimTheme.colors.text.text02,
                             ),
                         text = stringResource(R.string.meeting_detail_plan_apply_done),
                         onClick = {
@@ -248,7 +247,7 @@ fun MeetingDetailReviewItem(
                         MoimText(
                             text = review.planName,
                             style = MoimTheme.typography.title03.semiBold,
-                            color = MoimTheme.colors.gray.gray01,
+                            color = MoimTheme.colors.text.text01,
                         )
                     }
                     Spacer(Modifier.height(4.dp))
@@ -287,7 +286,7 @@ fun MeetingDetailReviewItem(
                                 text = review.reviewImages.size.toString(),
                                 textAlign = TextAlign.Center,
                                 style = MoimTheme.typography.body01.medium,
-                                color = MoimTheme.colors.primary.primary,
+                                color = MoimTheme.colors.global.primary,
                             )
                         }
                     }
@@ -305,7 +304,7 @@ private fun MyPostIcon() {
                 .size(20.dp)
                 .padding(2.dp)
                 .clip(CircleShape)
-                .background(MoimTheme.colors.primary.primary),
+                .background(MoimTheme.colors.global.primary),
     ) {
         Icon(
             modifier =
@@ -314,7 +313,7 @@ private fun MyPostIcon() {
                     .size(14.dp),
             imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
             contentDescription = "",
-            tint = MoimTheme.colors.white,
+            tint = MoimTheme.colors.bg.primary,
         )
     }
 
@@ -333,7 +332,7 @@ private fun MeetingDetailPlanHeader(
             modifier = modifier.weight(1f),
             text = time.parseDateString(stringResource(R.string.regex_date_year_month_day_short)),
             style = MoimTheme.typography.body02.semiBold,
-            color = MoimTheme.colors.gray.gray04,
+            color = MoimTheme.colors.text.text03,
         )
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_next),
@@ -362,7 +361,7 @@ private fun PlanParticipantCount(
         MoimText(
             text = stringResource(R.string.unit_participants_count, count),
             style = MoimTheme.typography.body02.medium,
-            color = MoimTheme.colors.gray.gray04,
+            color = MoimTheme.colors.text.text03,
         )
     }
 }
@@ -386,7 +385,7 @@ private fun MeetingWeatherInfo(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(color = color_F6F8FA, shape = RoundedCornerShape(10.dp))
+                .background(color = MoimTheme.colors.bg.input, shape = RoundedCornerShape(10.dp))
                 .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -395,7 +394,7 @@ private fun MeetingWeatherInfo(
                 Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .size(32.dp)
-                    .background(MoimTheme.colors.white)
+                    .background(MoimTheme.colors.bg.primary)
                     .padding(4.dp),
         ) {
             NetworkImage(
@@ -413,7 +412,7 @@ private fun MeetingWeatherInfo(
                 text = notFoundText,
                 textAlign = TextAlign.Center,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         } else {
             MoimText(
@@ -423,13 +422,13 @@ private fun MeetingWeatherInfo(
                         .padding(horizontal = 12.dp),
                 text = stringResource(R.string.unit_weather, temperature.decimalFormatString()),
                 style = MoimTheme.typography.body01.semiBold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
 
             MoimText(
                 text = address,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
     }

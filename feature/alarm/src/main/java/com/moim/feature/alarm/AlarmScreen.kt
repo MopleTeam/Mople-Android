@@ -60,7 +60,11 @@ fun AlarmRoute(
 ) {
     val notifications = viewModel.alarmItems.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
     val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
+    val modifier =
+        Modifier.containerScreen(
+            backgroundColor = MoimTheme.colors.bg.primary,
+            padding = padding,
+        )
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
@@ -134,7 +138,7 @@ fun AlarmScreen(
                                 .padding(vertical = 24.dp),
                         text = stringResource(R.string.alarm_deadline_description),
                         style = MoimTheme.typography.body01.regular,
-                        color = MoimTheme.colors.gray.gray04,
+                        color = MoimTheme.colors.text.text03,
                         textAlign = TextAlign.Center,
                     )
                 }
@@ -145,7 +149,7 @@ fun AlarmScreen(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .background(MoimTheme.colors.white)
+                                    .background(MoimTheme.colors.bg.primary)
                                     .animateItem(),
                         )
                     }
@@ -157,7 +161,7 @@ fun AlarmScreen(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .background(MoimTheme.colors.white)
+                                    .background(MoimTheme.colors.bg.primary)
                                     .animateItem(),
                             onClickRetry = alarmItems::retry,
                         )
@@ -222,13 +226,13 @@ fun AlarmCount(
             modifier = Modifier.weight(1f),
             text = stringResource(R.string.alarm_new),
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         MoimText(
             text = stringResource(R.string.unit_count, alarmCount.decimalFormatString()),
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
     }
 }

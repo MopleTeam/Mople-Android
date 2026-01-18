@@ -47,7 +47,7 @@ fun ProfileUpdateRoute(
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val profileUpdateUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
+    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary, padding = padding)
     val singlePhotoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickVisualMedia(),
@@ -157,7 +157,7 @@ fun ProfileUpdateScreen(
 private fun ProfileUpdateScreenPreview() {
     MoimTheme {
         ProfileUpdateScreen(
-            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
             uiState = ProfileUpdateUiState.Success(),
             isLoading = false,
             onUiAction = {},

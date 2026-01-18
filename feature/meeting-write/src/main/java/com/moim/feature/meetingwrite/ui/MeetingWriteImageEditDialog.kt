@@ -52,14 +52,14 @@ fun MeetingWriteImageEditDialog(
             MoimText(
                 text = stringResource(R.string.common_profile_edit),
                 style = MoimTheme.typography.body01.semiBold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
             Spacer(Modifier.height(24.dp))
 
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.common_default_select),
-                buttonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.gray.gray04),
+                buttonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.gray.gray02),
                 onClick = {
                     onUiAction(dismissAction)
                     onUiAction(MeetingWriteUiAction.OnChangeMeetingPhotoUrl(null))
@@ -70,7 +70,7 @@ fun MeetingWriteImageEditDialog(
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.common_album_select),
-                buttonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
+                buttonColors = moimButtomColors(),
                 onClick = {
                     onUiAction(dismissAction)
                     onUiAction(MeetingWriteUiAction.OnNavigatePhotoPicker)

@@ -16,6 +16,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
@@ -42,7 +43,7 @@ fun HomePlanMoreCard(
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_add),
                 contentDescription = "",
-                tint = MoimTheme.colors.gray.gray03,
+                tint = MoimTheme.colors.text.text02,
             )
 
             Spacer(Modifier.height(6.dp))
@@ -50,13 +51,13 @@ fun HomePlanMoreCard(
             MoimText(
                 text = stringResource(R.string.home_meeting_more),
                 style = MoimTheme.typography.title03.bold,
-                color = MoimTheme.colors.gray.gray03,
+                color = MoimTheme.colors.text.text02,
             )
         }
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun HomeMeetingMoreCardPreview() {
     MoimTheme {

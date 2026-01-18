@@ -181,6 +181,7 @@
     <!-- Profile -->
     <string name="profile_title">마이페이지</string>
     <string name="profile_alarm">알림 관리</string>
+    <string name="profile_theme">화면 관리</string>
     <string name="profile_privacy_policy">개인정보 처리방침</string>
     <string name="profile_version">버전정보</string>
     <string name="profile_logout">로그아웃</string>
@@ -215,6 +216,11 @@
     <string name="alarm_setting_comment_notify_description">나의 댓글에 답글이 달리면 알림</string>
     <string name="alarm_setting_mention_notify">멘션 알림</string>
     <string name="alarm_setting_mention_notify_description">나를 멘션시 알림</string>
+
+    <!-- ThemeSetting -->
+    <string name="theme_setting">화면 관리</string>
+    <string name="theme_setting_title">화면 색상 설정</string>
+    <string name="theme_setting_description">원하시는 테마로 변경해보세요</string>
 
     <!-- Unit -->
     <string name="unit_participants_count">%d명 참여</string>

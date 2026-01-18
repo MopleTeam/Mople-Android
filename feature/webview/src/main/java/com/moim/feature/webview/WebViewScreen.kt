@@ -36,7 +36,7 @@ fun WebViewRoute(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
 ) {
-    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
+    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary, padding = padding)
     val webViewUiState by viewModel.uiState
         .filterIsInstance<WebViewUiState>()
         .collectAsStateWithLifecycle(WebViewUiState())
@@ -73,7 +73,7 @@ fun WebViewScreen(
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
                         trackColor = MoimTheme.colors.primary.disable,
-                        color = MoimTheme.colors.primary.primary,
+                        color = MoimTheme.colors.global.primary,
                         progress = { uiState.loadProgress },
                         drawStopIndicator = {},
                     )

@@ -22,9 +22,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.Meeting
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
@@ -44,6 +46,7 @@ fun MeetingDetailHeader(
         modifier =
             modifier
                 .fillMaxWidth()
+                .background(MoimTheme.colors.bg.primary)
                 .padding(20.dp),
     ) {
         MeetingDetailInfo(
@@ -55,15 +58,15 @@ fun MeetingDetailHeader(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .background(color = MoimTheme.colors.bg.primary, shape = RoundedCornerShape(8.dp))
+                    .background(color = MoimTheme.colors.bg.secondary, shape = RoundedCornerShape(8.dp))
                     .padding(6.dp),
         ) {
             MoimPrimaryButton(
                 modifier = Modifier.weight(1f),
                 buttonColors =
                     moimButtomColors().copy(
-                        containerColor = if (isSelectedFuturePlan) MoimTheme.colors.primary.primary else MoimTheme.colors.bg.primary,
-                        contentColor = if (isSelectedFuturePlan) MoimTheme.colors.white else MoimTheme.colors.gray.gray04,
+                        containerColor = if (isSelectedFuturePlan) MoimTheme.colors.global.primary else MoimTheme.colors.bg.secondary,
+                        contentColor = if (isSelectedFuturePlan) MoimTheme.colors.primary.text else MoimTheme.colors.text.text03,
                     ),
                 text = stringResource(R.string.meeting_detail_future_plan),
                 onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanTab(true)) },
@@ -75,8 +78,8 @@ fun MeetingDetailHeader(
                 modifier = Modifier.weight(1f),
                 buttonColors =
                     moimButtomColors().copy(
-                        containerColor = if (isSelectedFuturePlan) MoimTheme.colors.bg.primary else MoimTheme.colors.primary.primary,
-                        contentColor = if (isSelectedFuturePlan) MoimTheme.colors.gray.gray04 else MoimTheme.colors.white,
+                        containerColor = if (isSelectedFuturePlan) MoimTheme.colors.bg.secondary else MoimTheme.colors.global.primary,
+                        contentColor = if (!isSelectedFuturePlan) MoimTheme.colors.primary.text else MoimTheme.colors.text.text03,
                     ),
                 text = stringResource(R.string.meeting_detail_past_plan),
                 onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanTab(false)) },
@@ -117,7 +120,7 @@ private fun MeetingDetailInfo(
                 text = meeting.name,
                 singleLine = false,
                 style = MoimTheme.typography.title02.semiBold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
             Spacer(Modifier.height(4.dp))
 
@@ -134,14 +137,14 @@ private fun MeetingDetailInfo(
                 MoimText(
                     text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
                     style = MoimTheme.typography.body02.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
 
                 MoimText(
                     modifier = Modifier.padding(horizontal = 4.dp),
                     text = stringResource(R.string.unit_dot),
                     style = MoimTheme.typography.body02.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
 
                 Row(
@@ -154,7 +157,7 @@ private fun MeetingDetailInfo(
                     MoimText(
                         text = stringResource(R.string.common_invite),
                         style = MoimTheme.typography.body02.medium,
-                        color = MoimTheme.colors.gray.gray04,
+                        color = MoimTheme.colors.text.text03,
                     )
 
                     Icon(
@@ -166,5 +169,20 @@ private fun MeetingDetailInfo(
                 }
             }
         }
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun MeetingDetailHeaderPreview() {
+    MoimTheme {
+        MeetingDetailHeader(
+            meeting =
+                Meeting(
+                    name = "test",
+                ),
+            isSelectedFuturePlan = true,
+            onUiAction = {},
+        )
     }
 }

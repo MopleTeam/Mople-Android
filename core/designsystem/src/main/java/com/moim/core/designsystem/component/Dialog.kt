@@ -1,6 +1,7 @@
 package com.moim.core.designsystem.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,7 +44,9 @@ fun MoimDialog(
             ),
         onDismissRequest = onDismiss,
         content = {
-            MoimTheme {
+            MoimTheme(
+                darkTheme = MoimTheme.isDarkTheme,
+            ) {
                 content()
             }
         },
@@ -67,11 +70,11 @@ fun MoimAlertDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(dismissOnBackPress = cancelable, dismissOnClickOutside = cancelable),
         content = {
-            MoimTheme {
+            MoimTheme(darkTheme = MoimTheme.isDarkTheme) {
                 Column(
                     modifier =
                         Modifier
-                            .background(MoimTheme.colors.white, RoundedCornerShape(10.dp))
+                            .background(MoimTheme.colors.bg.primary, RoundedCornerShape(10.dp))
                             .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp)
                             .fillMaxWidth(),
                     verticalArrangement = Arrangement.Center,
@@ -81,7 +84,7 @@ fun MoimAlertDialog(
                         text = title,
                         singleLine = false,
                         style = MoimTheme.typography.title02.semiBold,
-                        color = MoimTheme.colors.gray.gray01,
+                        color = MoimTheme.colors.text.text01,
                     )
 
                     if (description.isNotEmpty()) {
@@ -90,7 +93,7 @@ fun MoimAlertDialog(
                             text = description,
                             singleLine = false,
                             style = MoimTheme.typography.body01.regular,
-                            color = MoimTheme.colors.gray.gray02,
+                            color = MoimTheme.colors.text.text02,
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -109,7 +112,7 @@ fun MoimAlertDialog(
                                 buttonColors =
                                     moimButtomColors().copy(
                                         containerColor = MoimTheme.colors.tertiary,
-                                        contentColor = MoimTheme.colors.gray.gray01,
+                                        contentColor = MoimTheme.colors.text.text01,
                                     ),
                             )
                             Spacer(modifier = Modifier.width(8.dp))

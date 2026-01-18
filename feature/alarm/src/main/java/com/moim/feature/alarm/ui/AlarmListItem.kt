@@ -17,11 +17,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.NotificationType
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
@@ -79,7 +79,7 @@ fun AlarmListItem(
                             append(alarm.title)
                         }
                     },
-                color = MoimTheme.colors.gray.gray02,
+                color = MoimTheme.colors.text.text01,
                 maxLine = 2,
             )
             Spacer(Modifier.size(4.dp))
@@ -89,26 +89,26 @@ fun AlarmListItem(
                 MoimText(
                     text = alarm.meetName,
                     style = MoimTheme.typography.body02.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
                 MoimText(
                     modifier = Modifier.padding(horizontal = 4.dp),
                     text = stringResource(R.string.unit_dot),
                     style = MoimTheme.typography.body02.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
 
                 MoimText(
                     text = alarm.sendAt.parseDateString(stringResource(R.string.regex_date_year_month_day_short)),
                     style = MoimTheme.typography.body02.medium,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.text.text03,
                 )
             }
         }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xffffff)
+@ThemePreviews
 @Composable
 private fun AlarmListItemPreview() {
     MoimTheme {
