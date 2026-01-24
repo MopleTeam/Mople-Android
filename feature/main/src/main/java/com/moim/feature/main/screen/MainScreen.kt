@@ -31,6 +31,7 @@ import com.moim.feature.main.navigation.meetingDetailScreenEntry
 import com.moim.feature.main.navigation.meetingScreenEntry
 import com.moim.feature.main.navigation.meetingSettingScreenEntry
 import com.moim.feature.main.navigation.meetingWriteScreenEntry
+import com.moim.feature.main.navigation.participantListForLeaderChangeScreenEntry
 import com.moim.feature.main.navigation.participantListScreenEntry
 import com.moim.feature.main.navigation.planDetailScreenEntry
 import com.moim.feature.main.navigation.planWriteScreenEntry
@@ -86,6 +87,7 @@ fun MainScreen(
                     planWriteScreenEntry(navigator, innerPadding)
                     reviewWriteScreenEntry(navigator, innerPadding)
                     participantListScreenEntry(navigator, innerPadding)
+                    participantListForLeaderChangeScreenEntry(navigator, innerPadding)
                     imageViewerScreenEntry(navigator, innerPadding)
                     profileUpdateScreenEntry(navigator, innerPadding)
                     alarmScreenEntry(navigator, innerPadding)

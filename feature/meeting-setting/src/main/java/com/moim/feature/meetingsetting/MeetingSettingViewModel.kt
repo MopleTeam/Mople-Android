@@ -89,6 +89,10 @@ class MeetingSettingViewModel @AssistedInject constructor(
                 )
             }
 
+            is MeetingSettingUiAction.OnClickMeetingLeaderChange -> {
+                setUiEvent(MeetingSettingUiEvent.NavigateToParticipantsForLeaderChange(uiAction.viewIdType))
+            }
+
             is MeetingSettingUiAction.OnShowMeetingExitDialog -> {
                 showMeetingExitDialog(uiAction.isShow)
             }
@@ -170,6 +174,10 @@ sealed interface MeetingSettingUiAction : UiAction {
         val viewIdType: ViewIdType,
     ) : MeetingSettingUiAction
 
+    data class OnClickMeetingLeaderChange(
+        val viewIdType: ViewIdType.MeetId,
+    ) : MeetingSettingUiAction
+
     data class OnClickMeetingEdit(
         val meeting: Meeting,
     ) : MeetingSettingUiAction
@@ -194,6 +202,10 @@ sealed interface MeetingSettingUiEvent : UiEvent {
 
     data class NavigateToMeetingParticipants(
         val viewIdType: ViewIdType,
+    ) : MeetingSettingUiEvent
+
+    data class NavigateToParticipantsForLeaderChange(
+        val viewIdType: ViewIdType.MeetId,
     ) : MeetingSettingUiEvent
 
     data class ShowToastMessage(

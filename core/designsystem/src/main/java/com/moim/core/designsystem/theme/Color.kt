@@ -6,6 +6,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 // Secondary
@@ -57,7 +58,7 @@ val color_FEE500 = Color(0xFFFEE500)
 data class Global(
     val primary: Color,
     val black: Color,
-    val white : Color,
+    val white: Color,
     val red: Color,
 )
 
@@ -240,47 +241,50 @@ val LocalMoimColors = staticCompositionLocalOf { lightMoimColor() }
 val LocalIsDarkTheme = staticCompositionLocalOf { false }
 
 @Composable
-fun moimTextFieldColors() =
-    TextFieldDefaults.colors(
-        // container
-        focusedContainerColor = MoimTheme.colors.bg.input,
-        unfocusedContainerColor = MoimTheme.colors.bg.input,
-        disabledContainerColor = MoimTheme.colors.input.disable,
-        errorContainerColor = MoimTheme.colors.bg.input,
-        // indicator
-        focusedIndicatorColor = MoimTheme.colors.bg.input,
-        unfocusedIndicatorColor = MoimTheme.colors.bg.input,
-        disabledIndicatorColor = MoimTheme.colors.bg.input,
-        errorIndicatorColor = MoimTheme.colors.bg.input,
-        // text
-        focusedTextColor = MoimTheme.colors.text.text01,
-        unfocusedTextColor = MoimTheme.colors.text.text01,
-        disabledTextColor = MoimTheme.colors.text.text01,
-        errorTextColor = MoimTheme.colors.text.text01,
-        // supportText
-        focusedSupportingTextColor = MoimTheme.colors.text.text01,
-        unfocusedSupportingTextColor = MoimTheme.colors.text.text01,
-        disabledSupportingTextColor = MoimTheme.colors.text.text01,
-        errorSupportingTextColor = MoimTheme.colors.global.red,
-        // leftIcon
-        focusedLeadingIconColor = MoimTheme.colors.icon,
-        unfocusedLeadingIconColor = MoimTheme.colors.icon,
-        disabledLeadingIconColor = MoimTheme.colors.gray.gray06,
-        errorLeadingIconColor = MoimTheme.colors.icon,
-        // rightIcon
-        focusedTrailingIconColor = MoimTheme.colors.icon,
-        unfocusedTrailingIconColor = MoimTheme.colors.icon,
-        disabledTrailingIconColor = MoimTheme.colors.gray.gray06,
-        errorTrailingIconColor = MoimTheme.colors.icon,
-        // placeHolder
-        focusedPlaceholderColor = MoimTheme.colors.gray.gray05,
-        unfocusedPlaceholderColor = MoimTheme.colors.gray.gray05,
-        disabledPlaceholderColor = MoimTheme.colors.gray.gray05,
-        errorPlaceholderColor = MoimTheme.colors.gray.gray05,
-        // cursor
-        cursorColor = MoimTheme.colors.global.primary,
-        errorCursorColor = MoimTheme.colors.global.primary,
-    )
+fun moimTextFieldColors(
+    textColor: Color = MoimTheme.colors.text.text01,
+    indicatorColor: Color = MoimTheme.colors.bg.input,
+    placeHolderColor: Color = MoimTheme.colors.gray.gray05,
+) = TextFieldDefaults.colors(
+    // container
+    focusedContainerColor = MoimTheme.colors.bg.input,
+    unfocusedContainerColor = MoimTheme.colors.bg.input,
+    disabledContainerColor = MoimTheme.colors.input.disable,
+    errorContainerColor = MoimTheme.colors.bg.input,
+    // indicator
+    focusedIndicatorColor = indicatorColor,
+    unfocusedIndicatorColor = indicatorColor,
+    disabledIndicatorColor = indicatorColor,
+    errorIndicatorColor = indicatorColor,
+    // text
+    focusedTextColor = textColor,
+    unfocusedTextColor = textColor,
+    disabledTextColor = textColor,
+    errorTextColor = textColor,
+    // supportText
+    focusedSupportingTextColor = MoimTheme.colors.text.text01,
+    unfocusedSupportingTextColor = MoimTheme.colors.text.text01,
+    disabledSupportingTextColor = MoimTheme.colors.text.text01,
+    errorSupportingTextColor = MoimTheme.colors.global.red,
+    // leftIcon
+    focusedLeadingIconColor = MoimTheme.colors.icon,
+    unfocusedLeadingIconColor = MoimTheme.colors.icon,
+    disabledLeadingIconColor = MoimTheme.colors.gray.gray06,
+    errorLeadingIconColor = MoimTheme.colors.icon,
+    // rightIcon
+    focusedTrailingIconColor = MoimTheme.colors.icon,
+    unfocusedTrailingIconColor = MoimTheme.colors.icon,
+    disabledTrailingIconColor = MoimTheme.colors.gray.gray06,
+    errorTrailingIconColor = MoimTheme.colors.icon,
+    // placeHolder
+    focusedPlaceholderColor = placeHolderColor,
+    unfocusedPlaceholderColor = placeHolderColor,
+    disabledPlaceholderColor = placeHolderColor,
+    errorPlaceholderColor = placeHolderColor,
+    // cursor
+    cursorColor = MoimTheme.colors.global.primary,
+    errorCursorColor = MoimTheme.colors.global.primary,
+)
 
 @Composable
 fun moimButtomColors() =

@@ -19,3 +19,5 @@ fun Job?.cancelIfActive() {
         cancel()
     }
 }
+
+fun Job?.isActiveCheck(): Boolean = this?.isActive == true

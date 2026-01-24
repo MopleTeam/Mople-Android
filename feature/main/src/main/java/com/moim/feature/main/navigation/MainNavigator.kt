@@ -100,6 +100,9 @@ class MainNavigator(
 
     fun navigateToParticipantList(viewIdType: ViewIdType) = navigate(DetailRoute.ParticipantList(viewIdType))
 
+    fun navigateToParticipantListForLeaderChange(viewIdType: ViewIdType.MeetId) =
+        navigate(DetailRoute.ParticipantListForLeaderChange(viewIdType))
+
     fun navigateToImageViewer(
         title: String,
         images: List<String>,

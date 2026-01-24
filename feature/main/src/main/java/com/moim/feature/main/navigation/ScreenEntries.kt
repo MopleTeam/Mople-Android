@@ -25,6 +25,8 @@ import com.moim.feature.meetingwrite.MeetingWriteRoute
 import com.moim.feature.meetingwrite.MeetingWriteViewModel
 import com.moim.feature.participantlist.ParticipantListRoute
 import com.moim.feature.participantlist.ParticipantListViewModel
+import com.moim.feature.participantlistforleaderchange.ParticipantListForLeaderChangeRoute
+import com.moim.feature.participantlistforleaderchange.ParticipantListForLeaderChangeViewModel
 import com.moim.feature.plandetail.PlanDetailRoute
 import com.moim.feature.plandetail.PlanDetailViewModel
 import com.moim.feature.planwrite.PlanWriteRoute
@@ -148,6 +150,7 @@ fun EntryProviderScope<NavKey>.meetingSettingScreenEntry(
                 if (shouldPopTwice) navigator.goBack()
             },
             navigateToParticipants = navigator::navigateToParticipantList,
+            navigateToParticipantsForLeaderChange = navigator::navigateToParticipantListForLeaderChange,
             navigateToMeetingWrite = navigator::navigateToMeetingWrite,
             viewModel =
                 hiltViewModel<MeetingSettingViewModel, MeetingSettingViewModel.Factory>(
@@ -269,6 +272,28 @@ fun EntryProviderScope<NavKey>.participantListScreenEntry(
             viewModel =
                 hiltViewModel<ParticipantListViewModel, ParticipantListViewModel.Factory>(
                     key = key.viewIdType.id,
+                ) { factory ->
+                    factory.create(key)
+                },
+        )
+    }
+}
+
+fun EntryProviderScope<NavKey>.participantListForLeaderChangeScreenEntry(
+    navigator: MainNavigator,
+    paddingValues: PaddingValues,
+) {
+    entry<DetailRoute.ParticipantListForLeaderChange> { key ->
+        ParticipantListForLeaderChangeRoute(
+            padding = paddingValues,
+            navigateToBack = { shouldPopTwice ->
+                navigator.goBack()
+                if (shouldPopTwice) navigator.goBack()
+            },
+            navigateToImageViewer = navigator::navigateToImageViewer,
+            viewModel =
+                hiltViewModel<ParticipantListForLeaderChangeViewModel, ParticipantListForLeaderChangeViewModel.Factory>(
+                    key = key.meetId.id,
                 ) { factory ->
                     factory.create(key)
                 },

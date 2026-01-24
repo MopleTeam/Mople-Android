@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 
@@ -48,6 +49,77 @@ fun MoimDialog(
                 darkTheme = MoimTheme.isDarkTheme,
             ) {
                 content()
+            }
+        },
+    )
+}
+
+@Composable
+fun MoimAlertDialog(
+    title: String = "",
+    isNegative: Boolean = true,
+    cancelable: Boolean = true,
+    negativeText: String = stringResource(id = R.string.common_negative),
+    positiveText: String = stringResource(id = R.string.common_positive),
+    positiveButtonColors: ButtonColors = moimButtomColors(),
+    onClickNegative: () -> Unit = {},
+    onClickPositive: () -> Unit = {},
+    onDismiss: () -> Unit = {},
+    content: @Composable () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnBackPress = cancelable, dismissOnClickOutside = cancelable),
+        content = {
+            MoimTheme(darkTheme = MoimTheme.isDarkTheme) {
+                Column(
+                    modifier =
+                        Modifier
+                            .background(MoimTheme.colors.bg.primary, RoundedCornerShape(10.dp))
+                            .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp)
+                            .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    MoimText(
+                        text = title,
+                        singleLine = false,
+                        style = MoimTheme.typography.title02.semiBold,
+                        color = MoimTheme.colors.text.text01,
+                        textAlign = TextAlign.Center,
+                    )
+
+                    content()
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (isNegative) {
+                            MoimPrimaryButton(
+                                modifier = Modifier.weight(1f),
+                                onClick = onClickNegative,
+                                verticalPadding = 16.dp,
+                                text = negativeText,
+                                style = MoimTheme.typography.title03.semiBold,
+                                buttonColors =
+                                    moimButtomColors().copy(
+                                        containerColor = MoimTheme.colors.tertiary,
+                                        contentColor = MoimTheme.colors.text.text01,
+                                    ),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+
+                        MoimPrimaryButton(
+                            modifier = Modifier.weight(1f),
+                            onClick = onClickPositive,
+                            verticalPadding = 16.dp,
+                            text = positiveText,
+                            buttonColors = positiveButtonColors,
+                            style = MoimTheme.typography.title03.semiBold,
+                        )
+                    }
+                }
             }
         },
     )
@@ -133,15 +205,17 @@ fun MoimAlertDialog(
     )
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun MoimAlertDialogPreview() {
-    Column(
-        modifier = Modifier.containerScreen(),
-    ) {
-        MoimAlertDialog(
-            title = "정말 탈퇴하시겠어요?",
-            description = "회원 탈퇴하면 모임과 일정을 복구할 수 없어요",
-        )
+    MoimTheme {
+        Column(
+            modifier = Modifier.containerScreen(),
+        ) {
+            MoimAlertDialog(
+                title = "정말 탈퇴하시겠어요?",
+                description = "회원 탈퇴하면 모임과 일정을 복구할 수 없어요",
+            )
+        }
     }
 }

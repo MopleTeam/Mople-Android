@@ -93,6 +93,11 @@ sealed interface DetailRoute : Route {
     ) : DetailRoute
 
     @Serializable
+    data class ParticipantListForLeaderChange(
+        val meetId: ViewIdType.MeetId,
+    ) : DetailRoute
+
+    @Serializable
     data class ImageViewer(
         val title: String,
         val images: List<String>,

@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.SwitchColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.internal.MoimSwitchImpl
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimSwitchColors
@@ -24,7 +24,7 @@ fun MoimSwitch(
     )
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun MoimSwitchPreview() {
     MoimTheme {

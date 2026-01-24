@@ -15,7 +15,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import com.moim.core.analytics.AnalyticsHelper
 import com.moim.core.analytics.LocalAnalyticsHelper
 import com.moim.core.common.consts.INTRO_ACTIVITY_NAME
@@ -24,7 +23,6 @@ import com.moim.core.common.model.Theme
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.main.screen.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -41,7 +39,7 @@ class MainActivity : ComponentActivity() {
             CompositionLocalProvider(
                 LocalAnalyticsHelper provides analyticsHelper,
             ) {
-                val theme by viewModel.them.collectAsStateWithLifecycle(Theme.SYSTEM)
+                val theme by viewModel.theme.collectAsStateWithLifecycle(Theme.SYSTEM)
                 val isDarkTheme = shouldUseDarkTheme(theme)
 
                 LaunchedEffect(isDarkTheme) {

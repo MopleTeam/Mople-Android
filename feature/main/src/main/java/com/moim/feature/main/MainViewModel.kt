@@ -21,7 +21,7 @@ class MainViewModel @Inject constructor(
     private val meetingEventBus: EventBus<MeetingAction>,
     private val planEventBus: EventBus<PlanAction>,
 ) : BaseViewModel() {
-    val them = userRepository.getTheme()
+    val theme = userRepository.getTheme()
 
     fun setPlanId(planId: String) {
         planEventBus.send(PlanAction.PlanInvalidate())

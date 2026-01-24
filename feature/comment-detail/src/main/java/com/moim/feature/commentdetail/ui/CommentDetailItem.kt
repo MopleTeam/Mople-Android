@@ -263,14 +263,14 @@ private fun CommentOpenGraph(
                 MoimText(
                     text = openGraph.title ?: "",
                     style = MoimTheme.typography.body02.semiBold,
-                    color = MoimTheme.colors.global.black,
+                    color = MoimTheme.colors.text.text01,
                 )
                 Spacer(Modifier.height(4.dp))
             }
             MoimText(
                 text = openGraph.description ?: "",
                 style = MoimTheme.typography.body02.regular,
-                color = MoimTheme.colors.global.black,
+                color = MoimTheme.colors.text.text01,
             )
         }
     }

@@ -21,6 +21,13 @@ interface MeetingRepository {
         size: Int,
     ): PaginationContainer<List<User>>
 
+    suspend fun getMeetingParticipantsForSearch(
+        meetingId: String,
+        keyword: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<User>>
+
     fun createMeeting(
         meetingName: String,
         meetingImageUrl: String?,
@@ -31,6 +38,11 @@ interface MeetingRepository {
         meetingName: String,
         meetingImageUrl: String?,
     ): Flow<Meeting>
+
+    fun updateMeetingLeader(
+        meetingId: String,
+        newHostId: String,
+    ): Flow<Unit>
 
     fun joinMeeting(code: String): Flow<Meeting>
 

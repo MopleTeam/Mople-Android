@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,6 +24,7 @@ import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.MoimText
@@ -34,6 +34,7 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.meetingsetting.ui.MeetingSettingLeaderChange
 import com.moim.feature.meetingsetting.ui.MeetingSettingParticipantsInfo
 import com.moim.feature.meetingsetting.ui.MeetingSettingProfile
 import com.moim.feature.meetingsetting.ui.MeetingSettingTopAppbar
@@ -46,6 +47,7 @@ fun MeetingSettingRoute(
     padding: PaddingValues,
     navigateToBack: (Boolean) -> Unit,
     navigateToParticipants: (ViewIdType) -> Unit,
+    navigateToParticipantsForLeaderChange: (ViewIdType.MeetId) -> Unit,
     navigateToMeetingWrite: (Meeting) -> Unit,
 ) {
     val context = LocalContext.current
@@ -70,6 +72,10 @@ fun MeetingSettingRoute(
                 navigateToParticipants(event.viewIdType)
             }
 
+            is MeetingSettingUiEvent.NavigateToParticipantsForLeaderChange -> {
+                navigateToParticipantsForLeaderChange(event.viewIdType)
+            }
+
             is MeetingSettingUiEvent.ShowToastMessage -> {
                 showToast(context, event.message)
             }
@@ -89,7 +95,7 @@ fun MeetingSettingRoute(
 }
 
 @Composable
-fun MeetingSettingScreen(
+private fun MeetingSettingScreen(
     modifier: Modifier = Modifier,
     uiState: MeetingSettingUiState.MeetingSetting,
     isLoading: Boolean,
@@ -122,6 +128,14 @@ fun MeetingSettingScreen(
                 meeting = uiState.meeting,
                 onUiAction = onUiAction,
             )
+
+            if (uiState.isHostUser) {
+                MeetingSettingLeaderChange(
+                    meetingId = uiState.meeting.id,
+                    onUiAction = onUiAction,
+                )
+            }
+
             MeetingSettingExit(
                 isHostUser = uiState.isHostUser,
                 onUiAction = onUiAction,
@@ -131,16 +145,16 @@ fun MeetingSettingScreen(
 
     if (uiState.isShowMeetingExitDialog) {
         MeetingExitDialog(
-            isDelete = false,
             dismissAction = MeetingSettingUiAction.OnShowMeetingExitDialog(false),
             onUiAction = onUiAction,
         )
     }
 
     if (uiState.isShowMeetingDeleteDialog) {
-        MeetingExitDialog(
-            isDelete = true,
+        val meetingIdType = ViewIdType.MeetId(uiState.meeting.id)
+        MeetingDeleteDialog(
             dismissAction = MeetingSettingUiAction.OnShowMeetingDeleteDialog(false),
+            meetingIdType = meetingIdType,
             onUiAction = onUiAction,
         )
     }
@@ -149,15 +163,14 @@ fun MeetingSettingScreen(
 }
 
 @Composable
-fun MeetingExitDialog(
-    isDelete: Boolean,
+private fun MeetingExitDialog(
     dismissAction: MeetingSettingUiAction,
     onUiAction: OnMeetingSettingUiAction,
 ) {
     MoimAlertDialog(
         title = stringResource(R.string.meeting_setting_exit),
         description = stringResource(R.string.meeting_setting_exit_description),
-        positiveText = stringResource(if (isDelete) R.string.meeting_setting_delete_btn else R.string.meeting_setting_exit_btn),
+        positiveText = stringResource(R.string.meeting_setting_exit_btn),
         positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
         onClickPositive = {
             onUiAction(dismissAction)
@@ -169,7 +182,31 @@ fun MeetingExitDialog(
 }
 
 @Composable
-fun MeetingSettingExit(
+private fun MeetingDeleteDialog(
+    meetingIdType: ViewIdType.MeetId,
+    dismissAction: MeetingSettingUiAction,
+    onUiAction: OnMeetingSettingUiAction,
+) {
+    MoimAlertDialog(
+        title = stringResource(R.string.meeting_setting_delete_title),
+        description = stringResource(R.string.meeting_setting_delete_description),
+        negativeText = stringResource(R.string.meeting_setting_exit_btn),
+        positiveText = stringResource(R.string.meeting_setting_participants_leader_change),
+        positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
+        onClickPositive = {
+            onUiAction(dismissAction)
+            onUiAction(MeetingSettingUiAction.OnClickMeetingLeaderChange(meetingIdType))
+        },
+        onClickNegative = {
+            onUiAction(dismissAction)
+            onUiAction(MeetingSettingUiAction.OnClickMeetingExit)
+        },
+        onDismiss = { onUiAction(dismissAction) },
+    )
+}
+
+@Composable
+private fun MeetingSettingExit(
     isHostUser: Boolean,
     onUiAction: OnMeetingSettingUiAction,
 ) {
@@ -195,7 +232,7 @@ fun MeetingSettingExit(
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun MeetingSettingScreenPreview() {
     MoimTheme {
@@ -209,6 +246,7 @@ private fun MeetingSettingScreenPreview() {
                             sinceDays = 12,
                         ),
                     isHostUser = true,
+                    isShowMeetingDeleteDialog = false,
                 ),
             isLoading = false,
             onUiAction = {},
