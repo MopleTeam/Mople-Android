@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,6 +27,8 @@ import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.common.PagingErrorScreen
+import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimFloatingActionButton
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.MoimText
@@ -91,6 +94,7 @@ private fun MeetingScreen(
 
             Box(
                 modifier = contentModifier,
+                contentAlignment = Alignment.Center,
             ) {
                 FadeAnimatedVisibility(paging.isLoading) {
                     LoadingScreen()
@@ -111,8 +115,12 @@ private fun MeetingScreen(
                     )
 
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 20.dp),
                         state = listState,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(top = 28.dp, bottom = 90.dp),
                     ) {
                         items(
@@ -124,6 +132,31 @@ private fun MeetingScreen(
                                 uiModel = uiModel,
                                 onUiAction = onUiAction,
                             )
+                        }
+
+                        item {
+                            if (paging.isLoadingFooter) {
+                                PagingLoadingScreen(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .animateItem(),
+                                )
+                            }
+                        }
+
+                        item {
+                            if (paging.isErrorFooter) {
+                                PagingErrorScreen(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .animateItem(),
+                                    backgroundColor = MoimTheme.colors.bg.secondary,
+                                ) {
+                                    onUiAction(MeetingUiAction.OnClickRefresh)
+                                }
+                            }
                         }
                     }
                 }

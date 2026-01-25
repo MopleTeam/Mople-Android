@@ -169,7 +169,8 @@ class MeetingViewModel @Inject constructor(
             }
 
             is MeetingUiAction.OnClickRefresh -> {
-                getMeetings()
+                val uiState = uiState.value as? MeetingUiState ?: return
+                getMeetings(uiState.pagingInfo.nextCursor)
             }
 
             is MeetingUiAction.OnNextPageLoad -> {
@@ -316,7 +317,7 @@ class MeetingViewModel @Inject constructor(
                                     isLoadingFooter = false,
                                     isErrorFooter = false,
                                     nextCursor = pagingData.page.nextCursor,
-                                    isLoading = !pagingData.page.isNext || addData.isEmpty(),
+                                    isLast = !pagingData.page.isNext || addData.isEmpty(),
                                 ),
                             meetings = meetings.toMutableList().apply { addAll(addData) },
                         )
