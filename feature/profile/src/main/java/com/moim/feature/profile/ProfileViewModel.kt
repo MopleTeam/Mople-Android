@@ -5,6 +5,7 @@ import com.moim.core.common.model.User
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.auth.AuthRepository
+import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
@@ -24,6 +25,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val authRepository: AuthRepository,
+    private val meetingRepository: MeetingRepository,
 ) : BaseViewModel() {
     private val userResult =
         userRepository
@@ -51,9 +53,35 @@ class ProfileViewModel @Inject constructor(
             is ProfileUiAction.OnClickPrivacyPolicy -> setUiEvent(ProfileUiEvent.NavigateToPrivacyPolicy)
             is ProfileUiAction.OnClickLogout -> logout()
             is ProfileUiAction.OnClickUserDelete -> deleteUser()
+            is ProfileUiAction.OnClickUserWithdrawal -> validMyMeeting()
             is ProfileUiAction.OnClickRefresh -> userResult.restart()
             is ProfileUiAction.OnShowUserLogoutDialog -> showUserLogoutDialog(uiAction.isShow)
             is ProfileUiAction.OnShowUserDeleteDialog -> showUserDeleteDialog(uiAction.isShow)
+        }
+    }
+
+    private fun validMyMeeting() {
+        viewModelScope.launch {
+            runCatching {
+                setLoading(true)
+                // TODO:: API 변경
+                meetingRepository
+                    .getMeetings("", 1)
+                    .content
+            }.onFailure { error ->
+                when (error) {
+                    is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                    else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                }
+            }.onSuccess { myMeetings ->
+                if (myMeetings.isNotEmpty()) {
+                    setUiEvent(ProfileUiEvent.NavigateToUserWithdrawalForLeaderChange)
+                } else {
+                    showUserDeleteDialog(true)
+                }
+            }.also {
+                setLoading(false)
+            }
         }
     }
 
@@ -156,6 +184,8 @@ sealed interface ProfileUiAction : UiAction {
 
     data object OnClickLogout : ProfileUiAction
 
+    data object OnClickUserWithdrawal : ProfileUiAction
+
     data object OnClickUserDelete : ProfileUiAction
 
     data object OnClickRefresh : ProfileUiAction
@@ -177,6 +207,8 @@ sealed interface ProfileUiEvent : UiEvent {
     data object NavigateToThemeSetting : ProfileUiEvent
 
     data object NavigateToPrivacyPolicy : ProfileUiEvent
+
+    data object NavigateToUserWithdrawalForLeaderChange : ProfileUiEvent
 
     data object NavigateToIntro : ProfileUiEvent
 

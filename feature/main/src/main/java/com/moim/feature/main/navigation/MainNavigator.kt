@@ -103,6 +103,8 @@ class MainNavigator(
     fun navigateToParticipantListForLeaderChange(viewIdType: ViewIdType.MeetId) =
         navigate(DetailRoute.ParticipantListForLeaderChange(viewIdType))
 
+    fun navigateToUserWithdrawalForLeaderChange() = navigate(DetailRoute.UserWithdrawalForLeaderChange)
+
     fun navigateToImageViewer(
         title: String,
         images: List<String>,

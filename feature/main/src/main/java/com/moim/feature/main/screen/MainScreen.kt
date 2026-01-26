@@ -41,6 +41,7 @@ import com.moim.feature.main.navigation.rememberMainNavController
 import com.moim.feature.main.navigation.reviewWriteScreenEntry
 import com.moim.feature.main.navigation.themeSettingScreenEntry
 import com.moim.feature.main.navigation.toEntries
+import com.moim.feature.main.navigation.userWithdrawalForLeaderChangeScreenEntry
 import com.moim.feature.main.navigation.webViewScreenEntry
 import com.moim.feature.main.screen.ui.MainBottomBar
 
@@ -88,6 +89,7 @@ fun MainScreen(
                     reviewWriteScreenEntry(navigator, innerPadding)
                     participantListScreenEntry(navigator, innerPadding)
                     participantListForLeaderChangeScreenEntry(navigator, innerPadding)
+                    userWithdrawalForLeaderChangeScreenEntry(navigator, innerPadding, navigateToIntro)
                     imageViewerScreenEntry(navigator, innerPadding)
                     profileUpdateScreenEntry(navigator, innerPadding)
                     alarmScreenEntry(navigator, innerPadding)

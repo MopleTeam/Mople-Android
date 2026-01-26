@@ -111,7 +111,7 @@ private fun MeetingScreen(
                         listState = listState,
                         threshold = 3,
                         enabled = !paging.isLast && !paging.isErrorFooter,
-                        onNext = { onUiAction(MeetingUiAction.OnNextPageLoad) },
+                        onNext = { onUiAction(MeetingUiAction.OnLoadNextPage) },
                     )
 
                     LazyColumn(

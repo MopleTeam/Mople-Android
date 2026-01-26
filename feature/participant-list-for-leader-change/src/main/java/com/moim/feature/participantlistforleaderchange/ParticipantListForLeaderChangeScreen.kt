@@ -124,7 +124,7 @@ private fun ParticipantListForLeaderChangeScreen(
                 .imePadding(),
     ) {
         MoimTopAppbar(
-            title = stringResource(R.string.participant_list_for_leader_title),
+            title = stringResource(R.string.participant_list_for_leader_change_title),
             onClickNavigate = {
                 onUiAction(ParticipantListForLeaderChangeUiAction.OnClickBack)
             },
@@ -137,7 +137,7 @@ private fun ParticipantListForLeaderChangeScreen(
                     .clip(RoundedCornerShape(16.dp)),
             textFieldState = keywordState,
             textFieldColors = moimTextFieldColors(textColor = MoimTheme.colors.text.text04),
-            hintText = stringResource(R.string.participant_list_for_leader_search_hint),
+            hintText = stringResource(R.string.participant_list_for_leader_change_search_hint),
             leadingIcon = {
                 Icon(
                     modifier = Modifier.size(20.dp),
@@ -157,7 +157,7 @@ private fun ParticipantListForLeaderChangeScreen(
 
             FadeAnimatedVisibility(paging.isError) {
                 ErrorScreen {
-                    onUiAction(ParticipantListForLeaderChangeUiAction.OnRefreshClick)
+                    onUiAction(ParticipantListForLeaderChangeUiAction.OnClickRefresh)
                 }
             }
 
@@ -166,7 +166,7 @@ private fun ParticipantListForLeaderChangeScreen(
                     listState = listState,
                     threshold = 3,
                     enabled = !paging.isLast && !paging.isErrorFooter,
-                    onNext = { onUiAction(ParticipantListForLeaderChangeUiAction.OnNextPageLoad) },
+                    onNext = { onUiAction(ParticipantListForLeaderChangeUiAction.OnLoadNextPage) },
                 )
 
                 LazyColumn(
@@ -207,7 +207,7 @@ private fun ParticipantListForLeaderChangeScreen(
                                         .fillMaxWidth()
                                         .animateItem(),
                             ) {
-                                onUiAction(ParticipantListForLeaderChangeUiAction.OnRefreshClick)
+                                onUiAction(ParticipantListForLeaderChangeUiAction.OnClickRefresh)
                             }
                         }
                     }

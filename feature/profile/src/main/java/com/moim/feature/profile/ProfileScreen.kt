@@ -46,6 +46,7 @@ fun ProfileRoute(
     navigateToAlarmSetting: () -> Unit,
     navigateToThemeSetting: () -> Unit,
     navigateToPrivacyPolicy: (String) -> Unit,
+    navigateToUserWithdrawalForLeaderChange: () -> Unit,
     navigateToIntro: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -59,6 +60,7 @@ fun ProfileRoute(
             is ProfileUiEvent.NavigateToAlarmSetting -> navigateToAlarmSetting()
             is ProfileUiEvent.NavigateToPrivacyPolicy -> navigateToPrivacyPolicy(NOTION_URL)
             is ProfileUiEvent.NavigateToThemeSetting -> navigateToThemeSetting()
+            is ProfileUiEvent.NavigateToUserWithdrawalForLeaderChange -> navigateToUserWithdrawalForLeaderChange()
             is ProfileUiEvent.NavigateToIntro -> navigateToIntro()
             is ProfileUiEvent.ShowToastMessage -> showToast(context, event.message)
         }

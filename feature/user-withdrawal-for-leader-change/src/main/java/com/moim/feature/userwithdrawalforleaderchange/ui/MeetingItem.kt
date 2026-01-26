@@ -1,4 +1,4 @@
-package com.moim.feature.meeting.ui
+package com.moim.feature.userwithdrawalforleaderchange.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -23,44 +23,24 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.model.Meeting
-import com.moim.core.common.util.getDateTimeBetweenDay
 import com.moim.core.designsystem.R
-import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meeting.MeetingUiAction
-import com.moim.feature.meeting.model.MeetingUiModel
-import kotlin.math.absoluteValue
+import com.moim.feature.userwithdrawalforleaderchange.UserWithdrawalForLeaderChangeUiAction
 
 @Composable
-fun MeetingCard(
+fun MeetingItem(
     modifier: Modifier = Modifier,
-    uiModel: MeetingUiModel,
-    onUiAction: (MeetingUiAction) -> Unit = {},
+    meeting: Meeting,
+    onUiAction: (UserWithdrawalForLeaderChangeUiAction) -> Unit = {},
 ) {
-    val (count, comment) =
-        uiModel
-            .meeting
-            .lastPlanAt
-            ?.let { lastDate ->
-                val day = getDateTimeBetweenDay(endDate = lastDate)
-                when {
-                    day == 0 -> stringResource(R.string.meeting_plan_today_count) to stringResource(R.string.meeting_plan_comment)
-                    day > 0 -> stringResource(R.string.meeting_plan_after_count, day) to stringResource(R.string.meeting_plan_comment)
-                    else -> null to stringResource(R.string.meeting_plan_before, day.absoluteValue)
-                }
-            } ?: run { null to stringResource(R.string.meeting_plan_new) }
-
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingUiAction.OnClickMeeting(meetingId = uiModel.meeting.id)) },
+        onClick = { onUiAction(UserWithdrawalForLeaderChangeUiAction.OnClickMeeting(meeting.id)) },
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -76,7 +56,7 @@ fun MeetingCard(
                             .clip(RoundedCornerShape(12.dp))
                             .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(12.dp))
                             .size(56.dp),
-                    imageUrl = uiModel.meeting.imageUrl,
+                    imageUrl = meeting.imageUrl,
                     errorImage = painterResource(R.drawable.ic_empty_meeting),
                 )
 
@@ -88,19 +68,17 @@ fun MeetingCard(
                     ) {
                         MoimText(
                             modifier = Modifier.weight(1f, false),
-                            text = uiModel.meeting.name,
+                            text = meeting.name,
                             style = MoimTheme.typography.title03.semiBold,
                             color = MoimTheme.colors.text.text01,
                         )
 
-                        if (uiModel.isLeader) {
-                            Spacer(Modifier.width(4.dp))
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_crown),
-                                contentDescription = "",
-                                tint = Color.Unspecified,
-                            )
-                        }
+                        Spacer(Modifier.width(4.dp))
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_crown),
+                            contentDescription = "",
+                            tint = Color.Unspecified,
+                        )
                     }
 
                     Spacer(Modifier.height(4.dp))
@@ -117,66 +95,32 @@ fun MeetingCard(
                         )
 
                         MoimText(
-                            text = stringResource(R.string.unit_participants_count_short, uiModel.meeting.memberCount),
+                            text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
                             style = MoimTheme.typography.body02.medium,
                             color = MoimTheme.colors.text.text03,
                         )
                     }
                 }
-
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_next),
-                    contentDescription = "",
-                    tint = MoimTheme.colors.icon,
-                )
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
             Row(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .background(color = MoimTheme.colors.bg.input, shape = RoundedCornerShape(8.dp)),
-                verticalAlignment = Alignment.CenterVertically,
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MoimTheme.colors.tertiary),
                 horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 MoimText(
-                    modifier = Modifier.padding(12.dp),
-                    text =
-                        buildAnnotatedString {
-                            if (count != null) {
-                                withStyle(style = SpanStyle(color = MoimTheme.colors.global.primary)) { append(count.plus(" ")) }
-                            }
-                            append(comment)
-                        },
-                    style = MoimTheme.typography.body01.medium,
-                    color = MoimTheme.colors.text.text03,
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    text = stringResource(R.string.user_withdrawal_for_leader_change),
+                    style = MoimTheme.typography.body01.semiBold,
+                    color = MoimTheme.colors.gray.gray03,
                 )
             }
-        }
-    }
-}
-
-@ThemePreviews
-@Composable
-private fun MeetingCardPreview() {
-    MoimTheme {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .background(color = MoimTheme.colors.bg.primary)
-                    .padding(12.dp),
-        ) {
-            MeetingCard(
-                uiModel =
-                    MeetingUiModel(
-                        meeting = Meeting(name = "우리중학교 동창 우리중학교 동창 우리중학교 동창"),
-                        isLeader = true,
-                    ),
-                onUiAction = {},
-            )
         }
     }
 }

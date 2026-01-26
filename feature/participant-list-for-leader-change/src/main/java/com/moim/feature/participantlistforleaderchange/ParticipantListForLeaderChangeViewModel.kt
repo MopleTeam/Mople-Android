@@ -56,7 +56,7 @@ class ParticipantListForLeaderChangeViewModel @AssistedInject constructor(
                 setUiEvent(ParticipantListForLeaderChangeUiEvent.NavigateToBack)
             }
 
-            is ParticipantListForLeaderChangeUiAction.OnNextPageLoad -> {
+            is ParticipantListForLeaderChangeUiAction.OnLoadNextPage -> {
                 val uiState = uiState.value as? ParticipantListForLeaderChangeUiState ?: return
                 getMeetingParticipantsForSearch(
                     keyword = keywordFieldState.text.toString(),
@@ -64,7 +64,7 @@ class ParticipantListForLeaderChangeViewModel @AssistedInject constructor(
                 )
             }
 
-            is ParticipantListForLeaderChangeUiAction.OnRefreshClick -> {
+            is ParticipantListForLeaderChangeUiAction.OnClickRefresh -> {
                 val uiState = uiState.value as? ParticipantListForLeaderChangeUiState ?: return
                 getMeetingParticipantsForSearch(
                     keyword = keywordFieldState.text.toString(),
@@ -262,6 +262,7 @@ class ParticipantListForLeaderChangeViewModel @AssistedInject constructor(
                                     isErrorFooter = false,
                                     nextCursor = pagingData.page.nextCursor,
                                     isLast = !pagingData.page.isNext || addData.isEmpty(),
+                                    totalCount = pagingData.totalCount,
                                 ),
                             users =
                                 users
@@ -354,9 +355,9 @@ sealed interface ParticipantListForLeaderChangeUiAction : UiAction {
         val isShow: Boolean,
     ) : ParticipantListForLeaderChangeUiAction
 
-    data object OnNextPageLoad : ParticipantListForLeaderChangeUiAction
+    data object OnLoadNextPage : ParticipantListForLeaderChangeUiAction
 
-    data object OnRefreshClick : ParticipantListForLeaderChangeUiAction
+    data object OnClickRefresh : ParticipantListForLeaderChangeUiAction
 }
 
 sealed interface ParticipantListForLeaderChangeUiEvent : UiEvent {

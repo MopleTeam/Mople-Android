@@ -35,7 +35,7 @@ fun ProfileAuthSettingContainer(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .onSingleClick { onUiAction(ProfileUiAction.OnShowUserDeleteDialog(true)) },
+                    .onSingleClick { onUiAction(ProfileUiAction.OnClickUserWithdrawal) },
             text = stringResource(R.string.profile_user_delete),
         )
     }

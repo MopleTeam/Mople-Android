@@ -177,12 +177,19 @@
     <!-- ParticipantList -->
     <string name="participant_list_title">참여자 목록</string>
 
-    <!-- ParticipantListForLeader -->
-    <string name="participant_list_for_leader_title">양도하기</string>
-    <string name="participant_list_for_leader_search_hint">닉네임을 검색해주세요</string>
+    <!-- ParticipantListForLeaderChange -->
+    <string name="participant_list_for_leader_change_title">양도하기</string>
+    <string name="participant_list_for_leader_change_search_hint">닉네임을 검색해주세요</string>
     <string name="participant_list_for_leader_change">모임 양도</string>
     <string name="participant_list_for_leader_change_request">해당 모임원으로\n모임장을 양도하시겠습니까?</string>
     <string name="participant_list_for_leader_change_completed">해당 유저에게 모임을 양도했어요</string>
+
+    <!-- UserWithdrawalForLeaderChange -->
+    <string name="user_withdrawal_for_leader_change_title">모임장을 양도하지 않고\n탈퇴하면 모임이 사라져요</string>
+    <string name="user_withdrawal_for_leader_change_meeting">양도 가능한 모임</string>
+    <string name="user_withdrawal_for_leader_change">모임 양도하기</string>
+    <string name="user_withdrawal_for_leader_change_exit">탈퇴하기</string>
+    <string name="user_withdrawal_for_leader_change_dialog_title">회원 탈퇴해도 내가 작성했던\n댓글과 좋아요는 남아있어요</string>
 
     <!-- Calendar -->
     <string name="calendar_title">일정관리</string>

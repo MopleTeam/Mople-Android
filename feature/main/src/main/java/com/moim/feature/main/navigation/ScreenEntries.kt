@@ -36,6 +36,7 @@ import com.moim.feature.profileupdate.ProfileUpdateRoute
 import com.moim.feature.reviewwrite.ReviewWriteRoute
 import com.moim.feature.reviewwrite.ReviewWriteViewModel
 import com.moim.feature.themesetting.ThemeSettingRoute
+import com.moim.feature.userwithdrawalforleaderchange.UserWithdrawalForLeaderChangeRoute
 import com.moim.feature.webview.WebViewRoute
 import com.moim.feature.webview.WebViewViewModel
 
@@ -92,6 +93,7 @@ fun EntryProviderScope<NavKey>.profileScreenEntry(
             navigateToAlarmSetting = navigator::navigateToAlarmSetting,
             navigateToPrivacyPolicy = navigator::navigateToWebView,
             navigateToThemeSetting = navigator::navigateToThemeSetting,
+            navigateToUserWithdrawalForLeaderChange = navigator::navigateToUserWithdrawalForLeaderChange,
             navigateToIntro = navigateToIntro,
         )
     }
@@ -297,6 +299,21 @@ fun EntryProviderScope<NavKey>.participantListForLeaderChangeScreenEntry(
                 ) { factory ->
                     factory.create(key)
                 },
+        )
+    }
+}
+
+fun EntryProviderScope<NavKey>.userWithdrawalForLeaderChangeScreenEntry(
+    navigator: MainNavigator,
+    paddingValues: PaddingValues,
+    navigateToIntro: () -> Unit,
+) {
+    entry<DetailRoute.UserWithdrawalForLeaderChange> {
+        UserWithdrawalForLeaderChangeRoute(
+            padding = paddingValues,
+            navigateToBack = navigator::goBack,
+            navigateToExit = navigateToIntro,
+            navigateToParticipantsForLeaderChange = navigator::navigateToParticipantListForLeaderChange,
         )
     }
 }

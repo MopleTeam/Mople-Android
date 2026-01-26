@@ -18,6 +18,7 @@ dependencies {
     implementation(projects.feature.commentDetail)
     implementation(projects.feature.participantList)
     implementation(projects.feature.participantListForLeaderChange)
+    implementation(projects.feature.userWithdrawalForLeaderChange)
     implementation(projects.feature.calendar)
     implementation(projects.feature.mapDetail)
     implementation(projects.feature.profile)

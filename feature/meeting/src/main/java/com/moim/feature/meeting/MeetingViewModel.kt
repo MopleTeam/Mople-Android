@@ -173,7 +173,7 @@ class MeetingViewModel @Inject constructor(
                 getMeetings(uiState.pagingInfo.nextCursor)
             }
 
-            is MeetingUiAction.OnNextPageLoad -> {
+            is MeetingUiAction.OnLoadNextPage -> {
                 val uiState = uiState.value as? MeetingUiState ?: return
                 getMeetings(uiState.pagingInfo.nextCursor)
             }
@@ -262,6 +262,7 @@ class MeetingViewModel @Inject constructor(
                                     isLoading = false,
                                     nextCursor = pagingData.page.nextCursor,
                                     isLast = !pagingData.page.isNext || data.isEmpty(),
+                                    totalCount = pagingData.totalCount,
                                 ),
                             meetings = data,
                         )
@@ -354,7 +355,7 @@ sealed interface MeetingUiAction : UiAction {
 
     data object OnClickRefresh : MeetingUiAction
 
-    data object OnNextPageLoad : MeetingUiAction
+    data object OnLoadNextPage : MeetingUiAction
 }
 
 sealed interface MeetingUiEvent : UiEvent {

@@ -21,6 +21,7 @@ data class PagingUiState(
     val isErrorFooter: Boolean = false,
     val isLast: Boolean = false,
     val nextCursor: String? = null,
+    val totalCount: Int = 0,
 )
 
 @Composable

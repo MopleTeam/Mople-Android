@@ -98,6 +98,9 @@ sealed interface DetailRoute : Route {
     ) : DetailRoute
 
     @Serializable
+    data object UserWithdrawalForLeaderChange : DetailRoute
+
+    @Serializable
     data class ImageViewer(
         val title: String,
         val images: List<String>,
