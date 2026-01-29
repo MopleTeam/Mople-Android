@@ -106,7 +106,7 @@ private fun MeetingScreen(
                     }
                 }
 
-                FadeAnimatedVisibility(!paging.isLoading && !paging.isError) {
+                FadeAnimatedVisibility(uiState.pagingInfo.isSuccess && uiState.meetings.isNotEmpty()) {
                     PaginationEffect(
                         listState = listState,
                         threshold = 3,
@@ -161,9 +161,7 @@ private fun MeetingScreen(
                     }
                 }
 
-                FadeAnimatedVisibility(
-                    visible = uiState.meetings.isEmpty() && !uiState.pagingInfo.isLoading && !uiState.pagingInfo.isError,
-                ) {
+                FadeAnimatedVisibility(uiState.pagingInfo.isSuccess && uiState.meetings.isEmpty()) {
                     MeetingEmptyScreen(
                         modifier =
                             Modifier

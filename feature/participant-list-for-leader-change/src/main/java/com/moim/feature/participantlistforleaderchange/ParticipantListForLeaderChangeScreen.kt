@@ -161,7 +161,7 @@ private fun ParticipantListForLeaderChangeScreen(
                 }
             }
 
-            FadeAnimatedVisibility(!paging.isLoading && !paging.isError) {
+            FadeAnimatedVisibility(paging.isSuccess) {
                 PaginationEffect(
                     listState = listState,
                     threshold = 3,

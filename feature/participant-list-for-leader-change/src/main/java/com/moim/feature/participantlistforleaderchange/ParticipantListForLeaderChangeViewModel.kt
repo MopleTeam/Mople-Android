@@ -14,6 +14,7 @@ import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.cancelIfActive
 import com.moim.core.ui.util.isActiveCheck
 import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.PagingHelper
 import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
@@ -145,50 +146,16 @@ class ParticipantListForLeaderChangeViewModel @AssistedInject constructor(
         isLoading: Boolean,
         cursor: String?,
     ) {
-        if (cursor == null) {
-            initializePagingData(
-                pagingData = pagingInfo,
-                isLoading = isLoading,
-            )
-        }
-
-        if (cursor != null) {
-            addLoadPagingData(
-                pagingData = pagingInfo,
-                isLoading = isLoading,
-            )
-        }
-    }
-
-    private fun initializePagingData(
-        pagingData: PaginationContainer<List<User>>?,
-        isLoading: Boolean,
-    ) {
-        val uiState =
-            when {
-                isLoading -> {
-                    ParticipantListForLeaderChangeUiState(
-                        pagingInfo =
-                            PagingUiState(
-                                isLoading = true,
-                            ),
-                    )
-                }
-
-                pagingData == null -> {
-                    ParticipantListForLeaderChangeUiState(
-                        pagingInfo =
-                            PagingUiState(
-                                isLoading = false,
-                                isError = true,
-                            ),
-                    )
-                }
-
-                else -> {
-                    val data =
-                        pagingData
-                            .content
+        uiState.checkState<ParticipantListForLeaderChangeUiState> {
+            val result =
+                PagingHelper.handlePagingResult(
+                    pagingData = pagingInfo,
+                    isLoading = isLoading,
+                    currentPagingInfo = this.pagingInfo,
+                    currentItems = users,
+                    isInitialLoad = cursor == null,
+                    transform = { users ->
+                        users
                             .filter { it.userRole != "HOST" }
                             .map {
                                 ParticipantListUiModel(
@@ -196,83 +163,15 @@ class ParticipantListForLeaderChangeViewModel @AssistedInject constructor(
                                     isSelected = false,
                                 )
                             }
+                    },
+                )
 
-                    ParticipantListForLeaderChangeUiState(
-                        pagingInfo =
-                            PagingUiState(
-                                isLoading = false,
-                                nextCursor = pagingData.page.nextCursor,
-                                isLast = !pagingData.page.isNext || data.isEmpty(),
-                            ),
-                        users = data,
-                    )
-                }
-            }
-
-        setUiState(uiState)
-    }
-
-    private fun addLoadPagingData(
-        pagingData: PaginationContainer<List<User>>?,
-        isLoading: Boolean,
-    ) {
-        uiState.checkState<ParticipantListForLeaderChangeUiState> {
-            val pagingInfo = this.pagingInfo
-
-            val uiState =
-                when {
-                    isLoading -> {
-                        this.copy(
-                            pagingInfo =
-                                pagingInfo.copy(
-                                    isLoadingFooter = true,
-                                    isErrorFooter = false,
-                                ),
-                            users = users,
-                        )
-                    }
-
-                    pagingData == null -> {
-                        this.copy(
-                            pagingInfo =
-                                pagingInfo.copy(
-                                    isLoadingFooter = false,
-                                    isErrorFooter = true,
-                                ),
-                            users = users,
-                        )
-                    }
-
-                    else -> {
-                        val addData =
-                            pagingData
-                                .content
-                                .filter { it.userRole != "HOST" }
-                                .map {
-                                    ParticipantListUiModel(
-                                        user = it,
-                                        isSelected = false,
-                                    )
-                                }
-
-                        this.copy(
-                            pagingInfo =
-                                pagingInfo.copy(
-                                    isLoadingFooter = false,
-                                    isErrorFooter = false,
-                                    nextCursor = pagingData.page.nextCursor,
-                                    isLast = !pagingData.page.isNext || addData.isEmpty(),
-                                    totalCount = pagingData.totalCount,
-                                ),
-                            users =
-                                users
-                                    .toMutableList()
-                                    .apply { addAll(addData) },
-                        )
-                    }
-                }
-
-            setUiState(uiState)
+            setUiState(
+                copy(
+                    pagingInfo = result.pagingInfo,
+                    users = result.items,
+                ),
+            )
         }
     }
 

@@ -11,6 +11,7 @@ import com.moim.core.ui.eventbus.MeetingAction
 import com.moim.core.ui.eventbus.PlanAction
 import com.moim.core.ui.util.isActiveCheck
 import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.PagingHelper
 import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
@@ -211,121 +212,30 @@ class MeetingViewModel @Inject constructor(
         isLoading: Boolean,
         cursor: String?,
     ) {
-        if (cursor == null) {
-            initializePagingData(
-                pagingData = pagingInfo,
-                isLoading = isLoading,
-            )
-        }
-
-        if (cursor != null) {
-            addLoadPagingData(
-                pagingData = pagingInfo,
-                isLoading = isLoading,
-            )
-        }
-    }
-
-    private fun initializePagingData(
-        pagingData: PaginationContainer<List<Meeting>>?,
-        isLoading: Boolean,
-    ) {
         uiState.checkState<MeetingUiState> {
-            val uiState =
-                when {
-                    isLoading -> {
-                        copy(pagingInfo = PagingUiState(isLoading = true))
-                    }
+            val result =
+                PagingHelper.handlePagingResult(
+                    pagingData = pagingInfo,
+                    isLoading = isLoading,
+                    currentPagingInfo = this.pagingInfo,
+                    currentItems = meetings,
+                    isInitialLoad = cursor == null,
+                    transform = { meetings ->
+                        meetings.map { meeting ->
+                            MeetingUiModel(
+                                meeting = meeting,
+                                isLeader = meeting.creatorId == user.userId,
+                            )
+                        }
+                    },
+                )
 
-                    pagingData == null -> {
-                        copy(
-                            pagingInfo =
-                                PagingUiState(
-                                    isLoading = false,
-                                    isError = true,
-                                ),
-                        )
-                    }
-
-                    else -> {
-                        val data =
-                            pagingData.content.map { meeting ->
-                                MeetingUiModel(
-                                    meeting = meeting,
-                                    isLeader = meeting.creatorId == user.userId,
-                                )
-                            }
-
-                        copy(
-                            pagingInfo =
-                                PagingUiState(
-                                    isLoading = false,
-                                    nextCursor = pagingData.page.nextCursor,
-                                    isLast = !pagingData.page.isNext || data.isEmpty(),
-                                    totalCount = pagingData.totalCount,
-                                ),
-                            meetings = data,
-                        )
-                    }
-                }
-
-            setUiState(uiState)
-        }
-    }
-
-    private fun addLoadPagingData(
-        pagingData: PaginationContainer<List<Meeting>>?,
-        isLoading: Boolean,
-    ) {
-        uiState.checkState<MeetingUiState> {
-            val pagingInfo = this.pagingInfo
-            val uiState =
-                when {
-                    isLoading -> {
-                        this.copy(
-                            pagingInfo =
-                                pagingInfo.copy(
-                                    isLoadingFooter = true,
-                                    isErrorFooter = false,
-                                ),
-                            meetings = meetings,
-                        )
-                    }
-
-                    pagingData == null -> {
-                        this.copy(
-                            pagingInfo =
-                                pagingInfo.copy(
-                                    isLoadingFooter = false,
-                                    isErrorFooter = true,
-                                ),
-                            meetings = meetings,
-                        )
-                    }
-
-                    else -> {
-                        val addData =
-                            pagingData.content.map { meeting ->
-                                MeetingUiModel(
-                                    meeting = meeting,
-                                    isLeader = meeting.creatorId == user.userId,
-                                )
-                            }
-
-                        this.copy(
-                            pagingInfo =
-                                pagingInfo.copy(
-                                    isLoadingFooter = false,
-                                    isErrorFooter = false,
-                                    nextCursor = pagingData.page.nextCursor,
-                                    isLast = !pagingData.page.isNext || addData.isEmpty(),
-                                ),
-                            meetings = meetings.toMutableList().apply { addAll(addData) },
-                        )
-                    }
-                }
-
-            setUiState(uiState)
+            setUiState(
+                copy(
+                    pagingInfo = result.pagingInfo,
+                    meetings = result.items,
+                ),
+            )
         }
     }
 
