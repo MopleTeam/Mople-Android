@@ -1,9 +1,8 @@
 package com.moim.feature.participantlist
 
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import com.moim.core.common.exception.NetworkException
+import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.User
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.result.Result
@@ -11,18 +10,21 @@ import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
-import com.moim.core.domain.usecase.GetParticipantsUseCase
 import com.moim.core.ui.route.DetailRoute
+import com.moim.core.ui.util.isActiveCheck
 import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.PagingHelper
+import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
+import com.moim.core.ui.view.checkState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -32,30 +34,15 @@ class ParticipantListViewModel @AssistedInject constructor(
     private val meetingRepository: MeetingRepository,
     private val planRepository: PlanRepository,
     private val reviewRepository: ReviewRepository,
-    getParticipantsUseCase: GetParticipantsUseCase,
     @Assisted val participantListRoute: DetailRoute.ParticipantList,
 ) : BaseViewModel() {
+    private var pagingJob: Job? = null
     private val viewIdType = participantListRoute.viewIdType
-
-    private val participants =
-        getParticipantsUseCase(
-            params =
-                GetParticipantsUseCase.Params(
-                    id = viewIdType.id,
-                    isMeeting = viewIdType is ViewIdType.MeetId,
-                    isPlan = viewIdType is ViewIdType.PlanId,
-                ),
-        ).cachedIn(viewModelScope)
 
     init {
         viewModelScope.launch {
-            setUiState(
-                ParticipantListUiState(
-                    isMeeting = viewIdType is ViewIdType.MeetId,
-                    participant = participants,
-                    totalCount = getParticipantTotalCount(),
-                ),
-            )
+            setUiState(ParticipantListUiState(isMeeting = viewIdType is ViewIdType.MeetId))
+            getParticipants()
         }
     }
 
@@ -63,6 +50,16 @@ class ParticipantListViewModel @AssistedInject constructor(
         when (uiAction) {
             is ParticipantListUiAction.OnClickBack -> {
                 setUiEvent(ParticipantListUiEvent.NavigateToBack)
+            }
+
+            is ParticipantListUiAction.OnLoadNextPage -> {
+                val uiState = uiState.value as? ParticipantListUiState ?: return
+                getParticipants(uiState.pagingInfo.nextCursor)
+            }
+
+            is ParticipantListUiAction.OnClickRefresh -> {
+                val uiState = uiState.value as? ParticipantListUiState ?: return
+                getParticipants(uiState.pagingInfo.nextCursor)
             }
 
             is ParticipantListUiAction.OnClickUserImage -> {
@@ -74,6 +71,82 @@ class ParticipantListViewModel @AssistedInject constructor(
             is ParticipantListUiAction.OnClickMeetingInvite -> {
                 getInviteLink()
             }
+        }
+    }
+
+    private fun getParticipants(cursor: String? = null) {
+        if (pagingJob.isActiveCheck()) return
+        pagingJob =
+            viewModelScope.launch {
+                handlePagingData(
+                    pagingInfo = null,
+                    isLoading = true,
+                    cursor = cursor,
+                )
+
+                val pagingInfo =
+                    runCatching {
+                        when (viewIdType) {
+                            is ViewIdType.MeetId -> {
+                                meetingRepository.getMeetingParticipants(
+                                    meetingId = viewIdType.id,
+                                    cursor = cursor ?: "",
+                                    size = 30,
+                                )
+                            }
+
+                            is ViewIdType.PlanId -> {
+                                planRepository.getPlanParticipants(
+                                    planId = viewIdType.id,
+                                    cursor = cursor ?: "",
+                                    size = 30,
+                                )
+                            }
+
+                            is ViewIdType.ReviewId -> {
+                                reviewRepository.getReviewParticipants(
+                                    reviewId = viewIdType.id,
+                                    cursor = cursor ?: "",
+                                    size = 30,
+                                )
+                            }
+
+                            else -> {
+                                throw IllegalStateException("this ViewTypeId is not allowed")
+                            }
+                        }
+                    }.getOrNull()
+
+                handlePagingData(
+                    pagingInfo = pagingInfo,
+                    isLoading = false,
+                    cursor = cursor,
+                )
+            }
+    }
+
+    private fun handlePagingData(
+        pagingInfo: PaginationContainer<List<User>>?,
+        isLoading: Boolean,
+        cursor: String?,
+    ) {
+        uiState.checkState<ParticipantListUiState> {
+            val result =
+                PagingHelper.handlePagingResult(
+                    pagingData = pagingInfo,
+                    isLoading = isLoading,
+                    currentPagingInfo = this.pagingInfo,
+                    currentItems = participants,
+                    isInitialLoad = cursor == null,
+                    transform = { users -> users },
+                )
+
+            setUiState(
+                copy(
+                    pagingInfo = result.pagingInfo,
+                    participants = result.items,
+                ),
+            )
         }
     }
 
@@ -104,43 +177,6 @@ class ParticipantListViewModel @AssistedInject constructor(
         }
     }
 
-    private suspend fun getParticipantTotalCount(): Int {
-        val totalCount =
-            runCatching {
-                when (viewIdType) {
-                    is ViewIdType.MeetId -> {
-                        meetingRepository.getMeetingParticipants(
-                            meetingId = viewIdType.id,
-                            cursor = "",
-                            size = 1,
-                        )
-                    }
-
-                    is ViewIdType.PlanId -> {
-                        planRepository.getPlanParticipants(
-                            planId = viewIdType.id,
-                            cursor = "",
-                            size = 1,
-                        )
-                    }
-
-                    is ViewIdType.ReviewId -> {
-                        reviewRepository.getReviewParticipants(
-                            reviewId = viewIdType.id,
-                            cursor = "",
-                            size = 1,
-                        )
-                    }
-
-                    else -> {
-                        throw IllegalStateException("this ViewTypeId is not allowed")
-                    }
-                }.totalCount
-            }.getOrElse { 0 }
-
-        return totalCount
-    }
-
     @AssistedFactory
     interface Factory {
         fun create(participantListRoute: DetailRoute.ParticipantList): ParticipantListViewModel
@@ -148,13 +184,15 @@ class ParticipantListViewModel @AssistedInject constructor(
 }
 
 data class ParticipantListUiState(
-    val isMeeting: Boolean,
-    val participant: Flow<PagingData<User>>? = null,
-    val totalCount: Int = 0,
+    val isMeeting: Boolean = true,
+    val pagingInfo: PagingUiState = PagingUiState(),
+    val participants: List<User> = emptyList(),
 ) : UiState
 
 sealed interface ParticipantListUiAction : UiAction {
     data object OnClickBack : ParticipantListUiAction
+
+    data object OnClickRefresh : ParticipantListUiAction
 
     data object OnClickMeetingInvite : ParticipantListUiAction
 
@@ -162,6 +200,8 @@ sealed interface ParticipantListUiAction : UiAction {
         val userImage: String,
         val userName: String,
     ) : ParticipantListUiAction
+
+    data object OnLoadNextPage : ParticipantListUiAction
 }
 
 sealed interface ParticipantListUiEvent : UiEvent {
