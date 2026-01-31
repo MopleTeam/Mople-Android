@@ -34,6 +34,22 @@ internal class MeetingRepositoryImpl @Inject constructor(
             throw converterException(e)
         }
 
+    override suspend fun getMeetingsForHost(
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<Meeting>> =
+        try {
+            meetingApi
+                .getMeetingsForHost(
+                    cursor = cursor,
+                    size = size,
+                ).asItem {
+                    it.map(MeetingResponse::asItem)
+                }
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+
     override fun getMeeting(meetingId: String) =
         catchFlow {
             emit(meetingApi.getMeeting(meetingId).asItem())

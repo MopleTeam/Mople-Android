@@ -19,6 +19,12 @@ interface MeetingApi {
         @Query("size") size: Int,
     ): PaginationContainerResponse<List<MeetingResponse>>
 
+    @GET("/meet/host/list")
+    suspend fun getMeetingsForHost(
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<MeetingResponse>>
+
     @GET("meet/{meetId}")
     suspend fun getMeeting(
         @Path("meetId") id: String,

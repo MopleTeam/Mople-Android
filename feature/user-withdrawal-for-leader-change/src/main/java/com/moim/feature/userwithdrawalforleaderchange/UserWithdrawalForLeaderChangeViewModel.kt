@@ -127,7 +127,7 @@ class UserWithdrawalForLeaderChangeViewModel @Inject constructor(
 
                 val pagingInfo =
                     runCatching {
-                        meetingRepository.getMeetings(
+                        meetingRepository.getMeetingsForHost(
                             cursor = cursor ?: "",
                             size = 30,
                         )

@@ -11,6 +11,11 @@ interface MeetingRepository {
         size: Int,
     ): PaginationContainer<List<Meeting>>
 
+    suspend fun getMeetingsForHost(
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<Meeting>>
+
     fun getMeeting(meetingId: String): Flow<Meeting>
 
     fun getMeetingInviteCode(meetingId: String): Flow<String>

@@ -64,9 +64,8 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 setLoading(true)
-                // TODO:: API 변경
                 meetingRepository
-                    .getMeetings("", 1)
+                    .getMeetingsForHost("", 1)
                     .content
             }.onFailure { error ->
                 when (error) {
