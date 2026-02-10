@@ -52,7 +52,7 @@ class MeetingSettingViewModel @AssistedInject constructor(
                 setUiState(
                     MeetingSettingUiState.MeetingSetting(
                         meeting = meeting,
-                        isHostUser = meeting.creatorId == user.userId,
+                        isHostUser = meeting.hostId == user.userId,
                     ),
                 )
             }

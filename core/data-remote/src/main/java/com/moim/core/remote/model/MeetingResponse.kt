@@ -9,8 +9,8 @@ import kotlinx.serialization.Serializable
 data class MeetingResponse(
     @SerialName("meetId")
     val id: String,
-    @SerialName("creatorId")
-    val creatorId: String = "",
+    @SerialName("hostId")
+    val hostId: String = "",
     @SerialName("meetName")
     val name: String,
     @SerialName("meetImage")
@@ -28,7 +28,7 @@ data class MeetingResponse(
 fun MeetingResponse.asItem(): Meeting =
     Meeting(
         id = id,
-        creatorId = creatorId,
+        hostId = hostId,
         name = name,
         imageUrl = imageUrl,
         memberCount = memberCount,

@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,7 +42,6 @@ import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.moimTextFieldColors
 import com.moim.core.ui.view.FadeAnimatedVisibility
 import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
@@ -136,7 +136,6 @@ private fun ParticipantListForLeaderChangeScreen(
                     .padding(horizontal = 20.dp)
                     .clip(RoundedCornerShape(16.dp)),
             textFieldState = keywordState,
-            textFieldColors = moimTextFieldColors(textColor = MoimTheme.colors.text.text04),
             hintText = stringResource(R.string.participant_list_for_leader_change_search_hint),
             leadingIcon = {
                 Icon(
@@ -161,7 +160,25 @@ private fun ParticipantListForLeaderChangeScreen(
                 }
             }
 
-            FadeAnimatedVisibility(paging.isSuccess) {
+            FadeAnimatedVisibility(paging.isSuccess && uiState.users.isEmpty()) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_user_search),
+                        contentDescription = null,
+                        tint = MoimTheme.colors.icon,
+                    )
+
+                    Text(
+                        text = stringResource(R.string.participant_list_for_leader_change_empty),
+                        style = MoimTheme.typography.body01.medium,
+                        color = MoimTheme.colors.gray.gray04,
+                    )
+                }
+            }
+
+            FadeAnimatedVisibility(paging.isSuccess && uiState.users.isNotEmpty()) {
                 PaginationEffect(
                     listState = listState,
                     threshold = 3,

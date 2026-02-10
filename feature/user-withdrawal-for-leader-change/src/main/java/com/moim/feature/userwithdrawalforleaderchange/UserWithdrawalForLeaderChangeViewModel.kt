@@ -56,7 +56,7 @@ class UserWithdrawalForLeaderChangeViewModel @Inject constructor(
                                                 meeting
                                             }
                                         }.filter {
-                                            it.creatorId != user.userId
+                                            it.hostId != user.userId
                                         }
 
                                 setUiState(copy(meetings = meetings))

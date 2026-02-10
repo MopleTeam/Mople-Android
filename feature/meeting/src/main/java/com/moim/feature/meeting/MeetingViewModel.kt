@@ -107,7 +107,7 @@ class MeetingViewModel @Inject constructor(
                             }
 
                             is MeetingAction.MeetingCreate -> {
-                                val isLeader = user.userId == action.meeting.creatorId
+                                val isLeader = user.userId == action.meeting.hostId
                                 val meetings =
                                     meetings
                                         .toMutableList()
@@ -124,7 +124,7 @@ class MeetingViewModel @Inject constructor(
                             }
 
                             is MeetingAction.MeetingUpdate -> {
-                                val isLeader = user.userId == action.meeting.creatorId
+                                val isLeader = user.userId == action.meeting.hostId
                                 val meetings =
                                     meetings.map { uiModel ->
                                         if (uiModel.meeting.id == action.meeting.id) {
@@ -224,7 +224,7 @@ class MeetingViewModel @Inject constructor(
                         meetings.map { meeting ->
                             MeetingUiModel(
                                 meeting = meeting,
-                                isLeader = meeting.creatorId == user.userId,
+                                isLeader = meeting.hostId == user.userId,
                             )
                         }
                     },

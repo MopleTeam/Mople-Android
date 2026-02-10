@@ -181,6 +181,7 @@
     <string name="participant_list_for_leader_change_title">양도하기</string>
     <string name="participant_list_for_leader_change_search_hint">닉네임을 검색해주세요</string>
     <string name="participant_list_for_leader_change">모임 양도</string>
+    <string name="participant_list_for_leader_change_empty">검색 결과가 없어요</string>
     <string name="participant_list_for_leader_change_request">해당 모임원으로\n모임장을 양도하시겠습니까?</string>
     <string name="participant_list_for_leader_change_completed">해당 유저에게 모임을 양도했어요</string>
 
