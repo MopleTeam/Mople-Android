@@ -5,16 +5,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimTopAppbar
-import com.moim.feature.commentdetail.CommentDetailAction
+import com.moim.feature.commentdetail.CommentDetailUiAction
 
 @Composable
 fun CommentDetailTopAppbar(
     modifier: Modifier = Modifier,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     MoimTopAppbar(
         modifier = modifier,
         title = stringResource(R.string.comment_detail_title),
-        onClickNavigate = { onUiAction(CommentDetailAction.OnClickBack) },
+        onClickNavigate = { onUiAction(CommentDetailUiAction.OnClickBack) },
     )
 }

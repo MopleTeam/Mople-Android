@@ -7,13 +7,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MeetingPlanContainerResponse(
     @SerialName("plans")
-    val plans: List<PlanResponse>,
-    @SerialName("meets")
-    val meetings: List<MeetingResponse>,
+    val plans: List<PlanResponse> = emptyList(),
+    @SerialName("hasJoinedMeet")
+    val hasJoinedMeet: Boolean = true,
 )
 
 fun MeetingPlanContainerResponse.asItem(): MeetingPlanContainer =
     MeetingPlanContainer(
         plans = plans.map(PlanResponse::asItem).map { it.copy(isParticipant = true) },
-        meetings = meetings.map(MeetingResponse::asItem),
+        hasJoinedMeet = hasJoinedMeet,
     )

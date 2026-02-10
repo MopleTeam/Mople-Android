@@ -50,14 +50,14 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.decimalFormatString
-import com.moim.feature.commentdetail.CommentDetailAction
+import com.moim.feature.commentdetail.CommentDetailUiAction
 
 @Composable
 fun CommentDetailItem(
     modifier: Modifier = Modifier,
     userId: String,
     comment: CommentUiModel,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     Row(
         modifier =
@@ -76,7 +76,7 @@ fun CommentDetailItem(
                     .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
                     .onSingleClick {
                         onUiAction(
-                            CommentDetailAction.OnClickUserProfileImage(
+                            CommentDetailUiAction.OnClickUserProfileImage(
                                 imageUrl = comment.comment.writer.imageUrl,
                                 userName = comment.comment.writer.nickname,
                             ),
@@ -125,7 +125,7 @@ private fun CommentHeader(
     modifier: Modifier = Modifier,
     userId: String,
     comment: Comment,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -151,12 +151,12 @@ private fun CommentHeader(
             onClick = {
                 val uiAction =
                     if (userId == comment.writer.userId) {
-                        CommentDetailAction.OnShowCommentEditDialog(
+                        CommentDetailUiAction.OnShowCommentEditDialog(
                             isShow = true,
                             comment = comment,
                         )
                     } else {
-                        CommentDetailAction.OnShowCommentReportDialog(
+                        CommentDetailUiAction.OnShowCommentReportDialog(
                             isShow = true,
                             comment = comment,
                         )
@@ -172,7 +172,7 @@ private fun CommentHeader(
 private fun CommentText(
     modifier: Modifier = Modifier,
     texts: List<CommentTextUiModel>,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     val text = texts.joinToString("") { it.content }
     val spanStyle =
@@ -214,7 +214,7 @@ private fun CommentText(
                             clickable =
                                 LinkAnnotation.Clickable(
                                     tag = "URL",
-                                    linkInteractionListener = { onUiAction(CommentDetailAction.OnClickCommentWebLink(uiModel.content)) },
+                                    linkInteractionListener = { onUiAction(CommentDetailUiAction.OnClickCommentWebLink(uiModel.content)) },
                                 ),
                             start = startIndex,
                             end = startIndex + uiModel.content.length,
@@ -234,7 +234,7 @@ private fun CommentText(
 @Composable
 private fun CommentOpenGraph(
     openGraph: OpenGraph,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     Column(
         modifier =
@@ -242,7 +242,7 @@ private fun CommentOpenGraph(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(MoimTheme.colors.tertiary)
-                .onSingleClick(onClick = { onUiAction(CommentDetailAction.OnClickCommentWebLink(openGraph.url)) }),
+                .onSingleClick(onClick = { onUiAction(CommentDetailUiAction.OnClickCommentWebLink(openGraph.url)) }),
     ) {
         NetworkImage(
             modifier =
@@ -279,7 +279,7 @@ private fun CommentOpenGraph(
 @Composable
 private fun CommentFooter(
     comment: Comment,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     val iconColor =
         if (comment.isLike) {
@@ -299,7 +299,7 @@ private fun CommentFooter(
                 iconRes = R.drawable.ic_thumb_up,
                 iconCount = comment.likeCount,
                 iconColor = iconColor,
-                onClick = { onUiAction(CommentDetailAction.OnClickCommentLike(comment = comment)) },
+                onClick = { onUiAction(CommentDetailUiAction.OnClickCommentLike(comment = comment)) },
             )
         }
     }

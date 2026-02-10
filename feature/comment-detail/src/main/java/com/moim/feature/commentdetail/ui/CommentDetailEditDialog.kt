@@ -5,14 +5,14 @@ import androidx.compose.ui.res.stringResource
 import com.moim.core.common.model.Comment
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimAlertDialog
-import com.moim.feature.commentdetail.CommentDetailAction
+import com.moim.feature.commentdetail.CommentDetailUiAction
 
 @Composable
 fun CommentDetailEditDialog(
     comment: Comment,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
-    val dismissAction = CommentDetailAction.OnShowCommentEditDialog(false, null)
+    val dismissAction = CommentDetailUiAction.OnShowCommentEditDialog(false, null)
 
     MoimAlertDialog(
         title = stringResource(R.string.comment_detail_edit),
@@ -22,11 +22,11 @@ fun CommentDetailEditDialog(
         onDismiss = { onUiAction(dismissAction) },
         onClickNegative = {
             onUiAction(dismissAction)
-            onUiAction(CommentDetailAction.OnClickCommentDelete(comment))
+            onUiAction(CommentDetailUiAction.OnClickCommentDelete(comment))
         },
         onClickPositive = {
             onUiAction(dismissAction)
-            onUiAction(CommentDetailAction.OnClickCommentUpdate(comment))
+            onUiAction(CommentDetailUiAction.OnClickCommentUpdate(comment))
         },
     )
 }
@@ -34,9 +34,9 @@ fun CommentDetailEditDialog(
 @Composable
 fun CommentDetailReportDialog(
     comment: Comment,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
-    val dismissAction = CommentDetailAction.OnShowCommentReportDialog(false, null)
+    val dismissAction = CommentDetailUiAction.OnShowCommentReportDialog(false, null)
 
     MoimAlertDialog(
         title = stringResource(R.string.comment_detail_report_title),
@@ -47,7 +47,7 @@ fun CommentDetailReportDialog(
         onClickNegative = { onUiAction(dismissAction) },
         onClickPositive = {
             onUiAction(dismissAction)
-            onUiAction(CommentDetailAction.OnClickCommentReport(comment))
+            onUiAction(CommentDetailUiAction.OnClickCommentReport(comment))
         },
     )
 }

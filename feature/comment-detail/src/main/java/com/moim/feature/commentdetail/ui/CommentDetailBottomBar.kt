@@ -33,7 +33,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimTextFieldColors
-import com.moim.feature.commentdetail.CommentDetailAction
+import com.moim.feature.commentdetail.CommentDetailUiAction
 
 @Composable
 fun CommentDetailBottomBar(
@@ -41,7 +41,7 @@ fun CommentDetailBottomBar(
     updateComment: Comment? = null,
     commentState: TextFieldState = TextFieldState(),
     selectedMentions: List<User>,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -54,7 +54,7 @@ fun CommentDetailBottomBar(
 
     LaunchedEffect(commentState.text) {
         if (commentState.text.isEmpty()) {
-            onUiAction(CommentDetailAction.OnShowMentionDialog(null))
+            onUiAction(CommentDetailUiAction.OnShowMentionDialog(null))
             return@LaunchedEffect
         }
 
@@ -63,9 +63,9 @@ fun CommentDetailBottomBar(
 
         if (lastAtIndex != -1) {
             val mentionText = textUntilCursor.substring(lastAtIndex + 1)
-            onUiAction(CommentDetailAction.OnShowMentionDialog(mentionText))
+            onUiAction(CommentDetailUiAction.OnShowMentionDialog(mentionText))
         } else {
-            onUiAction(CommentDetailAction.OnShowMentionDialog(null))
+            onUiAction(CommentDetailUiAction.OnShowMentionDialog(null))
         }
     }
 
@@ -132,7 +132,7 @@ fun CommentDetailBottomBar(
                 onClick = {
                     keyboardController?.hide()
                     focusManager.clearFocus()
-                    onUiAction(CommentDetailAction.OnClickCommentUpload(updateComment))
+                    onUiAction(CommentDetailUiAction.OnClickCommentUpload(updateComment))
                 },
             )
         }

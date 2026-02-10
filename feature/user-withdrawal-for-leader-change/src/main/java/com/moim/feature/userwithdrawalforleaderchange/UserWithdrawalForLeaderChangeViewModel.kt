@@ -154,7 +154,7 @@ class UserWithdrawalForLeaderChangeViewModel @Inject constructor(
                     currentPagingInfo = this.pagingInfo,
                     currentItems = meetings,
                     isInitialLoad = cursor == null,
-                    transform = { meetings -> meetings },
+                    transform = { meetings -> meetings.filter { it.memberCount > 1 } },
                 )
 
             setUiState(

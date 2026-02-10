@@ -65,8 +65,9 @@ class ProfileViewModel @Inject constructor(
             runCatching {
                 setLoading(true)
                 meetingRepository
-                    .getMeetingsForHost("", 1)
+                    .getMeetingsForHost("", 100)
                     .content
+                    .filter { it.memberCount > 1 }
             }.onFailure { error ->
                 when (error) {
                     is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
