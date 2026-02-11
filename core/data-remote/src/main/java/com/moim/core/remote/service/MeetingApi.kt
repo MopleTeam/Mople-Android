@@ -19,6 +19,12 @@ interface MeetingApi {
         @Query("size") size: Int,
     ): PaginationContainerResponse<List<MeetingResponse>>
 
+    @GET("/meet/host/list")
+    suspend fun getMeetingsForHost(
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<MeetingResponse>>
+
     @GET("meet/{meetId}")
     suspend fun getMeeting(
         @Path("meetId") id: String,
@@ -36,6 +42,14 @@ interface MeetingApi {
         @Query("size") size: Int,
     ): PaginationContainerResponse<List<UserResponse>>
 
+    @GET("meet/members/search/{meetId}")
+    suspend fun getMeetingParticipantsForSearch(
+        @Path("meetId") id: String,
+        @Query("keyword") keyword: String,
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<UserResponse>>
+
     @POST("meet/create")
     suspend fun createMeeting(
         @Body params: JsonObject,
@@ -46,6 +60,12 @@ interface MeetingApi {
         @Path("meetId") id: String,
         @Body params: JsonObject,
     ): MeetingResponse
+
+    @PATCH("meet/host/{meetId}")
+    suspend fun updateMeetingLeader(
+        @Path("meetId") id: String,
+        @Body params: JsonObject,
+    )
 
     @POST("meet/join/{meetCode}")
     suspend fun joinMeeting(

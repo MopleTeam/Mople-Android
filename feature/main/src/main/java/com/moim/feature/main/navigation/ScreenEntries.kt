@@ -25,6 +25,8 @@ import com.moim.feature.meetingwrite.MeetingWriteRoute
 import com.moim.feature.meetingwrite.MeetingWriteViewModel
 import com.moim.feature.participantlist.ParticipantListRoute
 import com.moim.feature.participantlist.ParticipantListViewModel
+import com.moim.feature.participantlistforleaderchange.ParticipantListForLeaderChangeRoute
+import com.moim.feature.participantlistforleaderchange.ParticipantListForLeaderChangeViewModel
 import com.moim.feature.plandetail.PlanDetailRoute
 import com.moim.feature.plandetail.PlanDetailViewModel
 import com.moim.feature.planwrite.PlanWriteRoute
@@ -33,6 +35,8 @@ import com.moim.feature.profile.ProfileRoute
 import com.moim.feature.profileupdate.ProfileUpdateRoute
 import com.moim.feature.reviewwrite.ReviewWriteRoute
 import com.moim.feature.reviewwrite.ReviewWriteViewModel
+import com.moim.feature.themesetting.ThemeSettingRoute
+import com.moim.feature.userwithdrawalforleaderchange.UserWithdrawalForLeaderChangeRoute
 import com.moim.feature.webview.WebViewRoute
 import com.moim.feature.webview.WebViewViewModel
 
@@ -88,6 +92,8 @@ fun EntryProviderScope<NavKey>.profileScreenEntry(
             navigateToProfileUpdate = navigator::navigateToProfileUpdate,
             navigateToAlarmSetting = navigator::navigateToAlarmSetting,
             navigateToPrivacyPolicy = navigator::navigateToWebView,
+            navigateToThemeSetting = navigator::navigateToThemeSetting,
+            navigateToUserWithdrawalForLeaderChange = navigator::navigateToUserWithdrawalForLeaderChange,
             navigateToIntro = navigateToIntro,
         )
     }
@@ -146,6 +152,7 @@ fun EntryProviderScope<NavKey>.meetingSettingScreenEntry(
                 if (shouldPopTwice) navigator.goBack()
             },
             navigateToParticipants = navigator::navigateToParticipantList,
+            navigateToParticipantsForLeaderChange = navigator::navigateToParticipantListForLeaderChange,
             navigateToMeetingWrite = navigator::navigateToMeetingWrite,
             viewModel =
                 hiltViewModel<MeetingSettingViewModel, MeetingSettingViewModel.Factory>(
@@ -274,6 +281,43 @@ fun EntryProviderScope<NavKey>.participantListScreenEntry(
     }
 }
 
+fun EntryProviderScope<NavKey>.participantListForLeaderChangeScreenEntry(
+    navigator: MainNavigator,
+    paddingValues: PaddingValues,
+) {
+    entry<DetailRoute.ParticipantListForLeaderChange> { key ->
+        ParticipantListForLeaderChangeRoute(
+            padding = paddingValues,
+            navigateToBack = { shouldPopTwice ->
+                navigator.goBack()
+                if (shouldPopTwice) navigator.goBack()
+            },
+            navigateToImageViewer = navigator::navigateToImageViewer,
+            viewModel =
+                hiltViewModel<ParticipantListForLeaderChangeViewModel, ParticipantListForLeaderChangeViewModel.Factory>(
+                    key = key.meetId.id,
+                ) { factory ->
+                    factory.create(key)
+                },
+        )
+    }
+}
+
+fun EntryProviderScope<NavKey>.userWithdrawalForLeaderChangeScreenEntry(
+    navigator: MainNavigator,
+    paddingValues: PaddingValues,
+    navigateToIntro: () -> Unit,
+) {
+    entry<DetailRoute.UserWithdrawalForLeaderChange> {
+        UserWithdrawalForLeaderChangeRoute(
+            padding = paddingValues,
+            navigateToBack = navigator::goBack,
+            navigateToExit = navigateToIntro,
+            navigateToParticipantsForLeaderChange = navigator::navigateToParticipantListForLeaderChange,
+        )
+    }
+}
+
 fun EntryProviderScope<NavKey>.imageViewerScreenEntry(
     navigator: MainNavigator,
     paddingValues: PaddingValues,
@@ -324,6 +368,18 @@ fun EntryProviderScope<NavKey>.alarmSettingScreenEntry(
 ) {
     entry<DetailRoute.AlarmSetting> {
         AlarmSettingRoute(
+            padding = paddingValues,
+            navigateToBack = navigator::goBack,
+        )
+    }
+}
+
+fun EntryProviderScope<NavKey>.themeSettingScreenEntry(
+    navigator: MainNavigator,
+    paddingValues: PaddingValues,
+) {
+    entry<DetailRoute.ThemeSetting> {
+        ThemeSettingRoute(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
         )

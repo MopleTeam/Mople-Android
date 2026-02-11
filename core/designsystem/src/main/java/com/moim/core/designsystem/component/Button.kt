@@ -35,10 +35,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_FEE500
 import com.moim.core.designsystem.theme.moimButtomColors
@@ -137,9 +137,9 @@ fun MoimFloatingActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(100),
-    containerColor: Color = MoimTheme.colors.primary.primary,
-    contentColor: Color = MoimTheme.colors.white,
-    borderStrokeColor: Color = MoimTheme.colors.primary.primary,
+    containerColor: Color = MoimTheme.colors.global.primary,
+    contentColor: Color = MoimTheme.colors.bg.primary,
+    borderStrokeColor: Color = MoimTheme.colors.global.primary,
     minWidth: Dp = 44.dp,
     minHeight: Dp = 44.dp,
     tonalElevation: Dp = 0.dp,
@@ -173,20 +173,21 @@ fun MoimFloatingActionButton(
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun MoimPrimaryButtonPreview() {
     MoimTheme {
         Column(
             modifier =
                 Modifier
-                    .background(MoimTheme.colors.white)
+                    .background(MoimTheme.colors.bg.primary)
                     .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
                 text = "Primary Button",
                 style = MoimTheme.typography.title03.semiBold,
+                color = MoimTheme.colors.text.text01,
             )
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
@@ -199,7 +200,7 @@ private fun MoimPrimaryButtonPreview() {
                 buttonColors =
                     moimButtomColors().copy(
                         containerColor = color_FEE500,
-                        contentColor = MoimTheme.colors.gray.gray01,
+                        contentColor = MoimTheme.colors.global.black,
                     ),
                 onClick = {},
             ) {
@@ -221,6 +222,7 @@ private fun MoimPrimaryButtonPreview() {
             Text(
                 text = "Etc Button",
                 style = MoimTheme.typography.title03.semiBold,
+                color = MoimTheme.colors.text.text01,
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,

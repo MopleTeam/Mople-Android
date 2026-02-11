@@ -43,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.internal.MoimOutlinedTextField
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimTextFieldColors
@@ -293,7 +294,7 @@ fun MoimTextField(
     )
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun MoimTextFieldPreview() {
     MoimTheme {
@@ -301,7 +302,7 @@ private fun MoimTextFieldPreview() {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .background(MoimTheme.colors.white)
+                    .background(MoimTheme.colors.bg.primary)
                     .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -333,6 +334,7 @@ private fun MoimTextFieldPreview() {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_search),
                         contentDescription = "",
+                        tint = MoimTheme.colors.icon,
                     )
                 },
                 trailingIcon = {

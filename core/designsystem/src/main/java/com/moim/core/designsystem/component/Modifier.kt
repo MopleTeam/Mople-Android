@@ -23,8 +23,10 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.semantics.Role
+import com.moim.core.designsystem.theme.LocalIsDarkTheme
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_222222
+import com.moim.core.designsystem.theme.color_CCCCCC
 import kotlinx.coroutines.delay
 
 @Composable
@@ -141,7 +143,7 @@ fun Modifier.onSingleClick(
             onClick = onClick,
             role = role,
             delay = delay,
-            indication = ripple(bounded = bounded, color = color_222222),
+            indication = ripple(bounded = bounded, color = if (LocalIsDarkTheme.current) color_CCCCCC else color_222222),
             interactionSource = remember { MutableInteractionSource() },
         )
     }

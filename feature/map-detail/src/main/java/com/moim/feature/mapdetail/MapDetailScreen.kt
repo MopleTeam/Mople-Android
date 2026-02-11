@@ -34,7 +34,7 @@ fun MapDetailRoute(
     navigateToBack: () -> Unit,
 ) {
     val context = LocalContext.current
-    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
     val uiState by viewModel.uiState
         .filterIsInstance<MapDetailUiState>()
         .collectAsStateWithLifecycle(null)

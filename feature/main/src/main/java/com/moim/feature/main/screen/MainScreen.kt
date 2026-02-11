@@ -31,6 +31,7 @@ import com.moim.feature.main.navigation.meetingDetailScreenEntry
 import com.moim.feature.main.navigation.meetingScreenEntry
 import com.moim.feature.main.navigation.meetingSettingScreenEntry
 import com.moim.feature.main.navigation.meetingWriteScreenEntry
+import com.moim.feature.main.navigation.participantListForLeaderChangeScreenEntry
 import com.moim.feature.main.navigation.participantListScreenEntry
 import com.moim.feature.main.navigation.planDetailScreenEntry
 import com.moim.feature.main.navigation.planWriteScreenEntry
@@ -38,7 +39,9 @@ import com.moim.feature.main.navigation.profileScreenEntry
 import com.moim.feature.main.navigation.profileUpdateScreenEntry
 import com.moim.feature.main.navigation.rememberMainNavController
 import com.moim.feature.main.navigation.reviewWriteScreenEntry
+import com.moim.feature.main.navigation.themeSettingScreenEntry
 import com.moim.feature.main.navigation.toEntries
+import com.moim.feature.main.navigation.userWithdrawalForLeaderChangeScreenEntry
 import com.moim.feature.main.navigation.webViewScreenEntry
 import com.moim.feature.main.screen.ui.MainBottomBar
 
@@ -85,10 +88,13 @@ fun MainScreen(
                     planWriteScreenEntry(navigator, innerPadding)
                     reviewWriteScreenEntry(navigator, innerPadding)
                     participantListScreenEntry(navigator, innerPadding)
+                    participantListForLeaderChangeScreenEntry(navigator, innerPadding)
+                    userWithdrawalForLeaderChangeScreenEntry(navigator, innerPadding, navigateToIntro)
                     imageViewerScreenEntry(navigator, innerPadding)
                     profileUpdateScreenEntry(navigator, innerPadding)
                     alarmScreenEntry(navigator, innerPadding)
                     alarmSettingScreenEntry(navigator, innerPadding)
+                    themeSettingScreenEntry(navigator, innerPadding)
                     webViewScreenEntry(navigator, innerPadding)
                 }
 
@@ -96,7 +102,7 @@ fun MainScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(MoimTheme.colors.white),
+                        .background(MoimTheme.colors.bg.primary),
                 entries = navigationState.toEntries(entryProvider),
                 onBack = { navigator.goBack() },
                 transitionSpec = {

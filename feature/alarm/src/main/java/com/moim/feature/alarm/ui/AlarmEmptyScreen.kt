@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
 
@@ -35,9 +36,17 @@ fun AlarmEmptyScreen(modifier: Modifier = Modifier) {
         MoimText(
             text = stringResource(R.string.alarm_empty),
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray06,
+            color = MoimTheme.colors.text.text03,
         )
 
         Spacer(Modifier.weight(2f))
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun AlarmEmptyScreenPreview() {
+    MoimTheme {
+        AlarmEmptyScreen()
     }
 }

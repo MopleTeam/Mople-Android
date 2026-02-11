@@ -76,7 +76,7 @@ fun MeetingSettingProfile(
             MoimText(
                 text = meeting.name,
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
             if (isMeetingHost) {
                 Icon(
@@ -101,12 +101,12 @@ fun MeetingSettingProfile(
                 text =
                     buildAnnotatedString {
                         append(stringResource(R.string.meeting_setting_date_01))
-                        withStyle(style = SpanStyle(color = MoimTheme.colors.primary.primary)) { append(" ${meeting.sinceDays} ") }
+                        withStyle(style = SpanStyle(color = MoimTheme.colors.global.primary)) { append(" ${meeting.sinceDays} ") }
                         append(stringResource(R.string.meeting_setting_date_02))
                     },
                 overflow = TextOverflow.Ellipsis,
                 style = MoimTheme.typography.body01.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
     }
@@ -120,7 +120,7 @@ private fun MeetingSettingProfilePreview() {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .background(MoimTheme.colors.white),
+                    .background(MoimTheme.colors.bg.primary),
         ) {
             MeetingSettingProfile(
                 meeting =

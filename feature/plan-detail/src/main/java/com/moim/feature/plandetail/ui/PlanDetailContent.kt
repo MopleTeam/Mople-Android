@@ -73,7 +73,7 @@ fun PlanDetailContent(
             MoimText(
                 text = planItem.meetingName,
                 style = MoimTheme.typography.body02.semiBold,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
 
@@ -82,7 +82,7 @@ fun PlanDetailContent(
         MoimText(
             text = planItem.planName,
             style = MoimTheme.typography.heading.bold,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
             maxLine = 2,
         )
 
@@ -91,7 +91,7 @@ fun PlanDetailContent(
             MoimText(
                 text = planItem.description,
                 style = MoimTheme.typography.body01.regular,
-                color = MoimTheme.colors.gray.gray03,
+                color = MoimTheme.colors.text.text02,
                 singleLine = false,
             )
         }
@@ -134,8 +134,8 @@ fun PlanDetailContent(
             val btnTextRes = if (planItem.isParticipant) R.string.plan_detail_plan_apply_done else R.string.plan_detail_plan_apply
             val buttonColors =
                 moimButtomColors().copy(
-                    containerColor = if (planItem.isParticipant) MoimTheme.colors.tertiary else MoimTheme.colors.primary.primary,
-                    contentColor = if (planItem.isParticipant) MoimTheme.colors.gray.gray03 else MoimTheme.colors.white,
+                    containerColor = if (planItem.isParticipant) MoimTheme.colors.tertiary else MoimTheme.colors.global.primary,
+                    contentColor = if (planItem.isParticipant) MoimTheme.colors.text.text02 else MoimTheme.colors.bg.primary,
                 )
 
             Spacer(Modifier.height(16.dp))
@@ -185,7 +185,7 @@ private fun PlanInfoItem(
             modifier = Modifier.padding(horizontal = 4.dp),
             text = text,
             style = MoimTheme.typography.body01.medium,
-            color = MoimTheme.colors.gray.gray03,
+            color = MoimTheme.colors.text.text02,
             maxLine = 2,
         )
 

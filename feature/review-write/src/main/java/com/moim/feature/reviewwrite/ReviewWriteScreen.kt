@@ -46,7 +46,7 @@ fun ReviewWriteRoute(
 ) {
     val context = LocalContext.current
     val reviewWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white, padding = padding)
+    val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary, padding = padding)
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val multiPhotoPickerLauncher =
         rememberLauncherForActivityResult(
@@ -178,7 +178,7 @@ private fun ReviewWriteHeader() {
         MoimText(
             text = stringResource(R.string.review_write_header),
             style = MoimTheme.typography.heading.bold,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
             singleLine = false,
         )
     }

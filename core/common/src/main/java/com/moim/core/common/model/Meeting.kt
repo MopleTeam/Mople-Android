@@ -9,13 +9,11 @@ import java.time.ZonedDateTime
 @Serializable
 data class Meeting(
     val id: String = "",
-    val creatorId: String = "",
+    val hostId: String = "",
     val name: String = "",
     val imageUrl: String = "",
     val memberCount: Int = 1,
     val sinceDays: Int = 0,
     @Serializable(with = KZonedDateTimeSerializer::class)
     val lastPlanAt: ZonedDateTime? = null,
-) {
-    var isDeleted: Boolean = false
-}
+)

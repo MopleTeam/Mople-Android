@@ -15,9 +15,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
@@ -44,7 +44,7 @@ fun ErrorScreen(
         MoimText(
             text = stringResource(id = R.string.common_error),
             style = MoimTheme.typography.title02.semiBold,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         Spacer(Modifier.height(8.dp))
@@ -54,7 +54,7 @@ fun ErrorScreen(
             textAlign = TextAlign.Center,
             style = MoimTheme.typography.body01.regular,
             singleLine = false,
-            color = MoimTheme.colors.gray.gray02,
+            color = MoimTheme.colors.text.text02,
         )
 
         Spacer(Modifier.height(24.dp))
@@ -92,7 +92,7 @@ fun NotFoundErrorScreen(
             textAlign = TextAlign.Center,
             style = MoimTheme.typography.title03.medium,
             singleLine = false,
-            color = MoimTheme.colors.gray.gray05,
+            color = MoimTheme.colors.text.text04,
         )
 
         Spacer(Modifier.weight(1f))
@@ -110,7 +110,7 @@ fun NotFoundErrorScreen(
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun ErrorScreenPreview() {
     MoimTheme {
@@ -121,7 +121,7 @@ private fun ErrorScreenPreview() {
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun NotFoundErrorScreenPreview() {
     MoimTheme {

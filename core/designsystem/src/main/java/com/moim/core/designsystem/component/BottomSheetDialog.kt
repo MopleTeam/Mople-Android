@@ -30,8 +30,8 @@ fun MoimBottomSheetDialog(
         modifier = modifier,
         sheetState = sheetState,
         shape = shapes.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
-        containerColor = MoimTheme.colors.white,
-        contentColor = MoimTheme.colors.gray.gray02,
+        containerColor = MoimTheme.colors.bg.primary,
+        contentColor = MoimTheme.colors.text.text02,
         onDismissRequest = {
             keyboardController?.hide()
             focusManager.clearFocus()
@@ -39,7 +39,9 @@ fun MoimBottomSheetDialog(
         },
         dragHandle = dragHandle,
     ) {
-        MoimTheme {
+        MoimTheme(
+            darkTheme = MoimTheme.isDarkTheme,
+        ) {
             content()
         }
     }

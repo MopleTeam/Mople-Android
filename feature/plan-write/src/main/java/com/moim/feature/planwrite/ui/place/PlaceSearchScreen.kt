@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,11 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Place
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
@@ -76,7 +77,7 @@ fun PlaceSearchScreen(
                     ),
                 singleLine = false,
                 style = MoimTheme.typography.body01.medium,
-                color = MoimTheme.colors.gray.gray06,
+                color = MoimTheme.colors.text.text04,
             )
         }
     }
@@ -93,8 +94,13 @@ fun PlaceItem(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(if (selectedPlace?.roadAddress == place.roadAddress) MoimTheme.colors.bg.primary else MoimTheme.colors.white)
-                .onSingleClick { onUiAction(PlanWriteUiAction.OnClickSearchPlace(place)) }
+                .background(
+                    if (selectedPlace?.roadAddress == place.roadAddress) {
+                        MoimTheme.colors.bg.primary
+                    } else {
+                        MoimTheme.colors.bg.primary
+                    },
+                ).onSingleClick { onUiAction(PlanWriteUiAction.OnClickSearchPlace(place)) }
                 .padding(20.dp),
     ) {
         Icon(
@@ -113,20 +119,20 @@ fun PlaceItem(
                 modifier = Modifier.fillMaxWidth(),
                 text = place.title,
                 style = MoimTheme.typography.title03.medium,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
             Spacer(Modifier.height(4.dp))
             MoimText(
                 modifier = Modifier.fillMaxWidth(),
                 text = place.roadAddress,
                 style = MoimTheme.typography.body01.regular,
-                color = MoimTheme.colors.gray.gray05,
+                color = MoimTheme.colors.text.text04,
             )
         }
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun PlaceItemPreview() {
     MoimTheme {
@@ -137,6 +143,18 @@ private fun PlaceItemPreview() {
                     Place(title = "CGV 청담씨네마시티", roadAddress = "서울 강남구 도산대로 323 8층"),
                     Place(title = "메가박스 센트럴", roadAddress = "서울 서초구 신반포로 176 센트럴시티빌딩 지하1층"),
                 ),
+            selectedPlace = Place(title = "메가박스 센트럴", roadAddress = "서울 서초구 신반포로 176 센트럴시티빌딩 지하1층"),
+        )
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun PlaceEmptyPreview() {
+    MoimTheme {
+        PlaceSearchScreen(
+            modifier = Modifier.fillMaxSize(),
+            searchPlaces = emptyList(),
             selectedPlace = Place(title = "메가박스 센트럴", roadAddress = "서울 서초구 신반포로 176 센트럴시티빌딩 지하1층"),
         )
     }

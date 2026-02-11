@@ -1,7 +1,6 @@
 package com.moim.feature.home
 
 import androidx.lifecycle.viewModelScope
-import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.Plan
 import com.moim.core.common.model.User
 import com.moim.core.common.model.ViewIdType
@@ -69,7 +68,7 @@ class HomeViewModel @Inject constructor(
                                 HomeUiState.Success(
                                     user = user,
                                     plans = meetContainer.plans,
-                                    meetings = meetContainer.meetings,
+                                    hasJoinedMeet = meetContainer.hasJoinedMeet,
                                 ),
                             )
                         }
@@ -86,19 +85,10 @@ class HomeViewModel @Inject constructor(
                     uiState.checkState<HomeUiState.Success> {
                         when (action) {
                             is MeetingAction.MeetingCreate -> {
-                                val meetings = meetings.toMutableList().apply { add(action.meeting) }
-                                setUiState(copy(meetings = meetings))
+                                setUiState(copy(hasJoinedMeet = true))
                             }
 
                             is MeetingAction.MeetingUpdate -> {
-                                val meetings =
-                                    meetings.toMutableList().apply {
-                                        withIndex()
-                                            .firstOrNull { action.meeting.id == it.value.id }
-                                            ?.index
-                                            ?.let { index -> set(index, action.meeting) }
-                                    }
-
                                 val plans =
                                     plans.map { plan ->
                                         if (plan.meetingId == action.meeting.id) {
@@ -111,7 +101,12 @@ class HomeViewModel @Inject constructor(
                                         }
                                     }
 
-                                setUiState(copy(meetings = meetings, plans = plans))
+                                setUiState(copy(plans = plans))
+                            }
+
+                            is MeetingAction.MeetingDelete,
+                            is MeetingAction.MeetingInvalidate, -> {
+                                meetingPlansResult.restart()
                             }
 
                             else -> {
@@ -212,7 +207,7 @@ class HomeViewModel @Inject constructor(
 
     private fun navigateToPlanWrite() {
         uiState.checkState<HomeUiState.Success> {
-            if (meetings.isEmpty()) {
+            if (!hasJoinedMeet) {
                 setUiEvent(HomeUiEvent.ShowToastMessage(ToastMessage.EmptyPlanErrorMessage))
             } else {
                 setUiEvent(HomeUiEvent.NavigateToPlanWrite)
@@ -227,7 +222,7 @@ sealed interface HomeUiState : UiState {
     data class Success(
         val user: User,
         val plans: List<Plan> = emptyList(),
-        val meetings: List<Meeting> = emptyList(),
+        val hasJoinedMeet: Boolean = false,
         val isPermissionCheck: Boolean = false,
     ) : HomeUiState
 

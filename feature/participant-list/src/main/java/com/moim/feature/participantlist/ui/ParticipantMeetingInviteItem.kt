@@ -51,7 +51,7 @@ fun ParticipantMeetingInviteItem(
                         .size(18.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.ic_add),
                 contentDescription = "",
-                tint = MoimTheme.colors.primary.primary,
+                tint = MoimTheme.colors.global.primary,
             )
         }
 
@@ -60,7 +60,7 @@ fun ParticipantMeetingInviteItem(
         MoimText(
             text = stringResource(R.string.common_invite),
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.primary.primary,
+            color = MoimTheme.colors.global.primary,
         )
     }
 }

@@ -86,7 +86,7 @@ fun PlaceContainerScreen(
                         Modifier
                             .fillMaxSize()
                             .imePadding()
-                            .background(MoimTheme.colors.white),
+                            .background(MoimTheme.colors.bg.primary),
                     isSearchResult = searchKeyword.isNullOrEmpty().not(),
                     searchPlaces = searchPlaces,
                     selectedPlace = selectedPlace,

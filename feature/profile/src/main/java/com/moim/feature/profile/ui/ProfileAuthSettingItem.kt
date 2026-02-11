@@ -35,7 +35,7 @@ fun ProfileAuthSettingContainer(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .onSingleClick { onUiAction(ProfileUiAction.OnShowUserDeleteDialog(true)) },
+                    .onSingleClick { onUiAction(ProfileUiAction.OnClickUserWithdrawal) },
             text = stringResource(R.string.profile_user_delete),
         )
     }
@@ -57,7 +57,7 @@ fun ProfileAuthSettingItem(
                     .padding(vertical = 16.dp, horizontal = 20.dp),
             text = text,
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
     }
 }

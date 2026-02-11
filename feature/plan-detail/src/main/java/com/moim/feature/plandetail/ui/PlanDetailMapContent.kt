@@ -78,7 +78,7 @@ fun PlanDetailMapContent(
                     modifier = Modifier.size(54.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_location),
                     contentDescription = "",
-                    tint = MoimTheme.colors.primary.primary,
+                    tint = MoimTheme.colors.global.primary,
                 )
             }
         }

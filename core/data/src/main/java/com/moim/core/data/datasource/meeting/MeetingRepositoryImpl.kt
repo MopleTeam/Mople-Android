@@ -34,6 +34,22 @@ internal class MeetingRepositoryImpl @Inject constructor(
             throw converterException(e)
         }
 
+    override suspend fun getMeetingsForHost(
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<Meeting>> =
+        try {
+            meetingApi
+                .getMeetingsForHost(
+                    cursor = cursor,
+                    size = size,
+                ).asItem {
+                    it.map(MeetingResponse::asItem)
+                }
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+
     override fun getMeeting(meetingId: String) =
         catchFlow {
             emit(meetingApi.getMeeting(meetingId).asItem())
@@ -53,6 +69,26 @@ internal class MeetingRepositoryImpl @Inject constructor(
             meetingApi
                 .getMeetingParticipants(
                     id = meetingId,
+                    cursor = cursor,
+                    size = size,
+                ).asItem {
+                    it.map(UserResponse::asItem)
+                }
+        } catch (e: Exception) {
+            throw converterException(e)
+        }
+
+    override suspend fun getMeetingParticipantsForSearch(
+        meetingId: String,
+        keyword: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<User>> =
+        try {
+            meetingApi
+                .getMeetingParticipantsForSearch(
+                    id = meetingId,
+                    keyword = keyword,
                     cursor = cursor,
                     size = size,
                 ).asItem {
@@ -92,6 +128,22 @@ internal class MeetingRepositoryImpl @Inject constructor(
             )
         }
 
+    override fun updateMeetingLeader(
+        meetingId: String,
+        newHostId: String,
+    ): Flow<Unit> =
+        catchFlow {
+            emit(
+                meetingApi.updateMeetingLeader(
+                    id = meetingId,
+                    params =
+                        jsonOf(
+                            KEY_NEW_HOST_ID to newHostId,
+                        ),
+                ),
+            )
+        }
+
     override fun joinMeeting(code: String): Flow<Meeting> =
         catchFlow {
             emit(meetingApi.joinMeeting(code).asItem())
@@ -105,5 +157,6 @@ internal class MeetingRepositoryImpl @Inject constructor(
     companion object {
         private const val KEY_NAME = "name"
         private const val KEY_IMAGE = "image"
+        private const val KEY_NEW_HOST_ID = "newHostId"
     }
 }

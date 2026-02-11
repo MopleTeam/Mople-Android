@@ -31,7 +31,7 @@ fun MainBottomBar(
     onTabSelected: (MainTab) -> Unit,
 ) {
     NavigationBar(
-        containerColor = MoimTheme.colors.white,
+        containerColor = MoimTheme.colors.bg.primary,
     ) {
         tabs.forEach { tab ->
             MainBottomBarItem(
@@ -56,7 +56,7 @@ fun RowScope.MainBottomBarItem(
                 .clip(RoundedCornerShape(50))
                 .selectable(
                     selected = isSelected,
-                    indication = ripple(bounded = true, color = MoimTheme.colors.gray.gray01),
+                    indication = ripple(bounded = true, color = MoimTheme.colors.text.text01),
                     role = null,
                     interactionSource = remember { MutableInteractionSource() },
                     onClick = onClick,
@@ -76,9 +76,10 @@ fun RowScope.MainBottomBarItem(
             MoimText(
                 text = tab.label,
                 style =
-                    MoimTheme.typography.body02.regular
+                    MoimTheme.typography.body02
+                        .regular
                         .copy(fontSize = 10.sp),
-                color = if (isSelected) MoimTheme.colors.secondary else MoimTheme.colors.gray.gray05,
+                color = if (isSelected) MoimTheme.colors.text.text01 else MoimTheme.colors.text.text04,
             )
         }
     }

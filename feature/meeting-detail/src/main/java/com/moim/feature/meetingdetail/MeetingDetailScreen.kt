@@ -64,7 +64,7 @@ fun MeetingDetailRoute(
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val meetingDetailUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
@@ -160,7 +160,7 @@ fun MeetingDetailScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(MoimTheme.colors.bg.primary),
+                    .background(MoimTheme.colors.bg.secondary),
         ) {
             if (plans == null || reviews == null) return
 

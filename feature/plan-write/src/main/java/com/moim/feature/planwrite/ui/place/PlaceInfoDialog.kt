@@ -51,7 +51,7 @@ fun PlaceInfoDialog(
             MoimText(
                 text = place.title,
                 style = MoimTheme.typography.title02.semiBold,
-                color = MoimTheme.colors.gray.gray02,
+                color = MoimTheme.colors.text.text01,
             )
             Spacer(Modifier.height(16.dp))
 
@@ -59,7 +59,7 @@ fun PlaceInfoDialog(
                 text = place.roadAddress,
                 singleLine = false,
                 style = MoimTheme.typography.body01.regular,
-                color = MoimTheme.colors.gray.gray05,
+                color = MoimTheme.colors.text.text04,
             )
 
             Spacer(Modifier.height(20.dp))

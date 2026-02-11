@@ -84,6 +84,7 @@ fun Comment.createCommentUiModel(): CommentUiModel {
             }.flatten()
 
     return CommentUiModel(
+        commentId = this.commentId,
         comment = this,
         texts = commentTextUiModel,
         openGraph = this.openGraph,

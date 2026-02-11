@@ -67,8 +67,8 @@ internal fun MoimOutlinedTextField(
 ) {
     val textSelectionColor =
         TextSelectionColors(
-            handleColor = MoimTheme.colors.primary.primary,
-            backgroundColor = MoimTheme.colors.gray.gray04,
+            handleColor = MoimTheme.colors.global.primary,
+            backgroundColor = MoimTheme.colors.text.text03,
         )
     val focusManager = LocalFocusManager.current
 
@@ -104,7 +104,7 @@ internal fun MoimOutlinedTextField(
                         maxHeightInLines = maxLines,
                     ),
                 interactionSource = interactionSource,
-                cursorBrush = SolidColor(MoimTheme.colors.primary.primary),
+                cursorBrush = SolidColor(MoimTheme.colors.global.primary),
                 decorator = { innerTextFiled ->
                     OutlinedTextFieldDefaults.DecorationBox(
                         value = textFieldState.text.toString(),
@@ -182,8 +182,8 @@ internal fun MoimOutlinedTextField(
 ) {
     val textSelectionColor =
         TextSelectionColors(
-            handleColor = MoimTheme.colors.primary.primary,
-            backgroundColor = MoimTheme.colors.gray.gray04,
+            handleColor = MoimTheme.colors.global.primary,
+            backgroundColor = MoimTheme.colors.text.text03,
         )
 
     CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColor) {
@@ -292,8 +292,8 @@ internal fun MoimOutlinedTextField(
 ) {
     val textSelectionColor =
         TextSelectionColors(
-            handleColor = MoimTheme.colors.primary.primary,
-            backgroundColor = MoimTheme.colors.gray.gray04,
+            handleColor = MoimTheme.colors.global.primary,
+            backgroundColor = MoimTheme.colors.text.text03,
         )
 
     CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColor) {

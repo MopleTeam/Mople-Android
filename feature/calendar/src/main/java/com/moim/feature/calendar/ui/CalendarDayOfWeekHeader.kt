@@ -26,7 +26,7 @@ fun CalendarDayOfWeekHeader(
                 textAlign = TextAlign.Center,
                 singleLine = false,
                 style = MoimTheme.typography.body01.medium,
-                color = if (selectedDayOfWeek == dayOfWeek) MoimTheme.colors.primary.primary else MoimTheme.colors.gray.gray05,
+                color = if (selectedDayOfWeek == dayOfWeek) MoimTheme.colors.global.primary else MoimTheme.colors.gray.gray05,
             )
         }
     }

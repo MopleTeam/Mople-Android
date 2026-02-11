@@ -11,12 +11,24 @@ interface MeetingRepository {
         size: Int,
     ): PaginationContainer<List<Meeting>>
 
+    suspend fun getMeetingsForHost(
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<Meeting>>
+
     fun getMeeting(meetingId: String): Flow<Meeting>
 
     fun getMeetingInviteCode(meetingId: String): Flow<String>
 
     suspend fun getMeetingParticipants(
         meetingId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<User>>
+
+    suspend fun getMeetingParticipantsForSearch(
+        meetingId: String,
+        keyword: String,
         cursor: String,
         size: Int,
     ): PaginationContainer<List<User>>
@@ -31,6 +43,11 @@ interface MeetingRepository {
         meetingName: String,
         meetingImageUrl: String?,
     ): Flow<Meeting>
+
+    fun updateMeetingLeader(
+        meetingId: String,
+        newHostId: String,
+    ): Flow<Unit>
 
     fun joinMeeting(code: String): Flow<Meeting>
 

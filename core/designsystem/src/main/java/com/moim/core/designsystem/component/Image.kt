@@ -49,7 +49,7 @@ fun NetworkImage(
 private fun NetworkImagePreview() {
     MaterialTheme {
         Column(
-            modifier = Modifier.background(MoimTheme.colors.white),
+            modifier = Modifier.background(MoimTheme.colors.bg.primary),
         ) {
             NetworkImage(
                 modifier = Modifier.size(120.dp),

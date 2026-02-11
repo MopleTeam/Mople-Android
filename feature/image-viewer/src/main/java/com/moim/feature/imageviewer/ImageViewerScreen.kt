@@ -35,7 +35,7 @@ fun ImageViewerRoute(
     viewModel: ImageViewerViewModel = hiltViewModel(),
     navigateToBack: () -> Unit,
 ) {
-    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.black)
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.global.black)
     val imageViewerUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
@@ -72,7 +72,7 @@ fun ImageViewerScreen(
     TrackScreenViewEvent(screenName = "image_viewer")
     MoimScaffold(
         modifier = modifier,
-        backgroundColor = MoimTheme.colors.black,
+        backgroundColor = MoimTheme.colors.global.black,
         topBar = {
             ImageViewerTopAppbar(
                 modifier = Modifier.fillMaxWidth(),
@@ -112,23 +112,22 @@ private fun ImageViewerTopAppbar(
 ) {
     MoimTopAppbar(
         modifier = modifier,
-        backgroundColor = MoimTheme.colors.black,
+        backgroundColor = MoimTheme.colors.global.black,
         navigationIcon = {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_back),
                 contentDescription = "",
-                tint = MoimTheme.colors.white,
+                tint = MoimTheme.colors.global.white,
             )
         },
         onClickNavigate = onClickDismiss,
         title = title,
-        titleColor = MoimTheme.colors.white,
         actions = {
             if (totalIndex > 1) {
                 MoimText(
                     text = "$currentIndex/$totalIndex",
                     style = MoimTheme.typography.title03.semiBold,
-                    color = MoimTheme.colors.gray.gray04,
+                    color = MoimTheme.colors.global.white,
                 )
             }
         },

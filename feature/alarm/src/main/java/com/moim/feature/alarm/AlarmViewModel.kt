@@ -1,27 +1,24 @@
 package com.moim.feature.alarm
 
 import androidx.lifecycle.viewModelScope
-import androidx.paging.cachedIn
-import androidx.paging.map
+import com.moim.core.common.model.Notification
 import com.moim.core.common.model.NotificationType
+import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.ViewIdType
-import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.notification.NotificationRepository
-import com.moim.core.domain.usecase.GetNotificationsUseCase
+import com.moim.core.ui.util.isActiveCheck
 import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.PagingHelper
+import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
+import com.moim.core.ui.view.checkState
 import com.moim.feature.alarm.model.AlarmUiModel
 import com.moim.feature.alarm.model.asUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -29,24 +26,94 @@ import javax.inject.Inject
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
-    getNotificationsUseCase: GetNotificationsUseCase,
 ) : BaseViewModel() {
-    val alarmItems =
-        getNotificationsUseCase()
-            .map { pagingData -> pagingData.map { it.asUiModel() } }
-            .cachedIn(viewModelScope)
-    val totalCount =
-        getNotificationTotalCount()
-            .filterIsInstance<Result.Success<Int>>()
-            .mapLatest { it.data }
-            .stateIn(viewModelScope, SharingStarted.Lazily, 0)
+    private var pagingJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            setUiState(AlarmUiState())
+            getAlarms()
+        }
+    }
 
     fun onUiAction(uiAction: AlarmUiAction) {
         when (uiAction) {
-            is AlarmUiAction.OnClickBack -> setUiEvent(AlarmUiEvent.NavigateToBack)
-            is AlarmUiAction.OnClickRefresh -> setUiEvent(AlarmUiEvent.RefreshPagingData)
-            is AlarmUiAction.OnUpdateNotificationCount -> clearNotificationCount()
-            is AlarmUiAction.OnClickAlarm -> navigateToNotifyTarget(uiAction.item)
+            is AlarmUiAction.OnClickBack -> {
+                setUiEvent(AlarmUiEvent.NavigateToBack)
+            }
+
+            is AlarmUiAction.OnClickRefresh -> {
+                val uiState = uiState.value as? AlarmUiState ?: return
+                getAlarms(uiState.pagingInfo.nextCursor)
+            }
+
+            is AlarmUiAction.OnLoadNextPage -> {
+                val uiState = uiState.value as? AlarmUiState ?: return
+                getAlarms(uiState.pagingInfo.nextCursor)
+            }
+
+            is AlarmUiAction.OnUpdateNotificationCount -> {
+                clearNotificationCount()
+            }
+
+            is AlarmUiAction.OnClickAlarm -> {
+                navigateToNotifyTarget(uiAction.item)
+            }
+        }
+    }
+
+    private fun getAlarms(cursor: String? = null) {
+        if (pagingJob.isActiveCheck()) return
+        pagingJob =
+            viewModelScope.launch {
+                handlePagingData(
+                    pagingInfo = null,
+                    isLoading = true,
+                    cursor = cursor,
+                )
+
+                val pagingInfo =
+                    runCatching {
+                        notificationRepository.getNotifications(
+                            cursor = cursor ?: "",
+                            size = 30,
+                        )
+                    }.getOrNull()
+
+                handlePagingData(
+                    pagingInfo = pagingInfo,
+                    isLoading = false,
+                    cursor = cursor,
+                )
+            }
+    }
+
+    private fun handlePagingData(
+        pagingInfo: PaginationContainer<List<Notification>>?,
+        isLoading: Boolean,
+        cursor: String?,
+    ) {
+        uiState.checkState<AlarmUiState> {
+            val result =
+                PagingHelper.handlePagingResult(
+                    pagingData = pagingInfo,
+                    isLoading = isLoading,
+                    currentPagingInfo = this.pagingInfo,
+                    currentItems = alarms,
+                    isInitialLoad = cursor == null,
+                    transform = { notifications ->
+                        notifications.map { notification ->
+                            notification.asUiModel()
+                        }
+                    },
+                )
+
+            setUiState(
+                copy(
+                    pagingInfo = result.pagingInfo,
+                    alarms = result.items,
+                ),
+            )
         }
     }
 
@@ -57,17 +124,6 @@ class AlarmViewModel @Inject constructor(
             }
         }
     }
-
-    private fun getNotificationTotalCount() =
-        flow {
-            emit(
-                notificationRepository
-                    .getNotifications(
-                        cursor = "",
-                        size = 1,
-                    ).totalCount,
-            )
-        }.asResult()
 
     private fun navigateToNotifyTarget(alarmUiModel: AlarmUiModel) {
         when (alarmUiModel.type) {
@@ -110,6 +166,11 @@ class AlarmViewModel @Inject constructor(
     }
 }
 
+data class AlarmUiState(
+    val pagingInfo: PagingUiState = PagingUiState(),
+    val alarms: List<AlarmUiModel> = emptyList(),
+) : UiState
+
 sealed interface AlarmUiAction : UiAction {
     data object OnClickBack : AlarmUiAction
 
@@ -120,6 +181,8 @@ sealed interface AlarmUiAction : UiAction {
     ) : AlarmUiAction
 
     data object OnUpdateNotificationCount : AlarmUiAction
+
+    data object OnLoadNextPage : AlarmUiAction
 }
 
 sealed interface AlarmUiEvent : UiEvent {
@@ -132,6 +195,4 @@ sealed interface AlarmUiEvent : UiEvent {
     data class NavigateToPlanDetail(
         val viewIdType: ViewIdType,
     ) : AlarmUiEvent
-
-    data object RefreshPagingData : AlarmUiEvent
 }

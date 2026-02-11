@@ -47,7 +47,7 @@ fun PlanDetailReviewImages(
             MoimText(
                 text = stringResource(R.string.plan_detail_image),
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
 
             Spacer(Modifier.weight(1f))
@@ -55,7 +55,7 @@ fun PlanDetailReviewImages(
             MoimText(
                 text = stringResource(R.string.unit_count, images.size.decimalFormatString()),
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
 

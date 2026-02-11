@@ -100,6 +100,11 @@ class MainNavigator(
 
     fun navigateToParticipantList(viewIdType: ViewIdType) = navigate(DetailRoute.ParticipantList(viewIdType))
 
+    fun navigateToParticipantListForLeaderChange(viewIdType: ViewIdType.MeetId) =
+        navigate(DetailRoute.ParticipantListForLeaderChange(viewIdType))
+
+    fun navigateToUserWithdrawalForLeaderChange() = navigate(DetailRoute.UserWithdrawalForLeaderChange)
+
     fun navigateToImageViewer(
         title: String,
         images: List<String>,
@@ -112,6 +117,8 @@ class MainNavigator(
     fun navigateToAlarm() = navigate(DetailRoute.Alarm)
 
     fun navigateToAlarmSetting() = navigate(DetailRoute.AlarmSetting)
+
+    fun navigateToThemeSetting() = navigate(DetailRoute.ThemeSetting)
 
     fun navigateToWebView(webUrl: String) = navigate(DetailRoute.WebView(webUrl))
 }

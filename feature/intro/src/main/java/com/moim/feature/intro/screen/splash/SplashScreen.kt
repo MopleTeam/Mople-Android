@@ -22,6 +22,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
@@ -81,15 +82,23 @@ private fun SplashScreen(
     onUiAction: (SplashUiAction) -> Unit,
 ) {
     TrackScreenViewEvent(screenName = "splash")
+
+    val iconRes =
+        if (MoimTheme.isDarkTheme) {
+            R.drawable.ic_logo_full_dark
+        } else {
+            R.drawable.ic_logo_full_light
+        }
+
     Box(
         modifier =
             Modifier
-                .containerScreen(backgroundColor = MoimTheme.colors.white)
+                .containerScreen(backgroundColor = MoimTheme.colors.bg.primary)
                 .systemBarsPadding(),
     ) {
         Icon(
             modifier = Modifier.align(Alignment.Center),
-            imageVector = ImageVector.vectorResource(R.drawable.ic_logo_full),
+            imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = "",
             tint = Color.Unspecified,
         )
@@ -118,7 +127,7 @@ private fun SplashScreen(
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun SplashScreenPreview() {
     SplashScreen(

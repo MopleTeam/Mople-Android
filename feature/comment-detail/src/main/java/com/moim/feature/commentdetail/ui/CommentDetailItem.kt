@@ -50,14 +50,14 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.decimalFormatString
-import com.moim.feature.commentdetail.CommentDetailAction
+import com.moim.feature.commentdetail.CommentDetailUiAction
 
 @Composable
 fun CommentDetailItem(
     modifier: Modifier = Modifier,
     userId: String,
     comment: CommentUiModel,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     Row(
         modifier =
@@ -76,7 +76,7 @@ fun CommentDetailItem(
                     .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
                     .onSingleClick {
                         onUiAction(
-                            CommentDetailAction.OnClickUserProfileImage(
+                            CommentDetailUiAction.OnClickUserProfileImage(
                                 imageUrl = comment.comment.writer.imageUrl,
                                 userName = comment.comment.writer.nickname,
                             ),
@@ -125,7 +125,7 @@ private fun CommentHeader(
     modifier: Modifier = Modifier,
     userId: String,
     comment: Comment,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -134,7 +134,7 @@ private fun CommentHeader(
         MoimText(
             text = comment.writer.nickname,
             style = MoimTheme.typography.body01.semiBold,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         Spacer(Modifier.width(8.dp))
@@ -143,7 +143,7 @@ private fun CommentHeader(
             modifier = Modifier.weight(1f),
             text = comment.commentAt.parseDateString(stringResource(R.string.regex_date_month_day)),
             style = MoimTheme.typography.body02.regular,
-            color = MoimTheme.colors.gray.gray04,
+            color = MoimTheme.colors.text.text03,
         )
 
         MoimIconButton(
@@ -151,12 +151,12 @@ private fun CommentHeader(
             onClick = {
                 val uiAction =
                     if (userId == comment.writer.userId) {
-                        CommentDetailAction.OnShowCommentEditDialog(
+                        CommentDetailUiAction.OnShowCommentEditDialog(
                             isShow = true,
                             comment = comment,
                         )
                     } else {
-                        CommentDetailAction.OnShowCommentReportDialog(
+                        CommentDetailUiAction.OnShowCommentReportDialog(
                             isShow = true,
                             comment = comment,
                         )
@@ -172,12 +172,12 @@ private fun CommentHeader(
 private fun CommentText(
     modifier: Modifier = Modifier,
     texts: List<CommentTextUiModel>,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     val text = texts.joinToString("") { it.content }
     val spanStyle =
         SpanStyle(
-            color = MoimTheme.colors.gray.gray03,
+            color = MoimTheme.colors.text.text02,
             fontFamily = FontFamily(Font(R.font.pretendard_medium, FontWeight.W600)),
             fontWeight = FontWeight.W600,
             textDecoration = TextDecoration.None,
@@ -193,7 +193,7 @@ private fun CommentText(
                     }
 
                     is CommentTextUiModel.MentionText -> {
-                        withStyle(style = spanStyle.copy(color = MoimTheme.colors.primary.primary)) {
+                        withStyle(style = spanStyle.copy(color = MoimTheme.colors.global.primary)) {
                             append(uiModel.content)
                         }
                     }
@@ -204,7 +204,7 @@ private fun CommentText(
                         withStyle(
                             style =
                                 spanStyle.copy(
-                                    color = MoimTheme.colors.primary.primary,
+                                    color = MoimTheme.colors.global.primary,
                                     textDecoration = TextDecoration.Underline,
                                 ),
                         ) {
@@ -214,7 +214,7 @@ private fun CommentText(
                             clickable =
                                 LinkAnnotation.Clickable(
                                     tag = "URL",
-                                    linkInteractionListener = { onUiAction(CommentDetailAction.OnClickCommentWebLink(uiModel.content)) },
+                                    linkInteractionListener = { onUiAction(CommentDetailUiAction.OnClickCommentWebLink(uiModel.content)) },
                                 ),
                             start = startIndex,
                             end = startIndex + uiModel.content.length,
@@ -234,7 +234,7 @@ private fun CommentText(
 @Composable
 private fun CommentOpenGraph(
     openGraph: OpenGraph,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     Column(
         modifier =
@@ -242,7 +242,7 @@ private fun CommentOpenGraph(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(MoimTheme.colors.tertiary)
-                .onSingleClick(onClick = { onUiAction(CommentDetailAction.OnClickCommentWebLink(openGraph.url)) }),
+                .onSingleClick(onClick = { onUiAction(CommentDetailUiAction.OnClickCommentWebLink(openGraph.url)) }),
     ) {
         NetworkImage(
             modifier =
@@ -263,14 +263,14 @@ private fun CommentOpenGraph(
                 MoimText(
                     text = openGraph.title ?: "",
                     style = MoimTheme.typography.body02.semiBold,
-                    color = MoimTheme.colors.black,
+                    color = MoimTheme.colors.text.text01,
                 )
                 Spacer(Modifier.height(4.dp))
             }
             MoimText(
                 text = openGraph.description ?: "",
                 style = MoimTheme.typography.body02.regular,
-                color = MoimTheme.colors.black,
+                color = MoimTheme.colors.text.text01,
             )
         }
     }
@@ -279,13 +279,13 @@ private fun CommentOpenGraph(
 @Composable
 private fun CommentFooter(
     comment: Comment,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
-    val likeResource =
+    val iconColor =
         if (comment.isLike) {
-            R.drawable.ic_thumb_up_fill
+            MoimTheme.colors.secondary
         } else {
-            R.drawable.ic_thumb_up
+            MoimTheme.colors.icon
         }
 
     Column {
@@ -296,9 +296,10 @@ private fun CommentFooter(
         ) {
             CommentIcon(
                 modifier = Modifier.padding(end = 8.dp),
-                iconRes = likeResource,
+                iconRes = R.drawable.ic_thumb_up,
                 iconCount = comment.likeCount,
-                onClick = { onUiAction(CommentDetailAction.OnClickCommentLike(comment = comment)) },
+                iconColor = iconColor,
+                onClick = { onUiAction(CommentDetailUiAction.OnClickCommentLike(comment = comment)) },
             )
         }
     }
@@ -309,6 +310,7 @@ private fun CommentIcon(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
     iconCount: Int,
+    iconColor: Color,
     onClick: () -> Unit,
 ) {
     Row(
@@ -323,14 +325,14 @@ private fun CommentIcon(
         Icon(
             imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = "",
-            tint = Color.Unspecified,
+            tint = iconColor,
         )
 
         if (iconCount > 0) {
             Text(
                 text = iconCount.decimalFormatString(),
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

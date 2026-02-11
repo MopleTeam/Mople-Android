@@ -101,7 +101,7 @@ fun PlanDetailRoute(
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val planDetailUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
@@ -269,7 +269,7 @@ fun PlanDetailScreen(
                                     modifier =
                                         Modifier
                                             .fillMaxWidth()
-                                            .background(MoimTheme.colors.white)
+                                            .background(MoimTheme.colors.bg.primary)
                                             .animateItem(),
                                 )
                             }
@@ -281,7 +281,7 @@ fun PlanDetailScreen(
                                     modifier =
                                         Modifier
                                             .fillMaxWidth()
-                                            .background(MoimTheme.colors.white)
+                                            .background(MoimTheme.colors.bg.primary)
                                             .animateItem(),
                                     onClickRetry = comments::retry,
                                 )

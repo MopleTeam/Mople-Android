@@ -39,7 +39,7 @@ fun MeetingSettingParticipantsInfo(
             modifier = Modifier.weight(1f),
             text = stringResource(R.string.meeting_setting_participants),
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         Row(
@@ -48,7 +48,7 @@ fun MeetingSettingParticipantsInfo(
             MoimText(
                 text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
                 style = MoimTheme.typography.title03.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
             Spacer(Modifier.width(4.dp))
             Icon(

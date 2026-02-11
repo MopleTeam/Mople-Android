@@ -33,7 +33,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimTextFieldColors
-import com.moim.feature.commentdetail.CommentDetailAction
+import com.moim.feature.commentdetail.CommentDetailUiAction
 
 @Composable
 fun CommentDetailBottomBar(
@@ -41,7 +41,7 @@ fun CommentDetailBottomBar(
     updateComment: Comment? = null,
     commentState: TextFieldState = TextFieldState(),
     selectedMentions: List<User>,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -54,7 +54,7 @@ fun CommentDetailBottomBar(
 
     LaunchedEffect(commentState.text) {
         if (commentState.text.isEmpty()) {
-            onUiAction(CommentDetailAction.OnShowMentionDialog(null))
+            onUiAction(CommentDetailUiAction.OnShowMentionDialog(null))
             return@LaunchedEffect
         }
 
@@ -63,9 +63,9 @@ fun CommentDetailBottomBar(
 
         if (lastAtIndex != -1) {
             val mentionText = textUntilCursor.substring(lastAtIndex + 1)
-            onUiAction(CommentDetailAction.OnShowMentionDialog(mentionText))
+            onUiAction(CommentDetailUiAction.OnShowMentionDialog(mentionText))
         } else {
-            onUiAction(CommentDetailAction.OnShowMentionDialog(null))
+            onUiAction(CommentDetailUiAction.OnShowMentionDialog(null))
         }
     }
 
@@ -85,7 +85,7 @@ fun CommentDetailBottomBar(
                         .padding(vertical = 4.dp, horizontal = 8.dp),
                 text = stringResource(R.string.plan_detail_comment_update_typing),
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
 
@@ -127,12 +127,12 @@ fun CommentDetailBottomBar(
                         .size(40.dp)
                         .align(Alignment.CenterEnd),
                 iconRes = R.drawable.ic_arrow_up,
-                backgroundColor = if (commentState.text.isNotEmpty()) MoimTheme.colors.primary.primary else MoimTheme.colors.primary.disable,
+                backgroundColor = if (commentState.text.isNotEmpty()) MoimTheme.colors.global.primary else MoimTheme.colors.primary.disable,
                 enable = commentState.text.isNotEmpty(),
                 onClick = {
                     keyboardController?.hide()
                     focusManager.clearFocus()
-                    onUiAction(CommentDetailAction.OnClickCommentUpload(updateComment))
+                    onUiAction(CommentDetailUiAction.OnClickCommentUpload(updateComment))
                 },
             )
         }
@@ -144,8 +144,8 @@ fun HighlightTextView(
     keywords: List<String>,
     currentMessage: String,
     modifier: Modifier = Modifier,
-    highlightColor: Color = MoimTheme.colors.primary.primary,
-    textColor: Color = MoimTheme.colors.gray.gray01,
+    highlightColor: Color = MoimTheme.colors.global.primary,
+    textColor: Color = MoimTheme.colors.text.text01,
 ) {
     val annotatedString =
         buildAnnotatedString {

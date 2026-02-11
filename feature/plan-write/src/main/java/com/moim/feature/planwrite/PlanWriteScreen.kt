@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -31,6 +30,7 @@ import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.util.parseDateString
 import com.moim.core.common.util.parseLongTime
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimScaffold
@@ -58,7 +58,7 @@ fun PlanWriteRoute(
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val planWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.white)
+    val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
 
     BackHandler {
         viewModel.onUiAction(PlanWriteUiAction.OnClickBack)
@@ -172,7 +172,7 @@ fun PlanWriteScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .background(MoimTheme.colors.white)
+                        .background(MoimTheme.colors.bg.primary)
                         .padding(20.dp),
             ) {
                 MoimPrimaryButton(
@@ -221,12 +221,12 @@ fun PlanWriteScreen(
     LoadingDialog(isLoading)
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun PlanWriteScreenPreview() {
     MoimTheme {
         PlanWriteScreen(
-            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.white),
+            modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
             uiState = PlanWriteUiState.PlanWrite(),
         )
     }

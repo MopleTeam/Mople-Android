@@ -29,13 +29,13 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.commentdetail.CommentDetailAction
+import com.moim.feature.commentdetail.CommentDetailUiAction
 
 @Composable
 fun CommentDetailMentionDialog(
     modifier: Modifier = Modifier,
     userList: List<User>,
-    onUiAction: (CommentDetailAction) -> Unit,
+    onUiAction: (CommentDetailUiAction) -> Unit,
 ) {
     Column(
         modifier =
@@ -43,7 +43,7 @@ fun CommentDetailMentionDialog(
                 .fillMaxWidth()
                 .shadow(elevation = 12.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(MoimTheme.colors.white),
+                .background(MoimTheme.colors.bg.primary),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
@@ -57,7 +57,7 @@ fun CommentDetailMentionDialog(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .onSingleClick { onUiAction(CommentDetailAction.OnClickMentionUser(user)) }
+                            .onSingleClick { onUiAction(CommentDetailUiAction.OnClickMentionUser(user)) }
                             .padding(vertical = 8.dp, horizontal = 24.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

@@ -40,6 +40,10 @@ fun ProfileSettingContainer(
             onClick = { onUiAction(ProfileUiAction.OnClickAlarmSetting) },
         )
         ProfileSettingItem(
+            text = stringResource(R.string.profile_theme),
+            onClick = { onUiAction(ProfileUiAction.OnClickThemeSetting) },
+        )
+        ProfileSettingItem(
             text = stringResource(R.string.profile_privacy_policy),
             onClick = { onUiAction(ProfileUiAction.OnClickPrivacyPolicy) },
         )
@@ -70,7 +74,7 @@ fun ProfileSettingItem(
             text = text,
             singleLine = false,
             style = MoimTheme.typography.title03.medium,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         Spacer(Modifier.width(4.dp))
@@ -86,7 +90,7 @@ fun ProfileSettingItem(
                 text = subText,
                 singleLine = false,
                 style = MoimTheme.typography.title03.medium,
-                color = MoimTheme.colors.gray.gray06,
+                color = MoimTheme.colors.text.text04,
             )
         }
     }

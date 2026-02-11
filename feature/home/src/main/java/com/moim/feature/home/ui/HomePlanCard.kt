@@ -24,17 +24,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.model.Plan
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.color_F6F8FA
 import com.moim.core.ui.util.decimalFormatString
 import com.moim.feature.home.HomeUiAction
 import com.moim.feature.home.OnHomeUiAction
@@ -66,7 +65,7 @@ fun HomePlanCard(
             MoimText(
                 text = plan.planName,
                 style = MoimTheme.typography.title01.bold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
             Spacer(Modifier.height(16.dp))
 
@@ -124,7 +123,7 @@ private fun MeetingInfoTopAppbar(
                     .padding(horizontal = 8.dp),
             text = groupName,
             style = MoimTheme.typography.body02.semiBold,
-            color = MoimTheme.colors.gray.gray04,
+            color = MoimTheme.colors.text.text03,
         )
 
         Icon(
@@ -161,7 +160,7 @@ private fun MeetingInfoText(
                     .padding(start = 4.dp),
             text = text,
             style = MoimTheme.typography.body02.medium,
-            color = MoimTheme.colors.gray.gray04,
+            color = MoimTheme.colors.text.text03,
             maxLine = maxLines,
             minLine = maxLines,
         )
@@ -193,7 +192,7 @@ private fun MeetingWeatherInfo(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(color = color_F6F8FA, shape = RoundedCornerShape(10.dp))
+                .background(color = MoimTheme.colors.bg.input, shape = RoundedCornerShape(10.dp))
                 .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -202,7 +201,7 @@ private fun MeetingWeatherInfo(
                 Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .size(32.dp)
-                    .background(MoimTheme.colors.white)
+                    .background(MoimTheme.colors.bg.primary)
                     .padding(4.dp),
         ) {
             NetworkImage(
@@ -220,7 +219,7 @@ private fun MeetingWeatherInfo(
                 text = notFoundText,
                 textAlign = TextAlign.Center,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         } else {
             MoimText(
@@ -230,19 +229,19 @@ private fun MeetingWeatherInfo(
                         .padding(horizontal = 12.dp),
                 text = stringResource(R.string.unit_weather, temperature.decimalFormatString()),
                 style = MoimTheme.typography.body01.semiBold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
 
             MoimText(
                 text = address,
                 style = MoimTheme.typography.body02.medium,
-                color = MoimTheme.colors.gray.gray04,
+                color = MoimTheme.colors.text.text03,
             )
         }
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun HomeMeetingPlanCardPreview() {
     MoimTheme {

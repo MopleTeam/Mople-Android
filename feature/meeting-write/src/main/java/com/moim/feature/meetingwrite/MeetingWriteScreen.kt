@@ -52,7 +52,7 @@ fun MeetingWriteRoute(
 
     val modifier =
         Modifier.containerScreen(
-            backgroundColor = MoimTheme.colors.white,
+            backgroundColor = MoimTheme.colors.bg.primary,
             padding = padding,
         )
 

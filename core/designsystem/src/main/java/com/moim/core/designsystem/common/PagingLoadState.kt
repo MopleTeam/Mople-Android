@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
@@ -60,7 +61,7 @@ fun PagingLoadingScreen(modifier: Modifier = Modifier) {
 @Composable
 fun PagingErrorScreen(
     modifier: Modifier = Modifier,
-    backgroundColor: Color = MoimTheme.colors.white,
+    backgroundColor: Color = MoimTheme.colors.bg.primary,
     onClickRetry: () -> Unit = {},
 ) {
     Column(
@@ -75,7 +76,7 @@ fun PagingErrorScreen(
         MoimText(
             text = stringResource(id = R.string.common_error),
             style = MoimTheme.typography.title02.semiBold,
-            color = MoimTheme.colors.gray.gray01,
+            color = MoimTheme.colors.text.text01,
         )
 
         Spacer(Modifier.height(8.dp))
@@ -85,7 +86,7 @@ fun PagingErrorScreen(
             textAlign = TextAlign.Center,
             style = MoimTheme.typography.body01.regular,
             singleLine = false,
-            color = MoimTheme.colors.gray.gray02,
+            color = MoimTheme.colors.text.text02,
         )
 
         Spacer(Modifier.height(24.dp))
@@ -102,23 +103,14 @@ fun PagingErrorScreen(
 @Composable
 private fun PagingLoadingScreenPreview() {
     MoimTheme {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .background(MoimTheme.colors.white),
-        ) {
-            PagingLoadingScreen()
-        }
+        PagingLoadingScreen()
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun PagingErrorScreenPreview() {
     MoimTheme {
-        PagingErrorScreen(
-            backgroundColor = MoimTheme.colors.bg.primary,
-        )
+        PagingErrorScreen()
     }
 }

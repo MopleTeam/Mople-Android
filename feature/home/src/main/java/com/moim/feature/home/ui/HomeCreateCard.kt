@@ -22,6 +22,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
@@ -75,7 +76,7 @@ fun HomeCreateCard(
                 text = text,
                 singleLine = false,
                 style = MoimTheme.typography.title03.semiBold,
-                color = MoimTheme.colors.gray.gray01,
+                color = MoimTheme.colors.text.text01,
             )
             Spacer(Modifier.height(4.dp))
 
@@ -92,7 +93,7 @@ fun HomeCreateCard(
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun HomeCreateCardPreview() {
     MoimTheme {

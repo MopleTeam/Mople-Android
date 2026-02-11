@@ -95,7 +95,7 @@ private fun MeetingWriteImagePreview() {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .background(MoimTheme.colors.white),
+                    .background(MoimTheme.colors.bg.primary),
         ) {
             MeetingWriteImage(
                 meetingImageUrl = null,

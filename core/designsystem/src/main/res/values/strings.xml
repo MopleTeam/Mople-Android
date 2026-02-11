@@ -90,10 +90,13 @@
     <string name="meeting_setting_date_01">우리가 추억을 쌓은지</string>
     <string name="meeting_setting_date_02">일째</string>
     <string name="meeting_setting_participants">참여자 목록</string>
+    <string name="meeting_setting_participants_leader_change">모임 양도하기</string>
     <string name="meeting_setting_exit">모임을 삭제할까요?</string>
     <string name="meeting_setting_exit_description">해당 모임에 대한 모든 기록을 복구할 수 없어요</string>
     <string name="meeting_setting_delete_btn">모임삭제</string>
     <string name="meeting_setting_exit_btn">모임 나가기</string>
+    <string name="meeting_setting_delete_title">내가 모임장인 모임이에요</string>
+    <string name="meeting_setting_delete_description">모임을 나가면 모임이 삭제됩니다</string>
 
     <!-- PlanWrite -->
     <string name="plan_write_title_for_create">약속 생성하기</string>
@@ -174,6 +177,21 @@
     <!-- ParticipantList -->
     <string name="participant_list_title">참여자 목록</string>
 
+    <!-- ParticipantListForLeaderChange -->
+    <string name="participant_list_for_leader_change_title">양도하기</string>
+    <string name="participant_list_for_leader_change_search_hint">닉네임을 검색해주세요</string>
+    <string name="participant_list_for_leader_change">모임 양도</string>
+    <string name="participant_list_for_leader_change_empty">검색 결과가 없어요</string>
+    <string name="participant_list_for_leader_change_request">해당 모임원으로\n모임장을 양도하시겠습니까?</string>
+    <string name="participant_list_for_leader_change_completed">해당 유저에게 모임을 양도했어요</string>
+
+    <!-- UserWithdrawalForLeaderChange -->
+    <string name="user_withdrawal_for_leader_change_title">모임장을 양도하지 않고\n탈퇴하면 모임이 사라져요</string>
+    <string name="user_withdrawal_for_leader_change_meeting">양도 가능한 모임</string>
+    <string name="user_withdrawal_for_leader_change">모임 양도하기</string>
+    <string name="user_withdrawal_for_leader_change_exit">탈퇴하기</string>
+    <string name="user_withdrawal_for_leader_change_dialog_title">회원 탈퇴해도 내가 작성했던\n댓글과 좋아요는 남아있어요</string>
+
     <!-- Calendar -->
     <string name="calendar_title">일정관리</string>
     <string name="calendar_empty">새로운 일정을 추가해보세요.</string>
@@ -181,6 +199,7 @@
     <!-- Profile -->
     <string name="profile_title">마이페이지</string>
     <string name="profile_alarm">알림 관리</string>
+    <string name="profile_theme">화면 테마</string>
     <string name="profile_privacy_policy">개인정보 처리방침</string>
     <string name="profile_version">버전정보</string>
     <string name="profile_logout">로그아웃</string>
@@ -215,6 +234,14 @@
     <string name="alarm_setting_comment_notify_description">나의 댓글에 답글이 달리면 알림</string>
     <string name="alarm_setting_mention_notify">멘션 알림</string>
     <string name="alarm_setting_mention_notify_description">나를 멘션시 알림</string>
+
+    <!-- ThemeSetting -->
+    <string name="theme_setting">화면 테마</string>
+    <string name="theme_setting_light_mode">라이트 모드</string>
+    <string name="theme_setting_dark_mode">다크 모드</string>
+    <string name="theme_setting_system_mode">시스템 설정</string>
+    <string name="theme_setting_title">화면 색상 설정</string>
+    <string name="theme_setting_description">원하시는 테마로 변경해보세요</string>
 
     <!-- Unit -->
     <string name="unit_participants_count">%d명 참여</string>

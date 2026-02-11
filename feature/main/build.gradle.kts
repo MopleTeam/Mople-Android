@@ -17,6 +17,8 @@ dependencies {
     implementation(projects.feature.planDetail)
     implementation(projects.feature.commentDetail)
     implementation(projects.feature.participantList)
+    implementation(projects.feature.participantListForLeaderChange)
+    implementation(projects.feature.userWithdrawalForLeaderChange)
     implementation(projects.feature.calendar)
     implementation(projects.feature.mapDetail)
     implementation(projects.feature.profile)
@@ -25,7 +27,5 @@ dependencies {
     implementation(projects.feature.alarmSetting)
     implementation(projects.feature.webview)
     implementation(projects.feature.imageViewer)
-
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
+    implementation(projects.feature.themeSetting)
 }
