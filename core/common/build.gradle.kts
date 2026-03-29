@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.moim.jvm.library)
-    alias(libs.plugins.moim.jvm.hilt)
+    alias(libs.plugins.moim.hilt)
     alias(libs.plugins.kotlin.serialization)
 }
 

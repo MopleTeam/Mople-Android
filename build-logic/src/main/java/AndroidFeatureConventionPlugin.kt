@@ -1,19 +1,23 @@
-import com.android.build.gradle.LibraryExtension
+import com.android.build.api.dsl.LibraryExtension
 import com.moim.convention.configureGradleManagedDevices
 import com.moim.convention.implementation
 import com.moim.convention.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
 internal class AndroidFeatureConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply {
-                apply("moim.android.library")
-                apply("moim.android.library.compose")
-                apply("moim.android.hilt")
+            apply(plugin = "moim.android.library")
+            apply(plugin = "moim.android.library.compose")
+            apply(plugin = "moim.hilt")
+
+            extensions.configure<LibraryExtension> {
+                testOptions.animationsDisabled = true
+                configureGradleManagedDevices(this)
             }
 
             extensions.configure<LibraryExtension> {

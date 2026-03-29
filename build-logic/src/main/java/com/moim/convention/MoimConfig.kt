@@ -6,7 +6,7 @@ object MoimConfig {
     const val MIN_SDK = 28 // os 9
     const val TARGET_SDK = 36 // os 16
     const val COMPILE_SDK = 36
-    val javaCompileTarget = JavaVersion.VERSION_17
+    val javaCompileTarget = JavaVersion.VERSION_11
 
     private const val VERSION_MAJOR = 1
     private const val VERSION_MINOR = 4

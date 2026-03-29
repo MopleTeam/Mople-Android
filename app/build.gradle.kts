@@ -3,7 +3,7 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 plugins {
     alias(libs.plugins.moim.android.application)
     alias(libs.plugins.moim.android.application.compose)
-    alias(libs.plugins.moim.android.hilt)
+    alias(libs.plugins.moim.hilt)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
 }

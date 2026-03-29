@@ -3,32 +3,33 @@ package com.moim.convention
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.provideDelegate
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
-internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension<*, *, *, *, *, *>) {
+internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     commonExtension.apply {
-        defaultConfig {
+        defaultConfig.apply {
             minSdk = MoimConfig.MIN_SDK
             compileSdk = MoimConfig.COMPILE_SDK
         }
 
-        compileOptions {
+        compileOptions.apply {
             sourceCompatibility = MoimConfig.javaCompileTarget
             targetCompatibility = MoimConfig.javaCompileTarget
             isCoreLibraryDesugaringEnabled = true
         }
 
-        buildFeatures {
+        buildFeatures.apply {
             buildConfig = true
         }
     }
 
-    configureKotlin()
+    configureKotlin<KotlinAndroidProjectExtension>()
 
     dependencies {
         coreLibraryDesugaring(libs.android.desugarJdkLibs)
@@ -41,32 +42,37 @@ internal fun Project.configureKotlinJvm() {
         targetCompatibility = MoimConfig.javaCompileTarget
     }
 
-    configureKotlin()
+    configureKotlin<KotlinJvmProjectExtension>()
 }
 
-/**
- * Configure base Kotlin options
- */
-private fun Project.configureKotlin() {
-    tasks.withType<KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.fromTarget(MoimConfig.javaCompileTarget.toString()))
-
+private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() =
+    configure<T> {
+        // Treat all Kotlin warnings as errors (disabled by default)
+        // Override by setting warningsAsErrors=true in your ~/.gradle/gradle.properties
+        val warningsAsErrors =
+            providers
+                .gradleProperty("warningsAsErrors")
+                .map {
+                    it.toBoolean()
+                }.orElse(false)
+        when (this) {
+            is KotlinAndroidProjectExtension -> compilerOptions
+            is KotlinJvmProjectExtension -> compilerOptions
+            else -> TODO("Unsupported project extension $this ${T::class}")
+        }.apply {
+            jvmTarget = JvmTarget.JVM_11
+            allWarningsAsErrors = warningsAsErrors
             freeCompilerArgs.addAll(
+                "-Xconsistent-data-class-copy-visibility",
                 "-Xstring-concat=inline",
                 "-opt-in=kotlin.RequiresOptIn",
                 // Enable experimental coroutines APIs, including Flow
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-opt-in=kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi",
                 "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-opt-in=kotlin.Experimental",
                 // Enable experimental compose APIs
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
                 "-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi",
                 "-opt-in=androidx.lifecycle.compose.ExperimentalLifecycleComposeApi",
-                // Enable Annotation API
-                "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode",
             )
         }
     }
-}

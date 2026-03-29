@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.moim.android.library)
     alias(libs.plugins.moim.android.library.compose)
-    alias(libs.plugins.moim.android.hilt)
+    alias(libs.plugins.moim.hilt)
 }
 
 android {

@@ -3,15 +3,13 @@ import com.moim.convention.Plugins
 import com.moim.convention.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 
 internal class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            with(pluginManager) {
-                apply(Plugins.ANDROID_APPLICATION)
-                apply(Plugins.KOTLIN_ANDROID)
-            }
+            apply(plugin = Plugins.ANDROID_APPLICATION)
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)

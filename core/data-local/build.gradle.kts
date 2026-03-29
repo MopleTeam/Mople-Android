@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.moim.android.library)
-    alias(libs.plugins.moim.android.hilt)
+    alias(libs.plugins.moim.hilt)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }

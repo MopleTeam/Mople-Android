@@ -7,6 +7,10 @@ plugins {
 android {
     val localProperties = gradleLocalProperties(rootDir, providers)
 
+    buildFeatures {
+        resValues = true // ← 추가
+    }
+
     namespace = "com.moim.feature.intro"
 
     buildTypes {

@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
     compileOnly(libs.android.gradlePlugin)
-    compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.kotlin.compose.compiler.extension)
     compileOnly(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
 }
@@ -35,20 +34,13 @@ gradlePlugin {
             id = "moim.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
         }
-
-        register("androidHilt") {
-            id = "moim.android.hilt"
-            implementationClass = "AndroidHiltConventionPlugin"
+        register("hilt") {
+            id = "moim.hilt"
+            implementationClass = "HiltConventionPlugin"
         }
-
         register("jvmLibrary") {
             id = "moim.jvm.library"
             implementationClass = "JvmLibraryPlugin"
-        }
-
-        register("jvmHilt") {
-            id = "moim.jvm.hilt"
-            implementationClass = "JvmHiltConventionPlugin"
         }
     }
 }
