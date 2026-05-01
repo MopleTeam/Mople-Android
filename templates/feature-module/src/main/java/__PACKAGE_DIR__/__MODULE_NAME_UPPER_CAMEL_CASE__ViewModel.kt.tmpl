@@ -1,0 +1,37 @@
+package __PACKAGE__
+
+import androidx.lifecycle.viewModelScope
+import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.UiAction
+import com.moim.core.ui.view.UiEvent
+import com.moim.core.ui.view.UiState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class __MODULE_NAME_UPPER_CAMEL_CASE__ViewModel @Inject constructor() : BaseViewModel() {
+    init {
+        viewModelScope.launch {
+            setUiState(__MODULE_NAME_UPPER_CAMEL_CASE__UiState())
+        }
+    }
+
+    fun onUiAction(uiAction: __MODULE_NAME_UPPER_CAMEL_CASE__UiAction) {
+        when (uiAction) {
+            is __MODULE_NAME_UPPER_CAMEL_CASE__UiAction.OnClickBack -> setUiEvent(__MODULE_NAME_UPPER_CAMEL_CASE__UiEvent.NavigateToBack)
+        }
+    }
+}
+
+data class __MODULE_NAME_UPPER_CAMEL_CASE__UiState(
+    val placeholder: Unit = Unit,
+) : UiState
+
+sealed interface __MODULE_NAME_UPPER_CAMEL_CASE__UiAction : UiAction {
+    data object OnClickBack : __MODULE_NAME_UPPER_CAMEL_CASE__UiAction
+}
+
+sealed interface __MODULE_NAME_UPPER_CAMEL_CASE__UiEvent : UiEvent {
+    data object NavigateToBack : __MODULE_NAME_UPPER_CAMEL_CASE__UiEvent
+}
