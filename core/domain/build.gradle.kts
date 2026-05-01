@@ -18,9 +18,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines)
     implementation(libs.kotlinx.serialization.json)
 
-    // paging
-    implementation(libs.androidx.paging.common)
-
     // Log tracker
     implementation(libs.timber)
 }

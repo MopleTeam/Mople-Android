@@ -25,7 +25,6 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.ui.util)
-    implementation(libs.androidx.paging.common)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.lottie.compose)
     implementation(libs.bundles.coil)

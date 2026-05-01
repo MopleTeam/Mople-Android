@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -29,14 +31,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import com.moim.core.common.consts.WEATHER_ICON_URL
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.common.ErrorScreen
+import com.moim.core.designsystem.common.PagingErrorScreen
+import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
@@ -44,6 +46,9 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.ui.util.decimalFormatString
+import com.moim.core.ui.view.FadeAnimatedVisibility
+import com.moim.core.ui.view.PaginationEffect
+import com.moim.core.ui.view.PagingUiState
 import com.moim.feature.meetingdetail.MeetingDetailUiAction
 import java.time.ZonedDateTime
 
@@ -52,17 +57,75 @@ fun MeetingDetailPlanContent(
     modifier: Modifier = Modifier,
     userId: String,
     isPlanSelected: Boolean,
-    plans: LazyPagingItems<PlanItem>,
-    reviews: LazyPagingItems<PlanItem>,
+    plans: List<PlanItem>,
+    reviews: List<PlanItem>,
+    plansPagingInfo: PagingUiState,
+    reviewsPagingInfo: PagingUiState,
     planTotalCount: Int,
     reviewTotalCount: Int,
     onUiAction: (MeetingDetailUiAction) -> Unit,
 ) {
+    val items = if (isPlanSelected) plans else reviews
+    val paging = if (isPlanSelected) plansPagingInfo else reviewsPagingInfo
+
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        FadeAnimatedVisibility(paging.isLoading) {
+            PagingLoadingScreen(modifier = Modifier.fillMaxSize())
+        }
+
+        FadeAnimatedVisibility(paging.isError) {
+            ErrorScreen(
+                modifier = Modifier.fillMaxSize(),
+                onClickRefresh = { onUiAction(MeetingDetailUiAction.OnClickRefresh) },
+            )
+        }
+
+        FadeAnimatedVisibility(paging.isSuccess && items.isEmpty()) {
+            MeetingDetailPlanEmpty()
+        }
+
+        FadeAnimatedVisibility(paging.isSuccess && items.isNotEmpty()) {
+            MeetingDetailPagingList(
+                userId = userId,
+                isPlanSelected = isPlanSelected,
+                items = items,
+                paging = paging,
+                planTotalCount = planTotalCount,
+                reviewTotalCount = reviewTotalCount,
+                onUiAction = onUiAction,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MeetingDetailPagingList(
+    userId: String,
+    isPlanSelected: Boolean,
+    items: List<PlanItem>,
+    paging: PagingUiState,
+    planTotalCount: Int,
+    reviewTotalCount: Int,
+    onUiAction: (MeetingDetailUiAction) -> Unit,
+) {
+    val listState = rememberLazyListState()
+
+    PaginationEffect(
+        listState = listState,
+        threshold = 3,
+        enabled = !paging.isLast && !paging.isErrorFooter,
+        onNext = { onUiAction(MeetingDetailUiAction.OnLoadNextPage) },
+    )
+
     LazyColumn(
         modifier =
-            modifier
+            Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp),
+        state = listState,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(top = 28.dp, bottom = 64.dp),
@@ -90,32 +153,49 @@ fun MeetingDetailPlanContent(
             }
         }
 
-        if (isPlanSelected) {
-            items(
-                count = plans.itemCount,
-                key = plans.itemKey(),
-                contentType = plans.itemContentType(),
-            ) { index ->
-                val plan = plans[index] ?: return@items
-
+        items(
+            items = items,
+            key = { it.postId },
+        ) { item ->
+            if (isPlanSelected) {
                 MeetingDetailPlanItem(
+                    modifier = Modifier.animateItem(),
                     userId = userId,
-                    plan = plan,
+                    plan = item,
+                    onUiAction = onUiAction,
+                )
+            } else {
+                MeetingDetailReviewItem(
+                    modifier = Modifier.animateItem(),
+                    userId = userId,
+                    review = item,
                     onUiAction = onUiAction,
                 )
             }
-        } else {
-            items(
-                count = reviews.itemCount,
-                key = reviews.itemKey(),
-                contentType = reviews.itemContentType(),
-            ) { index ->
-                val review = reviews[index] ?: return@items
-                MeetingDetailReviewItem(
-                    userId = userId,
-                    review = review,
-                    onUiAction = onUiAction,
+        }
+
+        item {
+            if (paging.isLoadingFooter) {
+                PagingLoadingScreen(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .animateItem(),
                 )
+            }
+        }
+
+        item {
+            if (paging.isErrorFooter) {
+                PagingErrorScreen(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .animateItem(),
+                    backgroundColor = MoimTheme.colors.bg.secondary,
+                ) {
+                    onUiAction(MeetingDetailUiAction.OnLoadNextPage)
+                }
             }
         }
     }

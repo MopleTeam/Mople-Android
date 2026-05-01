@@ -1,18 +1,22 @@
 package com.moim.feature.planwrite.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -21,12 +25,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import com.moim.core.common.model.Meeting
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.PagingErrorScreen
@@ -37,12 +39,9 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.PAGING_ERROR
-import com.moim.core.ui.view.PAGING_LOADING
-import com.moim.core.ui.view.isAppendError
-import com.moim.core.ui.view.isAppendLoading
-import com.moim.core.ui.view.isError
-import com.moim.core.ui.view.isLoading
+import com.moim.core.ui.view.FadeAnimatedVisibility
+import com.moim.core.ui.view.PaginationEffect
+import com.moim.core.ui.view.PagingUiState
 import com.moim.feature.planwrite.OnPlanWriteUiAction
 import com.moim.feature.planwrite.PlanWriteUiAction
 import com.moim.feature.planwrite.model.MeetingUiModel
@@ -51,7 +50,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun PlanWriteMeetingsDialog(
     modifier: Modifier = Modifier,
-    meetings: LazyPagingItems<MeetingUiModel>,
+    meetings: List<MeetingUiModel>,
+    pagingInfo: PagingUiState,
     onUiAction: OnPlanWriteUiAction,
 ) {
     val dismissAction = PlanWriteUiAction.OnShowMeetingsDialog(false)
@@ -72,13 +72,14 @@ fun PlanWriteMeetingsDialog(
 
         PlanWriteMeetingsScreen(
             meetings = meetings,
+            pagingInfo = pagingInfo,
             onUiAction = onUiAction,
         )
     }
 }
 
 @Composable
-fun PlanWriteMeetingsTopAppbar(
+private fun PlanWriteMeetingsTopAppbar(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
@@ -103,33 +104,77 @@ fun PlanWriteMeetingsTopAppbar(
 }
 
 @Composable
-fun PlanWriteMeetingsScreen(
+private fun PlanWriteMeetingsScreen(
     modifier: Modifier = Modifier,
-    meetings: LazyPagingItems<MeetingUiModel>,
+    meetings: List<MeetingUiModel>,
+    pagingInfo: PagingUiState,
     onUiAction: OnPlanWriteUiAction,
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
+    val configuration = LocalConfiguration.current
+    val sheetHeight = (configuration.screenHeightDp * 0.6f).dp
+
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(sheetHeight),
+        contentAlignment = Alignment.Center,
     ) {
+        FadeAnimatedVisibility(pagingInfo.isLoading) {
+            PagingLoadingScreen()
+        }
+
+        FadeAnimatedVisibility(pagingInfo.isError) {
+            PagingErrorScreen(
+                onClickRetry = { onUiAction(PlanWriteUiAction.OnLoadNextMeetingsPage) },
+            )
+        }
+
+        FadeAnimatedVisibility(pagingInfo.isSuccess) {
+            MeetingsPagingList(
+                meetings = meetings,
+                pagingInfo = pagingInfo,
+                onUiAction = onUiAction,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MeetingsPagingList(
+    meetings: List<MeetingUiModel>,
+    pagingInfo: PagingUiState,
+    onUiAction: OnPlanWriteUiAction,
+) {
+    val listState = rememberLazyListState()
+
+    PaginationEffect(
+        listState = listState,
+        threshold = 3,
+        enabled = !pagingInfo.isLast && !pagingInfo.isErrorFooter,
+        onNext = { onUiAction(PlanWriteUiAction.OnLoadNextMeetingsPage) },
+    )
+
+    Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
             contentPadding = PaddingValues(bottom = 60.dp),
         ) {
             items(
-                count = meetings.itemCount,
-                key = meetings.itemKey(),
-                contentType = meetings.itemContentType(),
-            ) { index ->
-                val meetingUiModel = meetings[index] ?: return@items
+                items = meetings,
+                key = { it.meeting.id },
+            ) { meetingUiModel ->
                 PlanWriteMeetingInfo(
+                    modifier = Modifier.animateItem(),
                     meeting = meetingUiModel.meeting,
                     isSelected = meetingUiModel.isSelected,
                     onUiAction = onUiAction,
                 )
             }
 
-            if (meetings.loadState.isAppendLoading()) {
-                item(key = PAGING_LOADING) {
+            item {
+                if (pagingInfo.isLoadingFooter) {
                     PagingLoadingScreen(
                         modifier =
                             Modifier
@@ -140,35 +185,15 @@ fun PlanWriteMeetingsScreen(
                 }
             }
 
-            if (meetings.loadState.isAppendError()) {
-                item(key = PAGING_ERROR) {
+            item {
+                if (pagingInfo.isErrorFooter) {
                     PagingErrorScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
                                 .background(MoimTheme.colors.bg.primary)
                                 .animateItem(),
-                        onClickRetry = meetings::retry,
-                    )
-                }
-            }
-
-            item {
-                AnimatedVisibility(
-                    visible = meetings.loadState.isLoading(),
-                ) {
-                    PagingLoadingScreen()
-                }
-            }
-
-            item {
-                AnimatedVisibility(
-                    modifier = Modifier.fillMaxWidth(),
-                    visible = meetings.loadState.isError(),
-                ) {
-                    PagingErrorScreen(
-                        modifier = modifier,
-                        onClickRetry = meetings::refresh,
+                        onClickRetry = { onUiAction(PlanWriteUiAction.OnLoadNextMeetingsPage) },
                     )
                 }
             }
@@ -177,7 +202,7 @@ fun PlanWriteMeetingsScreen(
 }
 
 @Composable
-fun PlanWriteMeetingInfo(
+private fun PlanWriteMeetingInfo(
     modifier: Modifier = Modifier,
     meeting: Meeting,
     isSelected: Boolean,

@@ -16,7 +16,6 @@ androidxNavigation3 = "1.0.1"
 androidxDataStore = "1.2.1"
 androidxRoom = "2.8.4"
 androidxAppcompat = "1.7.1"
-androidxPaging = "3.4.2"
 
 # Android
 androidPlayServicesLocation = "21.3.0"
@@ -90,11 +89,6 @@ androidx-room-coroutine = { group = "androidx.room", name = "room-ktx", version.
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "androidxRoom" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidxRoom" } # For Kotlin use Ksp instead of annotationProcessor
 
-# AndroidX Paging
-androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "androidxPaging" }
-androidx-paging-common = { group = "androidx.paging", name = "paging-common-ktx", version.ref = "androidxPaging" }
-androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "androidxPaging" }
-
 # AndroidX Navigation
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "androidxNavigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "androidxNavigation3" }
@@ -161,7 +155,6 @@ material = { group = "com.google.android.material", name = "material", version.r
 
 [bundles]
 androidx-room = ["androidx-room-runtime", "androidx-room-coroutine", "androidx-room-paging"]
-androidx-paging = ["androidx-paging-runtime", "androidx-paging-common", "androidx-paging-compose"]
 androidx-lifecycle = ["androidx-lifecycle-runtime-compose", "androidx-lifecycle-viewModel-compose", "androidx-lifecycle-viewmodel-navigation3", "androidx-lifecycle-savedState"]
 coil = ["coil-kt-network", "coil-kt-compose", "coil-kt-svg"]
 retrofit = ["retrofit-core", "retrofit-converter-kotlinx-serialization", "okhttp-logging"]

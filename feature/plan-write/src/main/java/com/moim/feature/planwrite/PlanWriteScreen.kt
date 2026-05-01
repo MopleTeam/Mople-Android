@@ -22,10 +22,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.util.parseDateString
 import com.moim.core.common.util.parseLongTime
@@ -92,7 +89,6 @@ fun PlanWriteScreen(
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val meetings = uiState.meetings?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
 
     TrackScreenViewEvent(screenName = "plan_write")
     MoimScaffold(
@@ -185,9 +181,10 @@ fun PlanWriteScreen(
         },
     )
 
-    if (uiState.isShowMeetingDialog && meetings != null) {
+    if (uiState.isShowMeetingDialog) {
         PlanWriteMeetingsDialog(
-            meetings = meetings,
+            meetings = uiState.meetings,
+            pagingInfo = uiState.meetingsPagingInfo,
             onUiAction = onUiAction,
         )
     }
