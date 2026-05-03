@@ -1,4 +1,4 @@
-package com.moim.core.ui.message
+package com.moim.core.messaging
 
 import android.app.NotificationChannel
 import android.app.NotificationChannelGroup

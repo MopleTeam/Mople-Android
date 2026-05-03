@@ -72,6 +72,7 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.ui)
     implementation(projects.core.crashreport)
+    implementation(projects.core.messaging)
     implementation(projects.feature.main)
     implementation(projects.feature.intro)
 

@@ -1,11 +1,17 @@
-package com.moim.core.ui.message
+package com.moim.core.messaging
 
 import android.os.Bundle
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.moim.core.common.di.IoDispatcher
+import com.moim.core.data.datasource.token.TokenRepository
 import com.moim.core.designsystem.R
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -13,11 +19,28 @@ class MoimMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var moimNotificationManager: MoimNotificationManager
 
+    @Inject
+    lateinit var tokenRepository: TokenRepository
+
+    @Inject
+    @IoDispatcher
+    lateinit var ioDispatcher: CoroutineDispatcher
+
+    private val serviceScope by lazy { CoroutineScope(SupervisorJob() + ioDispatcher) }
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        Timber.d("[onMessageReceived] notification : ${remoteMessage.notification?.title}, ${remoteMessage.notification?.body}")
-        Timber.d("[onMessageReceived] remoteMessageData : ${remoteMessage.data}")
         sendNotification(remoteMessage)
+    }
+
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+        serviceScope.launch { tokenRepository.onFcmTokenRefreshed(token) }
+    }
+
+    override fun onDestroy() {
+        serviceScope.cancel()
+        super.onDestroy()
     }
 
     private fun sendNotification(remoteMessage: RemoteMessage) {

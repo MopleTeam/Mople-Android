@@ -13,10 +13,6 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.designsystem)
 
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.messageing)
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.foundation.layout)

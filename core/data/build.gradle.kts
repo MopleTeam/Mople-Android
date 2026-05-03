@@ -11,6 +11,7 @@ android {
 
 dependencies {
     implementation(projects.core.common)
+    implementation(projects.core.crashreport)
     implementation(projects.core.dataLocal)
     implementation(projects.core.dataRemote)
 
