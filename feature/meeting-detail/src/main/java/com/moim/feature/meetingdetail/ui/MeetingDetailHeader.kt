@@ -1,44 +1,47 @@
 package com.moim.feature.meetingdetail.ui
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.moim.core.common.model.Meeting
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
-import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
-import com.moim.core.designsystem.component.NetworkImage
-import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.feature.meetingdetail.MeetingDetailUiAction
+
+private const val CHIP_ANIMATION_DURATION = 250
 
 @Composable
 fun MeetingDetailHeader(
     modifier: Modifier = Modifier,
-    meeting: Meeting,
     isSelectedFuturePlan: Boolean = true,
     onUiAction: (MeetingDetailUiAction) -> Unit,
 ) {
@@ -46,42 +49,81 @@ fun MeetingDetailHeader(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(MoimTheme.colors.bg.primary)
+                .background(MoimTheme.colors.bg.secondary)
                 .padding(20.dp),
     ) {
-        MeetingDetailInfo(
-            meeting = meeting,
-            onUiAction = onUiAction,
-        )
-        Spacer(Modifier.height(24.dp))
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .background(color = MoimTheme.colors.bg.secondary, shape = RoundedCornerShape(8.dp))
-                    .padding(6.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            MoimPrimaryButton(
-                modifier = Modifier.weight(1f),
-                buttonColors =
-                    moimButtomColors().copy(
-                        containerColor = if (isSelectedFuturePlan) MoimTheme.colors.global.primary else MoimTheme.colors.bg.secondary,
-                        contentColor = if (isSelectedFuturePlan) MoimTheme.colors.primary.text else MoimTheme.colors.text.text03,
-                    ),
+            MeetingDetailChipContainer(
+                isSelectedFuturePlan = isSelectedFuturePlan,
+                onUiAction = onUiAction,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MeetingDetailChipContainer(
+    isSelectedFuturePlan: Boolean,
+    onUiAction: (MeetingDetailUiAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val density = LocalDensity.current
+    val spacerWidthPx = with(density) { 8.dp.roundToPx() }
+
+    var pastChipWidth by remember { mutableIntStateOf(0) }
+    var futureChipWidth by remember { mutableIntStateOf(0) }
+    val hasMeasured = pastChipWidth > 0 && futureChipWidth > 0
+
+    Box(
+        modifier =
+            modifier
+                .padding(6.dp)
+                .height(IntrinsicSize.Max),
+    ) {
+        if (hasMeasured) {
+            val targetX = if (isSelectedFuturePlan) 0 else futureChipWidth + spacerWidthPx
+            val targetWidth = if (isSelectedFuturePlan) futureChipWidth else pastChipWidth
+
+            val animatedX by animateIntAsState(
+                targetValue = targetX,
+                animationSpec = tween(durationMillis = CHIP_ANIMATION_DURATION),
+                label = "chipIndicatorX",
+            )
+            val animatedWidth by animateIntAsState(
+                targetValue = targetWidth,
+                animationSpec = tween(durationMillis = CHIP_ANIMATION_DURATION),
+                label = "chipIndicatorWidth",
+            )
+
+            Box(
+                modifier =
+                    Modifier
+                        .offset { IntOffset(animatedX, 0) }
+                        .width(with(density) { animatedWidth.toDp() })
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MoimTheme.colors.global.primary),
+            )
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            MeetingDetailChip(
+                modifier = Modifier.onSizeChanged { futureChipWidth = it.width },
                 text = stringResource(R.string.meeting_detail_future_plan),
+                isSelected = isSelectedFuturePlan,
                 onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanTab(true)) },
             )
 
             Spacer(Modifier.width(8.dp))
 
-            MoimPrimaryButton(
-                modifier = Modifier.weight(1f),
-                buttonColors =
-                    moimButtomColors().copy(
-                        containerColor = if (isSelectedFuturePlan) MoimTheme.colors.bg.secondary else MoimTheme.colors.global.primary,
-                        contentColor = if (!isSelectedFuturePlan) MoimTheme.colors.primary.text else MoimTheme.colors.text.text03,
-                    ),
+            MeetingDetailChip(
+                modifier = Modifier.onSizeChanged { pastChipWidth = it.width },
                 text = stringResource(R.string.meeting_detail_past_plan),
+                isSelected = !isSelectedFuturePlan,
                 onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanTab(false)) },
             )
         }
@@ -89,86 +131,39 @@ fun MeetingDetailHeader(
 }
 
 @Composable
-private fun MeetingDetailInfo(
+private fun MeetingDetailChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    meeting: Meeting,
-    onUiAction: (MeetingDetailUiAction) -> Unit,
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+    val textColor by animateColorAsState(
+        targetValue =
+            if (isSelected) {
+                MoimTheme.colors.text.primary
+            } else {
+                MoimTheme.colors.text.text03
+            },
+        animationSpec = tween(durationMillis = CHIP_ANIMATION_DURATION),
+        label = "chipTextColor",
+    )
+
+    Box(
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(16.dp))
+                .clickable(onClick = onClick)
+                .padding(
+                    vertical = 8.dp,
+                    horizontal = 20.dp,
+                ),
+        contentAlignment = Alignment.Center,
     ) {
-        NetworkImage(
-            modifier =
-                Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(12.dp))
-                    .size(56.dp)
-                    .onSingleClick { onUiAction(MeetingDetailUiAction.OnClickMeetingImage(meeting.imageUrl, meeting.name)) },
-            imageUrl = meeting.imageUrl,
-            errorImage = painterResource(R.drawable.ic_empty_meeting),
+        MoimText(
+            text = text,
+            style = MoimTheme.typography.body01.semiBold,
+            color = textColor,
         )
-
-        Spacer(Modifier.width(12.dp))
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            MoimText(
-                modifier = Modifier.fillMaxWidth(),
-                text = meeting.name,
-                singleLine = false,
-                style = MoimTheme.typography.title02.semiBold,
-                color = MoimTheme.colors.text.text01,
-            )
-            Spacer(Modifier.height(4.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    modifier = Modifier.size(20.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_menu_meeting),
-                    contentDescription = "",
-                    tint = MoimTheme.colors.icon,
-                )
-                Spacer(Modifier.width(4.dp))
-                MoimText(
-                    text = stringResource(R.string.unit_participants_count_short, meeting.memberCount),
-                    style = MoimTheme.typography.body02.medium,
-                    color = MoimTheme.colors.text.text03,
-                )
-
-                MoimText(
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                    text = stringResource(R.string.unit_dot),
-                    style = MoimTheme.typography.body02.medium,
-                    color = MoimTheme.colors.text.text03,
-                )
-
-                Row(
-                    modifier =
-                        Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .onSingleClick { onUiAction(MeetingDetailUiAction.OnClickMeetingInvite) },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    MoimText(
-                        text = stringResource(R.string.common_invite),
-                        style = MoimTheme.typography.body02.medium,
-                        color = MoimTheme.colors.text.text03,
-                    )
-
-                    Icon(
-                        modifier = Modifier.size(20.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_next),
-                        contentDescription = "",
-                        tint = MoimTheme.colors.icon,
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -177,10 +172,6 @@ private fun MeetingDetailInfo(
 private fun MeetingDetailHeaderPreview() {
     MoimTheme {
         MeetingDetailHeader(
-            meeting =
-                Meeting(
-                    name = "test",
-                ),
             isSelectedFuturePlan = true,
             onUiAction = {},
         )

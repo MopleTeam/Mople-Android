@@ -76,6 +76,8 @@ class MainNavigator(
 
     fun navigateToMeetingSetting(meeting: Meeting) = navigate(DetailRoute.MeetingSetting(meeting))
 
+    fun navigateToMeetingNotice(meetId: String) = navigate(DetailRoute.MeetingNotice(meetId))
+
     fun navigateToMapDetail(
         placeName: String,
         address: String,

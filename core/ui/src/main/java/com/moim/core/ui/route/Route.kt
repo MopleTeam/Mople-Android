@@ -57,6 +57,11 @@ sealed interface DetailRoute : Route {
     ) : DetailRoute
 
     @Serializable
+    data class MeetingNotice(
+        val meetId: String,
+    ) : DetailRoute
+
+    @Serializable
     data class MapDetail(
         val placeName: String,
         val address: String,

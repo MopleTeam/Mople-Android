@@ -30,8 +30,6 @@ import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.MoimFloatingActionButton
-import com.moim.core.designsystem.component.MoimIconButton
-import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
@@ -40,6 +38,7 @@ import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
 import com.moim.feature.meetingdetail.ui.MeetingDetailHeader
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanContent
+import com.moim.feature.meetingdetail.ui.MeetingDetailTopAppbar
 
 @Composable
 fun MeetingDetailRoute(
@@ -49,6 +48,7 @@ fun MeetingDetailRoute(
     navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToPlanDetail: (ViewIdType) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit,
+    navigateToMeetingNotice: (meetId: String) -> Unit,
     navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit,
 ) {
     val context = LocalContext.current
@@ -64,6 +64,10 @@ fun MeetingDetailRoute(
 
             is MeetingDetailUiEvent.NavigateToMeetingSetting -> {
                 navigateToMeetingSetting(event.meeting)
+            }
+
+            is MeetingDetailUiEvent.NavigateToMeetingNotice -> {
+                navigateToMeetingNotice(event.meetId)
             }
 
             is MeetingDetailUiEvent.NavigateToPlanDetail -> {
@@ -127,18 +131,12 @@ fun MeetingDetailScreen(
     Column(
         modifier = modifier,
     ) {
-        MoimTopAppbar(
-            actions = {
-                MoimIconButton(
-                    iconRes = R.drawable.ic_burger,
-                    onClick = { onUiAction(MeetingDetailUiAction.OnClickMeetingSetting) },
-                )
-            },
-            onClickNavigate = { onUiAction(MeetingDetailUiAction.OnClickBack) },
+        MeetingDetailTopAppbar(
+            meeting = uiState.meeting,
+            onUiAction = onUiAction,
         )
 
         MeetingDetailHeader(
-            meeting = uiState.meeting,
             isSelectedFuturePlan = uiState.isPlanSelected,
             onUiAction = onUiAction,
         )

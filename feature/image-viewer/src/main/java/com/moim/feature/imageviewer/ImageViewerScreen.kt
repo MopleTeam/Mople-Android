@@ -122,6 +122,7 @@ private fun ImageViewerTopAppbar(
         },
         onClickNavigate = onClickDismiss,
         title = title,
+        titleColor = MoimTheme.colors.global.white,
         actions = {
             if (totalIndex > 1) {
                 MoimText(

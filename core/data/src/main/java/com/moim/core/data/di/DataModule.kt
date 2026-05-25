@@ -8,6 +8,8 @@ import com.moim.core.data.datasource.holiday.HolidayRepository
 import com.moim.core.data.datasource.holiday.HolidayRepositoryImpl
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.meeting.MeetingRepositoryImpl
+import com.moim.core.data.datasource.notice.NoticeRepository
+import com.moim.core.data.datasource.notice.NoticeRepositoryImpl
 import com.moim.core.data.datasource.notification.NotificationRepository
 import com.moim.core.data.datasource.notification.NotificationRepositoryImpl
 import com.moim.core.data.datasource.plan.PlanRepository
@@ -75,6 +77,11 @@ internal abstract class DataModule {
     @Singleton
     @Binds
     abstract fun bindNotificationRepository(notificationRepositoryImpl: NotificationRepositoryImpl): NotificationRepository
+
+    // ================================ Notice ============================================//
+    @Singleton
+    @Binds
+    abstract fun bindNoticeRepository(noticeRepositoryImpl: NoticeRepositoryImpl): NoticeRepository
 
     // ================================ Holiday ============================================//
     @Singleton

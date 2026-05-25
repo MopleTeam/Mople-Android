@@ -126,6 +126,10 @@ class MeetingDetailViewModel @AssistedInject constructor(
                 navigateToMeetingSetting()
             }
 
+            is MeetingDetailUiAction.OnClickMeetingNotice -> {
+                navigateToMeetingNotice()
+            }
+
             is MeetingDetailUiAction.OnClickPlanTab -> {
                 setPlanTab(uiAction.isBefore)
             }
@@ -427,6 +431,12 @@ class MeetingDetailViewModel @AssistedInject constructor(
         }
     }
 
+    private fun navigateToMeetingNotice() {
+        uiState.checkState<MeetingDetailUiState.Success> {
+            setUiEvent(MeetingDetailUiEvent.NavigateToMeetingNotice(meeting.id))
+        }
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(meetingDetailRoute: DetailRoute.MeetingDetail): MeetingDetailViewModel
@@ -461,6 +471,8 @@ sealed interface MeetingDetailUiAction : UiAction {
     data object OnClickPlanWrite : MeetingDetailUiAction
 
     data object OnClickMeetingSetting : MeetingDetailUiAction
+
+    data object OnClickMeetingNotice : MeetingDetailUiAction
 
     data object OnClickMeetingInvite : MeetingDetailUiAction
 
@@ -499,6 +511,10 @@ sealed interface MeetingDetailUiEvent : UiEvent {
 
     data class NavigateToMeetingSetting(
         val meeting: Meeting,
+    ) : MeetingDetailUiEvent
+
+    data class NavigateToMeetingNotice(
+        val meetId: String,
     ) : MeetingDetailUiEvent
 
     data class NavigateToPlanDetail(
