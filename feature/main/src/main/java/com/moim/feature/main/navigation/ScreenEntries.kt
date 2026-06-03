@@ -20,6 +20,7 @@ import com.moim.feature.meeting.MeetingRoute
 import com.moim.feature.meetingdetail.MeetingDetailRoute
 import com.moim.feature.meetingdetail.MeetingDetailViewModel
 import com.moim.feature.meetingnotice.MeetingNoticeRoute
+import com.moim.feature.meetingnotice.MeetingNoticeViewModel
 import com.moim.feature.meetingsetting.MeetingSettingRoute
 import com.moim.feature.meetingsetting.MeetingSettingViewModel
 import com.moim.feature.meetingwrite.MeetingWriteRoute
@@ -172,9 +173,12 @@ fun EntryProviderScope<NavKey>.meetingNoticeScreenEntry(
 ) {
     entry<DetailRoute.MeetingNotice> { key ->
         MeetingNoticeRoute(
-            viewModel = hiltViewModel(key = key.meetId),
             padding = paddingValues,
             navigateToBack = navigator::goBack,
+            viewModel =
+                hiltViewModel<MeetingNoticeViewModel, MeetingNoticeViewModel.Factory>(key = key.meetId) { factory ->
+                    factory.create(key)
+                },
         )
     }
 }

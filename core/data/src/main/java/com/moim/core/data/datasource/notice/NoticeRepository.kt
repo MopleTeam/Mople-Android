@@ -1,15 +1,16 @@
 package com.moim.core.data.datasource.notice
 
 import com.moim.core.common.model.Notice
+import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.PaginationContainer
 import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.json.JsonObject
 
 interface NoticeRepository {
     suspend fun getNotices(
         meetId: String,
         cursor: String,
         size: Int,
+        filterType: NoticeType?,
     ): PaginationContainer<List<Notice>>
 
     fun createNotice(

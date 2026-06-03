@@ -1,6 +1,7 @@
 package com.moim.core.data.datasource.notice
 
 import com.moim.core.common.model.Notice
+import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
@@ -18,6 +19,7 @@ internal class NoticeRepositoryImpl @Inject constructor(
         meetId: String,
         cursor: String,
         size: Int,
+        filterType: NoticeType?,
     ): PaginationContainer<List<Notice>> =
         try {
             noticeApi

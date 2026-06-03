@@ -98,6 +98,23 @@
     <string name="meeting_setting_delete_title">내가 모임장인 모임이에요</string>
     <string name="meeting_setting_delete_description">모임을 나가면 모임이 삭제됩니다</string>
 
+    <!-- MeetingNotice -->
+    <string name="meeting_notice_title">공지사항</string>
+    <string name="meeting_notice_tab_total">전체</string>
+    <string name="meeting_notice_tab_custom">모임공지</string>
+    <string name="meeting_notice_tab_system">시스템</string>
+
+    <!-- MeetingNoticeWrite -->
+    <string name="meeting_notice_write_title">공지 작성하기</string>
+    <string name="meeting_notice_write_hint">멤버들에게 공지를 남겨보세요.</string>
+    <string name="meeting_notice_write_completed">작성 완료</string>
+
+    <!-- MeetingNoticeDetail -->
+    <string name="meeting_notice_detail_title">공지 상세</string>
+    <string name="meeting_notice_detail_custom">공지 작성하기</string>
+    <string name="meeting_notice_detail_system">멤버들에게 공지를 남겨보세요.</string>
+    <string name="meeting_notice_detail_comment_hint">댓글을 입력해주세요</string>
+
     <!-- PlanWrite -->
     <string name="plan_write_title_for_create">약속 생성하기</string>
     <string name="plan_write_title_for_update">약속 수정하기</string>

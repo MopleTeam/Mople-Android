@@ -12,14 +12,14 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface CommentApi {
-    @GET("comment/{postId}")
+    @GET("comment/post/{postId}")
     suspend fun getComments(
         @Path("postId") postId: String,
         @Query("cursor") cursor: String,
         @Query("size") size: Int,
     ): PaginationContainerResponse<List<CommentResponse>>
 
-    @GET("comment/{postId}/{commentId}")
+    @GET("comment/post/{postId}/{commentId}")
     suspend fun getReplyComments(
         @Path("postId") postId: String,
         @Path("commentId") commentId: String,
@@ -27,37 +27,51 @@ interface CommentApi {
         @Query("size") size: Int,
     ): PaginationContainerResponse<List<CommentResponse>>
 
-    @POST("comment/{postId}")
+    @GET("comment/notice/{noticeId}")
+    suspend fun getNoticeComments(
+        @Path("noticeId") postId: String,
+        @Query("cursor") cursor: String,
+        @Query("size") size: Int,
+    ): PaginationContainerResponse<List<CommentResponse>>
+
+    @POST("comment/post/{postId}")
     suspend fun createComment(
         @Path("postId") postId: String,
         @Body params: JsonObject,
     ): CommentResponse
 
-    @POST("comment/{postId}/{commentId}")
+    @POST("comment/post/{postId}/{commentId}")
     suspend fun createReplyComment(
         @Path("postId") postId: String,
         @Path("commentId") commentId: String,
         @Body params: JsonObject,
     ): CommentResponse
 
+    @POST("comment/notice/{postId}")
+    suspend fun createNoticeComment(
+        @Path("postId") postId: String,
+        @Body params: JsonObject,
+    ): CommentResponse
+
+    @POST("comment/post/{commentId}/likes")
+    suspend fun updateLikeComment(
+        @Path("commentId") commentId: String,
+    ): CommentResponse
+
+    // Common
     @PATCH("comment/{commentId}")
     suspend fun updateComment(
         @Path("commentId") commentId: String,
         @Body params: JsonObject,
     ): CommentResponse
 
-    @POST("comment/{commentId}/likes")
-    suspend fun updateLikeComment(
-        @Path("commentId") commentId: String,
-    ): CommentResponse
+    @POST("comment/report")
+    suspend fun reportComment(
+        @Body params: JsonObject,
+    )
 
     @DELETE("comment/{commentId}")
     suspend fun deleteComment(
         @Path("commentId") commentId: String,
-    )
-
-    @POST("comment/report")
-    suspend fun reportComment(
-        @Body params: JsonObject,
     )
 }

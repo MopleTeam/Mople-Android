@@ -11,6 +11,12 @@ interface CommentRepository {
         size: Int,
     ): PaginationContainer<List<Comment>>
 
+    suspend fun getNoticeComments(
+        noticeId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<Comment>>
+
     suspend fun getReplyComments(
         postId: String,
         commentId: String,
@@ -40,6 +46,12 @@ interface CommentRepository {
     fun updateLikeComment(commentId: String): Flow<Comment>
 
     fun deleteComment(commentId: String): Flow<Unit>
+
+    fun createNoticeComment(
+        noticeId: String,
+        content: String,
+        mentionIds: List<String>,
+    ): Flow<Comment>
 
     fun reportComment(commentId: String): Flow<Unit>
 }

@@ -81,6 +81,8 @@ private fun MeetingDetailChipContainer(
     Box(
         modifier =
             modifier
+                .clip(RoundedCornerShape(44.dp))
+                .background(MoimTheme.colors.global.white)
                 .padding(6.dp)
                 .height(IntrinsicSize.Max),
     ) {
