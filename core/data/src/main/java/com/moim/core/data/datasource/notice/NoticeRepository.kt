@@ -13,6 +13,11 @@ interface NoticeRepository {
         filterType: NoticeType?,
     ): PaginationContainer<List<Notice>>
 
+    fun getNotice(
+        meetId: String,
+        noticeId: String,
+    ): Flow<Notice>
+
     fun createNotice(
         meetId: String,
         content: String,

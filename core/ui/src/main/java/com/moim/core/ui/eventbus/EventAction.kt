@@ -1,6 +1,7 @@
 package com.moim.core.ui.eventbus
 
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.Notice
 import com.moim.core.common.model.item.CommentUiModel
 import com.moim.core.common.model.item.PlanItem
 import kotlinx.coroutines.CoroutineScope
@@ -92,4 +93,25 @@ sealed class PlanAction(
     ) : PlanAction(actionAt)
 
     data object None : PlanAction(ZonedDateTime.now())
+}
+
+sealed class NoticeAction(
+    override val actionAt: ZonedDateTime,
+) : EventAction {
+    data class NoticeCreate(
+        override val actionAt: ZonedDateTime = ZonedDateTime.now(),
+        val notice: Notice,
+    ) : NoticeAction(actionAt)
+
+    data class NoticeUpdate(
+        override val actionAt: ZonedDateTime = ZonedDateTime.now(),
+        val notice: Notice,
+    ) : NoticeAction(actionAt)
+
+    data class NoticeDelete(
+        override val actionAt: ZonedDateTime = ZonedDateTime.now(),
+        val noticeId: String,
+    ) : NoticeAction(actionAt)
+
+    data object None : NoticeAction(ZonedDateTime.now())
 }

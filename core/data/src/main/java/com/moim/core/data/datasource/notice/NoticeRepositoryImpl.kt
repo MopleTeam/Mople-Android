@@ -32,6 +32,14 @@ internal class NoticeRepositoryImpl @Inject constructor(
             throw converterException(e)
         }
 
+    override fun getNotice(
+        meetId: String,
+        noticeId: String,
+    ): Flow<Notice> {
+        // TODO GET API
+        throw IllegalStateException("Noop")
+    }
+
     override fun createNotice(
         meetId: String,
         content: String,

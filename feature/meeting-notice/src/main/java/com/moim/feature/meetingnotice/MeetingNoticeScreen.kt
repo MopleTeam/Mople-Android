@@ -7,22 +7,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.common.model.Notice
@@ -32,6 +28,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingScreen
+import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
@@ -49,6 +46,7 @@ fun MeetingNoticeRoute(
     viewModel: MeetingNoticeViewModel,
     padding: PaddingValues,
     navigateToBack: () -> Unit,
+    navigateToMeetingNoticeWrite: (String) -> Unit,
 ) {
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
     val noticeUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -56,6 +54,7 @@ fun MeetingNoticeRoute(
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is MeetingNoticeUiEvent.NavigateToBack -> navigateToBack()
+            is MeetingNoticeUiEvent.NavigateToMeetingNoticeWrite -> navigateToMeetingNoticeWrite(event.meetId)
         }
     }
 
@@ -97,11 +96,10 @@ private fun MeetingNoticeScreen(
                 onClickNavigate = { onUiAction(MeetingNoticeUiAction.OnClickBack) },
                 actions = {
                     if (uiState.isHostUser) {
-                        Icon(
-                            modifier = Modifier.size(40.dp),
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_pen),
-                            contentDescription = "",
-                            tint = MoimTheme.colors.icon,
+                        MoimIconButton(
+                            iconRes = R.drawable.ic_pen,
+                            iconSize = 40.dp,
+                            onClick = { onUiAction(MeetingNoticeUiAction.OnClickWrite) },
                         )
                     }
                 },

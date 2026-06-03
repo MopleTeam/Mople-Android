@@ -8,6 +8,9 @@ import com.moim.core.common.model.User
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.notice.NoticeRepository
 import com.moim.core.data.datasource.user.UserRepository
+import com.moim.core.ui.eventbus.EventBus
+import com.moim.core.ui.eventbus.NoticeAction
+import com.moim.core.ui.eventbus.actionStateIn
 import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.isActiveCheck
 import com.moim.core.ui.view.BaseViewModel
@@ -32,22 +35,41 @@ class MeetingNoticeViewModel @AssistedInject constructor(
     private val meetingRepository: MeetingRepository,
     private val noticeRepository: NoticeRepository,
     @Assisted val meetingNoticeRoute: DetailRoute.MeetingNotice,
+    noticeEventBus: EventBus<NoticeAction>,
 ) : BaseViewModel() {
     private var pagingJob: Job? = null
     private val meetingId = meetingNoticeRoute.meetId
 
+    private val noticeActionReceiver =
+        noticeEventBus
+            .action
+            .actionStateIn(viewModelScope, NoticeAction.None)
+
     init {
         viewModelScope.launch {
-            val user = userRepository.getUser().first()
-            val meeting = runCatching { meetingRepository.getMeeting(meetingId).first() }.getOrNull()
+            launch {
+                val user = userRepository.getUser().first()
+                val meeting = runCatching { meetingRepository.getMeeting(meetingId).first() }.getOrNull()
 
-            setUiState(
-                MeetingNoticeUiState(
-                    user = user,
-                    isHostUser = meeting?.hostId == user.userId,
-                ),
-            )
-            getNotices(tabIndex = 0)
+                setUiState(
+                    MeetingNoticeUiState(
+                        user = user,
+                        isHostUser = meeting?.hostId == user.userId,
+                    ),
+                )
+                getNotices(tabIndex = 0)
+            }
+
+            launch {
+                noticeActionReceiver.collect { action ->
+                    when (action) {
+                        is NoticeAction.NoticeCreate -> applyNoticeCreate(action.notice)
+                        is NoticeAction.NoticeUpdate -> applyNoticeUpdate(action.notice)
+                        is NoticeAction.NoticeDelete -> applyNoticeDelete(action.noticeId)
+                        is NoticeAction.None -> Unit
+                    }
+                }
+            }
         }
     }
 
@@ -55,6 +77,10 @@ class MeetingNoticeViewModel @AssistedInject constructor(
         when (uiAction) {
             is MeetingNoticeUiAction.OnClickBack -> {
                 setUiEvent(MeetingNoticeUiEvent.NavigateToBack)
+            }
+
+            is MeetingNoticeUiAction.OnClickWrite -> {
+                setUiEvent(MeetingNoticeUiEvent.NavigateToMeetingNoticeWrite(meetingId))
             }
 
             is MeetingNoticeUiAction.OnClickRefresh -> {
@@ -79,7 +105,6 @@ class MeetingNoticeViewModel @AssistedInject constructor(
             }
 
             is MeetingNoticeUiAction.OnClickNotice -> {
-
             }
         }
     }
@@ -142,6 +167,37 @@ class MeetingNoticeViewModel @AssistedInject constructor(
         }
     }
 
+    private fun applyNoticeCreate(notice: Notice) {
+        uiState.checkState<MeetingNoticeUiState> {
+            if (notice.meetId != meetingId) return@checkState
+            if (notices.any { it.noticeId == notice.noticeId }) return@checkState
+
+            val currentFilter = filterTypeOf(selectedTabIndex)
+            if (currentFilter != null && currentFilter != notice.type) return@checkState
+
+            // 고정 공지 묶음 아래에 새 공지를 삽입
+            val insertIndex = notices.indexOfLast { it.pinned } + 1
+            val updated = notices.toMutableList().apply { add(insertIndex, notice) }
+            setUiState(copy(notices = updated))
+        }
+    }
+
+    private fun applyNoticeUpdate(notice: Notice) {
+        uiState.checkState<MeetingNoticeUiState> {
+            if (notices.none { it.noticeId == notice.noticeId }) return@checkState
+            val updated = notices.map { if (it.noticeId == notice.noticeId) notice else it }
+            setUiState(copy(notices = updated))
+        }
+    }
+
+    private fun applyNoticeDelete(noticeId: String) {
+        uiState.checkState<MeetingNoticeUiState> {
+            val filtered = notices.filterNot { it.noticeId == noticeId }
+            if (filtered.size == notices.size) return@checkState
+            setUiState(copy(notices = filtered))
+        }
+    }
+
     private fun filterTypeOf(tabIndex: Int): NoticeType? =
         when (tabIndex) {
             TAB_INDEX_CUSTOM -> NoticeType.CUSTOM
@@ -173,6 +229,8 @@ data class MeetingNoticeUiState(
 sealed interface MeetingNoticeUiAction : UiAction {
     data object OnClickBack : MeetingNoticeUiAction
 
+    data object OnClickWrite : MeetingNoticeUiAction
+
     data object OnClickRefresh : MeetingNoticeUiAction
 
     data class OnClickNotice(
@@ -188,4 +246,8 @@ sealed interface MeetingNoticeUiAction : UiAction {
 
 sealed interface MeetingNoticeUiEvent : UiEvent {
     data object NavigateToBack : MeetingNoticeUiEvent
+
+    data class NavigateToMeetingNoticeWrite(
+        val meetId: String,
+    ) : MeetingNoticeUiEvent
 }
