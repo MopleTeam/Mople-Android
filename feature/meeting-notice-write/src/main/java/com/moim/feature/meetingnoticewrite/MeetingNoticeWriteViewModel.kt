@@ -41,12 +41,7 @@ class MeetingNoticeWriteViewModel @AssistedInject constructor(
             if (noticeId == null) {
                 emit(null)
             } else {
-                emitAll(
-                    noticeRepository.getNotice(
-                        meetId = meetId,
-                        noticeId = noticeId,
-                    ),
-                )
+                emitAll(noticeRepository.getNotice(noticeId = noticeId))
             }
         }.mapLatest { notice ->
             MeetingNoticeWriteUiState.Success(

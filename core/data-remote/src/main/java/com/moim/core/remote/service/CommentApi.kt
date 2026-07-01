@@ -53,6 +53,12 @@ interface CommentApi {
         @Body params: JsonObject,
     ): CommentResponse
 
+    @POST("comment/notice/{commentId}")
+    suspend fun updateNoticeComment(
+        @Path("commentId") commentId: String,
+        @Body params: JsonObject,
+    ): CommentResponse
+
     @POST("comment/post/{commentId}/likes")
     suspend fun updateLikeComment(
         @Path("commentId") commentId: String,

@@ -12,6 +12,7 @@ data class Notice(
     val noticeId: String,
     val version: Int,
     val meetId: String,
+    val writer: Writer?,
     val type: NoticeType,
     val content: String,
     val createdAt: ZonedDateTime,

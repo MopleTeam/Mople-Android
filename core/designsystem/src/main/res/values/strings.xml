@@ -114,6 +114,10 @@
     <string name="meeting_notice_detail_custom">공지 작성하기</string>
     <string name="meeting_notice_detail_system">멤버들에게 공지를 남겨보세요.</string>
     <string name="meeting_notice_detail_comment_hint">댓글을 입력해주세요</string>
+    <string name="meeting_notice_detail_writer_system">시스템</string>
+    <string name="meeting_notice_detail_update_title">공지를 수정 또는 삭제할 수 있습니다.</string>
+    <string name="meeting_notice_detail_update">수정하기</string>
+    <string name="meeting_notice_detail_delete">삭제하기</string>
 
     <!-- PlanWrite -->
     <string name="plan_write_title_for_create">약속 생성하기</string>

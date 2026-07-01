@@ -21,6 +21,8 @@ import com.moim.feature.meetingdetail.MeetingDetailRoute
 import com.moim.feature.meetingdetail.MeetingDetailViewModel
 import com.moim.feature.meetingnotice.MeetingNoticeRoute
 import com.moim.feature.meetingnotice.MeetingNoticeViewModel
+import com.moim.feature.meetingnoticedetail.MeetingNoticeDetailRoute
+import com.moim.feature.meetingnoticedetail.MeetingNoticeDetailViewModel
 import com.moim.feature.meetingnoticewrite.MeetingNoticeWriteRoute
 import com.moim.feature.meetingnoticewrite.MeetingNoticeWriteViewModel
 import com.moim.feature.meetingsetting.MeetingSettingRoute
@@ -178,6 +180,9 @@ fun EntryProviderScope<NavKey>.meetingNoticeScreenEntry(
             padding = paddingValues,
             navigateToBack = navigator::goBack,
             navigateToMeetingNoticeWrite = { meetId -> navigator.navigateToMeetingNoticeWrite(meetId) },
+            navigateToMeetingNoticeDetail = { meetId, noticeId ->
+                navigator.navigateToMeetingNoticeDetail(meetId, noticeId)
+            },
             viewModel =
                 hiltViewModel<MeetingNoticeViewModel, MeetingNoticeViewModel.Factory>(key = key.meetId) { factory ->
                     factory.create(key)
@@ -196,6 +201,27 @@ fun EntryProviderScope<NavKey>.meetingNoticeWriteScreenEntry(
             navigateToBack = navigator::goBack,
             viewModel =
                 hiltViewModel<MeetingNoticeWriteViewModel, MeetingNoticeWriteViewModel.Factory>(
+                    key = key.noticeId ?: key.meetId,
+                ) { factory ->
+                    factory.create(key)
+                },
+        )
+    }
+}
+
+fun EntryProviderScope<NavKey>.meetingNoticeDetailScreenEntry(
+    navigator: MainNavigator,
+    paddingValues: PaddingValues,
+) {
+    entry<DetailRoute.MeetingNoticeDetail> { key ->
+        MeetingNoticeDetailRoute(
+            padding = paddingValues,
+            navigateToBack = navigator::goBack,
+            navigateToMeetingNoticeWrite = { meetId, noticeId ->
+                navigator.navigateToMeetingNoticeWrite(meetId, noticeId)
+            },
+            viewModel =
+                hiltViewModel<MeetingNoticeDetailViewModel, MeetingNoticeDetailViewModel.Factory>(
                     key = key.noticeId ?: key.meetId,
                 ) { factory ->
                     factory.create(key)

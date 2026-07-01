@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.moim.core.common.model.Notice
 import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.User
 import com.moim.core.designsystem.R
@@ -37,6 +36,7 @@ import com.moim.core.ui.view.FadeAnimatedVisibility
 import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.PagingUiState
+import com.moim.feature.meetingnotice.model.NoticeUiModel
 import com.moim.feature.meetingnotice.ui.MeetingNoticeItem
 import com.moim.feature.meetingnotice.ui.MeetingNoticeTabPager
 import java.time.ZonedDateTime
@@ -47,6 +47,7 @@ fun MeetingNoticeRoute(
     padding: PaddingValues,
     navigateToBack: () -> Unit,
     navigateToMeetingNoticeWrite: (String) -> Unit,
+    navigateToMeetingNoticeDetail: (String, String) -> Unit,
 ) {
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
     val noticeUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -55,6 +56,7 @@ fun MeetingNoticeRoute(
         when (event) {
             is MeetingNoticeUiEvent.NavigateToBack -> navigateToBack()
             is MeetingNoticeUiEvent.NavigateToMeetingNoticeWrite -> navigateToMeetingNoticeWrite(event.meetId)
+            is MeetingNoticeUiEvent.NavigateToMeetingNoticeDetail -> navigateToMeetingNoticeDetail(event.meetId, event.noticeId)
         }
     }
 
@@ -73,7 +75,7 @@ private fun MeetingNoticeScreen(
     onUiAction: (MeetingNoticeUiAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val paging = uiState.pagingInfo
+    val paging = uiState.currentTab.pagingInfo
     val pagerState =
         rememberPagerState(
             initialPage = uiState.selectedTabIndex,
@@ -142,12 +144,13 @@ private fun MeetingNoticeScreen(
                             modifier = Modifier.fillMaxSize(),
                             state = pagerState,
                         ) { page ->
+                            val pageNotices = uiState.tabStates[page]?.notices ?: emptyList()
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 state = listStates[page],
                             ) {
                                 items(
-                                    items = uiState.notices,
+                                    items = pageNotices,
                                     key = { it.noticeId },
                                 ) { notice ->
                                     MeetingNoticeItem(
@@ -169,9 +172,8 @@ private fun MeetingNoticeScreen(
 private fun MeetingNoticeScreenPreview() {
     MoimTheme {
         val notice =
-            Notice(
+            NoticeUiModel(
                 noticeId = "",
-                version = 1,
                 meetId = "",
                 type = NoticeType.CUSTOM,
                 content = "11/28일 모임 18:00 → 20:00 변경, 날씨이슈로 인해서 부득이하게 변경했습니다!",
@@ -201,10 +203,14 @@ private fun MeetingNoticeScreenPreview() {
                 MeetingNoticeUiState(
                     user = User(userId = "", nickname = ""),
                     isHostUser = true,
-                    notices = notices,
-                    pagingInfo =
-                        PagingUiState(
-                            isLoading = false,
+                    tabStates =
+                        mapOf(
+                            0 to
+                                NoticeTabState(
+                                    notices = notices,
+                                    pagingInfo = PagingUiState(isLoading = false),
+                                    isLoaded = true,
+                                ),
                         ),
                 ),
             onUiAction = {},

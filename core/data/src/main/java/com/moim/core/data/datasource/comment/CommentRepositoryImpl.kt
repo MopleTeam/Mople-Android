@@ -193,18 +193,31 @@ internal class CommentRepositoryImpl @Inject constructor(
     override fun createNoticeComment(
         noticeId: String,
         content: String,
-        mentionIds: List<String>,
     ): Flow<Comment> =
         catchFlow {
             val comment =
                 commentApi
                     .createNoticeComment(
                         postId = noticeId,
-                        params =
-                            jsonOf(
-                                KEY_CONTENTS to content,
-                                KEY_MENTIONS to mentionIds,
-                            ),
+                        params = jsonOf(KEY_CONTENTS to content),
+                    )
+            val openGraph =
+                openGraphRemoteDataSource
+                    .getOpenGraph(url = comment.content.findWebLink())
+
+            emit(comment.asItem(openGraph))
+        }
+
+    override fun updateNoticeComment(
+        commentId: String,
+        content: String,
+    ): Flow<Comment> =
+        catchFlow {
+            val comment =
+                commentApi
+                    .updateNoticeComment(
+                        commentId = commentId,
+                        params = jsonOf(KEY_CONTENTS to content),
                     )
             val openGraph =
                 openGraphRemoteDataSource

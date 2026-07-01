@@ -27,18 +27,16 @@ internal class NoticeRepositoryImpl @Inject constructor(
                     meetId = meetId,
                     cursor = cursor,
                     size = size,
+                    type = filterType?.name,
                 ).asItem { it.map(NoticeResponse::asItem) }
         } catch (e: Exception) {
             throw converterException(e)
         }
 
-    override fun getNotice(
-        meetId: String,
-        noticeId: String,
-    ): Flow<Notice> {
-        // TODO GET API
-        throw IllegalStateException("Noop")
-    }
+    override fun getNotice(noticeId: String): Flow<Notice> =
+        catchFlow {
+            emit(noticeApi.getNotice(noticeId).asItem())
+        }
 
     override fun createNotice(
         meetId: String,

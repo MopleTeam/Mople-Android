@@ -14,6 +14,8 @@ data class NoticeResponse(
     val version: Int,
     @SerialName("meetId")
     val meetId: Long,
+    @SerialName("writer")
+    val writer: WriterResponse? = null,
     @SerialName("type")
     val type: String,
     @SerialName("content")
@@ -29,6 +31,7 @@ fun NoticeResponse.asItem(): Notice =
         noticeId = noticeId.toString(),
         version = version,
         meetId = meetId.toString(),
+        writer = writer?.asItem(),
         type = NoticeType.entries.find { it.name == type } ?: NoticeType.NONE,
         content = content,
         createdAt = createdAt.parseZonedDateTime(),

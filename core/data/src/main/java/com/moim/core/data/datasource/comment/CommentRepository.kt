@@ -50,7 +50,11 @@ interface CommentRepository {
     fun createNoticeComment(
         noticeId: String,
         content: String,
-        mentionIds: List<String>,
+    ): Flow<Comment>
+
+    fun updateNoticeComment(
+        commentId: String,
+        content: String,
     ): Flow<Comment>
 
     fun reportComment(commentId: String): Flow<Unit>

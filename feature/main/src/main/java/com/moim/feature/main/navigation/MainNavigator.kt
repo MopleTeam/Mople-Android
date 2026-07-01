@@ -83,6 +83,11 @@ class MainNavigator(
         noticeId: String? = null,
     ) = navigate(DetailRoute.MeetingNoticeWrite(meetId, noticeId))
 
+    fun navigateToMeetingNoticeDetail(
+        meetId: String,
+        noticeId: String? = null,
+    ) = navigate(DetailRoute.MeetingNoticeDetail(meetId, noticeId))
+
     fun navigateToMapDetail(
         placeName: String,
         address: String,

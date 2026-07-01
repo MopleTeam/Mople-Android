@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import com.moim.core.common.model.Notice
 import com.moim.core.common.model.NoticeType
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
@@ -22,11 +21,12 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.meetingnotice.MeetingNoticeUiAction
+import com.moim.feature.meetingnotice.model.NoticeUiModel
 import java.time.ZonedDateTime
 
 @Composable
 fun MeetingNoticeItem(
-    notice: Notice,
+    notice: NoticeUiModel,
     onUiAction: (MeetingNoticeUiAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -87,9 +87,8 @@ private fun NoticeIcon(
 private fun MeetingNoticeItemPreview() {
     MoimTheme {
         val notice =
-            Notice(
+            NoticeUiModel(
                 noticeId = "",
-                version = 1,
                 meetId = "",
                 type = NoticeType.CUSTOM,
                 content = "11/28일 모임 18:00 → 20:00 변경, 날씨이슈로 인해서 부득이하게 변경했습니다!",

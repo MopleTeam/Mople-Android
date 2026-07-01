@@ -17,7 +17,13 @@ interface NoticeApi {
         @Path("meetId") meetId: String,
         @Query("cursor") cursor: String,
         @Query("size") size: Int,
+        @Query("type") type: String?,
     ): PaginationContainerResponse<List<NoticeResponse>>
+
+    @GET("/notice/detail/{noticeId}")
+    suspend fun getNotice(
+        @Path("noticeId") noticeId: String,
+    ): NoticeResponse
 
     @POST("notice/create")
     suspend fun createNotice(
