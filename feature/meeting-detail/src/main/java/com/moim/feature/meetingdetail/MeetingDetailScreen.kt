@@ -21,10 +21,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.asPlanItem
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
@@ -36,7 +38,12 @@ import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.ui.util.externalShareForUrl
 import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.meetingdetail.model.MeetingDetailNoticeUiModel
+import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
+import com.moim.feature.meetingdetail.model.MeetingDetailUiEvent
+import com.moim.feature.meetingdetail.model.MeetingDetailUiState
 import com.moim.feature.meetingdetail.ui.MeetingDetailHeader
+import com.moim.feature.meetingdetail.ui.MeetingDetailNotice
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanContent
 import com.moim.feature.meetingdetail.ui.MeetingDetailTopAppbar
 
@@ -49,6 +56,7 @@ fun MeetingDetailRoute(
     navigateToPlanDetail: (ViewIdType) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit,
     navigateToMeetingNotice: (meetId: String) -> Unit,
+    navigateToMeetingNoticeDetail: (meetId: String, noticeId: String) -> Unit,
     navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit,
 ) {
     val context = LocalContext.current
@@ -68,6 +76,10 @@ fun MeetingDetailRoute(
 
             is MeetingDetailUiEvent.NavigateToMeetingNotice -> {
                 navigateToMeetingNotice(event.meetId)
+            }
+
+            is MeetingDetailUiEvent.NavigateToMeetingNoticeDetail -> {
+                navigateToMeetingNoticeDetail(event.meetId, event.noticeId)
             }
 
             is MeetingDetailUiEvent.NavigateToPlanDetail -> {
@@ -136,6 +148,17 @@ fun MeetingDetailScreen(
             onUiAction = onUiAction,
         )
 
+        uiState.notice?.let {
+            Box(
+                modifier = Modifier.background(MoimTheme.colors.bg.secondary),
+            ) {
+                MeetingDetailNotice(
+                    notice = it,
+                    onUiAction = onUiAction,
+                )
+            }
+        }
+
         MeetingDetailHeader(
             isSelectedFuturePlan = uiState.isPlanSelected,
             onUiAction = onUiAction,
@@ -191,4 +214,26 @@ fun MeetingDetailScreen(
     }
 
     LoadingDialog(isLoading)
+}
+
+@ThemePreviews
+@Composable
+private fun MeetingDetailScreenPreview() {
+    MoimTheme {
+        MeetingDetailScreen(
+            uiState =
+                MeetingDetailUiState.Success(
+                    userId = "",
+                    meeting = Meeting(name = "모닝커피클럽"),
+                    notice =
+                        MeetingDetailNoticeUiModel(
+                            noticeId = "",
+                            content = "11/28일 모임 18:00 → 20:00 변경 되었습니다. 날씨이슈로 인해서 부득이하게 변경합니다. 양해 부탁드립니다.",
+                            noticeType = NoticeType.CUSTOM,
+                        ),
+                ),
+            isLoading = false,
+            onUiAction = {},
+        )
+    }
 }

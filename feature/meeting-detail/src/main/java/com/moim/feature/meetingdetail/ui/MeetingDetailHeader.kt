@@ -35,7 +35,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meetingdetail.MeetingDetailUiAction
+import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
 
 private const val CHIP_ANIMATION_DURATION = 250
 

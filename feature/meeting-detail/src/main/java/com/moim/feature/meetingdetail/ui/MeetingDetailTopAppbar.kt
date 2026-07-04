@@ -22,7 +22,7 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meetingdetail.MeetingDetailUiAction
+import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
 
 @Composable
 fun MeetingDetailTopAppbar(

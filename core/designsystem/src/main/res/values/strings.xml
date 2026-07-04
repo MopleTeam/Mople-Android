@@ -69,6 +69,7 @@
     <string name="meeting_plan_before">마지막 약속으로부터 %d일 지났어요</string>
 
     <!-- MeetingDetail -->
+    <string name="meeting_detail_notice">공지알림</string>
     <string name="meeting_detail_future_plan">예정된 약속</string>
     <string name="meeting_detail_past_plan">지난 약속</string>
     <string name="meeting_detail_plan_me">내가 만든 약속</string>

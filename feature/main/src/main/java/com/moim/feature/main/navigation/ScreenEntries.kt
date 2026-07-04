@@ -118,6 +118,7 @@ fun EntryProviderScope<NavKey>.meetingDetailScreenEntry(
             navigateToPlanDetail = navigator::navigateToPlanDetail,
             navigateToMeetingSetting = navigator::navigateToMeetingSetting,
             navigateToMeetingNotice = navigator::navigateToMeetingNotice,
+            navigateToMeetingNoticeDetail = navigator::navigateToMeetingNoticeDetail,
             navigateToImageViewer = navigator::navigateToImageViewer,
             viewModel =
                 hiltViewModel<MeetingDetailViewModel, MeetingDetailViewModel.Factory>(

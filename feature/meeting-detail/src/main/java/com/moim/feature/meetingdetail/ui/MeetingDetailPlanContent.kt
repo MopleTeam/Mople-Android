@@ -49,7 +49,7 @@ import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.ui.view.FadeAnimatedVisibility
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.PagingUiState
-import com.moim.feature.meetingdetail.MeetingDetailUiAction
+import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
 import java.time.ZonedDateTime
 
 @Composable

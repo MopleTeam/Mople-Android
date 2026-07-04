@@ -2,32 +2,33 @@ package com.moim.feature.meetingdetail
 
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.exception.NetworkException
-import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.Notice
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.Plan
 import com.moim.core.common.model.Review
-import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.asPlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.meeting.MeetingRepository
+import com.moim.core.data.datasource.notice.NoticeRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
+import com.moim.core.ui.eventbus.NoticeAction
 import com.moim.core.ui.eventbus.PlanAction
 import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.isActiveCheck
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
-import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
 import com.moim.core.ui.view.checkState
+import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
+import com.moim.feature.meetingdetail.model.MeetingDetailUiEvent
+import com.moim.feature.meetingdetail.model.MeetingDetailUiState
+import com.moim.feature.meetingdetail.model.toUiModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -47,8 +48,10 @@ class MeetingDetailViewModel @AssistedInject constructor(
     private val reviewRepository: ReviewRepository,
     private val meetingRepository: MeetingRepository,
     private val userRepository: UserRepository,
+    private val noticeRepository: NoticeRepository,
     private val meetingEventBus: EventBus<MeetingAction>,
     private val planEventBus: EventBus<PlanAction>,
+    private val noticeEventBus: EventBus<NoticeAction>,
     @Assisted val meetingDetailRoute: DetailRoute.MeetingDetail,
 ) : BaseViewModel() {
     private val meetingId = meetingDetailRoute.meetingId
@@ -100,7 +103,29 @@ class MeetingDetailViewModel @AssistedInject constructor(
                         }
 
                         is PlanAction.None -> {
-                            Unit
+                            return@collect
+                        }
+                    }
+                }
+            }
+
+            launch {
+                noticeEventBus.action.collect { action ->
+                    when (action) {
+                        is NoticeAction.NoticeCreate -> {
+                            applyNoticeCreate(action.notice)
+                        }
+
+                        is NoticeAction.NoticeUpdate -> {
+                            applyNoticeUpdate(action.notice)
+                        }
+
+                        is NoticeAction.NoticeDelete -> {
+                            applyNoticeDelete(action.noticeId)
+                        }
+
+                        is NoticeAction.None -> {
+                            return@collect
                         }
                     }
                 }
@@ -128,6 +153,10 @@ class MeetingDetailViewModel @AssistedInject constructor(
 
             is MeetingDetailUiAction.OnClickMeetingNotice -> {
                 navigateToMeetingNotice()
+            }
+
+            is MeetingDetailUiAction.OnClickMeetingNoticeDetail -> {
+                navigateToMeetingNoticeDetail(uiAction.noticeId)
             }
 
             is MeetingDetailUiAction.OnClickPlanTab -> {
@@ -178,10 +207,31 @@ class MeetingDetailViewModel @AssistedInject constructor(
                 }
             }.onSuccess { (user, meeting) ->
                 setUiState(MeetingDetailUiState.Success(userId = user.userId, meeting = meeting))
+                getCurrentNotice(meeting.id)
                 getPlans()
                 getReviews()
             }.onFailure {
                 setUiState(MeetingDetailUiState.Error)
+            }
+        }
+    }
+
+    private fun getCurrentNotice(meetId: String) {
+        viewModelScope.launch {
+            val notice =
+                runCatching {
+                    noticeRepository
+                        .getNotices(
+                            meetId = meetId,
+                            cursor = "",
+                            size = 1,
+                            filterType = null,
+                        ).content
+                        .firstOrNull()
+                }.getOrNull()
+
+            uiState.checkState<MeetingDetailUiState.Success> {
+                setUiState(copy(notice = notice?.toUiModel()))
             }
         }
     }
@@ -332,6 +382,27 @@ class MeetingDetailViewModel @AssistedInject constructor(
         }
     }
 
+    private fun applyNoticeCreate(notice: Notice) {
+        uiState.checkState<MeetingDetailUiState.Success> {
+            if (notice.meetId != meetingId) return@checkState
+            setUiState(copy(notice = notice.toUiModel()))
+        }
+    }
+
+    private fun applyNoticeUpdate(notice: Notice) {
+        uiState.checkState<MeetingDetailUiState.Success> {
+            if (this.notice?.noticeId != notice.noticeId) return@checkState
+            setUiState(copy(notice = notice.toUiModel()))
+        }
+    }
+
+    private fun applyNoticeDelete(noticeId: String) {
+        uiState.checkState<MeetingDetailUiState.Success> {
+            if (notice?.noticeId != noticeId) return@checkState
+            getCurrentNotice(meeting.id)
+        }
+    }
+
     private fun setPlanApply(
         planItem: PlanItem,
         isApply: Boolean,
@@ -437,100 +508,19 @@ class MeetingDetailViewModel @AssistedInject constructor(
         }
     }
 
+    private fun navigateToMeetingNoticeDetail(noticeId: String) {
+        uiState.checkState<MeetingDetailUiState.Success> {
+            setUiEvent(
+                MeetingDetailUiEvent.NavigateToMeetingNoticeDetail(
+                    meetId = meeting.id,
+                    noticeId = noticeId,
+                ),
+            )
+        }
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(meetingDetailRoute: DetailRoute.MeetingDetail): MeetingDetailViewModel
     }
-}
-
-sealed interface MeetingDetailUiState : UiState {
-    data object Loading : MeetingDetailUiState
-
-    data class Success(
-        val userId: String = "",
-        val meeting: Meeting = Meeting(),
-        val isShowApplyCancelDialog: Boolean = false,
-        val isPlanSelected: Boolean = true,
-        val cancelPlanItem: PlanItem? = null,
-        val plans: List<PlanItem> = emptyList(),
-        val reviews: List<PlanItem> = emptyList(),
-        val plansPagingInfo: PagingUiState = PagingUiState(),
-        val reviewsPagingInfo: PagingUiState = PagingUiState(),
-        val planTotalCount: Int = 0,
-        val reviewTotalCount: Int = 0,
-    ) : MeetingDetailUiState
-
-    data object Error : MeetingDetailUiState
-}
-
-sealed interface MeetingDetailUiAction : UiAction {
-    data object OnClickBack : MeetingDetailUiAction
-
-    data object OnClickRefresh : MeetingDetailUiAction
-
-    data object OnClickPlanWrite : MeetingDetailUiAction
-
-    data object OnClickMeetingSetting : MeetingDetailUiAction
-
-    data object OnClickMeetingNotice : MeetingDetailUiAction
-
-    data object OnClickMeetingInvite : MeetingDetailUiAction
-
-    data object OnLoadNextPage : MeetingDetailUiAction
-
-    data class OnClickPlanTab(
-        val isBefore: Boolean,
-    ) : MeetingDetailUiAction
-
-    data class OnClickPlanApply(
-        val planItem: PlanItem,
-        val isApply: Boolean,
-    ) : MeetingDetailUiAction
-
-    data class OnClickPlanDetail(
-        val viewIdType: ViewIdType,
-    ) : MeetingDetailUiAction
-
-    data class OnClickMeetingImage(
-        val imageUrl: String,
-        val meetingName: String,
-    ) : MeetingDetailUiAction
-
-    data class OnShowPlanApplyCancelDialog(
-        val isShow: Boolean,
-        val cancelPlanItem: PlanItem?,
-    ) : MeetingDetailUiAction
-}
-
-sealed interface MeetingDetailUiEvent : UiEvent {
-    data object NavigateToBack : MeetingDetailUiEvent
-
-    data class NavigateToPlanWrite(
-        val plan: Plan,
-    ) : MeetingDetailUiEvent
-
-    data class NavigateToMeetingSetting(
-        val meeting: Meeting,
-    ) : MeetingDetailUiEvent
-
-    data class NavigateToMeetingNotice(
-        val meetId: String,
-    ) : MeetingDetailUiEvent
-
-    data class NavigateToPlanDetail(
-        val viewIdType: ViewIdType,
-    ) : MeetingDetailUiEvent
-
-    data class NavigateToImageViewer(
-        val imageUrl: String,
-        val meetingName: String,
-    ) : MeetingDetailUiEvent
-
-    data class NavigateToExternalShareUrl(
-        val url: String,
-    ) : MeetingDetailUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : MeetingDetailUiEvent
 }
