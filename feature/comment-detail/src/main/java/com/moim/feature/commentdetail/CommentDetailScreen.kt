@@ -139,7 +139,7 @@ fun CommentDetailScreen(
                     }
                 }
 
-                FadeAnimatedVisibility(uiState.pagingInfo.isSuccess && uiState.replyComments.isNotEmpty()) {
+                FadeAnimatedVisibility(uiState.pagingInfo.isSuccess) {
                     PaginationEffect(
                         listState = listState,
                         threshold = 3,
