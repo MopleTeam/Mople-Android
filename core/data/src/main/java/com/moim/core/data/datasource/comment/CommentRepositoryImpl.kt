@@ -1,6 +1,7 @@
 package com.moim.core.data.datasource.comment
 
 import com.moim.core.common.model.Comment
+import com.moim.core.common.model.NoticeComment
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
@@ -51,7 +52,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         noticeId: String,
         cursor: String,
         size: Int,
-    ): PaginationContainer<List<Comment>> =
+    ): PaginationContainer<List<NoticeComment>> =
         coroutineScope {
             try {
                 val commentContainer =
@@ -193,7 +194,7 @@ internal class CommentRepositoryImpl @Inject constructor(
     override fun createNoticeComment(
         noticeId: String,
         content: String,
-    ): Flow<Comment> =
+    ): Flow<NoticeComment> =
         catchFlow {
             val comment =
                 commentApi
@@ -211,7 +212,7 @@ internal class CommentRepositoryImpl @Inject constructor(
     override fun updateNoticeComment(
         commentId: String,
         content: String,
-    ): Flow<Comment> =
+    ): Flow<NoticeComment> =
         catchFlow {
             val comment =
                 commentApi

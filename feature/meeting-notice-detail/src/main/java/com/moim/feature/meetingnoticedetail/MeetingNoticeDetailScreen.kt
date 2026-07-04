@@ -37,8 +37,10 @@ import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.showToast
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailBottomBar
+import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailCommentEditDialog
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailCommentHeader
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailCommentItem
+import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailCommentReportDialog
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailContent
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailEditDialog
 
@@ -175,6 +177,7 @@ private fun MeetingNoticeDetailScreen(
                     ) { commentUiModel ->
                         MeetingNoticeDetailCommentItem(
                             modifier = Modifier.animateItem(),
+                            userId = uiState.user.userId,
                             comment = commentUiModel,
                             onUiAction = onUiAction,
                         )
@@ -215,6 +218,20 @@ private fun MeetingNoticeDetailScreen(
 
     if (uiState.isShowNoticeEditDialog) {
         MeetingNoticeDetailEditDialog(
+            onUiAction = onUiAction,
+        )
+    }
+
+    if (uiState.isShowCommentEditDialog && uiState.selectedComment != null) {
+        MeetingNoticeDetailCommentEditDialog(
+            comment = uiState.selectedComment,
+            onUiAction = onUiAction,
+        )
+    }
+
+    if (uiState.isShowCommentReportDialog && uiState.selectedComment != null) {
+        MeetingNoticeDetailCommentReportDialog(
+            comment = uiState.selectedComment,
             onUiAction = onUiAction,
         )
     }

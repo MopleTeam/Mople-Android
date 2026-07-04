@@ -1,6 +1,7 @@
 package com.moim.core.remote.service
 
 import com.moim.core.remote.model.CommentResponse
+import com.moim.core.remote.model.NoticeCommentResponse
 import com.moim.core.remote.model.PaginationContainerResponse
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
@@ -32,7 +33,7 @@ interface CommentApi {
         @Path("noticeId") postId: String,
         @Query("cursor") cursor: String,
         @Query("size") size: Int,
-    ): PaginationContainerResponse<List<CommentResponse>>
+    ): PaginationContainerResponse<List<NoticeCommentResponse>>
 
     @POST("comment/post/{postId}")
     suspend fun createComment(
@@ -51,13 +52,13 @@ interface CommentApi {
     suspend fun createNoticeComment(
         @Path("postId") postId: String,
         @Body params: JsonObject,
-    ): CommentResponse
+    ): NoticeCommentResponse
 
-    @POST("comment/notice/{commentId}")
+    @PATCH("comment/notice/{commentId}")
     suspend fun updateNoticeComment(
         @Path("commentId") commentId: String,
         @Body params: JsonObject,
-    ): CommentResponse
+    ): NoticeCommentResponse
 
     @POST("comment/post/{commentId}/likes")
     suspend fun updateLikeComment(

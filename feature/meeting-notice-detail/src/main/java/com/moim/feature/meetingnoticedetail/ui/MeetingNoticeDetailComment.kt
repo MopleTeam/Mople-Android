@@ -30,14 +30,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.moim.core.common.model.Comment
+import com.moim.core.common.model.NoticeComment
 import com.moim.core.common.model.OpenGraph
 import com.moim.core.common.model.Writer
-import com.moim.core.common.model.item.CommentTextUiModel
-import com.moim.core.common.model.item.CommentUiModel
+import com.moim.core.common.model.item.NoticeCommentTextUiModel
+import com.moim.core.common.model.item.NoticeCommentUiModel
 import com.moim.core.common.util.parseDateString
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
+import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
@@ -79,7 +80,8 @@ fun MeetingNoticeDetailCommentHeader(
 @Composable
 fun MeetingNoticeDetailCommentItem(
     modifier: Modifier = Modifier,
-    comment: CommentUiModel,
+    userId: String,
+    comment: NoticeCommentUiModel,
     onUiAction: OnMeetingNoticeDetailUiAction,
 ) {
     Row(
@@ -105,7 +107,11 @@ fun MeetingNoticeDetailCommentItem(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Top,
         ) {
-            CommentHeader(comment = comment.comment)
+            CommentHeader(
+                userId = userId,
+                comment = comment.comment,
+                onUiAction = onUiAction,
+            )
 
             if (comment.texts.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
@@ -134,7 +140,9 @@ fun MeetingNoticeDetailCommentItem(
 @Composable
 private fun CommentHeader(
     modifier: Modifier = Modifier,
-    comment: Comment,
+    userId: String,
+    comment: NoticeComment,
+    onUiAction: OnMeetingNoticeDetailUiAction,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -154,13 +162,33 @@ private fun CommentHeader(
             style = MoimTheme.typography.body02.regular,
             color = MoimTheme.colors.text.text03,
         )
+
+        MoimIconButton(
+            iconRes = R.drawable.ic_more,
+            onClick = {
+                val uiAction =
+                    if (userId == comment.writer.userId) {
+                        MeetingNoticeDetailUiAction.OnShowCommentEditDialog(
+                            isShow = true,
+                            comment = comment,
+                        )
+                    } else {
+                        MeetingNoticeDetailUiAction.OnShowCommentReportDialog(
+                            isShow = true,
+                            comment = comment,
+                        )
+                    }
+
+                onUiAction(uiAction)
+            },
+        )
     }
 }
 
 @Composable
 private fun CommentText(
     modifier: Modifier = Modifier,
-    texts: List<CommentTextUiModel>,
+    texts: List<NoticeCommentTextUiModel>,
     onUiAction: OnMeetingNoticeDetailUiAction,
 ) {
     val text = texts.joinToString("") { it.content }
@@ -175,15 +203,13 @@ private fun CommentText(
         buildAnnotatedString {
             texts.forEach { uiModel ->
                 when (uiModel) {
-                    is CommentTextUiModel.PlainText,
-                    is CommentTextUiModel.MentionText,
-                    -> {
+                    is NoticeCommentTextUiModel.PlainText -> {
                         withStyle(style = spanStyle) {
                             append(uiModel.content)
                         }
                     }
 
-                    is CommentTextUiModel.HyperLinkText -> {
+                    is NoticeCommentTextUiModel.HyperLinkText -> {
                         val startIndex = text.indexOf(uiModel.content)
 
                         withStyle(
@@ -267,8 +293,7 @@ private fun CommentOpenGraph(
 @Composable
 private fun MeetingNoticeDetailCommentItemPreview() {
     val comment =
-        Comment(
-            postId = "",
+        NoticeComment(
             commentId = "",
             writer =
                 Writer(
@@ -288,10 +313,11 @@ private fun MeetingNoticeDetailCommentItemPreview() {
                     .background(MoimTheme.colors.bg.primary),
         ) {
             MeetingNoticeDetailCommentItem(
+                userId = "",
                 comment =
-                    CommentUiModel(
+                    NoticeCommentUiModel(
                         comment = comment,
-                        texts = listOf(CommentTextUiModel.PlainText(content = "이른 아침, 공지 확인했습니다. 다음 모임도 기대돼요!")),
+                        texts = listOf(NoticeCommentTextUiModel.PlainText(content = "이른 아침, 공지 확인했습니다. 다음 모임도 기대돼요!")),
                     ),
                 onUiAction = {},
             )

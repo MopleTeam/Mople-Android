@@ -2,16 +2,16 @@ package com.moim.feature.meetingnoticedetail
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.insert
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.exception.ForbiddenException
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.exception.NotFoundException
-import com.moim.core.common.model.Comment
-import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.Notice
+import com.moim.core.common.model.NoticeComment
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.User
-import com.moim.core.common.model.item.CommentUiModel
+import com.moim.core.common.model.item.NoticeCommentUiModel
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.crashreport.CrashReporter
@@ -23,7 +23,7 @@ import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.NoticeAction
 import com.moim.core.ui.eventbus.actionStateIn
 import com.moim.core.ui.route.DetailRoute
-import com.moim.core.ui.util.createCommentUiModel
+import com.moim.core.ui.util.createNoticeCommentUiModel
 import com.moim.core.ui.util.isActiveCheck
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
@@ -42,10 +42,8 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.take
@@ -191,6 +189,40 @@ class MeetingNoticeDetailViewModel @AssistedInject constructor(
             is MeetingNoticeDetailUiAction.OnClickNoticeDelete -> {
                 deleteNotice()
             }
+
+            is MeetingNoticeDetailUiAction.OnShowCommentEditDialog -> {
+                uiState.checkState<MeetingNoticeDetailUiState.Success> {
+                    setUiState(
+                        copy(
+                            isShowCommentEditDialog = uiAction.isShow,
+                            selectedComment = uiAction.comment,
+                        ),
+                    )
+                }
+            }
+
+            is MeetingNoticeDetailUiAction.OnShowCommentReportDialog -> {
+                uiState.checkState<MeetingNoticeDetailUiState.Success> {
+                    setUiState(
+                        copy(
+                            isShowCommentReportDialog = uiAction.isShow,
+                            selectedComment = uiAction.comment,
+                        ),
+                    )
+                }
+            }
+
+            is MeetingNoticeDetailUiAction.OnClickCommentUpdate -> {
+                updateComment(uiAction.comment)
+            }
+
+            is MeetingNoticeDetailUiAction.OnClickCommentDelete -> {
+                deleteComment(uiAction.comment)
+            }
+
+            is MeetingNoticeDetailUiAction.OnClickCommentReport -> {
+                reportComment(uiAction.comment)
+            }
         }
     }
 
@@ -232,7 +264,7 @@ class MeetingNoticeDetailViewModel @AssistedInject constructor(
     }
 
     private fun handleCommentsPagingData(
-        pagingInfo: PaginationContainer<List<Comment>>?,
+        pagingInfo: PaginationContainer<List<NoticeComment>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
@@ -244,7 +276,7 @@ class MeetingNoticeDetailViewModel @AssistedInject constructor(
                     currentPagingInfo = commentsPagingInfo,
                     currentItems = comments,
                     isInitialLoad = cursor == null,
-                    transform = { items -> items.map { it.createCommentUiModel() } },
+                    transform = { items -> items.map { it.createNoticeCommentUiModel() } },
                 )
 
             setUiState(
@@ -263,11 +295,18 @@ class MeetingNoticeDetailViewModel @AssistedInject constructor(
                 val content = commentState.text.toString().trim()
                 if (content.isEmpty()) return@checkState
 
-                commentRepository
-                    .createNoticeComment(
+                val updateComment = selectedUpdateComment
+                if (updateComment == null) {
+                    commentRepository.createNoticeComment(
                         noticeId = noticeId,
                         content = content,
-                    ).asResult()
+                    )
+                } else {
+                    commentRepository.updateNoticeComment(
+                        commentId = updateComment.commentId,
+                        content = content,
+                    )
+                }.asResult()
                     .onEach { setLoading(it is Result.Loading) }
                     .collect { result ->
                         uiState.checkState<MeetingNoticeDetailUiState.Success> {
@@ -277,17 +316,33 @@ class MeetingNoticeDetailViewModel @AssistedInject constructor(
                                 }
 
                                 is Result.Success -> {
-                                    val newComment = result.data.createCommentUiModel()
+                                    val newComment = result.data.createNoticeCommentUiModel()
                                     commentState.clearText()
-                                    setUiState(
-                                        copy(
-                                            comments = listOf(newComment) + comments,
-                                            commentsPagingInfo =
-                                                commentsPagingInfo.copy(
-                                                    totalCount = commentsPagingInfo.totalCount + 1,
-                                                ),
-                                        ),
-                                    )
+                                    if (updateComment == null) {
+                                        setUiState(
+                                            copy(
+                                                comments = listOf(newComment) + comments,
+                                                commentsPagingInfo =
+                                                    commentsPagingInfo.copy(
+                                                        totalCount = commentsPagingInfo.totalCount + 1,
+                                                    ),
+                                            ),
+                                        )
+                                    } else {
+                                        setUiState(
+                                            copy(
+                                                comments =
+                                                    comments.map { uiModel ->
+                                                        if (uiModel.comment.commentId == newComment.comment.commentId) {
+                                                            newComment
+                                                        } else {
+                                                            uiModel
+                                                        }
+                                                    },
+                                                selectedUpdateComment = null,
+                                            ),
+                                        )
+                                    }
                                 }
 
                                 is Result.Error -> {
@@ -297,6 +352,68 @@ class MeetingNoticeDetailViewModel @AssistedInject constructor(
                         }
                     }
             }
+        }
+    }
+
+    private fun updateComment(comment: NoticeComment) {
+        uiState.checkState<MeetingNoticeDetailUiState.Success> {
+            commentState.clearText()
+            commentState.edit { insert(0, comment.content) }
+            setUiState(copy(selectedUpdateComment = comment))
+        }
+    }
+
+    private fun deleteComment(comment: NoticeComment) {
+        viewModelScope.launch {
+            commentRepository
+                .deleteComment(comment.commentId)
+                .asResult()
+                .onEach { setLoading(it is Result.Loading) }
+                .collect { result ->
+                    uiState.checkState<MeetingNoticeDetailUiState.Success> {
+                        when (result) {
+                            is Result.Loading -> {
+                                return@collect
+                            }
+
+                            is Result.Success -> {
+                                if (selectedUpdateComment != null) {
+                                    commentState.clearText()
+                                }
+                                setUiState(
+                                    copy(
+                                        comments = comments.filterNot { it.comment.commentId == comment.commentId },
+                                        commentsPagingInfo =
+                                            commentsPagingInfo.copy(
+                                                totalCount = (commentsPagingInfo.totalCount - 1).coerceAtLeast(0),
+                                            ),
+                                        selectedUpdateComment = null,
+                                    ),
+                                )
+                            }
+
+                            is Result.Error -> {
+                                showErrorToast(result.exception)
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun reportComment(comment: NoticeComment) {
+        viewModelScope.launch {
+            commentRepository
+                .reportComment(commentId = comment.commentId)
+                .asResult()
+                .onEach { setLoading(it is Result.Loading) }
+                .collect { result ->
+                    when (result) {
+                        is Result.Loading -> return@collect
+                        is Result.Success -> setUiEvent(MeetingNoticeDetailUiEvent.ShowToastMessage(ToastMessage.ReportCompletedMessage))
+                        is Result.Error -> showErrorToast(result.exception)
+                    }
+                }
         }
     }
 
@@ -354,8 +471,12 @@ sealed interface MeetingNoticeDetailUiState : UiState {
         val notice: NoticeUiModel,
         val isHostUser: Boolean = false,
         val isShowNoticeEditDialog: Boolean = false,
+        val isShowCommentEditDialog: Boolean = false,
+        val isShowCommentReportDialog: Boolean = false,
+        val selectedComment: NoticeComment? = null,
+        val selectedUpdateComment: NoticeComment? = null,
         val commentState: TextFieldState = TextFieldState(),
-        val comments: List<CommentUiModel> = emptyList(),
+        val comments: List<NoticeCommentUiModel> = emptyList(),
         val commentsPagingInfo: PagingUiState = PagingUiState(),
     ) : MeetingNoticeDetailUiState
 
@@ -384,6 +505,28 @@ sealed interface MeetingNoticeDetailUiAction : UiAction {
     data object OnClickNoticeUpdate : MeetingNoticeDetailUiAction
 
     data object OnClickNoticeDelete : MeetingNoticeDetailUiAction
+
+    data class OnShowCommentEditDialog(
+        val isShow: Boolean,
+        val comment: NoticeComment? = null,
+    ) : MeetingNoticeDetailUiAction
+
+    data class OnShowCommentReportDialog(
+        val isShow: Boolean,
+        val comment: NoticeComment? = null,
+    ) : MeetingNoticeDetailUiAction
+
+    data class OnClickCommentUpdate(
+        val comment: NoticeComment,
+    ) : MeetingNoticeDetailUiAction
+
+    data class OnClickCommentDelete(
+        val comment: NoticeComment,
+    ) : MeetingNoticeDetailUiAction
+
+    data class OnClickCommentReport(
+        val comment: NoticeComment,
+    ) : MeetingNoticeDetailUiAction
 }
 
 sealed interface MeetingNoticeDetailUiEvent : UiEvent {
