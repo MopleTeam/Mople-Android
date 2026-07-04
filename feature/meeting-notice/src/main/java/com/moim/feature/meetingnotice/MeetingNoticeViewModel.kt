@@ -1,10 +1,13 @@
 package com.moim.feature.meetingnotice
 
 import androidx.lifecycle.viewModelScope
+import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Notice
 import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.User
+import com.moim.core.common.result.Result
+import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.notice.NoticeRepository
 import com.moim.core.data.datasource.user.UserRepository
@@ -16,6 +19,7 @@ import com.moim.core.ui.util.isActiveCheck
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
 import com.moim.core.ui.view.PagingUiState
+import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
@@ -28,8 +32,10 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 @HiltViewModel(assistedFactory = MeetingNoticeViewModel.Factory::class)
 class MeetingNoticeViewModel @AssistedInject constructor(
@@ -116,6 +122,13 @@ class MeetingNoticeViewModel @AssistedInject constructor(
                         meetId = uiAction.notice.meetId,
                         noticeId = uiAction.notice.noticeId,
                     ),
+                )
+            }
+
+            is MeetingNoticeUiAction.OnClickPin -> {
+                setPinNotice(
+                    noticeId = uiAction.notice.noticeId,
+                    isPin = !uiAction.notice.pinned,
                 )
             }
         }
@@ -236,6 +249,61 @@ class MeetingNoticeViewModel @AssistedInject constructor(
         }
     }
 
+    private fun setPinNotice(
+        noticeId: String,
+        isPin: Boolean,
+    ) {
+        viewModelScope.launch {
+            if (isPin) {
+                noticeRepository.pinNotice(noticeId = noticeId)
+            } else {
+                noticeRepository.unpinNotice(noticeId = noticeId)
+            }.asResult()
+                .onEach { setLoading(it is Result.Loading) }
+                .collect { result ->
+                    when (result) {
+                        is Result.Loading -> {
+                            return@collect
+                        }
+
+                        is Result.Success -> {
+                            applyNoticePinned(result.data)
+                        }
+
+                        is Result.Error -> {
+                            when (result.exception) {
+                                is IOException -> setUiEvent(MeetingNoticeUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
+                                is NetworkException -> setUiEvent(MeetingNoticeUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun applyNoticePinned(notice: Notice) {
+        uiState.checkState<MeetingNoticeUiState> {
+            val uiModel = notice.asUiModel()
+            val updated =
+                tabStates.mapValues { (_, tab) ->
+                    if (tab.notices.none { it.noticeId == uiModel.noticeId }) {
+                        tab
+                    } else {
+                        // 고정 상태를 반영한 뒤 고정 공지가 항상 위로 오도록 재정렬한다.
+                        val reordered =
+                            tab.notices
+                                .map { if (it.noticeId == uiModel.noticeId) uiModel else it }
+                                .sortedWith(
+                                    compareByDescending<NoticeUiModel> { it.pinned }
+                                        .thenByDescending { it.createdAt },
+                                )
+                        tab.copy(notices = reordered)
+                    }
+                }
+            setUiState(copy(tabStates = updated))
+        }
+    }
+
     private fun filterTypeOf(tabIndex: Int): NoticeType? =
         when (tabIndex) {
             TAB_INDEX_CUSTOM -> NoticeType.CUSTOM
@@ -283,6 +351,10 @@ sealed interface MeetingNoticeUiAction : UiAction {
         val notice: NoticeUiModel,
     ) : MeetingNoticeUiAction
 
+    data class OnClickPin(
+        val notice: NoticeUiModel,
+    ) : MeetingNoticeUiAction
+
     data object OnLoadNextPage : MeetingNoticeUiAction
 
     data class OnTabSelected(
@@ -300,5 +372,9 @@ sealed interface MeetingNoticeUiEvent : UiEvent {
     data class NavigateToMeetingNoticeDetail(
         val meetId: String,
         val noticeId: String,
+    ) : MeetingNoticeUiEvent
+
+    data class ShowToastMessage(
+        val message: ToastMessage,
     ) : MeetingNoticeUiEvent
 }

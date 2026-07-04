@@ -15,9 +15,13 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +40,7 @@ import com.moim.core.ui.view.FadeAnimatedVisibility
 import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.PagingUiState
+import com.moim.core.ui.view.showToast
 import com.moim.feature.meetingnotice.model.NoticeUiModel
 import com.moim.feature.meetingnotice.ui.MeetingNoticeItem
 import com.moim.feature.meetingnotice.ui.MeetingNoticeTabPager
@@ -49,6 +54,7 @@ fun MeetingNoticeRoute(
     navigateToMeetingNoticeWrite: (String) -> Unit,
     navigateToMeetingNoticeDetail: (String, String) -> Unit,
 ) {
+    val context = LocalContext.current
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
     val noticeUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -57,6 +63,7 @@ fun MeetingNoticeRoute(
             is MeetingNoticeUiEvent.NavigateToBack -> navigateToBack()
             is MeetingNoticeUiEvent.NavigateToMeetingNoticeWrite -> navigateToMeetingNoticeWrite(event.meetId)
             is MeetingNoticeUiEvent.NavigateToMeetingNoticeDetail -> navigateToMeetingNoticeDetail(event.meetId, event.noticeId)
+            is MeetingNoticeUiEvent.ShowToastMessage -> showToast(context, event.message)
         }
     }
 
@@ -76,6 +83,7 @@ private fun MeetingNoticeScreen(
     modifier: Modifier = Modifier,
 ) {
     val paging = uiState.currentTab.pagingInfo
+    var openedNoticeId by remember { mutableStateOf<String?>(null) }
     val pagerState =
         rememberPagerState(
             initialPage = uiState.selectedTabIndex,
@@ -155,6 +163,9 @@ private fun MeetingNoticeScreen(
                                 ) { notice ->
                                     MeetingNoticeItem(
                                         notice = notice,
+                                        isHostUser = uiState.isHostUser,
+                                        openedNoticeId = openedNoticeId,
+                                        onOpenedChange = { openedNoticeId = it },
                                         onUiAction = onUiAction,
                                     )
                                 }
@@ -185,11 +196,13 @@ private fun MeetingNoticeScreenPreview() {
             listOf(
                 notice.copy(
                     noticeId = "1",
-                    type = NoticeType.SYSTEM,
+                    pinned = true,
                     createdAt = ZonedDateTime.now().minusDays(1),
                 ),
                 notice.copy(
                     noticeId = "2",
+                    type = NoticeType.SYSTEM,
+                    content = "모임장이 카카오님에서 붕어빵님으로 변경되었습니다.",
                     createdAt = ZonedDateTime.now().minusDays(2),
                 ),
                 notice.copy(
