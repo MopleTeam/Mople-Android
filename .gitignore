@@ -49,3 +49,15 @@ vcs.xml
 /.kotlin/
 # Project exclude paths
 /build-logic/build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/README.md
+# fastlane secrets (서비스 계정 키 / 환경변수)
+fastlane/.env
+fastlane/*.env
+fastlane/*service-account*.json
+*service-account*.json
