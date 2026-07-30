@@ -9,6 +9,7 @@ import com.moim.core.common.model.Token
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.toJson
 import com.moim.core.common.util.JsonUtil.toObject
+import com.moim.core.local.PreferenceStorageImpl.PreferenceKeys.PREF_FCM_TOKEN_LAST
 import com.moim.core.local.PreferenceStorageImpl.PreferenceKeys.PREF_THEME
 import com.moim.core.local.PreferenceStorageImpl.PreferenceKeys.PREF_USER
 import com.moim.core.local.PreferenceStorageImpl.PreferenceKeys.PREF_USER_TOKEN
@@ -24,13 +25,14 @@ internal class PreferenceStorageImpl @Inject constructor(
         val PREF_USER = stringPreferencesKey("pref_user")
         val PREF_USER_TOKEN = stringPreferencesKey("pref_user_token")
         val PREF_THEME = stringPreferencesKey("pref_theme")
+        val PREF_FCM_TOKEN_LAST = stringPreferencesKey("pref_fcm_token_last")
     }
 
     override val user: Flow<User?> =
         preference.data.map {
             try {
                 it[PREF_USER]?.toObject<User>()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }
@@ -51,7 +53,7 @@ internal class PreferenceStorageImpl @Inject constructor(
         preference.data.map {
             try {
                 it[PREF_USER_TOKEN]?.toObject<Token>()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }
@@ -66,6 +68,13 @@ internal class PreferenceStorageImpl @Inject constructor(
                     ""
                 }
         }
+    }
+
+    override val lastFcmToken: Flow<String?> =
+        preference.data.map { it[PREF_FCM_TOKEN_LAST] }
+
+    override suspend fun saveLastFcmToken(fcmToken: String) {
+        preference.edit { it[PREF_FCM_TOKEN_LAST] = fcmToken }
     }
 
     override fun getTheme(): Flow<Theme> =

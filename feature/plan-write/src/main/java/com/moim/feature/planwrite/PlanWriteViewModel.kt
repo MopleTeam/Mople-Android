@@ -1,22 +1,23 @@
 package com.moim.feature.planwrite
 
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.map
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.Place
 import com.moim.core.common.model.item.asPlanItem
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseDateString
+import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
-import com.moim.core.domain.usecase.GetMeetingsUseCase
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.PlanAction
 import com.moim.core.ui.route.DetailRoute
+import com.moim.core.ui.util.isActiveCheck
 import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.view.PagingHelper
+import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.ToastMessage
 import com.moim.core.ui.view.UiAction
 import com.moim.core.ui.view.UiEvent
@@ -27,12 +28,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okio.IOException
 import java.time.ZonedDateTime
@@ -40,22 +37,12 @@ import java.time.ZonedDateTime
 @HiltViewModel(assistedFactory = PlanWriteViewModel.Factory::class)
 class PlanWriteViewModel @AssistedInject constructor(
     private val planRepository: PlanRepository,
-    getMeetingsUseCase: GetMeetingsUseCase,
+    private val meetingRepository: MeetingRepository,
     private val planEventBus: EventBus<PlanAction>,
     @Assisted val planWriteRoute: DetailRoute.PlanWrite,
 ) : BaseViewModel() {
     private val planItem = planWriteRoute.planItem
-    private val selectedMeetingId = MutableStateFlow<String?>(null)
-
-    private val meetings =
-        getMeetingsUseCase()
-            .mapLatest { it.map { meeting -> MeetingUiModel(meeting) } }
-            .cachedIn(viewModelScope)
-            .combine(selectedMeetingId) { meetings, selectedMeetingId ->
-                meetings.map { pagingData ->
-                    pagingData.copy(isSelected = pagingData.meeting.id == selectedMeetingId)
-                }
-            }.cachedIn(viewModelScope)
+    private var meetingsPagingJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -78,28 +65,76 @@ class PlanWriteViewModel @AssistedInject constructor(
                         enabledSubmit = plan.postId.isNotEmpty(),
                     ),
                 )
-                selectedMeetingId.update { plan.meetingId }
             } ?: run { setUiState(PlanWriteUiState.PlanWrite()) }
         }
     }
 
     fun onUiAction(uiAction: PlanWriteUiAction) {
         when (uiAction) {
-            is PlanWriteUiAction.OnClickBack -> navigateToBack()
-            is PlanWriteUiAction.OnClickPlanMeeting -> setPlanMeeting(uiAction.meeting)
-            is PlanWriteUiAction.OnClickPlanDate -> setPlanDate(uiAction.date)
-            is PlanWriteUiAction.OnClickPlanTime -> setPlanTime(uiAction.date)
-            is PlanWriteUiAction.OnClickPlanPlaceSearch -> getSearchPlace(uiAction.keyword, uiAction.xPoint, uiAction.yPoint)
-            is PlanWriteUiAction.OnClickSearchPlace -> setPlaceMarker(uiAction.place)
-            is PlanWriteUiAction.OnClickPlanPlace -> setPlanPlace(uiAction.place)
-            is PlanWriteUiAction.OnClickPlanWrite -> setPlan()
-            is PlanWriteUiAction.OnShowDatePickerDialog -> showDatePickerDialog(uiAction.isShow)
-            is PlanWriteUiAction.OnShowTimePickerDialog -> showTimePickerDialog(uiAction.isShow)
-            is PlanWriteUiAction.OnShowMeetingsDialog -> showMeetingsDialog(uiAction.isShow)
-            is PlanWriteUiAction.OnShowPlaceMapScreen -> showPlaceMapScreen(uiAction.isShow)
-            is PlanWriteUiAction.OnShowPlaceInfoDialog -> showPlaceInfoDialog(uiAction.isShow)
-            is PlanWriteUiAction.OnChangePlanName -> setPlanName(uiAction.name)
-            is PlanWriteUiAction.OnChangePlanDescription -> setPlanDescription(uiAction.description)
+            is PlanWriteUiAction.OnClickBack -> {
+                navigateToBack()
+            }
+
+            is PlanWriteUiAction.OnClickPlanMeeting -> {
+                setPlanMeeting(uiAction.meeting)
+            }
+
+            is PlanWriteUiAction.OnClickPlanDate -> {
+                setPlanDate(uiAction.date)
+            }
+
+            is PlanWriteUiAction.OnClickPlanTime -> {
+                setPlanTime(uiAction.date)
+            }
+
+            is PlanWriteUiAction.OnClickPlanPlaceSearch -> {
+                getSearchPlace(uiAction.keyword, uiAction.xPoint, uiAction.yPoint)
+            }
+
+            is PlanWriteUiAction.OnClickSearchPlace -> {
+                setPlaceMarker(uiAction.place)
+            }
+
+            is PlanWriteUiAction.OnClickPlanPlace -> {
+                setPlanPlace(uiAction.place)
+            }
+
+            is PlanWriteUiAction.OnClickPlanWrite -> {
+                setPlan()
+            }
+
+            is PlanWriteUiAction.OnLoadNextMeetingsPage -> {
+                val current = uiState.value as? PlanWriteUiState.PlanWrite ?: return
+                getMeetings(current.meetingsPagingInfo.nextCursor)
+            }
+
+            is PlanWriteUiAction.OnShowDatePickerDialog -> {
+                showDatePickerDialog(uiAction.isShow)
+            }
+
+            is PlanWriteUiAction.OnShowTimePickerDialog -> {
+                showTimePickerDialog(uiAction.isShow)
+            }
+
+            is PlanWriteUiAction.OnShowMeetingsDialog -> {
+                showMeetingsDialog(uiAction.isShow)
+            }
+
+            is PlanWriteUiAction.OnShowPlaceMapScreen -> {
+                showPlaceMapScreen(uiAction.isShow)
+            }
+
+            is PlanWriteUiAction.OnShowPlaceInfoDialog -> {
+                showPlaceInfoDialog(uiAction.isShow)
+            }
+
+            is PlanWriteUiAction.OnChangePlanName -> {
+                setPlanName(uiAction.name)
+            }
+
+            is PlanWriteUiAction.OnChangePlanDescription -> {
+                setPlanDescription(uiAction.description)
+            }
         }
     }
 
@@ -163,8 +198,14 @@ class PlanWriteViewModel @AssistedInject constructor(
 
     private fun setPlanMeeting(meeting: Meeting) {
         uiState.checkState<PlanWriteUiState.PlanWrite> {
-            selectedMeetingId.update { meeting.id }
-            setUiState(copy(selectMeetingId = meeting.id, selectMeetingName = meeting.name))
+            val updatedMeetings = meetings.map { it.copy(isSelected = it.meeting.id == meeting.id) }
+            setUiState(
+                copy(
+                    selectMeetingId = meeting.id,
+                    selectMeetingName = meeting.name,
+                    meetings = updatedMeetings,
+                ),
+            )
             setPlanCreateEnabled()
         }
     }
@@ -178,6 +219,62 @@ class PlanWriteViewModel @AssistedInject constructor(
                     planTime != null
 
             setUiState(copy(enabledSubmit = enable))
+        }
+    }
+
+    private fun getMeetings(cursor: String? = null) {
+        if (meetingsPagingJob.isActiveCheck()) return
+        meetingsPagingJob =
+            viewModelScope.launch {
+                handleMeetingsPagingData(
+                    pagingInfo = null,
+                    isLoading = true,
+                    cursor = cursor,
+                )
+
+                val pagingInfo =
+                    runCatching {
+                        meetingRepository.getMeetings(
+                            cursor = cursor ?: "",
+                            size = 30,
+                        )
+                    }.getOrNull()
+
+                handleMeetingsPagingData(
+                    pagingInfo = pagingInfo,
+                    isLoading = false,
+                    cursor = cursor,
+                )
+            }
+    }
+
+    private fun handleMeetingsPagingData(
+        pagingInfo: PaginationContainer<List<Meeting>>?,
+        isLoading: Boolean,
+        cursor: String?,
+    ) {
+        uiState.checkState<PlanWriteUiState.PlanWrite> {
+            val selectedId = selectMeetingId
+            val result =
+                PagingHelper.handlePagingResult(
+                    pagingData = pagingInfo,
+                    isLoading = isLoading,
+                    currentPagingInfo = meetingsPagingInfo,
+                    currentItems = meetings,
+                    isInitialLoad = cursor == null,
+                    transform = { items ->
+                        items.map { meeting ->
+                            MeetingUiModel(meeting = meeting, isSelected = meeting.id == selectedId)
+                        }
+                    },
+                )
+
+            setUiState(
+                copy(
+                    meetingsPagingInfo = result.pagingInfo,
+                    meetings = result.items,
+                ),
+            )
         }
     }
 
@@ -320,14 +417,10 @@ class PlanWriteViewModel @AssistedInject constructor(
     }
 
     private fun showMeetingsDialog(isShow: Boolean) {
-        viewModelScope.launch {
-            uiState.checkState<PlanWriteUiState.PlanWrite> {
-                setUiState(
-                    copy(
-                        isShowMeetingDialog = isShow,
-                        meetings = if (isShow) this@PlanWriteViewModel.meetings else null,
-                    ),
-                )
+        uiState.checkState<PlanWriteUiState.PlanWrite> {
+            setUiState(copy(isShowMeetingDialog = isShow))
+            if (isShow && meetings.isEmpty()) {
+                getMeetings()
             }
         }
     }
@@ -367,7 +460,8 @@ sealed interface PlanWriteUiState : UiState {
         val selectMeetingId: String? = null,
         val selectMeetingName: String? = null,
         val selectedPlace: Place? = null,
-        val meetings: Flow<PagingData<MeetingUiModel>>? = null,
+        val meetings: List<MeetingUiModel> = emptyList(),
+        val meetingsPagingInfo: PagingUiState = PagingUiState(),
         val searchKeyword: String? = null,
         val searchPlaces: List<Place> = emptyList(),
         val isShowDatePickerDialog: Boolean = false,
@@ -385,6 +479,8 @@ sealed interface PlanWriteUiAction : UiAction {
     data object OnClickBack : PlanWriteUiAction
 
     data object OnClickPlanWrite : PlanWriteUiAction
+
+    data object OnLoadNextMeetingsPage : PlanWriteUiAction
 
     data class OnClickPlanPlaceSearch(
         val keyword: String,

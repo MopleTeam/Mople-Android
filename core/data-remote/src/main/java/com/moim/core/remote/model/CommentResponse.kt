@@ -1,6 +1,7 @@
 package com.moim.core.remote.model
 
 import com.moim.core.common.model.Comment
+import com.moim.core.common.model.NoticeComment
 import com.moim.core.common.model.OpenGraph
 import com.moim.core.common.model.Writer
 import com.moim.core.common.util.parseZonedDateTime
@@ -32,6 +33,22 @@ data class CommentResponse(
 )
 
 @Serializable
+data class NoticeCommentResponse(
+    @SerialName("commentId")
+    val commentId: String,
+    @SerialName("content")
+    val content: String,
+    @SerialName("parentId")
+    val parentId: String? = null,
+    @SerialName("replyCount")
+    val replayCount: Int? = null,
+    @SerialName("writer")
+    val writer: WriterResponse,
+    @SerialName("time")
+    val commentAt: String,
+)
+
+@Serializable
 data class WriterResponse(
     @SerialName("userId")
     val userId: String,
@@ -52,6 +69,17 @@ fun CommentResponse.asItem(openGraph: OpenGraph?): Comment =
         isLike = isLike,
         writer = writer.asItem(),
         mentions = mentions.map(WriterResponse::asItem),
+        commentAt = commentAt.parseZonedDateTime(),
+        openGraph = openGraph,
+    )
+
+fun NoticeCommentResponse.asItem(openGraph: OpenGraph?): NoticeComment =
+    NoticeComment(
+        commentId = commentId,
+        content = content,
+        parentId = parentId,
+        replayCount = replayCount ?: 0,
+        writer = writer.asItem(),
         commentAt = commentAt.parseZonedDateTime(),
         openGraph = openGraph,
     )

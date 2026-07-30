@@ -1,9 +1,12 @@
 package com.moim.core.ui.util
 
 import com.moim.core.common.model.Comment
+import com.moim.core.common.model.NoticeComment
 import com.moim.core.common.model.User
 import com.moim.core.common.model.item.CommentTextUiModel
 import com.moim.core.common.model.item.CommentUiModel
+import com.moim.core.common.model.item.NoticeCommentTextUiModel
+import com.moim.core.common.model.item.NoticeCommentUiModel
 
 fun createMentionTagMessage(
     mentionUsers: List<User>,
@@ -84,6 +87,29 @@ fun Comment.createCommentUiModel(): CommentUiModel {
             }.flatten()
 
     return CommentUiModel(
+        commentId = this.commentId,
+        comment = this,
+        texts = commentTextUiModel,
+        openGraph = this.openGraph,
+    )
+}
+
+fun NoticeComment.createNoticeCommentUiModel(): NoticeCommentUiModel {
+    val commentTexts = content.parseTextWithLinks()
+    val commentTextUiModel =
+        commentTexts.flatMap { (isWebLink, text) ->
+            if (isWebLink) {
+                if (text == openGraph?.url && commentTexts.size == 1) {
+                    emptyList()
+                } else {
+                    listOf(NoticeCommentTextUiModel.HyperLinkText(content = text))
+                }
+            } else {
+                listOf(NoticeCommentTextUiModel.PlainText(content = text))
+            }
+        }
+
+    return NoticeCommentUiModel(
         commentId = this.commentId,
         comment = this,
         texts = commentTextUiModel,

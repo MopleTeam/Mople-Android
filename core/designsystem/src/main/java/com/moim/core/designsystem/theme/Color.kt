@@ -6,7 +6,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 // Secondary
@@ -42,14 +41,16 @@ val color_888888 = Color(0xFF888888)
 val color_999999 = Color(0xFF999999)
 val color_CCCCCC = Color(0xFFCCCCCC)
 val color_DCDCDC = Color(0xFFDCDCDC)
-val color_171717 = Color(0xFF171717)
 val color_F5F5F5 = Color(0xFFF5F5F5)
-val color_121212 = Color(0xFF121212)
 val color_F6F8FA = Color(0xFFF6F8FA)
-val color_1A1E23 = Color(0xFF1A1E23)
 val color_DEE0E3 = Color(0xFFDEE0E3)
 val color_E2E5E9 = Color(0xFFE2E5E9)
-val color_2B323B = Color(0xFF2B323B)
+val color_0D0D0D = Color(0xFF0D0D0D)
+val color_2B2E31 = Color(0xFF2B2E31)
+val color_242628 = Color(0xFF242628)
+val color_737373 = Color(0xFF737373)
+val color_444444 = Color(0xFF444444)
+val color_3D3D3D = Color(0xFF3D3D3D)
 val color_3366FF = Color(0xFF3366FF)
 val color_FF3B30 = Color(0xFFFF3B30)
 val color_FEE500 = Color(0xFFFEE500)
@@ -205,20 +206,20 @@ fun darkMoimColor() =
                 text01 = color_DCDCDC,
                 text02 = color_CCCCCC,
                 text03 = color_888888,
-                text04 = color_555555,
+                text04 = color_737373,
                 text05 = color_FFFFFF,
                 text06 = color_222222,
             ),
         bg =
             Background(
-                primary = color_171717,
-                secondary = color_121212,
-                input = color_1A1E23,
+                primary = color_1F1F1F,
+                secondary = color_0D0D0D,
+                input = color_2B2E31,
             ),
         input =
             Input(
                 icon = color_DEE0E3,
-                disable = color_2B323B,
+                disable = color_242628,
             ),
         gray =
             Gray(
@@ -227,8 +228,8 @@ fun darkMoimColor() =
                 gray03 = color_999999,
                 gray04 = color_888888,
                 gray05 = color_555555,
-                gray06 = color_333333,
-                gray07 = color_222222,
+                gray06 = color_444444,
+                gray07 = color_3D3D3D,
             ),
         secondary = color_D5D8DC,
         tertiary = color_262626,

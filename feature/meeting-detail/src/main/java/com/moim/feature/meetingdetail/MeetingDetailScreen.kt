@@ -1,7 +1,5 @@
 package com.moim.feature.meetingdetail
 
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,36 +18,34 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Meeting
+import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.asPlanItem
 import com.moim.core.designsystem.R
+import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
-import com.moim.core.designsystem.common.PagingLoadingScreen
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.MoimFloatingActionButton
-import com.moim.core.designsystem.component.MoimIconButton
-import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.ui.util.externalShareForUrl
 import com.moim.core.ui.view.ObserveAsEvents
-import com.moim.core.ui.view.isError
-import com.moim.core.ui.view.isLoading
-import com.moim.core.ui.view.isSuccess
 import com.moim.core.ui.view.showToast
+import com.moim.feature.meetingdetail.model.MeetingDetailNoticeUiModel
+import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
+import com.moim.feature.meetingdetail.model.MeetingDetailUiEvent
+import com.moim.feature.meetingdetail.model.MeetingDetailUiState
 import com.moim.feature.meetingdetail.ui.MeetingDetailHeader
+import com.moim.feature.meetingdetail.ui.MeetingDetailNotice
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanContent
-import com.moim.feature.meetingdetail.ui.MeetingDetailPlanEmpty
+import com.moim.feature.meetingdetail.ui.MeetingDetailTopAppbar
 
 @Composable
 fun MeetingDetailRoute(
@@ -59,6 +55,8 @@ fun MeetingDetailRoute(
     navigateToPlanWrite: (PlanItem) -> Unit,
     navigateToPlanDetail: (ViewIdType) -> Unit,
     navigateToMeetingSetting: (Meeting) -> Unit,
+    navigateToMeetingNotice: (meetId: String) -> Unit,
+    navigateToMeetingNoticeDetail: (meetId: String, noticeId: String) -> Unit,
     navigateToImageViewer: (title: String, images: List<String>, position: Int, defaultImage: Int) -> Unit,
 ) {
     val context = LocalContext.current
@@ -74,6 +72,14 @@ fun MeetingDetailRoute(
 
             is MeetingDetailUiEvent.NavigateToMeetingSetting -> {
                 navigateToMeetingSetting(event.meeting)
+            }
+
+            is MeetingDetailUiEvent.NavigateToMeetingNotice -> {
+                navigateToMeetingNotice(event.meetId)
+            }
+
+            is MeetingDetailUiEvent.NavigateToMeetingNoticeDetail -> {
+                navigateToMeetingNoticeDetail(event.meetId, event.noticeId)
             }
 
             is MeetingDetailUiEvent.NavigateToPlanDetail -> {
@@ -133,25 +139,27 @@ fun MeetingDetailScreen(
     isLoading: Boolean = false,
     onUiAction: (MeetingDetailUiAction) -> Unit,
 ) {
-    val plans = uiState.plans?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
-    val reviews = uiState.reviews?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
-
     TrackScreenViewEvent(screenName = "meet_detail")
     Column(
         modifier = modifier,
     ) {
-        MoimTopAppbar(
-            actions = {
-                MoimIconButton(
-                    iconRes = R.drawable.ic_burger,
-                    onClick = { onUiAction(MeetingDetailUiAction.OnClickMeetingSetting) },
-                )
-            },
-            onClickNavigate = { onUiAction(MeetingDetailUiAction.OnClickBack) },
+        MeetingDetailTopAppbar(
+            meeting = uiState.meeting,
+            onUiAction = onUiAction,
         )
 
+        uiState.notice?.let {
+            Box(
+                modifier = Modifier.background(MoimTheme.colors.bg.secondary),
+            ) {
+                MeetingDetailNotice(
+                    notice = it,
+                    onUiAction = onUiAction,
+                )
+            }
+        }
+
         MeetingDetailHeader(
-            meeting = uiState.meeting,
             isSelectedFuturePlan = uiState.isPlanSelected,
             onUiAction = onUiAction,
         )
@@ -162,69 +170,17 @@ fun MeetingDetailScreen(
                     .fillMaxSize()
                     .background(MoimTheme.colors.bg.secondary),
         ) {
-            if (plans == null || reviews == null) return
-
-            androidx.compose.animation.AnimatedVisibility(
-                modifier = Modifier.fillMaxSize(),
-                enter = fadeIn(),
-                exit = fadeOut(),
-                visible = plans.loadState.isSuccess() && reviews.loadState.isSuccess(),
-            ) {
-                MeetingDetailPlanContent(
-                    userId = uiState.userId,
-                    plans = plans,
-                    reviews = reviews,
-                    isPlanSelected = uiState.isPlanSelected,
-                    planTotalCount = uiState.planTotalCount,
-                    reviewTotalCount = uiState.reviewTotalCount,
-                    onUiAction = onUiAction,
-                )
-            }
-            androidx.compose.animation.AnimatedVisibility(
-                enter = fadeIn(),
-                exit = fadeOut(),
-                visible = plans.loadState.isLoading() || reviews.loadState.isLoading(),
-            ) {
-                PagingLoadingScreen(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .align(Alignment.Center),
-                )
-            }
-
-            androidx.compose.animation.AnimatedVisibility(
-                modifier = Modifier.fillMaxSize(),
-                enter = fadeIn(),
-                exit = fadeOut(),
-                visible = plans.loadState.isError() || reviews.loadState.isError(),
-            ) {
-                ErrorScreen(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .background(MoimTheme.colors.bg.primary),
-                    onClickRefresh = { onUiAction(MeetingDetailUiAction.OnClickRefresh) },
-                )
-            }
-
-            androidx.compose.animation.AnimatedVisibility(
-                modifier = Modifier.fillMaxSize(),
-                enter = fadeIn(),
-                exit = fadeOut(),
-                visible = uiState.isPlanSelected && plans.loadState.isSuccess() && plans.itemCount == 0,
-            ) {
-                MeetingDetailPlanEmpty()
-            }
-
-            androidx.compose.animation.AnimatedVisibility(
-                modifier = Modifier.fillMaxSize(),
-                enter = fadeIn(),
-                exit = fadeOut(),
-                visible = !uiState.isPlanSelected && reviews.loadState.isSuccess() && reviews.itemCount == 0,
-            ) {
-                MeetingDetailPlanEmpty()
-            }
+            MeetingDetailPlanContent(
+                userId = uiState.userId,
+                isPlanSelected = uiState.isPlanSelected,
+                plans = uiState.plans,
+                reviews = uiState.reviews,
+                plansPagingInfo = uiState.plansPagingInfo,
+                reviewsPagingInfo = uiState.reviewsPagingInfo,
+                planTotalCount = uiState.planTotalCount,
+                reviewTotalCount = uiState.reviewTotalCount,
+                onUiAction = onUiAction,
+            )
 
             MoimFloatingActionButton(
                 modifier =
@@ -258,4 +214,26 @@ fun MeetingDetailScreen(
     }
 
     LoadingDialog(isLoading)
+}
+
+@ThemePreviews
+@Composable
+private fun MeetingDetailScreenPreview() {
+    MoimTheme {
+        MeetingDetailScreen(
+            uiState =
+                MeetingDetailUiState.Success(
+                    userId = "",
+                    meeting = Meeting(name = "모닝커피클럽"),
+                    notice =
+                        MeetingDetailNoticeUiModel(
+                            noticeId = "",
+                            content = "11/28일 모임 18:00 → 20:00 변경 되었습니다. 날씨이슈로 인해서 부득이하게 변경합니다. 양해 부탁드립니다.",
+                            noticeType = NoticeType.CUSTOM,
+                        ),
+                ),
+            isLoading = false,
+            onUiAction = {},
+        )
+    }
 }

@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.moim.android.library)
-    alias(libs.plugins.moim.android.hilt)
+    alias(libs.plugins.moim.hilt)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
@@ -17,9 +17,6 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlinx.coroutines)
     implementation(libs.kotlinx.serialization.json)
-
-    // paging
-    implementation(libs.androidx.paging.common)
 
     // Log tracker
     implementation(libs.timber)

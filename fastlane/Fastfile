@@ -1,0 +1,174 @@
+# 한글 입력/출력 시 인코딩 에러(invalid byte sequence in UTF-8) 방지.
+# 시스템 ruby + 로케일 미설정 환경 대응 — UI.input 으로 한글 릴리즈 노트를 받을 수 있게 함.
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
+STDIN.set_encoding(Encoding::UTF_8) if STDIN.respond_to?(:set_encoding)
+STDOUT.set_encoding(Encoding::UTF_8) if STDOUT.respond_to?(:set_encoding)
+
+default_platform(:android)
+
+# 배포 가능한 variant 정의 (번호로 선택)
+#   1 => Dev     : devDebug   (applicationId: com.moim.moimtable.dev, google-services: src/dev)
+#   2 => Release : prodRelease (applicationId: com.moim.moimtable,     google-services: app/)
+# 주의: applicationIdSuffix(.dev) 는 debug 빌드타입에만 붙는다. 따라서 devRelease 는
+#       패키지명(com.moim.moimtable)이 dev flavor 의 google-services 와 안 맞아 빌드가 깨진다.
+#       Release 는 반드시 prod flavor + release 조합(prodRelease)이어야 한다.
+# Dev 와 Release 는 서로 다른 Firebase 프로젝트라 App ID 와 서비스 계정 키가 각각 다르다.
+VARIANTS = {
+  "1" => {
+    name: "Dev",
+    gradle_task: "assembleDevDebug",
+    apk_path: "app/build/outputs/apk/dev/debug/app-dev-debug.apk",
+    app_id_env: "FIREBASE_APP_ID_DEV",
+    credentials_env: "FIREBASE_CREDENTIALS_FILE_DEV",
+  },
+  "2" => {
+    name: "Release",
+    gradle_task: "assembleProdRelease",
+    apk_path: "app/build/outputs/apk/prod/release/app-prod-release.apk",
+    app_id_env: "FIREBASE_APP_ID_RELEASE",
+    credentials_env: "FIREBASE_CREDENTIALS_FILE_RELEASE",
+  },
+}.freeze
+
+# .env 의 상대경로와 gradle 경로를 항상 프로젝트 루트 기준으로 해석한다.
+# (fastlane 을 루트에서 실행하든 fastlane/ 안에서 실행하든 동일하게 동작)
+def moim_project_root
+  fastlane_dir = (FastlaneCore::FastlaneFolder.path rescue nil)
+  return File.expand_path("..", File.expand_path(fastlane_dir)) if fastlane_dir
+  Dir.pwd
+end
+
+# AGP/Kotlin 이 아직 JDK 26 을 지원하지 않아(JdkImageTransform 실패), gradle 을 JDK 17 로 실행한다.
+#   .env 의 FASTLANE_JAVA_HOME 로 명시하거나, 없으면 macOS 에서 JDK 17 을 자동 탐색한다.
+def ensure_jdk17!
+  java_home = ENV["FASTLANE_JAVA_HOME"].to_s
+  java_home = `/usr/libexec/java_home -v 17 2>/dev/null`.strip if java_home.empty?
+  UI.user_error!("JDK 17 을 찾을 수 없습니다. Android Studio 내장 JBR 경로를 .env 의 FASTLANE_JAVA_HOME 에 지정하세요.") if java_home.empty?
+  UI.user_error!("지정된 JAVA_HOME 경로가 올바르지 않습니다: #{java_home}") unless File.exist?(File.join(java_home, "bin", "java"))
+  ENV["JAVA_HOME"] = java_home
+  UI.message("JAVA_HOME = #{java_home}")
+end
+
+platform :android do
+  desc "Firebase App Distribution 배포 (variant 번호 선택 → 1: Dev, 2: Release)"
+  desc "사용법: fastlane distribute                        (번호·릴리즈 노트 모두 입력받음)"
+  desc "       fastlane distribute variant:1              (Dev, 릴리즈 노트는 실행 중 입력)"
+  desc "       fastlane distribute variant:2 notes:\"수정사항\"   (릴리즈 노트 직접 지정)"
+  desc "       fastlane distribute variant:1 notes_file:\"fastlane/release_notes.txt\"  (파일에서 읽기)"
+  lane :distribute do |options|
+    # variant 선택: 옵션으로 넘기거나(variant:1) 실행 중 대화형으로 입력
+    selection = options[:variant]&.to_s
+    unless VARIANTS.key?(selection)
+      selection = UI.input("배포할 variant 번호를 입력하세요 (1: Dev, 2: Release):")
+    end
+
+    variant = VARIANTS[selection]
+    UI.user_error!("잘못된 선택입니다: '#{selection}' (1 또는 2 만 가능)") if variant.nil?
+
+    root = moim_project_root
+
+    # 서비스 계정 키 파일 경로 검증 (variant = Firebase 프로젝트 마다 다름)
+    credentials_input = ENV[variant[:credentials_env]].to_s
+    UI.user_error!("#{variant[:credentials_env]} 환경변수가 설정되지 않았습니다.") if credentials_input.empty?
+    credentials = File.expand_path(credentials_input, root)
+    UI.user_error!("서비스 계정 키 파일을 찾을 수 없습니다: #{credentials}") unless File.exist?(credentials)
+
+    # Firebase App ID 검증
+    app_id = ENV[variant[:app_id_env]].to_s
+    UI.user_error!("#{variant[:app_id_env]} 환경변수가 설정되지 않았습니다.") if app_id.empty?
+
+    UI.message("▶ 배포 대상: #{variant[:name]} (#{variant[:gradle_task]})")
+
+    # 릴리즈 노트 결정 (빌드 전에 받아서 오래 기다린 뒤 입력하는 일이 없게 함)
+    #   우선순위: notes 옵션 > notes_file 옵션(파일 경로) > 실행 중 직접 입력
+    release_notes = options[:notes].to_s
+    if release_notes.strip.empty? && options[:notes_file]
+      notes_path = File.expand_path(options[:notes_file].to_s, root)
+      UI.user_error!("릴리즈 노트 파일을 찾을 수 없습니다: #{notes_path}") unless File.exist?(notes_path)
+      release_notes = File.read(notes_path)
+    end
+    if release_notes.strip.empty?
+      input = UI.input("릴리즈 노트를 입력하세요 (엔터로 건너뛰면 기본 문구 사용):")
+      release_notes = input.strip.empty? ? "#{variant[:name]} 자동 배포" : input
+    end
+    UI.message("릴리즈 노트:\n#{release_notes}")
+
+    ensure_jdk17!
+
+    # 빌드 (project_dir 를 명시해 실행 위치와 무관하게 gradlew 를 찾도록 함)
+    gradle(task: "clean", project_dir: root)
+    gradle(task: variant[:gradle_task], project_dir: root)
+
+    # 배포
+    firebase_app_distribution(
+      app: app_id,
+      service_credentials_file: credentials,
+      android_artifact_type: "APK",
+      android_artifact_path: File.expand_path(variant[:apk_path], root),
+      groups: ENV["FIREBASE_TESTER_GROUPS"] || "tester", # 두 콘솔 모두 tester 그룹 고정
+      release_notes: release_notes,
+    )
+
+    UI.success("#{variant[:name]} App Distribution 배포 완료 🎉")
+  end
+
+  desc "Play Store 심사 제출 (prodRelease AAB 빌드 → Play Console 업로드)"
+  desc "사용법: fastlane deploy_play                     (production 트랙, draft 로 업로드 — 콘솔에서 수동 제출)"
+  desc "       fastlane deploy_play status:completed    (즉시 심사 제출까지)"
+  desc "       fastlane deploy_play track:internal      (내부 테스트 트랙으로 업로드)"
+  desc "       fastlane deploy_play validate_only:true  (실제 업로드 없이 검증만 — versionCode 소비 안 함)"
+  lane :deploy_play do |options|
+    root = moim_project_root
+
+    # true 면 Play API 에 검증 요청만 보내고 실제 커밋은 하지 않음. versionCode 도 소비되지 않는다.
+    validate_only = options[:validate_only].to_s == "true"
+
+    # Play Console 서비스 계정 키 (Appfile 도 동일 ENV 를 참조)
+    key_input = ENV["JSON_KEY_FILE_PATH"].to_s
+    UI.user_error!("JSON_KEY_FILE_PATH 환경변수가 설정되지 않았습니다.") if key_input.empty?
+    json_key = File.expand_path(key_input, root)
+    UI.user_error!("Play 서비스 계정 키 파일을 찾을 수 없습니다: #{json_key}") unless File.exist?(json_key)
+
+    track = options[:track] || "production"
+    # draft: 콘솔에 초안만 생성(사람이 수동 제출) / completed: 즉시 심사 제출.
+    # 실수로 바로 공개되지 않도록 기본값은 draft.
+    status = options[:status] || "draft"
+
+    ensure_jdk17!
+
+    # 프로덕션 릴리즈 AAB 빌드 (prod flavor + release → applicationId: com.moim.moimtable)
+    gradle(task: "clean", project_dir: root)
+    gradle(task: "bundleProdRelease", project_dir: root)
+
+    aab_path = File.expand_path("app/build/outputs/bundle/prodRelease/app-prod-release.aab", root)
+    UI.user_error!("AAB 파일을 찾을 수 없습니다: #{aab_path}") unless File.exist?(aab_path)
+
+    # Crashlytics 심볼 해독용 매핑 파일 (있으면 함께 업로드)
+    mapping_path = File.expand_path("app/build/outputs/mapping/prodRelease/mapping.txt", root)
+
+    UI.message("▶ Play Store #{validate_only ? '검증(validate_only)' : '업로드'} (track: #{track}, status: #{status})")
+
+    upload_to_play_store(
+      package_name: "com.moim.moimtable",
+      json_key: json_key,
+      track: track,
+      release_status: status,
+      aab: aab_path,
+      mapping: File.exist?(mapping_path) ? mapping_path : nil,
+      validate_only: validate_only,
+      # 스토어 등록정보(설명/스크린샷 등)는 콘솔에서 관리 → 바이너리만 업로드
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+    )
+
+    UI.success(
+      validate_only ?
+        "Play Store 검증 통과 ✅ (실제 업로드 안 됨, versionCode 소비 없음)" :
+        "Play Store 업로드 완료 (track: #{track}, status: #{status}) 🎉",
+    )
+  end
+end

@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val userRepository: UserRepository,
+    userRepository: UserRepository,
     private val meetingRepository: MeetingRepository,
     private val meetingEventBus: EventBus<MeetingAction>,
     private val planEventBus: EventBus<PlanAction>,

@@ -8,6 +8,7 @@ import com.moim.core.remote.service.HolidayApi
 import com.moim.core.remote.service.ImageApi
 import com.moim.core.remote.service.LocationApi
 import com.moim.core.remote.service.MeetingApi
+import com.moim.core.remote.service.NoticeApi
 import com.moim.core.remote.service.NotificationApi
 import com.moim.core.remote.service.PlanApi
 import com.moim.core.remote.service.PolicyApi
@@ -77,6 +78,12 @@ internal object ApiModule {
     fun provideNotificationApi(
         @MoimApi retrofit: Retrofit,
     ): NotificationApi = retrofit.create(NotificationApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideNoticeApi(
+        @MoimApi retrofit: Retrofit,
+    ): NoticeApi = retrofit.create(NoticeApi::class.java)
 
     @Provides
     @Singleton

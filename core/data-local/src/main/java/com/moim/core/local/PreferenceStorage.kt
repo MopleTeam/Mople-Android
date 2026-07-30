@@ -14,6 +14,10 @@ interface PreferenceStorage {
 
     suspend fun saveUserToken(token: Token)
 
+    val lastFcmToken: Flow<String?>
+
+    suspend fun saveLastFcmToken(fcmToken: String)
+
     fun getTheme(): Flow<Theme>
 
     suspend fun setTheme(value: Theme)

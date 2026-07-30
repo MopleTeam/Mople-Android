@@ -1,9 +1,6 @@
 package com.moim.feature.plandetail
 
 import android.content.Intent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -22,12 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.ViewIdType
@@ -45,13 +39,9 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.ui.util.toValidUrl
+import com.moim.core.ui.view.FadeAnimatedVisibility
 import com.moim.core.ui.view.ObserveAsEvents
-import com.moim.core.ui.view.PAGING_ERROR
-import com.moim.core.ui.view.PAGING_LOADING
-import com.moim.core.ui.view.isAppendError
-import com.moim.core.ui.view.isAppendLoading
-import com.moim.core.ui.view.isError
-import com.moim.core.ui.view.isLoading
+import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.showToast
 import com.moim.feature.plandetail.ui.PlanDetailBottomBar
 import com.moim.feature.plandetail.ui.PlanDetailCommentEditDialog
@@ -194,7 +184,16 @@ fun PlanDetailScreen(
     onUiAction: OnPlanDetailUiAction,
 ) {
     val screenName = if (uiState.planItem.isPlanAtBefore) "plan_detail" else "review_detail"
-    val comments = uiState.comments?.collectAsLazyPagingItems(LocalLifecycleOwner.current.lifecycleScope.coroutineContext)
+    val comments = uiState.comments
+    val pagingInfo = uiState.commentsPagingInfo
+    val listState = rememberLazyListState()
+
+    PaginationEffect(
+        listState = listState,
+        threshold = 3,
+        enabled = !pagingInfo.isLast && !pagingInfo.isErrorFooter,
+        onNext = { onUiAction(PlanDetailUiAction.OnLoadNextCommentsPage) },
+    )
 
     TrackScreenViewEvent(screenName = screenName)
     MoimScaffold(
@@ -217,6 +216,7 @@ fun PlanDetailScreen(
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
+                    state = listState,
                 ) {
                     item {
                         PlanDetailContent(
@@ -248,68 +248,38 @@ fun PlanDetailScreen(
                         )
                     }
 
-                    if (comments != null) {
-                        items(
-                            count = comments.itemCount,
-                            key = comments.itemKey(),
-                            contentType = comments.itemContentType(),
-                        ) { index ->
-                            val comment = comments[index] ?: return@items
-                            PlanDetailCommentItem(
-                                modifier = Modifier.animateItem(),
-                                userId = uiState.user.userId,
-                                comment = comment,
-                                onUiAction = onUiAction,
+                    items(
+                        items = comments,
+                        key = { it.comment.commentId },
+                    ) { commentUiModel ->
+                        PlanDetailCommentItem(
+                            modifier = Modifier.animateItem(),
+                            userId = uiState.user.userId,
+                            comment = commentUiModel,
+                            onUiAction = onUiAction,
+                        )
+                    }
+
+                    item {
+                        FadeAnimatedVisibility(pagingInfo.isLoading || pagingInfo.isLoadingFooter) {
+                            PagingLoadingScreen(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .background(MoimTheme.colors.bg.primary),
                             )
                         }
+                    }
 
-                        if (comments.loadState.isAppendLoading()) {
-                            item(key = PAGING_LOADING) {
-                                PagingLoadingScreen(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .background(MoimTheme.colors.bg.primary)
-                                            .animateItem(),
-                                )
-                            }
-                        }
-
-                        if (comments.loadState.isAppendError()) {
-                            item(key = PAGING_ERROR) {
-                                PagingErrorScreen(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .background(MoimTheme.colors.bg.primary)
-                                            .animateItem(),
-                                    onClickRetry = comments::retry,
-                                )
-                            }
-                        }
-
-                        item {
-                            AnimatedVisibility(
-                                enter = fadeIn(),
-                                exit = fadeOut(),
-                                visible = comments.loadState.isLoading(),
-                            ) {
-                                PagingLoadingScreen()
-                            }
-                        }
-
-                        item {
-                            AnimatedVisibility(
-                                modifier = Modifier.fillMaxWidth(),
-                                enter = fadeIn(),
-                                exit = fadeOut(),
-                                visible = comments.loadState.isError(),
-                            ) {
-                                PagingErrorScreen(
-                                    modifier = modifier,
-                                    onClickRetry = comments::refresh,
-                                )
-                            }
+                    item {
+                        FadeAnimatedVisibility(pagingInfo.isError || pagingInfo.isErrorFooter) {
+                            PagingErrorScreen(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .background(MoimTheme.colors.bg.primary),
+                                onClickRetry = { onUiAction(PlanDetailUiAction.OnLoadNextCommentsPage) },
+                            )
                         }
                     }
                 }

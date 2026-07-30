@@ -1,6 +1,7 @@
 package com.moim.core.data.datasource.comment
 
 import com.moim.core.common.model.Comment
+import com.moim.core.common.model.NoticeComment
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
@@ -28,6 +29,35 @@ internal class CommentRepositoryImpl @Inject constructor(
                 val commentContainer =
                     commentApi.getComments(
                         postId = postId,
+                        cursor = cursor,
+                        size = size,
+                    )
+                val commentItems =
+                    commentContainer
+                        .content
+                        .map { comment ->
+                            async {
+                                val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
+                                comment.asItem(openGraph)
+                            }
+                        }.awaitAll()
+
+                commentContainer.asItem { commentItems }
+            } catch (e: Exception) {
+                throw converterException(e)
+            }
+        }
+
+    override suspend fun getNoticeComments(
+        noticeId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<NoticeComment>> =
+        coroutineScope {
+            try {
+                val commentContainer =
+                    commentApi.getNoticeComments(
+                        postId = noticeId,
                         cursor = cursor,
                         size = size,
                     )
@@ -159,6 +189,42 @@ internal class CommentRepositoryImpl @Inject constructor(
     override fun deleteComment(commentId: String): Flow<Unit> =
         catchFlow {
             emit(commentApi.deleteComment(commentId))
+        }
+
+    override fun createNoticeComment(
+        noticeId: String,
+        content: String,
+    ): Flow<NoticeComment> =
+        catchFlow {
+            val comment =
+                commentApi
+                    .createNoticeComment(
+                        postId = noticeId,
+                        params = jsonOf(KEY_CONTENTS to content),
+                    )
+            val openGraph =
+                openGraphRemoteDataSource
+                    .getOpenGraph(url = comment.content.findWebLink())
+
+            emit(comment.asItem(openGraph))
+        }
+
+    override fun updateNoticeComment(
+        commentId: String,
+        content: String,
+    ): Flow<NoticeComment> =
+        catchFlow {
+            val comment =
+                commentApi
+                    .updateNoticeComment(
+                        commentId = commentId,
+                        params = jsonOf(KEY_CONTENTS to content),
+                    )
+            val openGraph =
+                openGraphRemoteDataSource
+                    .getOpenGraph(url = comment.content.findWebLink())
+
+            emit(comment.asItem(openGraph))
         }
 
     override fun reportComment(commentId: String): Flow<Unit> =

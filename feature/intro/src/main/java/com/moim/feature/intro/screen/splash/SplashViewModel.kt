@@ -4,8 +4,10 @@ import androidx.lifecycle.viewModelScope
 import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.crashreport.CrashReporter
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.policy.PolicyRepository
+import com.moim.core.data.datasource.token.TokenRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.UiAction
@@ -13,6 +15,8 @@ import com.moim.core.ui.view.UiEvent
 import com.moim.core.ui.view.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -25,6 +29,8 @@ class SplashViewModel @Inject constructor(
     authRepository: AuthRepository,
     private val userRepository: UserRepository,
     private val policyRepository: PolicyRepository,
+    private val tokenRepository: TokenRepository,
+    private val crashReporter: CrashReporter,
 ) : BaseViewModel() {
     private val splashResult =
         authRepository
@@ -49,6 +55,15 @@ class SplashViewModel @Inject constructor(
         }
     }
 
+    private fun syncFcmToken() {
+        viewModelScope.launch {
+            tokenRepository
+                .syncFcmTokenIfNeeded()
+                .catch { e -> crashReporter.logException(e) }
+                .collect()
+        }
+    }
+
     private fun validateUser() {
         viewModelScope.launch {
             splashResult.collect { result ->
@@ -66,11 +81,12 @@ class SplashViewModel @Inject constructor(
                             }
 
                             user == null -> {
-                                delay(500)
+                                delay(timeMillis = 500)
                                 setUiEvent(SplashUiEvent.NavigateToSignIn)
                             }
 
                             else -> {
+                                syncFcmToken()
                                 setUiEvent(SplashUiEvent.NavigateToMain)
                             }
                         }
@@ -78,8 +94,14 @@ class SplashViewModel @Inject constructor(
 
                     is Result.Error -> {
                         when (result.exception) {
-                            is IOException -> setUiState(SplashUiState.Splash(isShowErrorDialog = true))
-                            is NetworkException -> setUiEvent(SplashUiEvent.NavigateToSignIn).also { userRepository.clearMoimStorage() }
+                            is IOException -> {
+                                setUiState(SplashUiState.Splash(isShowErrorDialog = true))
+                            }
+
+                            is NetworkException -> {
+                                setUiEvent(SplashUiEvent.NavigateToSignIn)
+                                    .also { userRepository.clearMoimStorage() }
+                            }
                         }
                     }
                 }

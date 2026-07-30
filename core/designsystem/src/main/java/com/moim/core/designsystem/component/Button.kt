@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -107,6 +108,7 @@ fun MoimIconButton(
     enable: Boolean = true,
     shape: Shape = RoundedCornerShape(100),
     @DrawableRes iconRes: Int,
+    iconSize: Dp? = null,
     iconColor: Color = Color.Unspecified,
     backgroundColor: Color = Color.Unspecified,
     onClick: () -> Unit = {},
@@ -124,7 +126,15 @@ fun MoimIconButton(
                 ),
         contentAlignment = Alignment.Center,
     ) {
+        val iconModifier =
+            if (iconSize == null) {
+                Modifier
+            } else {
+                Modifier.size(iconSize)
+            }
+
         Icon(
+            modifier = iconModifier,
             imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = "",
             tint = iconColor,

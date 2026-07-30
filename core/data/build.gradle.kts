@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.moim.android.library)
-    alias(libs.plugins.moim.android.hilt)
+    alias(libs.plugins.moim.hilt)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
@@ -11,6 +11,7 @@ android {
 
 dependencies {
     implementation(projects.core.common)
+    implementation(projects.core.crashreport)
     implementation(projects.core.dataLocal)
     implementation(projects.core.dataRemote)
 

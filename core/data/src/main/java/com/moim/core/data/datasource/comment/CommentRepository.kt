@@ -1,6 +1,7 @@
 package com.moim.core.data.datasource.comment
 
 import com.moim.core.common.model.Comment
+import com.moim.core.common.model.NoticeComment
 import com.moim.core.common.model.PaginationContainer
 import kotlinx.coroutines.flow.Flow
 
@@ -10,6 +11,12 @@ interface CommentRepository {
         cursor: String,
         size: Int,
     ): PaginationContainer<List<Comment>>
+
+    suspend fun getNoticeComments(
+        noticeId: String,
+        cursor: String,
+        size: Int,
+    ): PaginationContainer<List<NoticeComment>>
 
     suspend fun getReplyComments(
         postId: String,
@@ -40,6 +47,16 @@ interface CommentRepository {
     fun updateLikeComment(commentId: String): Flow<Comment>
 
     fun deleteComment(commentId: String): Flow<Unit>
+
+    fun createNoticeComment(
+        noticeId: String,
+        content: String,
+    ): Flow<NoticeComment>
+
+    fun updateNoticeComment(
+        commentId: String,
+        content: String,
+    ): Flow<NoticeComment>
 
     fun reportComment(commentId: String): Flow<Unit>
 }

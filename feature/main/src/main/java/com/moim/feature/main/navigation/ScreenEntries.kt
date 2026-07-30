@@ -19,6 +19,12 @@ import com.moim.feature.mapdetail.MapDetailViewModel
 import com.moim.feature.meeting.MeetingRoute
 import com.moim.feature.meetingdetail.MeetingDetailRoute
 import com.moim.feature.meetingdetail.MeetingDetailViewModel
+import com.moim.feature.meetingnotice.MeetingNoticeRoute
+import com.moim.feature.meetingnotice.MeetingNoticeViewModel
+import com.moim.feature.meetingnoticedetail.MeetingNoticeDetailRoute
+import com.moim.feature.meetingnoticedetail.MeetingNoticeDetailViewModel
+import com.moim.feature.meetingnoticewrite.MeetingNoticeWriteRoute
+import com.moim.feature.meetingnoticewrite.MeetingNoticeWriteViewModel
 import com.moim.feature.meetingsetting.MeetingSettingRoute
 import com.moim.feature.meetingsetting.MeetingSettingViewModel
 import com.moim.feature.meetingwrite.MeetingWriteRoute
@@ -111,6 +117,8 @@ fun EntryProviderScope<NavKey>.meetingDetailScreenEntry(
             navigateToPlanWrite = navigator::navigateToPlanWrite,
             navigateToPlanDetail = navigator::navigateToPlanDetail,
             navigateToMeetingSetting = navigator::navigateToMeetingSetting,
+            navigateToMeetingNotice = navigator::navigateToMeetingNotice,
+            navigateToMeetingNoticeDetail = navigator::navigateToMeetingNoticeDetail,
             navigateToImageViewer = navigator::navigateToImageViewer,
             viewModel =
                 hiltViewModel<MeetingDetailViewModel, MeetingDetailViewModel.Factory>(
@@ -157,6 +165,65 @@ fun EntryProviderScope<NavKey>.meetingSettingScreenEntry(
             viewModel =
                 hiltViewModel<MeetingSettingViewModel, MeetingSettingViewModel.Factory>(
                     key = key.meeting.id,
+                ) { factory ->
+                    factory.create(key)
+                },
+        )
+    }
+}
+
+fun EntryProviderScope<NavKey>.meetingNoticeScreenEntry(
+    navigator: MainNavigator,
+    paddingValues: PaddingValues,
+) {
+    entry<DetailRoute.MeetingNotice> { key ->
+        MeetingNoticeRoute(
+            padding = paddingValues,
+            navigateToBack = navigator::goBack,
+            navigateToMeetingNoticeWrite = { meetId -> navigator.navigateToMeetingNoticeWrite(meetId) },
+            navigateToMeetingNoticeDetail = { meetId, noticeId ->
+                navigator.navigateToMeetingNoticeDetail(meetId, noticeId)
+            },
+            viewModel =
+                hiltViewModel<MeetingNoticeViewModel, MeetingNoticeViewModel.Factory>(key = key.meetId) { factory ->
+                    factory.create(key)
+                },
+        )
+    }
+}
+
+fun EntryProviderScope<NavKey>.meetingNoticeWriteScreenEntry(
+    navigator: MainNavigator,
+    paddingValues: PaddingValues,
+) {
+    entry<DetailRoute.MeetingNoticeWrite> { key ->
+        MeetingNoticeWriteRoute(
+            padding = paddingValues,
+            navigateToBack = navigator::goBack,
+            viewModel =
+                hiltViewModel<MeetingNoticeWriteViewModel, MeetingNoticeWriteViewModel.Factory>(
+                    key = key.noticeId ?: key.meetId,
+                ) { factory ->
+                    factory.create(key)
+                },
+        )
+    }
+}
+
+fun EntryProviderScope<NavKey>.meetingNoticeDetailScreenEntry(
+    navigator: MainNavigator,
+    paddingValues: PaddingValues,
+) {
+    entry<DetailRoute.MeetingNoticeDetail> { key ->
+        MeetingNoticeDetailRoute(
+            padding = paddingValues,
+            navigateToBack = navigator::goBack,
+            navigateToMeetingNoticeWrite = { meetId, noticeId ->
+                navigator.navigateToMeetingNoticeWrite(meetId, noticeId)
+            },
+            viewModel =
+                hiltViewModel<MeetingNoticeDetailViewModel, MeetingNoticeDetailViewModel.Factory>(
+                    key = key.noticeId ?: key.meetId,
                 ) { factory ->
                     factory.create(key)
                 },
