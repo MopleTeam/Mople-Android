@@ -14,4 +14,8 @@ class UserDataUtilImpl @Inject constructor(
     override suspend fun saveUserToken(token: Token) {
         preferenceStorage.saveUserToken(token)
     }
+
+    override suspend fun clearUserSession() {
+        preferenceStorage.clearUserSession()
+    }
 }

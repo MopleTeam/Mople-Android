@@ -33,9 +33,9 @@ internal object TokenServiceModule {
     ): Call.Factory =
         OkHttpClient
             .Builder()
-            .connectTimeout(10, TimeUnit.MINUTES)
-            .readTimeout(10, TimeUnit.MINUTES)
-            .writeTimeout(10, TimeUnit.MINUTES)
+            .connectTimeout(TIMEOUT_CONNECT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT_READ_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(TIMEOUT_WRITE_SECONDS, TimeUnit.SECONDS)
             .addInterceptor(headerInterceptor)
             .addInterceptor(httpLoggingInterceptor)
             .build()
@@ -73,4 +73,9 @@ internal object TokenServiceModule {
         userDataUtil: UserDataUtil,
         authTokenApi: AuthTokenApi,
     ): TokenAuthenticator = TokenAuthenticator(userDataUtil, authTokenApi)
+
+    // 토큰 갱신은 원본 요청을 블로킹한 상태로 진행되므로 일반 API보다 짧게 잡습니다.
+    private const val TIMEOUT_CONNECT_SECONDS = 10L
+    private const val TIMEOUT_READ_SECONDS = 15L
+    private const val TIMEOUT_WRITE_SECONDS = 15L
 }

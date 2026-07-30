@@ -19,7 +19,7 @@
         android:roundIcon="${icon_app_launcher_round}"
         android:supportsRtl="true"
         android:theme="@style/Theme.MoimTable"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="false"
         tools:targetApi="31">
 
         <provider

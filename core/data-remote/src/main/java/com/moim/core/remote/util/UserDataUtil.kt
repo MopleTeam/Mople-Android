@@ -7,4 +7,6 @@ interface UserDataUtil {
     val token: Flow<Token?>
 
     suspend fun saveUserToken(token: Token)
+
+    suspend fun clearUserSession()
 }

@@ -90,6 +90,14 @@ internal class PreferenceStorageImpl @Inject constructor(
         preference.edit { it.clear() }
     }
 
+    override suspend fun clearUserSession() {
+        preference.edit {
+            it.remove(PREF_USER)
+            it.remove(PREF_USER_TOKEN)
+            it.remove(PREF_FCM_TOKEN_LAST)
+        }
+    }
+
     companion object {
         const val PREFS_MOIM = "prefsMoim"
     }

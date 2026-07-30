@@ -23,4 +23,6 @@ interface PreferenceStorage {
     suspend fun setTheme(value: Theme)
 
     suspend fun clearMoimStorage()
+
+    suspend fun clearUserSession()
 }

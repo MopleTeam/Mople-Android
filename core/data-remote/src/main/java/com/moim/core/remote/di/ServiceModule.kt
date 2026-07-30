@@ -42,21 +42,6 @@ internal object ServiceModule {
     @Singleton
     fun provideHttpLoggingInterceptor(json: Json): HttpLoggingInterceptor = MoimHttpLoggingInterceptor(json).interceptor
 
-    @Singleton
-    @Provides
-    fun provideOkHttpClient(
-        httpLoggingInterceptor: HttpLoggingInterceptor,
-        headerInterceptor: Interceptor,
-    ): OkHttpClient =
-        OkHttpClient
-            .Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor(headerInterceptor)
-            .addInterceptor(httpLoggingInterceptor)
-            .build()
-
     @Provides
     fun provideHeaderInterceptor(): Interceptor =
         Interceptor { chain ->
@@ -74,9 +59,9 @@ internal object ServiceModule {
     ): Call.Factory =
         OkHttpClient
             .Builder()
-            .connectTimeout(10, TimeUnit.MINUTES)
-            .readTimeout(10, TimeUnit.MINUTES)
-            .writeTimeout(10, TimeUnit.MINUTES)
+            .connectTimeout(TIMEOUT_CONNECT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT_READ_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(TIMEOUT_WRITE_SECONDS, TimeUnit.SECONDS)
             .addInterceptor(httpLoggingInterceptor)
             .addInterceptor(tokenInterceptor)
             .authenticator(tokenAuthenticator)
@@ -92,9 +77,9 @@ internal object ServiceModule {
     ): Call.Factory =
         OkHttpClient
             .Builder()
-            .connectTimeout(10, TimeUnit.MINUTES)
-            .readTimeout(10, TimeUnit.MINUTES)
-            .writeTimeout(10, TimeUnit.MINUTES)
+            .connectTimeout(TIMEOUT_CONNECT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT_READ_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(TIMEOUT_WRITE_SECONDS, TimeUnit.SECONDS)
             .addInterceptor(httpLoggingInterceptor)
             .addInterceptor(headerInterceptor)
             .build()
@@ -142,4 +127,10 @@ internal object ServiceModule {
             .addHeader("os", "android")
             .addHeader("version", BuildConfig.VERSION_NAME)
             .build()
+
+    // OkHttp의 read/write 타임아웃은 전체 전송 시간이 아닌 소켓 I/O 1회 기준이므로
+    // 이미지 업로드 같은 대용량 요청도 아래 값으로 충분합니다.
+    private const val TIMEOUT_CONNECT_SECONDS = 15L
+    private const val TIMEOUT_READ_SECONDS = 30L
+    private const val TIMEOUT_WRITE_SECONDS = 30L
 }
