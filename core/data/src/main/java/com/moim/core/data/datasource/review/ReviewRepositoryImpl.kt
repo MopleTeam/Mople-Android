@@ -4,14 +4,13 @@ import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.Review
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.util.catchFlow
 import com.moim.core.remote.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.remote.datasource.review.ReviewRemoteDataSource
 import com.moim.core.remote.model.ReviewResponse
 import com.moim.core.remote.model.UserResponse
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class ReviewRepositoryImpl @Inject constructor(
@@ -23,26 +22,22 @@ internal class ReviewRepositoryImpl @Inject constructor(
         cursor: String,
         size: Int,
     ): PaginationContainer<List<Review>> =
-        try {
-            reviewRemoteDataSource
-                .getReviews(
-                    id = meetingId,
-                    cursor = cursor,
-                    size = size,
-                ).asItem {
-                    it.map(ReviewResponse::asItem)
-                }
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
+        reviewRemoteDataSource
+            .getReviews(
+                id = meetingId,
+                cursor = cursor,
+                size = size,
+            ).asItem {
+                it.map(ReviewResponse::asItem)
+            }
 
     override fun getReview(reviewId: String) =
-        catchFlow {
+        flow {
             emit(reviewRemoteDataSource.getReview(reviewId).asItem())
         }
 
     override fun getReviewForPostId(postId: String) =
-        catchFlow {
+        flow {
             emit(reviewRemoteDataSource.gerReviewForPostId(postId).asItem())
         }
 
@@ -51,34 +46,30 @@ internal class ReviewRepositoryImpl @Inject constructor(
         cursor: String,
         size: Int,
     ): PaginationContainer<List<User>> =
-        try {
-            reviewRemoteDataSource
-                .getReviewParticipant(
-                    id = reviewId,
-                    cursor = cursor,
-                    size = size,
-                ).asItem {
-                    it.map(UserResponse::asItem)
-                }
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
+        reviewRemoteDataSource
+            .getReviewParticipant(
+                id = reviewId,
+                cursor = cursor,
+                size = size,
+            ).asItem {
+                it.map(UserResponse::asItem)
+            }
 
     override fun deleteReviewImage(
         reviewId: String,
         images: List<String>,
     ): Flow<Unit> =
-        catchFlow {
+        flow {
             emit(reviewRemoteDataSource.deleteReviewImage(reviewId, jsonOf(KEY_REVIEW_IMAGES to images)))
         }
 
     override fun deleteReview(reviewId: String) =
-        catchFlow {
+        flow {
             emit(reviewRemoteDataSource.deleteReview(reviewId))
         }
 
     override fun reportReview(reviewId: String) =
-        catchFlow {
+        flow {
             emit(
                 reviewRemoteDataSource.reportReview(
                     jsonOf(
@@ -92,7 +83,7 @@ internal class ReviewRepositoryImpl @Inject constructor(
     override fun updateReviewImages(
         reviewId: String,
         uploadImages: List<String>,
-    ) = catchFlow {
+    ) = flow {
         emit(imageUploadRemoteDataSource.uploadReviewImages(reviewId, uploadImages, "review"))
     }
 

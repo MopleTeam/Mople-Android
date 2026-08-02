@@ -10,7 +10,6 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -22,7 +21,7 @@ internal fun createMoimHttpClient(
     socketTimeoutMillis: Long = TIMEOUT_SOCKET_MILLIS,
 ): HttpClient =
     HttpClient(CIO) {
-        // 실패 응답은 아래 validator에서 MoimHttpException으로 변환
+        // 실패 응답은 아래 validator에서 도메인 예외로 변환
         expectSuccess = false
 
         install(ContentNegotiation) {
@@ -46,16 +45,15 @@ internal fun createMoimHttpClient(
             header(HEADER_VERSION, BuildConfig.VERSION_NAME)
         }
 
+        // 여기서 도메인 예외로 변환해 던지므로 호출부는 추가 변환 없이 그대로 받는다.
         HttpResponseValidator {
             validateResponse { response ->
                 if (response.status.isSuccess()) return@validateResponse
 
-                throw MoimHttpException(
-                    statusCode = response.status.value,
-                    statusMessage = response.status.description,
-                    errorBody = runCatching { response.bodyAsText() }.getOrDefault(""),
-                )
+                throw response.toNetworkException(json)
             }
+
+            handleResponseExceptionWithRequest { cause, _ -> throw cause.toNetworkException() }
         }
     }
 

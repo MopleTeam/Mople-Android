@@ -8,9 +8,12 @@ import com.moim.core.common.exception.NotFoundException
 import com.moim.core.common.exception.ServerErrorException
 import com.moim.core.common.exception.UnAuthorizedException
 import com.moim.core.common.exception.UnknownErrorException
-import com.moim.core.common.util.JsonUtil.toObject
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.io.IOException
 
 @Serializable
@@ -21,36 +24,28 @@ data class ErrorResponse(
     val message: String? = null,
 )
 
-// 응답 본문은 suspend로만 읽히므로 검증 단계에서 미리 읽어 담아둔다.
-internal class MoimHttpException(
-    val statusCode: Int,
-    val statusMessage: String,
-    val errorBody: String,
-) : RuntimeException("HTTP $statusCode $statusMessage: $errorBody")
+// 실패 응답 본문을 파싱해 도메인 예외로 변환한다.
+internal suspend fun HttpResponse.toNetworkException(json: Json): NetworkException {
+    val errorBody = runCatching { json.decodeFromString(ErrorResponse.serializer(), bodyAsText()) }.getOrNull()
+    val code = errorBody?.code?.toIntOrNull() ?: status.value
+    val message = errorBody?.message ?: status.description
 
-fun converterException(exception: Throwable): Exception =
-    when (exception) {
-        // 이미 변환된 예외
-        is NetworkException -> exception
+    return when (code) {
+        400 -> BadRequestException(message, null)
+        401 -> UnAuthorizedException(message, null)
+        403 -> ForbiddenException(message, null)
+        404 -> NotFoundException(message, null)
+        409 -> ConflictException(message, null)
+        500 -> ServerErrorException(message, null)
+        else -> UnknownErrorException(message, null)
+    }
+}
 
-        is MoimHttpException -> {
-            val errorBody = runCatching { exception.errorBody.toObject<ErrorResponse>() }.getOrNull()
-            val code = errorBody?.code?.toIntOrNull() ?: exception.statusCode
-            val message = errorBody?.message ?: exception.statusMessage
-
-            when (code) {
-                400 -> BadRequestException(message, exception)
-                401 -> UnAuthorizedException(message, exception)
-                403 -> ForbiddenException(message, exception)
-                404 -> NotFoundException(message, exception)
-                409 -> ConflictException(message, exception)
-                500 -> ServerErrorException(message, exception)
-                else -> UnknownErrorException(message, exception)
-            }
-        }
-
-        // 연결 실패·타임아웃
-        is IOException -> exception
-
-        else -> UnknownErrorException(exception.message, exception)
+// 연결 실패·타임아웃·직렬화 오류처럼 응답 검증 밖에서 터진 예외를 변환한다.
+internal fun Throwable.toNetworkException(): Throwable =
+    when (this) {
+        is CancellationException -> this
+        is NetworkException -> this
+        is IOException -> this
+        else -> UnknownErrorException(message, this)
     }

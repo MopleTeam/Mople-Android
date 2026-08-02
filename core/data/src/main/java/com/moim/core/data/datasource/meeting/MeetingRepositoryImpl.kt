@@ -4,14 +4,13 @@ import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.util.catchFlow
 import com.moim.core.remote.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.remote.datasource.meeting.MeetingRemoteDataSource
 import com.moim.core.remote.model.MeetingResponse
 import com.moim.core.remote.model.UserResponse
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class MeetingRepositoryImpl @Inject constructor(
@@ -22,41 +21,33 @@ internal class MeetingRepositoryImpl @Inject constructor(
         cursor: String,
         size: Int,
     ): PaginationContainer<List<Meeting>> =
-        try {
-            meetingRemoteDataSource
-                .getMeetings(
-                    cursor = cursor,
-                    size = size,
-                ).asItem {
-                    it.map(MeetingResponse::asItem)
-                }
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
+        meetingRemoteDataSource
+            .getMeetings(
+                cursor = cursor,
+                size = size,
+            ).asItem {
+                it.map(MeetingResponse::asItem)
+            }
 
     override suspend fun getMeetingsForHost(
         cursor: String,
         size: Int,
     ): PaginationContainer<List<Meeting>> =
-        try {
-            meetingRemoteDataSource
-                .getMeetingsForHost(
-                    cursor = cursor,
-                    size = size,
-                ).asItem {
-                    it.map(MeetingResponse::asItem)
-                }
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
+        meetingRemoteDataSource
+            .getMeetingsForHost(
+                cursor = cursor,
+                size = size,
+            ).asItem {
+                it.map(MeetingResponse::asItem)
+            }
 
     override fun getMeeting(meetingId: String) =
-        catchFlow {
+        flow {
             emit(meetingRemoteDataSource.getMeeting(meetingId).asItem())
         }
 
     override fun getMeetingInviteCode(meetingId: String) =
-        catchFlow {
+        flow {
             emit(meetingRemoteDataSource.getMeetingInviteCode(meetingId))
         }
 
@@ -65,18 +56,14 @@ internal class MeetingRepositoryImpl @Inject constructor(
         cursor: String,
         size: Int,
     ): PaginationContainer<List<User>> =
-        try {
-            meetingRemoteDataSource
-                .getMeetingParticipants(
-                    id = meetingId,
-                    cursor = cursor,
-                    size = size,
-                ).asItem {
-                    it.map(UserResponse::asItem)
-                }
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
+        meetingRemoteDataSource
+            .getMeetingParticipants(
+                id = meetingId,
+                cursor = cursor,
+                size = size,
+            ).asItem {
+                it.map(UserResponse::asItem)
+            }
 
     override suspend fun getMeetingParticipantsForSearch(
         meetingId: String,
@@ -84,25 +71,21 @@ internal class MeetingRepositoryImpl @Inject constructor(
         cursor: String,
         size: Int,
     ): PaginationContainer<List<User>> =
-        try {
-            meetingRemoteDataSource
-                .getMeetingParticipantsForSearch(
-                    id = meetingId,
-                    keyword = keyword,
-                    cursor = cursor,
-                    size = size,
-                ).asItem {
-                    it.map(UserResponse::asItem)
-                }
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
+        meetingRemoteDataSource
+            .getMeetingParticipantsForSearch(
+                id = meetingId,
+                keyword = keyword,
+                cursor = cursor,
+                size = size,
+            ).asItem {
+                it.map(UserResponse::asItem)
+            }
 
     override fun createMeeting(
         meetingName: String,
         meetingImageUrl: String?,
     ): Flow<Meeting> =
-        catchFlow {
+        flow {
             val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
             emit(meetingRemoteDataSource.createMeeting(jsonOf(KEY_NAME to meetingName, KEY_IMAGE to uploadImageUrl)).asItem())
         }
@@ -112,7 +95,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
         meetingName: String,
         meetingImageUrl: String?,
     ): Flow<Meeting> =
-        catchFlow {
+        flow {
             val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
 
             emit(
@@ -132,7 +115,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
         meetingId: String,
         newHostId: String,
     ): Flow<Unit> =
-        catchFlow {
+        flow {
             emit(
                 meetingRemoteDataSource.updateMeetingLeader(
                     id = meetingId,
@@ -145,12 +128,12 @@ internal class MeetingRepositoryImpl @Inject constructor(
         }
 
     override fun joinMeeting(code: String): Flow<Meeting> =
-        catchFlow {
+        flow {
             emit(meetingRemoteDataSource.joinMeeting(code).asItem())
         }
 
     override fun deleteMeeting(meetingId: String): Flow<Unit> =
-        catchFlow {
+        flow {
             emit(meetingRemoteDataSource.deleteMeeting(meetingId))
         }
 

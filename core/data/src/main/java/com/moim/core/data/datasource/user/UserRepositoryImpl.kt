@@ -3,7 +3,6 @@ package com.moim.core.data.datasource.user
 import com.moim.core.common.model.Theme
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.util.catchFlow
 import com.moim.core.local.PreferenceStorage
 import com.moim.core.remote.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.remote.datasource.user.UserRemoteDataSource
@@ -11,6 +10,7 @@ import com.moim.core.remote.model.asItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
@@ -25,7 +25,7 @@ internal class UserRepositoryImpl @Inject constructor(
             .filterNotNull()
 
     override fun fetchUser(): Flow<User> =
-        catchFlow {
+        flow {
             emit(userRemoteDataSource.getUser().asItem().also { preferenceStorage.saveUser(it) })
         }
 
@@ -33,7 +33,7 @@ internal class UserRepositoryImpl @Inject constructor(
         profileUrl: String?,
         nickname: String,
     ): Flow<User> =
-        catchFlow {
+        flow {
             val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(url = profileUrl, folderName = "profile")
             emit(
                 userRemoteDataSource
@@ -48,12 +48,12 @@ internal class UserRepositoryImpl @Inject constructor(
         }
 
     override fun deleteUser() =
-        catchFlow {
+        flow {
             emit(userRemoteDataSource.deleteUser())
         }
 
     override fun checkedNickname(nickname: String) =
-        catchFlow {
+        flow {
             emit(userRemoteDataSource.checkedNickname(nickname))
         }
 

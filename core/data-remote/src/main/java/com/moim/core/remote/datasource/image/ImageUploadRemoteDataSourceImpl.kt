@@ -32,9 +32,9 @@ internal class ImageUploadRemoteDataSourceImpl @Inject constructor(
         reviewId: String,
         urls: List<String>,
         folderName: String,
-    ) {
+    ) = withContext(Dispatchers.IO) {
         val localImageUrls = urls.filterNot { url -> url.isEmpty() || url.startsWith("http") }
-        if (localImageUrls.isEmpty()) return
+        if (localImageUrls.isEmpty()) return@withContext
 
         val imageFiles = localImageUrls.map { fileUtil.from(it).run { compressorUtil.compressFile(this) } }
 

@@ -3,7 +3,6 @@ package com.moim.core.data.datasource.auth
 import com.moim.core.common.consts.DEVICE_TYPE_ANDROID
 import com.moim.core.common.model.Token
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.util.catchFlow
 import com.moim.core.local.PreferenceStorage
 import com.moim.core.remote.datasource.auth.AuthRemoteDataSource
 import com.moim.core.remote.datasource.image.ImageUploadRemoteDataSource
@@ -11,6 +10,7 @@ import com.moim.core.remote.model.asItem
 import com.moim.core.remote.util.convertToToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class AuthRepositoryImpl @Inject constructor(
@@ -26,7 +26,7 @@ internal class AuthRepositoryImpl @Inject constructor(
         email: String,
         nickname: String,
         profileUrl: String?,
-    ) = catchFlow {
+    ) = flow {
         val uploadProfileUrl = imageUploadRemoteDataSource.uploadImage(profileUrl, "profile")
         val authToken =
             authRemoteDataSource
@@ -50,7 +50,7 @@ internal class AuthRepositoryImpl @Inject constructor(
         socialType: String,
         token: String,
         email: String,
-    ) = catchFlow {
+    ) = flow {
         val authToken =
             authRemoteDataSource
                 .signIn(
@@ -67,7 +67,7 @@ internal class AuthRepositoryImpl @Inject constructor(
     }
 
     override fun signOut(userId: String): Flow<Unit> =
-        catchFlow {
+        flow {
             val token = preferenceStorage.token.first()?.accessToken
 
             emit(

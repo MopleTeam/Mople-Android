@@ -4,15 +4,14 @@ import com.moim.core.common.model.Comment
 import com.moim.core.common.model.NoticeComment
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.util.catchFlow
 import com.moim.core.remote.datasource.comment.CommentRemoteDataSource
 import com.moim.core.remote.datasource.opengraph.OpenGraphRemoteDataSource
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class CommentRepositoryImpl @Inject constructor(
@@ -25,27 +24,23 @@ internal class CommentRepositoryImpl @Inject constructor(
         size: Int,
     ): PaginationContainer<List<Comment>> =
         coroutineScope {
-            try {
-                val commentContainer =
-                    commentRemoteDataSource.getComments(
-                        postId = postId,
-                        cursor = cursor,
-                        size = size,
-                    )
-                val commentItems =
-                    commentContainer
-                        .content
-                        .map { comment ->
-                            async {
-                                val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
-                                comment.asItem(openGraph)
-                            }
-                        }.awaitAll()
+            val commentContainer =
+                commentRemoteDataSource.getComments(
+                    postId = postId,
+                    cursor = cursor,
+                    size = size,
+                )
+            val commentItems =
+                commentContainer
+                    .content
+                    .map { comment ->
+                        async {
+                            val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
+                            comment.asItem(openGraph)
+                        }
+                    }.awaitAll()
 
-                commentContainer.asItem { commentItems }
-            } catch (e: Exception) {
-                throw converterException(e)
-            }
+            commentContainer.asItem { commentItems }
         }
 
     override suspend fun getNoticeComments(
@@ -54,27 +49,23 @@ internal class CommentRepositoryImpl @Inject constructor(
         size: Int,
     ): PaginationContainer<List<NoticeComment>> =
         coroutineScope {
-            try {
-                val commentContainer =
-                    commentRemoteDataSource.getNoticeComments(
-                        postId = noticeId,
-                        cursor = cursor,
-                        size = size,
-                    )
-                val commentItems =
-                    commentContainer
-                        .content
-                        .map { comment ->
-                            async {
-                                val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
-                                comment.asItem(openGraph)
-                            }
-                        }.awaitAll()
+            val commentContainer =
+                commentRemoteDataSource.getNoticeComments(
+                    postId = noticeId,
+                    cursor = cursor,
+                    size = size,
+                )
+            val commentItems =
+                commentContainer
+                    .content
+                    .map { comment ->
+                        async {
+                            val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
+                            comment.asItem(openGraph)
+                        }
+                    }.awaitAll()
 
-                commentContainer.asItem { commentItems }
-            } catch (e: Exception) {
-                throw converterException(e)
-            }
+            commentContainer.asItem { commentItems }
         }
 
     override suspend fun getReplyComments(
@@ -84,29 +75,25 @@ internal class CommentRepositoryImpl @Inject constructor(
         size: Int,
     ): PaginationContainer<List<Comment>> =
         coroutineScope {
-            try {
-                val commentContainer =
-                    commentRemoteDataSource
-                        .getReplyComments(
-                            postId = postId,
-                            commentId = commentId,
-                            cursor = cursor,
-                            size = size,
-                        )
-                val commentItems =
-                    commentContainer
-                        .content
-                        .map { comment ->
-                            async {
-                                val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
-                                comment.asItem(openGraph)
-                            }
-                        }.awaitAll()
+            val commentContainer =
+                commentRemoteDataSource
+                    .getReplyComments(
+                        postId = postId,
+                        commentId = commentId,
+                        cursor = cursor,
+                        size = size,
+                    )
+            val commentItems =
+                commentContainer
+                    .content
+                    .map { comment ->
+                        async {
+                            val openGraph = openGraphRemoteDataSource.getOpenGraph(comment.content.findWebLink())
+                            comment.asItem(openGraph)
+                        }
+                    }.awaitAll()
 
-                commentContainer.asItem { commentItems }
-            } catch (e: Exception) {
-                throw converterException(e)
-            }
+            commentContainer.asItem { commentItems }
         }
 
     override fun createComment(
@@ -114,7 +101,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         content: String,
         mentionIds: List<String>,
     ): Flow<Comment> =
-        catchFlow {
+        flow {
             val comment =
                 commentRemoteDataSource
                     .createComment(
@@ -138,7 +125,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         content: String,
         mentionIds: List<String>,
     ): Flow<Comment> =
-        catchFlow {
+        flow {
             val comment =
                 commentRemoteDataSource
                     .createReplyComment(
@@ -161,7 +148,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         content: String,
         mentionIds: List<String>,
     ): Flow<Comment> =
-        catchFlow {
+        flow {
             val comment =
                 commentRemoteDataSource
                     .updateComment(
@@ -180,14 +167,14 @@ internal class CommentRepositoryImpl @Inject constructor(
         }
 
     override fun updateLikeComment(commentId: String): Flow<Comment> =
-        catchFlow {
+        flow {
             val comment = commentRemoteDataSource.updateLikeComment(commentId)
             val openGraph = openGraphRemoteDataSource.getOpenGraph(url = comment.content.findWebLink())
             emit(comment.asItem(openGraph))
         }
 
     override fun deleteComment(commentId: String): Flow<Unit> =
-        catchFlow {
+        flow {
             emit(commentRemoteDataSource.deleteComment(commentId))
         }
 
@@ -195,7 +182,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         noticeId: String,
         content: String,
     ): Flow<NoticeComment> =
-        catchFlow {
+        flow {
             val comment =
                 commentRemoteDataSource
                     .createNoticeComment(
@@ -213,7 +200,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         commentId: String,
         content: String,
     ): Flow<NoticeComment> =
-        catchFlow {
+        flow {
             val comment =
                 commentRemoteDataSource
                     .updateNoticeComment(
@@ -228,7 +215,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         }
 
     override fun reportComment(commentId: String): Flow<Unit> =
-        catchFlow {
+        flow {
             emit(commentRemoteDataSource.reportComment(jsonOf(KEY_COMMENT_ID to commentId, KEY_REASON to "")))
         }
 

@@ -1,5 +1,7 @@
 package com.moim.core.remote.util
 
+import com.moim.core.common.exception.ForbiddenException
+import com.moim.core.common.exception.UnAuthorizedException
 import com.moim.core.common.model.Token
 import com.moim.core.remote.datasource.auth.AuthTokenRemoteDataSource
 import com.moim.core.remote.model.asItem
@@ -53,10 +55,14 @@ internal class TokenManager @Inject constructor(
                 .also { userDataUtil.saveUserToken(it) }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: MoimHttpException) {
-            Timber.e("[TokenManager] 토큰 갱신 실패 (code=${e.statusCode}): ${e.statusMessage}")
+        } catch (e: UnAuthorizedException) {
             // refreshToken이 만료·무효할 때만 세션 정리
-            if (e.statusCode in SESSION_EXPIRED_CODES) clearUserSessionSafely()
+            Timber.e("[TokenManager] refreshToken 만료: ${e.message}")
+            clearUserSessionSafely()
+            null
+        } catch (e: ForbiddenException) {
+            Timber.e("[TokenManager] refreshToken 무효: ${e.message}")
+            clearUserSessionSafely()
             null
         } catch (e: Exception) {
             // 일시적 실패로는 세션을 지우지 않는다.
@@ -82,10 +88,6 @@ internal class TokenManager @Inject constructor(
         } catch (e: Exception) {
             Timber.e("[TokenManager] 세션 정리 실패: ${e.message}")
         }
-    }
-
-    companion object {
-        private val SESSION_EXPIRED_CODES = setOf(401, 403)
     }
 }
 

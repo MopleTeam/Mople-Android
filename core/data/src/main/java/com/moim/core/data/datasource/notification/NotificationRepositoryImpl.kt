@@ -3,11 +3,10 @@ package com.moim.core.data.datasource.notification
 import com.moim.core.common.model.Notification
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.util.catchFlow
 import com.moim.core.remote.datasource.notification.NotificationRemoteDataSource
 import com.moim.core.remote.model.NotificationResponse
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.util.converterException
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class NotificationRepositoryImpl @Inject constructor(
@@ -17,35 +16,31 @@ internal class NotificationRepositoryImpl @Inject constructor(
         cursor: String,
         size: Int,
     ): PaginationContainer<List<Notification>> =
-        try {
-            notificationRemoteDataSource
-                .getNotifications(
-                    cursor = cursor,
-                    size = size,
-                ).asItem {
-                    it.map(NotificationResponse::asItem)
-                }
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
+        notificationRemoteDataSource
+            .getNotifications(
+                cursor = cursor,
+                size = size,
+            ).asItem {
+                it.map(NotificationResponse::asItem)
+            }
 
     override fun getNotificationSubscribes() =
-        catchFlow {
+        flow {
             emit(notificationRemoteDataSource.getNotificationSubscribes())
         }
 
     override fun setNotificationSubscribe(topic: String) =
-        catchFlow {
+        flow {
             emit(notificationRemoteDataSource.setNotificationSubscribe(jsonOf(KEY_TOPIC to listOf(topic))))
         }
 
     override fun setNotificationUnSubscribe(topic: String) =
-        catchFlow {
+        flow {
             emit(notificationRemoteDataSource.setNotificationUnSubscribe(jsonOf(KEY_TOPIC to listOf(topic))))
         }
 
     override fun clearNotificationCount() =
-        catchFlow {
+        flow {
             emit(notificationRemoteDataSource.clearNotificationCount())
         }
 

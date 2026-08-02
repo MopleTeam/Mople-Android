@@ -5,16 +5,14 @@ import com.moim.core.common.model.Plan
 import com.moim.core.common.model.PlanReviewContainer
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.datasource.plan.PlanRepositoryImpl.Companion.KEY_DESCRIPTION
-import com.moim.core.data.util.catchFlow
 import com.moim.core.remote.datasource.location.LocationRemoteDataSource
 import com.moim.core.remote.datasource.plan.PlanRemoteDataSource
 import com.moim.core.remote.model.PlaceResponse
 import com.moim.core.remote.model.PlanResponse
 import com.moim.core.remote.model.UserResponse
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class PlanRepositoryImpl @Inject constructor(
@@ -22,7 +20,7 @@ internal class PlanRepositoryImpl @Inject constructor(
     private val locationRemoteDataSource: LocationRemoteDataSource,
 ) : PlanRepository {
     override fun getCurrentPlans() =
-        catchFlow {
+        flow {
             emit(planRemoteDataSource.getCurrentPlan().asItem())
         }
 
@@ -31,24 +29,20 @@ internal class PlanRepositoryImpl @Inject constructor(
         cursor: String,
         size: Int,
     ): PaginationContainer<List<Plan>> =
-        try {
-            planRemoteDataSource
-                .getPlans(
-                    id = meetingId,
-                    cursor = cursor,
-                    size = size,
-                ).asItem { it.map(PlanResponse::asItem) }
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
+        planRemoteDataSource
+            .getPlans(
+                id = meetingId,
+                cursor = cursor,
+                size = size,
+            ).asItem { it.map(PlanResponse::asItem) }
 
     override fun getPlan(planId: String) =
-        catchFlow {
+        flow {
             emit(planRemoteDataSource.getPlan(planId).asItem())
         }
 
     override fun getPlansForCalendar(date: String): Flow<PlanReviewContainer> =
-        catchFlow {
+        flow {
             emit(planRemoteDataSource.getPlansForCalendar(date).asItem())
         }
 
@@ -56,7 +50,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         keyword: String,
         xPoint: String,
         yPoint: String,
-    ) = catchFlow {
+    ) = flow {
         emit(
             locationRemoteDataSource
                 .getSearchLocation(
@@ -76,26 +70,22 @@ internal class PlanRepositoryImpl @Inject constructor(
         cursor: String,
         size: Int,
     ): PaginationContainer<List<User>> =
-        try {
-            planRemoteDataSource
-                .getPlanParticipants(
-                    planId = planId,
-                    cursor = cursor,
-                    size = size,
-                ).asItem {
-                    it.map(UserResponse::asItem)
-                }
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
+        planRemoteDataSource
+            .getPlanParticipants(
+                planId = planId,
+                cursor = cursor,
+                size = size,
+            ).asItem {
+                it.map(UserResponse::asItem)
+            }
 
     override fun joinPlan(planId: String) =
-        catchFlow {
+        flow {
             emit(planRemoteDataSource.joinPlan(planId))
         }
 
     override fun leavePlan(planId: String) =
-        catchFlow {
+        flow {
             emit(planRemoteDataSource.leavePlan(planId))
         }
 
@@ -109,7 +99,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         title: String,
         longitude: Double?,
         latitude: Double?,
-    ) = catchFlow {
+    ) = flow {
         emit(
             planRemoteDataSource
                 .createPlan(
@@ -138,7 +128,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         title: String,
         longitude: Double?,
         latitude: Double?,
-    ) = catchFlow {
+    ) = flow {
         emit(
             planRemoteDataSource
                 .updatePlan(
@@ -157,12 +147,12 @@ internal class PlanRepositoryImpl @Inject constructor(
     }
 
     override fun deletePlan(planId: String) =
-        catchFlow {
+        flow {
             emit(planRemoteDataSource.deletePlan(planId))
         }
 
     override fun reportPlan(planId: String) =
-        catchFlow {
+        flow {
             emit(
                 planRemoteDataSource.reportPlan(
                     jsonOf(

@@ -2,12 +2,12 @@ package com.moim.core.data.datasource.token
 
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.crashreport.CrashReporter
-import com.moim.core.data.util.catchFlow
 import com.moim.core.local.PreferenceStorage
 import com.moim.core.remote.datasource.token.TokenRemoteDataSource
 import com.moim.core.remote.util.FirebaseUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class TokenRepositoryImpl @Inject constructor(
@@ -16,14 +16,14 @@ internal class TokenRepositoryImpl @Inject constructor(
     private val crashReporter: CrashReporter,
 ) : TokenRepository {
     override fun setFcmToken(): Flow<Unit> =
-        catchFlow {
+        flow {
             val fcmToken = FirebaseUtil.getFirebaseMessageToken()
             sendFcmToken(fcmToken)
             emit(Unit)
         }
 
     override fun syncFcmTokenIfNeeded(): Flow<Unit> =
-        catchFlow {
+        flow {
             val current = FirebaseUtil.getFirebaseMessageToken()
             val lastSent = preferenceStorage.lastFcmToken.first()
             if (current != null && current != lastSent) {
