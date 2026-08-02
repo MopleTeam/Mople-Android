@@ -2,18 +2,18 @@ package com.moim.core.data.datasource.holiday
 
 import com.moim.core.common.model.Holiday
 import com.moim.core.data.util.catchFlow
+import com.moim.core.remote.datasource.holiday.HolidayRemoteDataSource
 import com.moim.core.remote.model.HolidayResponse
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.service.HolidayApi
 import kotlinx.coroutines.flow.Flow
 import java.time.ZonedDateTime
 import javax.inject.Inject
 
 internal class HolidayRepositoryImpl @Inject constructor(
-    private val holidayApi: HolidayApi,
+    private val holidayRemoteDataSource: HolidayRemoteDataSource,
 ) : HolidayRepository {
     override fun getHolidays(currentYear: ZonedDateTime): Flow<List<Holiday>> =
         catchFlow {
-            emit(holidayApi.getHolidays(year = currentYear.year.toString()).map(HolidayResponse::asItem))
+            emit(holidayRemoteDataSource.getHolidays(year = currentYear.year.toString()).map(HolidayResponse::asItem))
         }
 }

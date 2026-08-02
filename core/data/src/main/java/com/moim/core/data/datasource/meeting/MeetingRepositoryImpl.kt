@@ -6,16 +6,16 @@ import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
 import com.moim.core.remote.datasource.image.ImageUploadRemoteDataSource
+import com.moim.core.remote.datasource.meeting.MeetingRemoteDataSource
 import com.moim.core.remote.model.MeetingResponse
 import com.moim.core.remote.model.UserResponse
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.service.MeetingApi
 import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 internal class MeetingRepositoryImpl @Inject constructor(
-    private val meetingApi: MeetingApi,
+    private val meetingRemoteDataSource: MeetingRemoteDataSource,
     private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource,
 ) : MeetingRepository {
     override suspend fun getMeetings(
@@ -23,7 +23,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
         size: Int,
     ): PaginationContainer<List<Meeting>> =
         try {
-            meetingApi
+            meetingRemoteDataSource
                 .getMeetings(
                     cursor = cursor,
                     size = size,
@@ -39,7 +39,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
         size: Int,
     ): PaginationContainer<List<Meeting>> =
         try {
-            meetingApi
+            meetingRemoteDataSource
                 .getMeetingsForHost(
                     cursor = cursor,
                     size = size,
@@ -52,12 +52,12 @@ internal class MeetingRepositoryImpl @Inject constructor(
 
     override fun getMeeting(meetingId: String) =
         catchFlow {
-            emit(meetingApi.getMeeting(meetingId).asItem())
+            emit(meetingRemoteDataSource.getMeeting(meetingId).asItem())
         }
 
     override fun getMeetingInviteCode(meetingId: String) =
         catchFlow {
-            emit(meetingApi.getMeetingInviteCode(meetingId))
+            emit(meetingRemoteDataSource.getMeetingInviteCode(meetingId))
         }
 
     override suspend fun getMeetingParticipants(
@@ -66,7 +66,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
         size: Int,
     ): PaginationContainer<List<User>> =
         try {
-            meetingApi
+            meetingRemoteDataSource
                 .getMeetingParticipants(
                     id = meetingId,
                     cursor = cursor,
@@ -85,7 +85,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
         size: Int,
     ): PaginationContainer<List<User>> =
         try {
-            meetingApi
+            meetingRemoteDataSource
                 .getMeetingParticipantsForSearch(
                     id = meetingId,
                     keyword = keyword,
@@ -104,7 +104,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
     ): Flow<Meeting> =
         catchFlow {
             val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
-            emit(meetingApi.createMeeting(jsonOf(KEY_NAME to meetingName, KEY_IMAGE to uploadImageUrl)).asItem())
+            emit(meetingRemoteDataSource.createMeeting(jsonOf(KEY_NAME to meetingName, KEY_IMAGE to uploadImageUrl)).asItem())
         }
 
     override fun updateMeeting(
@@ -116,7 +116,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
             val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
 
             emit(
-                meetingApi
+                meetingRemoteDataSource
                     .updateMeeting(
                         id = meetingId,
                         params =
@@ -134,7 +134,7 @@ internal class MeetingRepositoryImpl @Inject constructor(
     ): Flow<Unit> =
         catchFlow {
             emit(
-                meetingApi.updateMeetingLeader(
+                meetingRemoteDataSource.updateMeetingLeader(
                     id = meetingId,
                     params =
                         jsonOf(
@@ -146,12 +146,12 @@ internal class MeetingRepositoryImpl @Inject constructor(
 
     override fun joinMeeting(code: String): Flow<Meeting> =
         catchFlow {
-            emit(meetingApi.joinMeeting(code).asItem())
+            emit(meetingRemoteDataSource.joinMeeting(code).asItem())
         }
 
     override fun deleteMeeting(meetingId: String): Flow<Unit> =
         catchFlow {
-            emit(meetingApi.deleteMeeting(meetingId))
+            emit(meetingRemoteDataSource.deleteMeeting(meetingId))
         }
 
     companion object {

@@ -5,9 +5,9 @@ import com.moim.core.common.model.NoticeComment
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
+import com.moim.core.remote.datasource.comment.CommentRemoteDataSource
 import com.moim.core.remote.datasource.opengraph.OpenGraphRemoteDataSource
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.service.CommentApi
 import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 internal class CommentRepositoryImpl @Inject constructor(
-    private val commentApi: CommentApi,
+    private val commentRemoteDataSource: CommentRemoteDataSource,
     private val openGraphRemoteDataSource: OpenGraphRemoteDataSource,
 ) : CommentRepository {
     override suspend fun getComments(
@@ -27,7 +27,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         coroutineScope {
             try {
                 val commentContainer =
-                    commentApi.getComments(
+                    commentRemoteDataSource.getComments(
                         postId = postId,
                         cursor = cursor,
                         size = size,
@@ -56,7 +56,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         coroutineScope {
             try {
                 val commentContainer =
-                    commentApi.getNoticeComments(
+                    commentRemoteDataSource.getNoticeComments(
                         postId = noticeId,
                         cursor = cursor,
                         size = size,
@@ -86,7 +86,7 @@ internal class CommentRepositoryImpl @Inject constructor(
         coroutineScope {
             try {
                 val commentContainer =
-                    commentApi
+                    commentRemoteDataSource
                         .getReplyComments(
                             postId = postId,
                             commentId = commentId,
@@ -116,7 +116,7 @@ internal class CommentRepositoryImpl @Inject constructor(
     ): Flow<Comment> =
         catchFlow {
             val comment =
-                commentApi
+                commentRemoteDataSource
                     .createComment(
                         postId = postId,
                         params =
@@ -140,7 +140,7 @@ internal class CommentRepositoryImpl @Inject constructor(
     ): Flow<Comment> =
         catchFlow {
             val comment =
-                commentApi
+                commentRemoteDataSource
                     .createReplyComment(
                         postId = postId,
                         commentId = commentId,
@@ -163,7 +163,7 @@ internal class CommentRepositoryImpl @Inject constructor(
     ): Flow<Comment> =
         catchFlow {
             val comment =
-                commentApi
+                commentRemoteDataSource
                     .updateComment(
                         commentId = commentId,
                         params =
@@ -181,14 +181,14 @@ internal class CommentRepositoryImpl @Inject constructor(
 
     override fun updateLikeComment(commentId: String): Flow<Comment> =
         catchFlow {
-            val comment = commentApi.updateLikeComment(commentId)
+            val comment = commentRemoteDataSource.updateLikeComment(commentId)
             val openGraph = openGraphRemoteDataSource.getOpenGraph(url = comment.content.findWebLink())
             emit(comment.asItem(openGraph))
         }
 
     override fun deleteComment(commentId: String): Flow<Unit> =
         catchFlow {
-            emit(commentApi.deleteComment(commentId))
+            emit(commentRemoteDataSource.deleteComment(commentId))
         }
 
     override fun createNoticeComment(
@@ -197,7 +197,7 @@ internal class CommentRepositoryImpl @Inject constructor(
     ): Flow<NoticeComment> =
         catchFlow {
             val comment =
-                commentApi
+                commentRemoteDataSource
                     .createNoticeComment(
                         postId = noticeId,
                         params = jsonOf(KEY_CONTENTS to content),
@@ -215,7 +215,7 @@ internal class CommentRepositoryImpl @Inject constructor(
     ): Flow<NoticeComment> =
         catchFlow {
             val comment =
-                commentApi
+                commentRemoteDataSource
                     .updateNoticeComment(
                         commentId = commentId,
                         params = jsonOf(KEY_CONTENTS to content),
@@ -229,7 +229,7 @@ internal class CommentRepositoryImpl @Inject constructor(
 
     override fun reportComment(commentId: String): Flow<Unit> =
         catchFlow {
-            emit(commentApi.reportComment(jsonOf(KEY_COMMENT_ID to commentId, KEY_REASON to "")))
+            emit(commentRemoteDataSource.reportComment(jsonOf(KEY_COMMENT_ID to commentId, KEY_REASON to "")))
         }
 
     private fun String.findWebLink(): String? {

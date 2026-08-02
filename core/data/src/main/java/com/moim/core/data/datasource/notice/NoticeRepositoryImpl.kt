@@ -5,15 +5,15 @@ import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
+import com.moim.core.remote.datasource.notice.NoticeRemoteDataSource
 import com.moim.core.remote.model.NoticeResponse
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.service.NoticeApi
 import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 internal class NoticeRepositoryImpl @Inject constructor(
-    private val noticeApi: NoticeApi,
+    private val noticeRemoteDataSource: NoticeRemoteDataSource,
 ) : NoticeRepository {
     override suspend fun getNotices(
         meetId: String,
@@ -22,7 +22,7 @@ internal class NoticeRepositoryImpl @Inject constructor(
         filterType: NoticeType?,
     ): PaginationContainer<List<Notice>> =
         try {
-            noticeApi
+            noticeRemoteDataSource
                 .getNotices(
                     meetId = meetId,
                     cursor = cursor,
@@ -35,7 +35,7 @@ internal class NoticeRepositoryImpl @Inject constructor(
 
     override fun getNotice(noticeId: String): Flow<Notice> =
         catchFlow {
-            emit(noticeApi.getNotice(noticeId).asItem())
+            emit(noticeRemoteDataSource.getNotice(noticeId).asItem())
         }
 
     override fun createNotice(
@@ -44,7 +44,7 @@ internal class NoticeRepositoryImpl @Inject constructor(
     ): Flow<Notice> =
         catchFlow {
             emit(
-                noticeApi
+                noticeRemoteDataSource
                     .createNotice(
                         params =
                             jsonOf(
@@ -62,7 +62,7 @@ internal class NoticeRepositoryImpl @Inject constructor(
     ): Flow<Notice> =
         catchFlow {
             emit(
-                noticeApi
+                noticeRemoteDataSource
                     .updateNotice(
                         noticeId = noticeId,
                         params =
@@ -76,17 +76,17 @@ internal class NoticeRepositoryImpl @Inject constructor(
 
     override fun deleteNotice(noticeId: String): Flow<Unit> =
         catchFlow {
-            emit(noticeApi.deleteNotice(noticeId = noticeId))
+            emit(noticeRemoteDataSource.deleteNotice(noticeId = noticeId))
         }
 
     override fun pinNotice(noticeId: String): Flow<Notice> =
         catchFlow {
-            emit(noticeApi.pinNotice(noticeId = noticeId).asItem())
+            emit(noticeRemoteDataSource.pinNotice(noticeId = noticeId).asItem())
         }
 
     override fun unpinNotice(noticeId: String): Flow<Notice> =
         catchFlow {
-            emit(noticeApi.unpinNotice(noticeId = noticeId).asItem())
+            emit(noticeRemoteDataSource.unpinNotice(noticeId = noticeId).asItem())
         }
 
     companion object {

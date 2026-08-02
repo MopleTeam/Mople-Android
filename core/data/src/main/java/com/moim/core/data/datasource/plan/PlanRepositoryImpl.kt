@@ -7,23 +7,23 @@ import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.datasource.plan.PlanRepositoryImpl.Companion.KEY_DESCRIPTION
 import com.moim.core.data.util.catchFlow
+import com.moim.core.remote.datasource.location.LocationRemoteDataSource
+import com.moim.core.remote.datasource.plan.PlanRemoteDataSource
 import com.moim.core.remote.model.PlaceResponse
 import com.moim.core.remote.model.PlanResponse
 import com.moim.core.remote.model.UserResponse
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.service.LocationApi
-import com.moim.core.remote.service.PlanApi
 import com.moim.core.remote.util.converterException
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 internal class PlanRepositoryImpl @Inject constructor(
-    private val planApi: PlanApi,
-    private val locationApi: LocationApi,
+    private val planRemoteDataSource: PlanRemoteDataSource,
+    private val locationRemoteDataSource: LocationRemoteDataSource,
 ) : PlanRepository {
     override fun getCurrentPlans() =
         catchFlow {
-            emit(planApi.getCurrentPlan().asItem())
+            emit(planRemoteDataSource.getCurrentPlan().asItem())
         }
 
     override suspend fun getPlans(
@@ -32,7 +32,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         size: Int,
     ): PaginationContainer<List<Plan>> =
         try {
-            planApi
+            planRemoteDataSource
                 .getPlans(
                     id = meetingId,
                     cursor = cursor,
@@ -44,12 +44,12 @@ internal class PlanRepositoryImpl @Inject constructor(
 
     override fun getPlan(planId: String) =
         catchFlow {
-            emit(planApi.getPlan(planId).asItem())
+            emit(planRemoteDataSource.getPlan(planId).asItem())
         }
 
     override fun getPlansForCalendar(date: String): Flow<PlanReviewContainer> =
         catchFlow {
-            emit(planApi.getPlansForCalendar(date).asItem())
+            emit(planRemoteDataSource.getPlansForCalendar(date).asItem())
         }
 
     override fun getSearchPlace(
@@ -58,7 +58,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         yPoint: String,
     ) = catchFlow {
         emit(
-            locationApi
+            locationRemoteDataSource
                 .getSearchLocation(
                     params =
                         jsonOf(
@@ -77,7 +77,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         size: Int,
     ): PaginationContainer<List<User>> =
         try {
-            planApi
+            planRemoteDataSource
                 .getPlanParticipants(
                     planId = planId,
                     cursor = cursor,
@@ -91,12 +91,12 @@ internal class PlanRepositoryImpl @Inject constructor(
 
     override fun joinPlan(planId: String) =
         catchFlow {
-            emit(planApi.joinPlan(planId))
+            emit(planRemoteDataSource.joinPlan(planId))
         }
 
     override fun leavePlan(planId: String) =
         catchFlow {
-            emit(planApi.leavePlan(planId))
+            emit(planRemoteDataSource.leavePlan(planId))
         }
 
     override fun createPlan(
@@ -111,7 +111,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         latitude: Double?,
     ) = catchFlow {
         emit(
-            planApi
+            planRemoteDataSource
                 .createPlan(
                     jsonOf(
                         KEY_MEETING_ID to meetingId,
@@ -140,7 +140,7 @@ internal class PlanRepositoryImpl @Inject constructor(
         latitude: Double?,
     ) = catchFlow {
         emit(
-            planApi
+            planRemoteDataSource
                 .updatePlan(
                     jsonOf(
                         KEY_PLAN_ID to planId,
@@ -158,13 +158,13 @@ internal class PlanRepositoryImpl @Inject constructor(
 
     override fun deletePlan(planId: String) =
         catchFlow {
-            emit(planApi.deletePlan(planId))
+            emit(planRemoteDataSource.deletePlan(planId))
         }
 
     override fun reportPlan(planId: String) =
         catchFlow {
             emit(
-                planApi.reportPlan(
+                planRemoteDataSource.reportPlan(
                     jsonOf(
                         KEY_PLAN_ID to planId,
                         KEY_REASON to "",

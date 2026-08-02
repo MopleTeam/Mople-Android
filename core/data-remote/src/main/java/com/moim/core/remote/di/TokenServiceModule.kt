@@ -1,81 +1,29 @@
 package com.moim.core.remote.di
 
-import com.moim.core.remote.BuildConfig
-import com.moim.core.remote.di.qualifiers.MoimTokenApiOkHttp
-import com.moim.core.remote.service.AuthTokenApi
-import com.moim.core.remote.util.TokenAuthenticator
-import com.moim.core.remote.util.TokenInterceptor
-import com.moim.core.remote.util.UserDataUtil
+import com.moim.core.remote.di.qualifiers.TokenRefreshApi
+import com.moim.core.remote.util.createMoimHttpClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
-import okhttp3.Call
-import okhttp3.Interceptor
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
 internal object TokenServiceModule {
-    @MoimTokenApiOkHttp
+    @TokenRefreshApi
     @Singleton
     @Provides
-    fun provideApiOkHttpCallFactory(
-        headerInterceptor: Interceptor,
-        httpLoggingInterceptor: HttpLoggingInterceptor,
-    ): Call.Factory =
-        OkHttpClient
-            .Builder()
-            .connectTimeout(TIMEOUT_CONNECT_SECONDS, TimeUnit.SECONDS)
-            .readTimeout(TIMEOUT_READ_SECONDS, TimeUnit.SECONDS)
-            .writeTimeout(TIMEOUT_WRITE_SECONDS, TimeUnit.SECONDS)
-            .addInterceptor(headerInterceptor)
-            .addInterceptor(httpLoggingInterceptor)
-            .build()
+    fun provideTokenRefreshHttpClient(json: Json): HttpClient =
+        createMoimHttpClient(
+            json = json,
+            connectTimeoutMillis = TIMEOUT_CONNECT_MILLIS,
+            socketTimeoutMillis = TIMEOUT_SOCKET_MILLIS,
+        )
 
-    @Singleton
-    @Provides
-    fun provideTokenApi(
-        @MoimTokenApiOkHttp okHttpCallFactory: Call.Factory,
-    ): AuthTokenApi {
-        val format =
-            Json {
-                isLenient = true
-                coerceInputValues = true
-                ignoreUnknownKeys = true
-                encodeDefaults = true
-            }
-        val contentType = "application/json".toMediaType()
-
-        return Retrofit
-            .Builder()
-            .callFactory(okHttpCallFactory)
-            .addConverterFactory(format.asConverterFactory(contentType))
-            .baseUrl(BuildConfig.API_URL)
-            .build()
-            .create(AuthTokenApi::class.java)
-    }
-
-    @Singleton
-    @Provides
-    fun provideTokenInterceptor(userDataUtil: UserDataUtil): TokenInterceptor = TokenInterceptor(userDataUtil)
-
-    @Singleton
-    @Provides
-    fun provideTokenAuthenticator(
-        userDataUtil: UserDataUtil,
-        authTokenApi: AuthTokenApi,
-    ): TokenAuthenticator = TokenAuthenticator(userDataUtil, authTokenApi)
-
-    // 토큰 갱신은 원본 요청을 블로킹한 상태로 진행되므로 일반 API보다 짧게 잡습니다.
-    private const val TIMEOUT_CONNECT_SECONDS = 10L
-    private const val TIMEOUT_READ_SECONDS = 15L
-    private const val TIMEOUT_WRITE_SECONDS = 15L
+    // 원본 요청을 대기시키므로 일반 API보다 짧게
+    private const val TIMEOUT_CONNECT_MILLIS = 10_000L
+    private const val TIMEOUT_SOCKET_MILLIS = 15_000L
 }

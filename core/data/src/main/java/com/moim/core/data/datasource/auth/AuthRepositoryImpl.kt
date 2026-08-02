@@ -5,16 +5,16 @@ import com.moim.core.common.model.Token
 import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.data.util.catchFlow
 import com.moim.core.local.PreferenceStorage
+import com.moim.core.remote.datasource.auth.AuthRemoteDataSource
 import com.moim.core.remote.datasource.image.ImageUploadRemoteDataSource
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.service.AuthApi
 import com.moim.core.remote.util.convertToToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 internal class AuthRepositoryImpl @Inject constructor(
-    private val authApi: AuthApi,
+    private val authRemoteDataSource: AuthRemoteDataSource,
     private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource,
     private val preferenceStorage: PreferenceStorage,
 ) : AuthRepository {
@@ -29,7 +29,7 @@ internal class AuthRepositoryImpl @Inject constructor(
     ) = catchFlow {
         val uploadProfileUrl = imageUploadRemoteDataSource.uploadImage(profileUrl, "profile")
         val authToken =
-            authApi
+            authRemoteDataSource
                 .signUp(
                     params =
                         jsonOf(
@@ -52,7 +52,7 @@ internal class AuthRepositoryImpl @Inject constructor(
         email: String,
     ) = catchFlow {
         val authToken =
-            authApi
+            authRemoteDataSource
                 .signIn(
                     params =
                         jsonOf(
@@ -71,7 +71,7 @@ internal class AuthRepositoryImpl @Inject constructor(
             val token = preferenceStorage.token.first()?.accessToken
 
             emit(
-                authApi.signOut(
+                authRemoteDataSource.signOut(
                     token = token.convertToToken(),
                     params =
                         jsonOf(

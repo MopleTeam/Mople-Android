@@ -1,59 +1,60 @@
 [versions]
 # Project
-androidGradlePlugin = "9.1.0"
-playservicesGradlePlugin = "4.4.4"
-firebaseCrashlyticsGradlePlugin = "3.0.6"
+androidGradlePlugin = "9.1.1"
+playservicesGradlePlugin = "4.5.0"
+firebaseCrashlyticsGradlePlugin = "3.0.7"
 
 # AndroidX
-androidxCore = "1.18.0"
-androidxComposeBom = "2026.03.01"
+androidxCore = "1.19.0"
+androidxComposeBom = "2026.06.01"
 androidxStartUp = "1.2.0"
-androidxLifecycle = "2.10.0"
-androidxHilt = "1.3.0"
+androidxLifecycle = "2.11.0"
+androidxHilt = "1.4.0"
 androidxCoreSplashScreen = "1.2.0"
 androidxActivity = "1.13.0"
-androidxNavigation3 = "1.0.1"
+androidxNavigation3 = "1.1.5"
 androidxDataStore = "1.2.1"
 androidxRoom = "2.8.4"
 androidxAppcompat = "1.7.1"
 
 # Android
-androidPlayServicesLocation = "21.3.0"
+androidPlayServicesLocation = "21.4.0"
 
 # Kotlin
-kotlin = "2.3.20"
-kotlinxCoroutines = "1.10.2"
-kotlinxSerializationJson = "1.10.0"
+kotlin = "2.4.10"
+kotlinxCoroutines = "1.11.0"
+kotlinxSerializationJson = "1.11.0"
 ksp = "2.3.5"
 
 # Firebase
-firebaseBom = "34.11.0"
+firebaseBom = "34.17.0"
 
 # hilt
-hilt = "2.59.2"
+hilt = "2.60.1"
 
 # Coil
-coil = "3.4.0"
+coil = "3.5.0"
+
+# Network
+ktor = "3.5.2"
 
 # coreDseugar
 androidDesugarJdkLibs = "2.1.5"
 
 # ETC
-retrofit = "3.0.0"
-okhttp = "5.3.2"
 lottie = "6.7.1"
 timber = "5.0.1"
 leakCanary = "2.14"
 compressor = "3.0.1"
-calendarCompose = "2.10.0"
+calendarCompose = "2.10.1"
 composeStableMarker = "1.0.7"
-kakaoCore = "2.23.2"
-zoomable = "2.11.1"
+kakaoCore = "2.24.0"
+zoomable = "2.13.0"
 naverMapCompose = "1.9.0"
 naverMapLocation = "21.0.2"
 tedClusteringNaver = "1.0.2"
 ksoup = "0.2.6"
-material = "1.13.0"
+material = "1.14.0"
 
 [libraries]
 # AndroidX
@@ -127,12 +128,17 @@ coil-kt-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", ve
 coil-kt-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-kt-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil" }
 
+# Ktor
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+
 # ETC
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 ksoup-network = { module = "com.fleeksoft.ksoup:ksoup-network", version.ref = "ksoup" }
-retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
@@ -154,11 +160,34 @@ kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-pl
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [bundles]
-androidx-room = ["androidx-room-runtime", "androidx-room-coroutine", "androidx-room-paging"]
-androidx-lifecycle = ["androidx-lifecycle-runtime-compose", "androidx-lifecycle-viewModel-compose", "androidx-lifecycle-viewmodel-navigation3", "androidx-lifecycle-savedState"]
-coil = ["coil-kt-network", "coil-kt-compose", "coil-kt-svg"]
-retrofit = ["retrofit-core", "retrofit-converter-kotlinx-serialization", "okhttp-logging"]
-naver-map-compose = ["naver-map-compose", "naver-map-location", "tedclustering-naver", ]
+androidx-room = [
+    "androidx-room-runtime",
+    "androidx-room-coroutine",
+    "androidx-room-paging",
+]
+androidx-lifecycle = [
+    "androidx-lifecycle-runtime-compose",
+    "androidx-lifecycle-viewModel-compose",
+    "androidx-lifecycle-viewmodel-navigation3",
+    "androidx-lifecycle-savedState",
+]
+coil = [
+    "coil-kt-network",
+    "coil-kt-compose",
+    "coil-kt-svg",
+]
+ktor = [
+    "ktor-client-core",
+    "ktor-client-cio",
+    "ktor-client-content-negotiation",
+    "ktor-serialization-kotlinx-json",
+    "ktor-client-logging",
+]
+naver-map-compose = [
+    "naver-map-compose",
+    "naver-map-location",
+    "tedclustering-naver",
+]
 
 [plugins]
 # Android Plugin
