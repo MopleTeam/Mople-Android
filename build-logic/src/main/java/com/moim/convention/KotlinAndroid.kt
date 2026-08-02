@@ -27,6 +27,10 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
         buildFeatures.apply {
             buildConfig = true
         }
+
+        lint.apply {
+            lintConfig = rootProject.file("lint.xml")
+        }
     }
 
     configureKotlin<KotlinAndroidProjectExtension>()
