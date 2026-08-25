@@ -57,6 +57,8 @@ import com.moim.feature.plandetail.ui.PlanDetailMentionDialog
 import com.moim.feature.plandetail.ui.PlanDetailReportDialog
 import com.moim.feature.plandetail.ui.PlanDetailReviewImages
 import com.moim.feature.plandetail.ui.PlanDetailTopAppbar
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 internal typealias OnPlanDetailIntent = (PlanDetailIntent) -> Unit
 
