@@ -2,133 +2,105 @@ package com.moim.feature.intro.screen.splash
 
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.exception.NetworkException
-import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.crashreport.CrashReporter
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.policy.PolicyRepository
 import com.moim.core.data.datasource.token.TokenRepository
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.ui.view.BaseViewModel
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
+import com.moim.feature.intro.screen.splash.model.SplashIntent
+import com.moim.feature.intro.screen.splash.model.SplashSideEffect
+import com.moim.feature.intro.screen.splash.model.SplashState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import okio.IOException
+import org.orbitmvi.orbit.syntax.Syntax
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    authRepository: AuthRepository,
+    private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
     private val policyRepository: PolicyRepository,
     private val tokenRepository: TokenRepository,
     private val crashReporter: CrashReporter,
-) : BaseViewModel() {
-    private val splashResult =
-        authRepository
-            .getToken()
-            .flatMapLatest { token ->
-                combine(
-                    if (token != null) userRepository.fetchUser() else flowOf(null),
-                    policyRepository.getForceUpdateInfo(),
-                    ::Pair,
-                )
-            }.asResult()
-
-    init {
-        setUiState(SplashUiState.Splash())
+) : MVIViewModel<SplashState, SplashSideEffect>(SplashState()) {
+    override suspend fun Syntax<SplashState, SplashSideEffect>.onContainerCreate() {
         validateUser()
     }
 
-    fun onUiAction(uiAction: SplashUiAction) {
-        when (uiAction) {
-            is SplashUiAction.OnClickExit -> setUiEvent(SplashUiEvent.NavigateToExit)
-            is SplashUiAction.OnClickForceUpdate -> setUiEvent(SplashUiEvent.NavigateToPlayStore)
+    override fun onIntent(intent: Intent) {
+        if (intent !is SplashIntent) {
+            super.onIntent(intent)
+            return
         }
-    }
 
-    private fun syncFcmToken() {
-        viewModelScope.launch {
-            tokenRepository
-                .syncFcmTokenIfNeeded()
-                .catch { e -> crashReporter.logException(e) }
-                .collect()
-        }
-    }
+        intent {
+            when (intent) {
+                is SplashIntent.ExitClick -> {
+                    postSideEffect(SplashSideEffect.NavigateToExit)
+                }
 
-    private fun validateUser() {
-        viewModelScope.launch {
-            splashResult.collect { result ->
-                when (result) {
-                    is Result.Loading -> {
-                        return@collect
-                    }
-
-                    is Result.Success -> {
-                        val (user, forceUpdateState) = result.data
-
-                        when {
-                            forceUpdateState.isForceUpdate -> {
-                                setUiState(SplashUiState.Splash(isShowForceUpdateDialog = true))
-                            }
-
-                            user == null -> {
-                                delay(timeMillis = 500)
-                                setUiEvent(SplashUiEvent.NavigateToSignIn)
-                            }
-
-                            else -> {
-                                syncFcmToken()
-                                setUiEvent(SplashUiEvent.NavigateToMain)
-                            }
-                        }
-                    }
-
-                    is Result.Error -> {
-                        when (result.exception) {
-                            is IOException -> {
-                                setUiState(SplashUiState.Splash(isShowErrorDialog = true))
-                            }
-
-                            is NetworkException -> {
-                                setUiEvent(SplashUiEvent.NavigateToSignIn)
-                                    .also { userRepository.clearMoimStorage() }
-                            }
-                        }
-                    }
+                is SplashIntent.ForceUpdateClick -> {
+                    postSideEffect(SplashSideEffect.NavigateToPlayStore)
                 }
             }
         }
     }
-}
 
-sealed interface SplashUiState : UiState {
-    data class Splash(
-        val isShowErrorDialog: Boolean = false,
-        val isShowForceUpdateDialog: Boolean = false,
-    ) : SplashUiState
-}
+    private suspend fun Syntax<SplashState, SplashSideEffect>.validateUser() {
+        try {
+            val token = authRepository.getToken().first()
+            val (user, forceUpdateInfo) =
+                coroutineScope {
+                    val userAsync = async { if (token != null) userRepository.fetchUser() else null }
+                    val forceUpdateInfoAsync = async { policyRepository.getForceUpdateInfo() }
 
-sealed interface SplashUiAction : UiAction {
-    data object OnClickExit : SplashUiAction
+                    userAsync.await() to forceUpdateInfoAsync.await()
+                }
 
-    data object OnClickForceUpdate : SplashUiAction
-}
+            when {
+                forceUpdateInfo.isForceUpdate -> {
+                    reduce { state.copy(isShowForceUpdateDialog = true) }
+                }
 
-sealed interface SplashUiEvent : UiEvent {
-    data object NavigateToSignIn : SplashUiEvent
+                user == null -> {
+                    delay(timeMillis = 500)
+                    postSideEffect(SplashSideEffect.NavigateToSignIn)
+                }
 
-    data object NavigateToMain : SplashUiEvent
+                else -> {
+                    syncFcmToken()
+                    postSideEffect(SplashSideEffect.NavigateToMain)
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: NetworkException) {
+            postSideEffect(SplashSideEffect.NavigateToSignIn)
+            userRepository.clearMoimStorage()
+        } catch (e: Exception) {
+            if (e !is IOException) crashReporter.logException(e)
+            reduce { state.copy(isShowErrorDialog = true) }
+        }
+    }
 
-    data object NavigateToExit : SplashUiEvent
-
-    data object NavigateToPlayStore : SplashUiEvent
+    // 메인 진입을 막지 않도록 별도 코루틴에서 처리
+    private fun syncFcmToken() {
+        viewModelScope.launch {
+            try {
+                tokenRepository.syncFcmTokenIfNeeded()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                crashReporter.logException(e)
+            }
+        }
+    }
 }

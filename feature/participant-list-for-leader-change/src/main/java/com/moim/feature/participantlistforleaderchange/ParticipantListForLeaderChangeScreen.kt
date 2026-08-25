@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,11 +42,15 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.view.FadeAnimatedVisibility
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.showToast
+import com.moim.feature.participantlistforleaderchange.model.ParticipantListForLeaderChangeIntent
+import com.moim.feature.participantlistforleaderchange.model.ParticipantListForLeaderChangeSideEffect
+import com.moim.feature.participantlistforleaderchange.model.ParticipantListForLeaderChangeState
 import com.moim.feature.participantlistforleaderchange.ui.ParticipantChangeLeaderDialog
 import com.moim.feature.participantlistforleaderchange.ui.ParticipantListItem
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun ParticipantListForLeaderChangeRoute(
@@ -62,21 +65,21 @@ fun ParticipantListForLeaderChangeRoute(
     ) -> Unit,
 ) {
     val context = LocalContext.current
-    val participantListForLeaderUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is ParticipantListForLeaderChangeUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is ParticipantListForLeaderChangeSideEffect.NavigateToBack -> {
                 navigateToBack(false)
             }
 
-            is ParticipantListForLeaderChangeUiEvent.NavigateToExit -> {
+            is ParticipantListForLeaderChangeSideEffect.NavigateToExit -> {
                 navigateToBack(true)
             }
 
-            is ParticipantListForLeaderChangeUiEvent.NavigateToImageViewer -> {
-                val user = event.user
+            is ParticipantListForLeaderChangeSideEffect.NavigateToImageViewer -> {
+                val user = sideEffect.user
                 navigateToImageViewer(
                     user.nickname,
                     listOf(user.profileUrl),
@@ -85,34 +88,30 @@ fun ParticipantListForLeaderChangeRoute(
                 )
             }
 
-            is ParticipantListForLeaderChangeUiEvent.ShowCompletedMessage -> {
+            is ParticipantListForLeaderChangeSideEffect.ShowCompletedMessage -> {
                 showToast(context, context.getString(R.string.participant_list_for_leader_change_completed))
             }
 
-            is ParticipantListForLeaderChangeUiEvent.ShowErrorMessage -> {
+            is ParticipantListForLeaderChangeSideEffect.ShowErrorMessage -> {
                 showToast(context, context.getString(R.string.common_error_disconnection))
             }
         }
     }
 
-    (participantListForLeaderUiState as? ParticipantListForLeaderChangeUiState)?.let { uiState ->
-        ParticipantListForLeaderChangeScreen(
-            modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary),
-            uiState = uiState,
-            isLoading = isLoading,
-            keywordState = viewModel.keywordFieldState,
-            onUiAction = viewModel::onUiAction,
-        )
-    }
+    ParticipantListForLeaderChangeScreen(
+        modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary),
+        uiState = uiState,
+        isLoading = isLoading,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 private fun ParticipantListForLeaderChangeScreen(
     modifier: Modifier = Modifier,
-    uiState: ParticipantListForLeaderChangeUiState,
+    uiState: ParticipantListForLeaderChangeState,
     isLoading: Boolean,
-    keywordState: TextFieldState,
-    onUiAction: (ParticipantListForLeaderChangeUiAction) -> Unit,
+    onIntent: (ParticipantListForLeaderChangeIntent) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val paging = uiState.pagingInfo
@@ -126,7 +125,7 @@ private fun ParticipantListForLeaderChangeScreen(
         MoimTopAppbar(
             title = stringResource(R.string.participant_list_for_leader_change_title),
             onClickNavigate = {
-                onUiAction(ParticipantListForLeaderChangeUiAction.OnClickBack)
+                onIntent(ParticipantListForLeaderChangeIntent.BackClick)
             },
         )
         MoimTextField(
@@ -135,7 +134,7 @@ private fun ParticipantListForLeaderChangeScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
                     .clip(RoundedCornerShape(16.dp)),
-            textFieldState = keywordState,
+            textFieldState = uiState.keywordState,
             hintText = stringResource(R.string.participant_list_for_leader_change_search_hint),
             leadingIcon = {
                 Icon(
@@ -150,17 +149,17 @@ private fun ParticipantListForLeaderChangeScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            FadeAnimatedVisibility(paging.isLoading) {
+            FadeAnimatedVisibility(uiState.isLoading) {
                 LoadingScreen()
             }
 
-            FadeAnimatedVisibility(paging.isError) {
+            FadeAnimatedVisibility(uiState.isError) {
                 ErrorScreen {
-                    onUiAction(ParticipantListForLeaderChangeUiAction.OnClickRefresh)
+                    onIntent(ParticipantListForLeaderChangeIntent.RefreshClick)
                 }
             }
 
-            FadeAnimatedVisibility(paging.isSuccess && uiState.users.isEmpty()) {
+            FadeAnimatedVisibility(uiState.isSuccess && uiState.users.isEmpty()) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -178,12 +177,12 @@ private fun ParticipantListForLeaderChangeScreen(
                 }
             }
 
-            FadeAnimatedVisibility(paging.isSuccess && uiState.users.isNotEmpty()) {
+            FadeAnimatedVisibility(uiState.isSuccess && uiState.users.isNotEmpty()) {
                 PaginationEffect(
                     listState = listState,
                     threshold = 3,
                     enabled = !paging.isLast && !paging.isErrorFooter,
-                    onNext = { onUiAction(ParticipantListForLeaderChangeUiAction.OnLoadNextPage) },
+                    onNext = { onIntent(ParticipantListForLeaderChangeIntent.NextPageLoad) },
                 )
 
                 LazyColumn(
@@ -201,7 +200,7 @@ private fun ParticipantListForLeaderChangeScreen(
                                     .fillMaxWidth()
                                     .animateItem(),
                             participant = data,
-                            onUiAction = onUiAction,
+                            onIntent = onIntent,
                         )
                     }
 
@@ -224,14 +223,14 @@ private fun ParticipantListForLeaderChangeScreen(
                                         .fillMaxWidth()
                                         .animateItem(),
                             ) {
-                                onUiAction(ParticipantListForLeaderChangeUiAction.OnClickRefresh)
+                                onIntent(ParticipantListForLeaderChangeIntent.RefreshClick)
                             }
                         }
                     }
                 }
             }
 
-            if (paging.isLoading || paging.isError) return
+            if (uiState.isLoading || uiState.isError) return
 
             androidx.compose.animation.AnimatedVisibility(
                 modifier = Modifier.align(Alignment.BottomCenter),
@@ -256,7 +255,7 @@ private fun ParticipantListForLeaderChangeScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp)
                             .padding(top = 20.dp, bottom = 28.dp),
-                    onClick = { onUiAction(ParticipantListForLeaderChangeUiAction.ShowChangeLeaderDialog(true)) },
+                    onClick = { onIntent(ParticipantListForLeaderChangeIntent.ChangeLeaderDialogShow(true)) },
                     text = stringResource(R.string.participant_list_for_leader_change),
                 )
             }
@@ -266,7 +265,7 @@ private fun ParticipantListForLeaderChangeScreen(
     if (uiState.isShowChangeUserDialog && uiState.selectedUser != null) {
         ParticipantChangeLeaderDialog(
             user = requireNotNull(uiState.selectedUser),
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 

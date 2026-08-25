@@ -6,7 +6,6 @@ import com.moim.core.common.util.JsonUtil.jsonOf
 import com.moim.core.remote.datasource.notification.NotificationRemoteDataSource
 import com.moim.core.remote.model.NotificationResponse
 import com.moim.core.remote.model.asItem
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class NotificationRepositoryImpl @Inject constructor(
@@ -24,25 +23,19 @@ internal class NotificationRepositoryImpl @Inject constructor(
                 it.map(NotificationResponse::asItem)
             }
 
-    override fun getNotificationSubscribes() =
-        flow {
-            emit(notificationRemoteDataSource.getNotificationSubscribes())
-        }
+    override suspend fun getNotificationSubscribes(): List<String> = notificationRemoteDataSource.getNotificationSubscribes()
 
-    override fun setNotificationSubscribe(topic: String) =
-        flow {
-            emit(notificationRemoteDataSource.setNotificationSubscribe(jsonOf(KEY_TOPIC to listOf(topic))))
-        }
+    override suspend fun setNotificationSubscribe(topic: String) {
+        notificationRemoteDataSource.setNotificationSubscribe(jsonOf(KEY_TOPIC to listOf(topic)))
+    }
 
-    override fun setNotificationUnSubscribe(topic: String) =
-        flow {
-            emit(notificationRemoteDataSource.setNotificationUnSubscribe(jsonOf(KEY_TOPIC to listOf(topic))))
-        }
+    override suspend fun setNotificationUnSubscribe(topic: String) {
+        notificationRemoteDataSource.setNotificationUnSubscribe(jsonOf(KEY_TOPIC to listOf(topic)))
+    }
 
-    override fun clearNotificationCount() =
-        flow {
-            emit(notificationRemoteDataSource.clearNotificationCount())
-        }
+    override suspend fun clearNotificationCount() {
+        notificationRemoteDataSource.clearNotificationCount()
+    }
 
     companion object {
         private const val KEY_TOPIC = "topics"

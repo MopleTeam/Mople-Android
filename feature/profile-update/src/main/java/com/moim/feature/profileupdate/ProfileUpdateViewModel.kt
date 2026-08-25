@@ -1,226 +1,165 @@
 package com.moim.feature.profileupdate
 
-import androidx.lifecycle.viewModelScope
 import com.moim.core.common.consts.PATTERN_NICKNAME
-import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
-import com.moim.core.ui.view.restartableStateIn
+import com.moim.feature.profileupdate.model.ProfileUpdateIntent
+import com.moim.feature.profileupdate.model.ProfileUpdateSideEffect
+import com.moim.feature.profileupdate.model.ProfileUpdateState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import okio.IOException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.first
+import org.orbitmvi.orbit.syntax.Syntax
+import java.io.IOException
 import java.util.regex.Pattern
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileUpdateViewModel @Inject constructor(
     private val userRepository: UserRepository,
-) : BaseViewModel() {
-    private val userResult =
-        userRepository
-            .getUser()
-            .asResult()
-            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+) : MVIViewModel<ProfileUpdateState, ProfileUpdateSideEffect>(ProfileUpdateState()) {
+    override suspend fun Syntax<ProfileUpdateState, ProfileUpdateSideEffect>.onContainerCreate() {
+        loadUser()
+    }
 
-    init {
-        viewModelScope.launch {
-            userResult.collect { result ->
-                when (result) {
-                    is Result.Loading -> {
-                        setUiState(ProfileUpdateUiState.Loading)
-                    }
+    override fun onIntent(intent: Intent) {
+        if (intent !is ProfileUpdateIntent) {
+            super.onIntent(intent)
+            return
+        }
 
-                    is Result.Success -> {
-                        val user = result.data
+        intent {
+            when (intent) {
+                is ProfileUpdateIntent.BackClick -> {
+                    postSideEffect(ProfileUpdateSideEffect.NavigateToBack)
+                }
 
-                        setUiState(
-                            ProfileUpdateUiState.Success(
-                                profileUrl = user.profileUrl,
-                                currentNickname = user.nickname,
-                                nickname = user.nickname,
-                                enableProfileUpdate = false,
-                            ),
-                        )
-                    }
+                is ProfileUpdateIntent.RefreshClick -> {
+                    loadUser()
+                }
 
-                    is Result.Error -> {
-                        setUiState(ProfileUpdateUiState.Error)
-                    }
+                is ProfileUpdateIntent.PhotoPickerClick -> {
+                    postSideEffect(ProfileUpdateSideEffect.NavigateToPhotoPicker)
+                }
+
+                is ProfileUpdateIntent.ProfileUpdateClick -> {
+                    updateUser()
+                }
+
+                is ProfileUpdateIntent.DuplicatedCheckClick -> {
+                    validateDuplicateNickname()
+                }
+
+                is ProfileUpdateIntent.ProfileUrlChange -> {
+                    setProfileUrl(intent.profileUrl)
+                }
+
+                is ProfileUpdateIntent.NicknameChange -> {
+                    setNickname(intent.nickname)
+                }
+
+                is ProfileUpdateIntent.ProfileEditDialogShow -> {
+                    reduce { state.copy(isShowProfileEditDialog = intent.isShow) }
                 }
             }
         }
     }
 
-    fun onUiAction(uiAction: ProfileUpdateUiAction) {
-        when (uiAction) {
-            is ProfileUpdateUiAction.OnClickBack -> setUiEvent(ProfileUpdateUiEvent.NavigateToBack)
-            is ProfileUpdateUiAction.OnClickProfileUpdate -> updateUser()
-            is ProfileUpdateUiAction.OnClickDuplicatedCheck -> validateDuplicateNickname()
-            is ProfileUpdateUiAction.OnClickRefresh -> userResult.restart()
-            is ProfileUpdateUiAction.OnChangeProfileUrl -> setProfileUrl(uiAction.profileUrl)
-            is ProfileUpdateUiAction.OnChangeNickname -> setNickname(uiAction.nickname)
-            is ProfileUpdateUiAction.OnShowProfileEditDialog -> showProfileEditDialog(uiAction.isShow)
-            is ProfileUpdateUiAction.OnNavigatePhotoPicker -> setUiEvent(ProfileUpdateUiEvent.NavigateToPhotoPicker)
+    private fun loadUser() {
+        intent {
+            reduce { state.copy(user = Result.Loading) }
+
+            try {
+                val user = userRepository.getUser().first()
+
+                reduce {
+                    state.copy(
+                        user = Result.Success(user),
+                        profileUrl = user.profileUrl,
+                        nickname = user.nickname,
+                        enableProfileUpdate = false,
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                reduce { state.copy(user = Result.Error(e)) }
+            }
         }
     }
 
-    private fun showProfileEditDialog(isShow: Boolean) {
-        uiState.checkState<ProfileUpdateUiState.Success> {
-            setUiState(copy(isShowProfileEditDialog = isShow))
-        }
-    }
+    private suspend fun Syntax<ProfileUpdateState, ProfileUpdateSideEffect>.setProfileUrl(photoUrl: String?) {
+        val enableProfileUpdate = (state.isDuplicatedName == true).not() && state.isRegexError.not()
 
-    private fun setProfileUrl(photoUrl: String? = null) {
-        uiState.checkState<ProfileUpdateUiState.Success> {
-            val enableProfileUpdate = (isDuplicatedName == true).not() && isRegexError.not()
-            setUiState(copy(profileUrl = photoUrl, enableProfileUpdate = enableProfileUpdate))
-        }
-    }
-
-    private fun setNickname(nickname: String) {
-        uiState.checkState<ProfileUpdateUiState.Success> {
-            val trimNickname = nickname.trim()
-
-            setUiState(
-                copy(
-                    nickname = trimNickname,
-                    isDuplicatedName = null,
-                    isRegexError = if (trimNickname.isEmpty()) false else Pattern.matches(PATTERN_NICKNAME, nickname).not(),
-                    enableProfileUpdate = false,
-                ),
+        reduce {
+            state.copy(
+                profileUrl = photoUrl,
+                enableProfileUpdate = enableProfileUpdate,
             )
         }
     }
 
-    private fun validateDuplicateNickname() {
-        viewModelScope.launch {
-            uiState.checkState<ProfileUpdateUiState.Success> {
-                if (currentNickname == nickname || nickname.isEmpty() || isRegexError) return@checkState
-                userRepository
-                    .checkedNickname(nickname)
-                    .asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
+    private suspend fun Syntax<ProfileUpdateState, ProfileUpdateSideEffect>.setNickname(nickname: String) {
+        val trimNickname = nickname.trim()
 
-                            is Result.Success -> {
-                                setUiState(copy(isDuplicatedName = result.data, enableProfileUpdate = result.data.not()))
-                            }
-
-                            is Result.Error -> {
-                                when (result.exception) {
-                                    is IOException -> {
-                                        setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                    }
-
-                                    is NetworkException -> {
-                                        setUiEvent(
-                                            ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage),
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-            }
+        reduce {
+            state.copy(
+                nickname = trimNickname,
+                isDuplicatedName = null,
+                isRegexError = if (trimNickname.isEmpty()) false else Pattern.matches(PATTERN_NICKNAME, nickname).not(),
+                enableProfileUpdate = false,
+            )
         }
     }
 
-    private fun updateUser() {
-        viewModelScope.launch {
-            uiState.checkState<ProfileUpdateUiState.Success> {
-                userRepository
-                    .updateUser(profileUrl = profileUrl, nickname = nickname)
-                    .asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
+    private suspend fun Syntax<ProfileUpdateState, ProfileUpdateSideEffect>.validateDuplicateNickname() {
+        val nickname = state.nickname
+        if (state.currentNickname == nickname || nickname.isEmpty() || state.isRegexError) return
 
-                            is Result.Success -> {
-                                setUiEvent(ProfileUpdateUiEvent.NavigateToBack)
-                            }
+        setLoading(true)
 
-                            is Result.Error -> {
-                                when (result.exception) {
-                                    is IOException -> {
-                                        setUiEvent(ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                    }
+        try {
+            val isDuplicated = userRepository.checkedNickname(nickname)
 
-                                    is NetworkException -> {
-                                        setUiEvent(
-                                            ProfileUpdateUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage),
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
+            reduce {
+                state.copy(
+                    isDuplicatedName = isDuplicated,
+                    enableProfileUpdate = isDuplicated.not(),
+                )
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
-}
 
-sealed interface ProfileUpdateUiState : UiState {
-    data object Loading : ProfileUpdateUiState
+    private suspend fun Syntax<ProfileUpdateState, ProfileUpdateSideEffect>.updateUser() {
+        setLoading(true)
 
-    data class Success(
-        val profileUrl: String? = null,
-        val currentNickname: String = "",
-        val nickname: String = "",
-        val isDuplicatedName: Boolean? = null,
-        val isRegexError: Boolean = false,
-        val isShowProfileEditDialog: Boolean = false,
-        val enableProfileUpdate: Boolean = false,
-    ) : ProfileUpdateUiState
+        try {
+            userRepository.updateUser(
+                profileUrl = state.profileUrl,
+                nickname = state.nickname,
+            )
 
-    data object Error : ProfileUpdateUiState
-}
+            postSideEffect(ProfileUpdateSideEffect.NavigateToBack)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
+        }
+    }
 
-sealed interface ProfileUpdateUiAction : UiAction {
-    data object OnClickBack : ProfileUpdateUiAction
-
-    data object OnClickProfileUpdate : ProfileUpdateUiAction
-
-    data object OnClickDuplicatedCheck : ProfileUpdateUiAction
-
-    data object OnClickRefresh : ProfileUpdateUiAction
-
-    data class OnChangeProfileUrl(
-        val profileUrl: String?,
-    ) : ProfileUpdateUiAction
-
-    data class OnChangeNickname(
-        val nickname: String,
-    ) : ProfileUpdateUiAction
-
-    data class OnShowProfileEditDialog(
-        val isShow: Boolean,
-    ) : ProfileUpdateUiAction
-
-    data object OnNavigatePhotoPicker : ProfileUpdateUiAction
-}
-
-sealed interface ProfileUpdateUiEvent : UiEvent {
-    data object NavigateToBack : ProfileUpdateUiEvent
-
-    data object NavigateToPhotoPicker : ProfileUpdateUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : ProfileUpdateUiEvent
+    private suspend fun Syntax<ProfileUpdateState, ProfileUpdateSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(ProfileUpdateSideEffect.ShowToastMessage(message))
+    }
 }

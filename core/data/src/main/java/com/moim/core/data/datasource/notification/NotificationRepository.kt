@@ -2,7 +2,6 @@ package com.moim.core.data.datasource.notification
 
 import com.moim.core.common.model.Notification
 import com.moim.core.common.model.PaginationContainer
-import kotlinx.coroutines.flow.Flow
 
 interface NotificationRepository {
     suspend fun getNotifications(
@@ -10,11 +9,11 @@ interface NotificationRepository {
         size: Int,
     ): PaginationContainer<List<Notification>>
 
-    fun getNotificationSubscribes(): Flow<List<String>>
+    suspend fun getNotificationSubscribes(): List<String>
 
-    fun setNotificationSubscribe(topic: String): Flow<Unit>
+    suspend fun setNotificationSubscribe(topic: String)
 
-    fun setNotificationUnSubscribe(topic: String): Flow<Unit>
+    suspend fun setNotificationUnSubscribe(topic: String)
 
-    fun clearNotificationCount(): Flow<Unit>
+    suspend fun clearNotificationCount()
 }

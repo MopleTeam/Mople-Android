@@ -28,22 +28,22 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.participantlistforleaderchange.ParticipantListForLeaderChangeUiAction
+import com.moim.feature.participantlistforleaderchange.model.ParticipantListForLeaderChangeIntent
 import com.moim.feature.participantlistforleaderchange.model.ParticipantListUiModel
 
 @Composable
 fun ParticipantListItem(
     modifier: Modifier = Modifier,
     participant: ParticipantListUiModel,
-    onUiAction: (ParticipantListForLeaderChangeUiAction) -> Unit,
+    onIntent: (ParticipantListForLeaderChangeIntent) -> Unit,
 ) {
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
                 .onSingleClick {
-                    onUiAction(
-                        ParticipantListForLeaderChangeUiAction.OnClickUser(participant.user),
+                    onIntent(
+                        ParticipantListForLeaderChangeIntent.UserClick(participant.user),
                     )
                 }
                 .padding(horizontal = 20.dp, vertical = 8.dp),
@@ -57,7 +57,7 @@ fun ParticipantListItem(
                         .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = CircleShape)
                         .size(40.dp)
                         .onSingleClick {
-                            onUiAction(ParticipantListForLeaderChangeUiAction.OnClickUserProfile(participant.user))
+                            onIntent(ParticipantListForLeaderChangeIntent.UserProfileClick(participant.user))
                         },
                 imageUrl = participant.user.profileUrl,
                 errorImage = painterResource(R.drawable.ic_empty_user_logo),
@@ -119,7 +119,7 @@ private fun ParticipantListItemPreview() {
                             ),
                         isSelected = true,
                     ),
-                onUiAction = {},
+                onIntent = {},
             )
             ParticipantListItem(
                 participant =
@@ -131,7 +131,7 @@ private fun ParticipantListItemPreview() {
                             ),
                         isSelected = false,
                     ),
-                onUiAction = {},
+                onIntent = {},
             )
         }
     }

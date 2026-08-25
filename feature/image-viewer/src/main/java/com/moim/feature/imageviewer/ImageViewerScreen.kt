@@ -16,7 +16,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimScaffold
@@ -25,9 +24,13 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.feature.imageviewer.model.ImageViewerIntent
+import com.moim.feature.imageviewer.model.ImageViewerSideEffect
+import com.moim.feature.imageviewer.model.ImageViewerState
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun ImageViewerRoute(
@@ -36,30 +39,26 @@ fun ImageViewerRoute(
     navigateToBack: () -> Unit,
 ) {
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.global.black)
-    val imageViewerUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val imageViewerUiState by viewModel.collectAsState()
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is ImageViewerUiEvent.NavigateToBack -> navigateToBack()
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is ImageViewerSideEffect.NavigateToBack -> navigateToBack()
         }
     }
 
-    when (val uiState = imageViewerUiState) {
-        is ImageViewerUiState -> {
-            ImageViewerScreen(
-                modifier = modifier,
-                uiState = uiState,
-                onUiAction = viewModel::onUiAction,
-            )
-        }
-    }
+    ImageViewerScreen(
+        modifier = modifier,
+        uiState = imageViewerUiState,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 fun ImageViewerScreen(
     modifier: Modifier = Modifier,
-    uiState: ImageViewerUiState,
-    onUiAction: (ImageViewerUiAction) -> Unit,
+    uiState: ImageViewerState,
+    onIntent: (ImageViewerIntent) -> Unit,
 ) {
     val pageSize = uiState.images.size
     val pagerState =
@@ -79,7 +78,7 @@ fun ImageViewerScreen(
                 title = uiState.title,
                 currentIndex = pagerState.currentPage + 1,
                 totalIndex = pageSize,
-                onClickDismiss = { onUiAction(ImageViewerUiAction.OnClickBack) },
+                onClickDismiss = { onIntent(ImageViewerIntent.BackClick) },
             )
         },
         content = {

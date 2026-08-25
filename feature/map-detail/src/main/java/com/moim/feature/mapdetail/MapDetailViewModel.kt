@@ -1,12 +1,11 @@
 package com.moim.feature.mapdetail
 
-import com.moim.core.common.model.MapType
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
-import com.moim.core.ui.view.BaseViewModel
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
+import com.moim.feature.mapdetail.model.MapDetailIntent
+import com.moim.feature.mapdetail.model.MapDetailSideEffect
+import com.moim.feature.mapdetail.model.MapDetailState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -14,91 +13,52 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @HiltViewModel(assistedFactory = MapDetailViewModel.Factory::class)
 class MapDetailViewModel @AssistedInject constructor(
-    @Assisted val mapDetail: DetailRoute.MapDetail,
-) : BaseViewModel() {
-    init {
-        setUiState(
-            MapDetailUiState(
-                placeName = mapDetail.placeName,
-                address = mapDetail.address,
-                longitude = mapDetail.longitude,
-                latitude = mapDetail.latitude,
-            ),
-        )
-    }
-
-    fun onUiAction(uiAction: MapDetailUiAction) {
-        when (uiAction) {
-            is MapDetailUiAction.OnClickBack -> setUiEvent(MapDetailUiEvent.NavigateToBack)
-            is MapDetailUiAction.OnClickMapAddress -> navigateToMapApp(uiAction.mapType)
-            is MapDetailUiAction.OnShowPlaceInfoDialog -> showPlaceInfoDialog(uiAction.isShow)
-            is MapDetailUiAction.OnShowMapAppDialog -> showMapAppDialog(uiAction.isShow)
+    @Assisted mapDetailRoute: DetailRoute.MapDetail,
+) : MVIViewModel<MapDetailState, MapDetailSideEffect>(mapDetailRoute.asState()) {
+    override fun onIntent(intent: Intent) {
+        if (intent !is MapDetailIntent) {
+            super.onIntent(intent)
+            return
         }
-    }
 
-    private fun navigateToMapApp(mapType: MapType) {
-        uiState.checkState<MapDetailUiState> {
-            setUiEvent(
-                MapDetailUiEvent.NavigateToMapApp(
-                    mapType = mapType,
-                    latitude = latitude,
-                    longitude = longitude,
-                    address = address,
-                ),
-            )
-        }
-    }
+        intent {
+            when (intent) {
+                is MapDetailIntent.BackClick -> {
+                    postSideEffect(MapDetailSideEffect.NavigateToBack)
+                }
 
-    private fun showMapAppDialog(isShow: Boolean) {
-        uiState.checkState<MapDetailUiState> {
-            setUiState(copy(isShowMapAppDialog = isShow))
-        }
-    }
+                is MapDetailIntent.MapAddressClick -> {
+                    postSideEffect(
+                        MapDetailSideEffect.NavigateToMapApp(
+                            mapType = intent.mapType,
+                            latitude = state.latitude,
+                            longitude = state.longitude,
+                            address = state.address,
+                        ),
+                    )
+                }
 
-    private fun showPlaceInfoDialog(isShow: Boolean) {
-        uiState.checkState<MapDetailUiState> {
-            setUiState(copy(isShowPlaceInfoDialog = isShow))
+                is MapDetailIntent.PlaceInfoDialogShow -> {
+                    reduce { state.copy(isShowPlaceInfoDialog = intent.isShow) }
+                }
+
+                is MapDetailIntent.MapAppDialogShow -> {
+                    reduce { state.copy(isShowMapAppDialog = intent.isShow) }
+                }
+            }
         }
     }
 
     @AssistedFactory
     interface Factory {
-        fun create(mapDetail: DetailRoute.MapDetail): MapDetailViewModel
+        fun create(mapDetailRoute: DetailRoute.MapDetail): MapDetailViewModel
     }
 }
 
-data class MapDetailUiState(
-    val placeName: String,
-    val address: String,
-    val longitude: Double,
-    val latitude: Double,
-    val isShowPlaceInfoDialog: Boolean = true,
-    val isShowMapAppDialog: Boolean = false,
-) : UiState
-
-sealed interface MapDetailUiAction : UiAction {
-    data object OnClickBack : MapDetailUiAction
-
-    data class OnClickMapAddress(
-        val mapType: MapType,
-    ) : MapDetailUiAction
-
-    data class OnShowPlaceInfoDialog(
-        val isShow: Boolean,
-    ) : MapDetailUiAction
-
-    data class OnShowMapAppDialog(
-        val isShow: Boolean,
-    ) : MapDetailUiAction
-}
-
-sealed interface MapDetailUiEvent : UiEvent {
-    data object NavigateToBack : MapDetailUiEvent
-
-    data class NavigateToMapApp(
-        val mapType: MapType,
-        val latitude: Double,
-        val longitude: Double,
-        val address: String,
-    ) : MapDetailUiEvent
-}
+private fun DetailRoute.MapDetail.asState() =
+    MapDetailState(
+        placeName = placeName,
+        address = address,
+        longitude = longitude,
+        latitude = latitude,
+    )

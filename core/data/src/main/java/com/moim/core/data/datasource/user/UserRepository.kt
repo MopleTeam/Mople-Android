@@ -7,16 +7,16 @@ import kotlinx.coroutines.flow.Flow
 interface UserRepository {
     fun getUser(): Flow<User>
 
-    fun fetchUser(): Flow<User>
+    suspend fun fetchUser(): User
 
-    fun updateUser(
+    suspend fun updateUser(
         profileUrl: String?,
         nickname: String,
-    ): Flow<User>
+    ): User
 
-    fun deleteUser(): Flow<Unit>
+    suspend fun deleteUser()
 
-    fun checkedNickname(nickname: String): Flow<Boolean>
+    suspend fun checkedNickname(nickname: String): Boolean
 
     fun getTheme(): Flow<Theme>
 

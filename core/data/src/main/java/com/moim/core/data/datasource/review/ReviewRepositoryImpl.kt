@@ -9,8 +9,6 @@ import com.moim.core.remote.datasource.review.ReviewRemoteDataSource
 import com.moim.core.remote.model.ReviewResponse
 import com.moim.core.remote.model.UserResponse
 import com.moim.core.remote.model.asItem
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class ReviewRepositoryImpl @Inject constructor(
@@ -31,15 +29,9 @@ internal class ReviewRepositoryImpl @Inject constructor(
                 it.map(ReviewResponse::asItem)
             }
 
-    override fun getReview(reviewId: String) =
-        flow {
-            emit(reviewRemoteDataSource.getReview(reviewId).asItem())
-        }
+    override suspend fun getReview(reviewId: String): Review = reviewRemoteDataSource.getReview(reviewId).asItem()
 
-    override fun getReviewForPostId(postId: String) =
-        flow {
-            emit(reviewRemoteDataSource.gerReviewForPostId(postId).asItem())
-        }
+    override suspend fun getReviewForPostId(postId: String): Review = reviewRemoteDataSource.gerReviewForPostId(postId).asItem()
 
     override suspend fun getReviewParticipants(
         reviewId: String,
@@ -55,36 +47,31 @@ internal class ReviewRepositoryImpl @Inject constructor(
                 it.map(UserResponse::asItem)
             }
 
-    override fun deleteReviewImage(
+    override suspend fun deleteReviewImage(
         reviewId: String,
         images: List<String>,
-    ): Flow<Unit> =
-        flow {
-            emit(reviewRemoteDataSource.deleteReviewImage(reviewId, jsonOf(KEY_REVIEW_IMAGES to images)))
-        }
+    ) {
+        reviewRemoteDataSource.deleteReviewImage(reviewId, jsonOf(KEY_REVIEW_IMAGES to images))
+    }
 
-    override fun deleteReview(reviewId: String) =
-        flow {
-            emit(reviewRemoteDataSource.deleteReview(reviewId))
-        }
+    override suspend fun deleteReview(reviewId: String) {
+        reviewRemoteDataSource.deleteReview(reviewId)
+    }
 
-    override fun reportReview(reviewId: String) =
-        flow {
-            emit(
-                reviewRemoteDataSource.reportReview(
-                    jsonOf(
-                        KEY_REVIEW_ID to reviewId,
-                        KEY_REASON to "",
-                    ),
-                ),
-            )
-        }
+    override suspend fun reportReview(reviewId: String) {
+        reviewRemoteDataSource.reportReview(
+            jsonOf(
+                KEY_REVIEW_ID to reviewId,
+                KEY_REASON to "",
+            ),
+        )
+    }
 
-    override fun updateReviewImages(
+    override suspend fun updateReviewImages(
         reviewId: String,
         uploadImages: List<String>,
-    ) = flow {
-        emit(imageUploadRemoteDataSource.uploadReviewImages(reviewId, uploadImages, "review"))
+    ) {
+        imageUploadRemoteDataSource.uploadReviewImages(reviewId, uploadImages, "review")
     }
 
     companion object {

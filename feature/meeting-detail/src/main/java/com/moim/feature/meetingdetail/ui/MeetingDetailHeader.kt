@@ -35,7 +35,7 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
+import com.moim.feature.meetingdetail.model.MeetingDetailIntent
 
 private const val CHIP_ANIMATION_DURATION = 250
 
@@ -43,7 +43,7 @@ private const val CHIP_ANIMATION_DURATION = 250
 fun MeetingDetailHeader(
     modifier: Modifier = Modifier,
     isSelectedFuturePlan: Boolean = true,
-    onUiAction: (MeetingDetailUiAction) -> Unit,
+    onIntent: (MeetingDetailIntent) -> Unit,
 ) {
     Column(
         modifier =
@@ -59,7 +59,7 @@ fun MeetingDetailHeader(
         ) {
             MeetingDetailChipContainer(
                 isSelectedFuturePlan = isSelectedFuturePlan,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         }
     }
@@ -68,7 +68,7 @@ fun MeetingDetailHeader(
 @Composable
 private fun MeetingDetailChipContainer(
     isSelectedFuturePlan: Boolean,
-    onUiAction: (MeetingDetailUiAction) -> Unit,
+    onIntent: (MeetingDetailIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -117,7 +117,7 @@ private fun MeetingDetailChipContainer(
                 modifier = Modifier.onSizeChanged { futureChipWidth = it.width },
                 text = stringResource(R.string.meeting_detail_future_plan),
                 isSelected = isSelectedFuturePlan,
-                onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanTab(true)) },
+                onClick = { onIntent(MeetingDetailIntent.PlanTabClick(true)) },
             )
 
             Spacer(Modifier.width(8.dp))
@@ -126,7 +126,7 @@ private fun MeetingDetailChipContainer(
                 modifier = Modifier.onSizeChanged { pastChipWidth = it.width },
                 text = stringResource(R.string.meeting_detail_past_plan),
                 isSelected = !isSelectedFuturePlan,
-                onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanTab(false)) },
+                onClick = { onIntent(MeetingDetailIntent.PlanTabClick(false)) },
             )
         }
     }
@@ -175,7 +175,7 @@ private fun MeetingDetailHeaderPreview() {
     MoimTheme {
         MeetingDetailHeader(
             isSelectedFuturePlan = true,
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

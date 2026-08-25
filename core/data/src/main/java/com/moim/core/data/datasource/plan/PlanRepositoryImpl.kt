@@ -1,6 +1,8 @@
 package com.moim.core.data.datasource.plan
 
+import com.moim.core.common.model.MeetingPlanContainer
 import com.moim.core.common.model.PaginationContainer
+import com.moim.core.common.model.Place
 import com.moim.core.common.model.Plan
 import com.moim.core.common.model.PlanReviewContainer
 import com.moim.core.common.model.User
@@ -11,18 +13,13 @@ import com.moim.core.remote.model.PlaceResponse
 import com.moim.core.remote.model.PlanResponse
 import com.moim.core.remote.model.UserResponse
 import com.moim.core.remote.model.asItem
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class PlanRepositoryImpl @Inject constructor(
     private val planRemoteDataSource: PlanRemoteDataSource,
     private val locationRemoteDataSource: LocationRemoteDataSource,
 ) : PlanRepository {
-    override fun getCurrentPlans() =
-        flow {
-            emit(planRemoteDataSource.getCurrentPlan().asItem())
-        }
+    override suspend fun getCurrentPlans(): MeetingPlanContainer = planRemoteDataSource.getCurrentPlan().asItem()
 
     override suspend fun getPlans(
         meetingId: String,
@@ -36,34 +33,25 @@ internal class PlanRepositoryImpl @Inject constructor(
                 size = size,
             ).asItem { it.map(PlanResponse::asItem) }
 
-    override fun getPlan(planId: String) =
-        flow {
-            emit(planRemoteDataSource.getPlan(planId).asItem())
-        }
+    override suspend fun getPlan(planId: String): Plan = planRemoteDataSource.getPlan(planId).asItem()
 
-    override fun getPlansForCalendar(date: String): Flow<PlanReviewContainer> =
-        flow {
-            emit(planRemoteDataSource.getPlansForCalendar(date).asItem())
-        }
+    override suspend fun getPlansForCalendar(date: String): PlanReviewContainer = planRemoteDataSource.getPlansForCalendar(date).asItem()
 
-    override fun getSearchPlace(
+    override suspend fun getSearchPlace(
         keyword: String,
         xPoint: String,
         yPoint: String,
-    ) = flow {
-        emit(
-            locationRemoteDataSource
-                .getSearchLocation(
-                    params =
-                        jsonOf(
-                            KEY_QUERY to keyword,
-                            KEY_X_POINT to xPoint,
-                            KEY_Y_POINT to yPoint,
-                        ),
-                ).locations
-                .map(PlaceResponse::asItem),
-        )
-    }
+    ): List<Place> =
+        locationRemoteDataSource
+            .getSearchLocation(
+                params =
+                    jsonOf(
+                        KEY_QUERY to keyword,
+                        KEY_X_POINT to xPoint,
+                        KEY_Y_POINT to yPoint,
+                    ),
+            ).locations
+            .map(PlaceResponse::asItem)
 
     override suspend fun getPlanParticipants(
         planId: String,
@@ -79,17 +67,15 @@ internal class PlanRepositoryImpl @Inject constructor(
                 it.map(UserResponse::asItem)
             }
 
-    override fun joinPlan(planId: String) =
-        flow {
-            emit(planRemoteDataSource.joinPlan(planId))
-        }
+    override suspend fun joinPlan(planId: String) {
+        planRemoteDataSource.joinPlan(planId)
+    }
 
-    override fun leavePlan(planId: String) =
-        flow {
-            emit(planRemoteDataSource.leavePlan(planId))
-        }
+    override suspend fun leavePlan(planId: String) {
+        planRemoteDataSource.leavePlan(planId)
+    }
 
-    override fun createPlan(
+    override suspend fun createPlan(
         meetingId: String,
         planName: String,
         planTime: String,
@@ -99,26 +85,23 @@ internal class PlanRepositoryImpl @Inject constructor(
         title: String,
         longitude: Double?,
         latitude: Double?,
-    ) = flow {
-        emit(
-            planRemoteDataSource
-                .createPlan(
-                    jsonOf(
-                        KEY_MEETING_ID to meetingId,
-                        KEY_NAME to planName,
-                        KEY_PLAN_TIME to planTime,
-                        KEY_PLAN_ADDRESS to planAddress,
-                        KEY_TITLE to title,
-                        KEY_LOT to longitude,
-                        KEY_LAT to latitude,
-                        KEY_WEATHER_ADDRESS to planWeatherAddress,
-                        KEY_DESCRIPTION to planDescription,
-                    ),
-                ).asItem(),
-        )
-    }
+    ): Plan =
+        planRemoteDataSource
+            .createPlan(
+                jsonOf(
+                    KEY_MEETING_ID to meetingId,
+                    KEY_NAME to planName,
+                    KEY_PLAN_TIME to planTime,
+                    KEY_PLAN_ADDRESS to planAddress,
+                    KEY_TITLE to title,
+                    KEY_LOT to longitude,
+                    KEY_LAT to latitude,
+                    KEY_WEATHER_ADDRESS to planWeatherAddress,
+                    KEY_DESCRIPTION to planDescription,
+                ),
+            ).asItem()
 
-    override fun updatePlan(
+    override suspend fun updatePlan(
         planId: String,
         planName: String,
         planTime: String,
@@ -128,40 +111,33 @@ internal class PlanRepositoryImpl @Inject constructor(
         title: String,
         longitude: Double?,
         latitude: Double?,
-    ) = flow {
-        emit(
-            planRemoteDataSource
-                .updatePlan(
-                    jsonOf(
-                        KEY_PLAN_ID to planId,
-                        KEY_NAME to planName,
-                        KEY_PLAN_TIME to planTime,
-                        KEY_PLAN_ADDRESS to planAddress,
-                        KEY_LOT to longitude,
-                        KEY_LAT to latitude,
-                        KEY_WEATHER_ADDRESS to planWeatherAddress,
-                        KEY_DESCRIPTION to planDescription,
-                    ),
-                ).asItem(),
-        )
+    ): Plan =
+        planRemoteDataSource
+            .updatePlan(
+                jsonOf(
+                    KEY_PLAN_ID to planId,
+                    KEY_NAME to planName,
+                    KEY_PLAN_TIME to planTime,
+                    KEY_PLAN_ADDRESS to planAddress,
+                    KEY_LOT to longitude,
+                    KEY_LAT to latitude,
+                    KEY_WEATHER_ADDRESS to planWeatherAddress,
+                    KEY_DESCRIPTION to planDescription,
+                ),
+            ).asItem()
+
+    override suspend fun deletePlan(planId: String) {
+        planRemoteDataSource.deletePlan(planId)
     }
 
-    override fun deletePlan(planId: String) =
-        flow {
-            emit(planRemoteDataSource.deletePlan(planId))
-        }
-
-    override fun reportPlan(planId: String) =
-        flow {
-            emit(
-                planRemoteDataSource.reportPlan(
-                    jsonOf(
-                        KEY_PLAN_ID to planId,
-                        KEY_REASON to "",
-                    ),
-                ),
-            )
-        }
+    override suspend fun reportPlan(planId: String) {
+        planRemoteDataSource.reportPlan(
+            jsonOf(
+                KEY_PLAN_ID to planId,
+                KEY_REASON to "",
+            ),
+        )
+    }
 
     companion object {
         private const val KEY_QUERY = "query"

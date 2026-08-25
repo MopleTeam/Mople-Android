@@ -1,30 +1,23 @@
 package com.moim.feature.meetingnoticewrite
 
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.lifecycle.viewModelScope
 import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.notice.NoticeRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.NoticeAction
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
-import com.moim.core.ui.view.restartableStateIn
+import com.moim.feature.meetingnoticewrite.model.MeetingNoticeWriteIntent
+import com.moim.feature.meetingnoticewrite.model.MeetingNoticeWriteSideEffect
+import com.moim.feature.meetingnoticewrite.model.MeetingNoticeWriteState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import org.orbitmvi.orbit.syntax.Syntax
 import java.io.IOException
 
 @HiltViewModel(assistedFactory = MeetingNoticeWriteViewModel.Factory::class)
@@ -32,75 +25,78 @@ class MeetingNoticeWriteViewModel @AssistedInject constructor(
     private val noticeRepository: NoticeRepository,
     private val noticeEventBus: EventBus<NoticeAction>,
     @Assisted val meetingNoticeWriteRoute: DetailRoute.MeetingNoticeWrite,
-) : BaseViewModel() {
-    private val meetId: String = meetingNoticeWriteRoute.meetId
+) : MVIViewModel<MeetingNoticeWriteState, MeetingNoticeWriteSideEffect>(meetingNoticeWriteRoute.asState()) {
     private val noticeId: String? = meetingNoticeWriteRoute.noticeId
 
-    private val noticeWriteUiState =
-        flow {
-            if (noticeId == null) {
-                emit(null)
-            } else {
-                emitAll(noticeRepository.getNotice(noticeId = noticeId))
-            }
-        }.mapLatest { notice ->
-            MeetingNoticeWriteUiState.Success(
-                meetId = meetId,
-                noticeId = notice?.noticeId,
-                noticeState = TextFieldState(initialText = notice?.content.orEmpty()),
-                enabled = !notice?.content.isNullOrEmpty(),
-            )
-        }.asResult()
-            .mapLatest { result ->
-                when (result) {
-                    is Result.Loading -> MeetingNoticeWriteUiState.Loading
-                    is Result.Success -> result.data
-                    is Result.Error -> MeetingNoticeWriteUiState.Error
-                }
-            }.restartableStateIn(viewModelScope, SharingStarted.Lazily, MeetingNoticeWriteUiState.Loading)
+    override suspend fun Syntax<MeetingNoticeWriteState, MeetingNoticeWriteSideEffect>.onContainerCreate() {
+        loadNotice()
+    }
 
-    init {
-        viewModelScope.launch {
-            noticeWriteUiState.collect { uiState ->
-                setUiState(uiState)
+    override fun onIntent(intent: Intent) {
+        if (intent !is MeetingNoticeWriteIntent) {
+            super.onIntent(intent)
+            return
+        }
+
+        intent {
+            when (intent) {
+                is MeetingNoticeWriteIntent.BackClick -> {
+                    postSideEffect(MeetingNoticeWriteSideEffect.NavigateToBack)
+                }
+
+                is MeetingNoticeWriteIntent.RefreshClick -> {
+                    loadNotice()
+                }
+
+                is MeetingNoticeWriteIntent.EnableChange -> {
+                    reduce { state.copy(enabled = intent.isEnable) }
+                }
+
+                is MeetingNoticeWriteIntent.ConfirmClick -> {
+                    saveNotice(
+                        meetId = intent.meetId,
+                        noticeId = intent.noticeId,
+                    )
+                }
             }
         }
     }
 
-    fun onUiAction(uiAction: MeetingNoticeWriteUiAction) {
-        when (uiAction) {
-            is MeetingNoticeWriteUiAction.OnClickBack -> {
-                setUiEvent(MeetingNoticeWriteUiEvent.NavigateToBack)
-            }
+    private fun loadNotice() {
+        intent {
+            reduce { state.copy(loadState = Result.Loading) }
 
-            is MeetingNoticeWriteUiAction.OnClickRefresh -> {
-                noticeWriteUiState.restart()
-            }
+            try {
+                val notice = noticeId?.let { noticeRepository.getNotice(noticeId = it) }
+                val content = notice?.content.orEmpty()
 
-            is MeetingNoticeWriteUiAction.OnChangeEnable -> {
-                uiState.checkState<MeetingNoticeWriteUiState.Success> {
-                    setUiState(copy(enabled = uiAction.isEnable))
+                reduce {
+                    state.copy(
+                        loadState = Result.Success(Unit),
+                        noticeId = notice?.noticeId,
+                        noticeState = TextFieldState(initialText = content),
+                        enabled = content.isNotEmpty(),
+                    )
                 }
-            }
-
-            is MeetingNoticeWriteUiAction.OnClickConfirm -> {
-                saveNotice(
-                    meetId = uiAction.meetId,
-                    noticeId = uiAction.noticeId,
-                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                reduce { state.copy(loadState = Result.Error(e)) }
             }
         }
     }
 
-    private fun saveNotice(
+    private suspend fun Syntax<MeetingNoticeWriteState, MeetingNoticeWriteSideEffect>.saveNotice(
         meetId: String,
         noticeId: String?,
     ) {
-        viewModelScope.launch {
-            uiState.checkState<MeetingNoticeWriteUiState.Success> {
-                val content = noticeState.text.toString()
-                if (content.isBlank()) return@checkState
+        val content = state.noticeState.text.toString()
+        if (content.isBlank()) return
 
+        setLoading(true)
+
+        try {
+            val notice =
                 if (noticeId.isNullOrEmpty()) {
                     noticeRepository.createNotice(
                         meetId = meetId,
@@ -112,35 +108,27 @@ class MeetingNoticeWriteViewModel @AssistedInject constructor(
                         meetId = meetId,
                         content = content,
                     )
-                }.asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
+                }
 
-                            is Result.Success -> {
-                                if (noticeId.isNullOrEmpty()) {
-                                    noticeEventBus.send(NoticeAction.NoticeCreate(notice = result.data))
-                                } else {
-                                    noticeEventBus.send(NoticeAction.NoticeUpdate(notice = result.data))
-                                }
-                                setUiEvent(MeetingNoticeWriteUiEvent.NavigateToBack)
-                            }
-
-                            is Result.Error -> {
-                                val toastMessage =
-                                    when (result.exception) {
-                                        is IOException -> ToastMessage.NetworkErrorMessage
-                                        else -> ToastMessage.ServerErrorMessage
-                                    }
-                                setUiEvent(MeetingNoticeWriteUiEvent.ShowToastMessage(toastMessage))
-                            }
-                        }
-                    }
+            if (noticeId.isNullOrEmpty()) {
+                noticeEventBus.send(NoticeAction.NoticeCreate(notice = notice))
+            } else {
+                noticeEventBus.send(NoticeAction.NoticeUpdate(notice = notice))
             }
+
+            postSideEffect(MeetingNoticeWriteSideEffect.NavigateToBack)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
+    }
+
+    private suspend fun Syntax<MeetingNoticeWriteState, MeetingNoticeWriteSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(MeetingNoticeWriteSideEffect.ShowToastMessage(message))
     }
 
     @AssistedFactory
@@ -149,38 +137,8 @@ class MeetingNoticeWriteViewModel @AssistedInject constructor(
     }
 }
 
-sealed interface MeetingNoticeWriteUiState : UiState {
-    data object Loading : MeetingNoticeWriteUiState
-
-    data class Success(
-        val meetId: String = "",
-        val noticeId: String? = null,
-        val noticeState: TextFieldState = TextFieldState(),
-        val enabled: Boolean = false,
-    ) : MeetingNoticeWriteUiState
-
-    data object Error : MeetingNoticeWriteUiState
-}
-
-sealed interface MeetingNoticeWriteUiAction : UiAction {
-    data object OnClickBack : MeetingNoticeWriteUiAction
-
-    data object OnClickRefresh : MeetingNoticeWriteUiAction
-
-    data class OnChangeEnable(
-        val isEnable: Boolean,
-    ) : MeetingNoticeWriteUiAction
-
-    data class OnClickConfirm(
-        val meetId: String,
-        val noticeId: String?,
-    ) : MeetingNoticeWriteUiAction
-}
-
-sealed interface MeetingNoticeWriteUiEvent : UiEvent {
-    data object NavigateToBack : MeetingNoticeWriteUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : MeetingNoticeWriteUiEvent
-}
+private fun DetailRoute.MeetingNoticeWrite.asState() =
+    MeetingNoticeWriteState(
+        meetId = meetId,
+        noticeId = noticeId,
+    )

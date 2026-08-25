@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
+import com.moim.core.common.model.User
+import com.moim.core.common.result.Result
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -30,13 +32,17 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.profileupdate.model.ProfileUpdateIntent
+import com.moim.feature.profileupdate.model.ProfileUpdateSideEffect
+import com.moim.feature.profileupdate.model.ProfileUpdateState
 import com.moim.feature.profileupdate.ui.ProfileUpdateImage
 import com.moim.feature.profileupdate.ui.ProfileUpdateImageEditDialog
 import com.moim.feature.profileupdate.ui.ProfileUpdateNicknameTextField
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
-internal typealias OnProfileUpdateUiAction = (ProfileUpdateUiAction) -> Unit
+internal typealias OnProfileUpdateIntent = (ProfileUpdateIntent) -> Unit
 
 @Composable
 fun ProfileUpdateRoute(
@@ -46,50 +52,50 @@ fun ProfileUpdateRoute(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val profileUpdateUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary, padding = padding)
     val singlePhotoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickVisualMedia(),
-            onResult = { uri -> if (uri != null) viewModel.onUiAction(ProfileUpdateUiAction.OnChangeProfileUrl(uri.toString())) },
+            onResult = { uri -> if (uri != null) viewModel.onIntent(ProfileUpdateIntent.ProfileUrlChange(uri.toString())) },
         )
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is ProfileUpdateUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is ProfileUpdateSideEffect.NavigateToBack -> {
                 navigateToBack()
             }
 
-            is ProfileUpdateUiEvent.NavigateToPhotoPicker -> {
+            is ProfileUpdateSideEffect.NavigateToPhotoPicker -> {
                 singlePhotoPickerLauncher.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                 )
             }
 
-            is ProfileUpdateUiEvent.ShowToastMessage -> {
-                showToast(context, event.message)
+            is ProfileUpdateSideEffect.ShowToastMessage -> {
+                showToast(context, sideEffect.message)
             }
         }
     }
 
-    when (val uiState = profileUpdateUiState) {
-        is ProfileUpdateUiState.Loading -> {
+    when {
+        uiState.isLoading -> {
             LoadingScreen(modifier)
         }
 
-        is ProfileUpdateUiState.Success -> {
+        uiState.isSuccess -> {
             ProfileUpdateScreen(
                 modifier = modifier,
                 uiState = uiState,
                 isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
+                onIntent = viewModel::onIntent,
             )
         }
 
-        is ProfileUpdateUiState.Error -> {
+        uiState.isError -> {
             ErrorScreen(
                 modifier = modifier,
-                onClickRefresh = { viewModel.onUiAction(ProfileUpdateUiAction.OnClickRefresh) },
+                onClickRefresh = { viewModel.onIntent(ProfileUpdateIntent.RefreshClick) },
             )
         }
     }
@@ -98,9 +104,9 @@ fun ProfileUpdateRoute(
 @Composable
 fun ProfileUpdateScreen(
     modifier: Modifier = Modifier,
-    uiState: ProfileUpdateUiState.Success,
+    uiState: ProfileUpdateState,
     isLoading: Boolean,
-    onUiAction: OnProfileUpdateUiAction,
+    onIntent: OnProfileUpdateIntent,
 ) {
     TrackScreenViewEvent(screenName = "profile_write")
     Column(
@@ -108,7 +114,7 @@ fun ProfileUpdateScreen(
     ) {
         MoimTopAppbar(
             title = stringResource(R.string.profile_update_title),
-            onClickNavigate = { onUiAction(ProfileUpdateUiAction.OnClickBack) },
+            onClickNavigate = { onIntent(ProfileUpdateIntent.BackClick) },
         )
 
         Column(
@@ -122,14 +128,14 @@ fun ProfileUpdateScreen(
         ) {
             ProfileUpdateImage(
                 profileUrl = uiState.profileUrl,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
 
             ProfileUpdateNicknameTextField(
                 nickname = uiState.nickname,
                 isDuplicated = uiState.isDuplicatedName,
                 isRegexError = uiState.isRegexError,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
 
             Spacer(Modifier.weight(1f))
@@ -141,12 +147,12 @@ fun ProfileUpdateScreen(
                         .padding(top = 28.dp),
                 enable = uiState.enableProfileUpdate,
                 text = stringResource(R.string.common_save),
-                onClick = { onUiAction(ProfileUpdateUiAction.OnClickProfileUpdate) },
+                onClick = { onIntent(ProfileUpdateIntent.ProfileUpdateClick) },
             )
         }
     }
     if (uiState.isShowProfileEditDialog) {
-        ProfileUpdateImageEditDialog(onUiAction = onUiAction)
+        ProfileUpdateImageEditDialog(onIntent = onIntent)
     }
 
     LoadingDialog(isLoading)
@@ -158,9 +164,9 @@ private fun ProfileUpdateScreenPreview() {
     MoimTheme {
         ProfileUpdateScreen(
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
-            uiState = ProfileUpdateUiState.Success(),
+            uiState = ProfileUpdateState(user = Result.Success(User(userId = ""))),
             isLoading = false,
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

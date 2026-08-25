@@ -1,11 +1,9 @@
 package com.moim.core.data.datasource.token
 
-import kotlinx.coroutines.flow.Flow
-
 interface TokenRepository {
-    fun setFcmToken(): Flow<Unit>
+    suspend fun setFcmToken()
 
-    fun syncFcmTokenIfNeeded(): Flow<Unit>
+    suspend fun syncFcmTokenIfNeeded()
 
     suspend fun onFcmTokenRefreshed(fcmToken: String)
 }

@@ -44,8 +44,8 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.decimalFormatString
-import com.moim.feature.meetingnoticedetail.MeetingNoticeDetailUiAction
-import com.moim.feature.meetingnoticedetail.OnMeetingNoticeDetailUiAction
+import com.moim.feature.meetingnoticedetail.OnMeetingNoticeDetailIntent
+import com.moim.feature.meetingnoticedetail.model.MeetingNoticeDetailIntent
 import java.time.ZonedDateTime
 
 @Composable
@@ -82,7 +82,7 @@ fun MeetingNoticeDetailCommentItem(
     modifier: Modifier = Modifier,
     userId: String,
     comment: NoticeCommentUiModel,
-    onUiAction: OnMeetingNoticeDetailUiAction,
+    onIntent: OnMeetingNoticeDetailIntent,
 ) {
     Row(
         modifier =
@@ -110,14 +110,14 @@ fun MeetingNoticeDetailCommentItem(
             CommentHeader(
                 userId = userId,
                 comment = comment.comment,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
 
             if (comment.texts.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
                 CommentText(
                     texts = comment.texts,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
 
@@ -125,7 +125,7 @@ fun MeetingNoticeDetailCommentItem(
                 Spacer(Modifier.height(8.dp))
                 CommentOpenGraph(
                     openGraph = requireNotNull(comment.openGraph),
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
         }
@@ -142,7 +142,7 @@ private fun CommentHeader(
     modifier: Modifier = Modifier,
     userId: String,
     comment: NoticeComment,
-    onUiAction: OnMeetingNoticeDetailUiAction,
+    onIntent: OnMeetingNoticeDetailIntent,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -166,20 +166,20 @@ private fun CommentHeader(
         MoimIconButton(
             iconRes = R.drawable.ic_more,
             onClick = {
-                val uiAction =
+                val intent =
                     if (userId == comment.writer.userId) {
-                        MeetingNoticeDetailUiAction.OnShowCommentEditDialog(
+                        MeetingNoticeDetailIntent.CommentEditDialogShow(
                             isShow = true,
                             comment = comment,
                         )
                     } else {
-                        MeetingNoticeDetailUiAction.OnShowCommentReportDialog(
+                        MeetingNoticeDetailIntent.CommentReportDialogShow(
                             isShow = true,
                             comment = comment,
                         )
                     }
 
-                onUiAction(uiAction)
+                onIntent(intent)
             },
         )
     }
@@ -189,7 +189,7 @@ private fun CommentHeader(
 private fun CommentText(
     modifier: Modifier = Modifier,
     texts: List<NoticeCommentTextUiModel>,
-    onUiAction: OnMeetingNoticeDetailUiAction,
+    onIntent: OnMeetingNoticeDetailIntent,
 ) {
     val text = texts.joinToString("") { it.content }
     val spanStyle =
@@ -226,7 +226,7 @@ private fun CommentText(
                                 LinkAnnotation.Clickable(
                                     tag = "URL",
                                     linkInteractionListener = {
-                                        onUiAction(MeetingNoticeDetailUiAction.OnClickCommentWebLink(uiModel.content))
+                                        onIntent(MeetingNoticeDetailIntent.CommentWebLinkClick(uiModel.content))
                                     },
                                 ),
                             start = startIndex,
@@ -247,7 +247,7 @@ private fun CommentText(
 @Composable
 private fun CommentOpenGraph(
     openGraph: OpenGraph,
-    onUiAction: OnMeetingNoticeDetailUiAction,
+    onIntent: OnMeetingNoticeDetailIntent,
 ) {
     Column(
         modifier =
@@ -255,7 +255,7 @@ private fun CommentOpenGraph(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(MoimTheme.colors.tertiary)
-                .onSingleClick(onClick = { onUiAction(MeetingNoticeDetailUiAction.OnClickCommentWebLink(openGraph.url)) }),
+                .onSingleClick(onClick = { onIntent(MeetingNoticeDetailIntent.CommentWebLinkClick(openGraph.url)) }),
     ) {
         NetworkImage(
             modifier =
@@ -319,7 +319,7 @@ private fun MeetingNoticeDetailCommentItemPreview() {
                         comment = comment,
                         texts = listOf(NoticeCommentTextUiModel.PlainText(content = "이른 아침, 공지 확인했습니다. 다음 모임도 기대돼요!")),
                     ),
-                onUiAction = {},
+                onIntent = {},
             )
         }
     }

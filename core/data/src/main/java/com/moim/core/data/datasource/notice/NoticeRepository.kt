@@ -3,7 +3,6 @@ package com.moim.core.data.datasource.notice
 import com.moim.core.common.model.Notice
 import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.PaginationContainer
-import kotlinx.coroutines.flow.Flow
 
 interface NoticeRepository {
     suspend fun getNotices(
@@ -13,22 +12,22 @@ interface NoticeRepository {
         filterType: NoticeType?,
     ): PaginationContainer<List<Notice>>
 
-    fun getNotice(noticeId: String): Flow<Notice>
+    suspend fun getNotice(noticeId: String): Notice
 
-    fun createNotice(
+    suspend fun createNotice(
         meetId: String,
         content: String,
-    ): Flow<Notice>
+    ): Notice
 
-    fun updateNotice(
+    suspend fun updateNotice(
         noticeId: String,
         meetId: String,
         content: String,
-    ): Flow<Notice>
+    ): Notice
 
-    fun deleteNotice(noticeId: String): Flow<Unit>
+    suspend fun deleteNotice(noticeId: String)
 
-    fun pinNotice(noticeId: String): Flow<Notice>
+    suspend fun pinNotice(noticeId: String): Notice
 
-    fun unpinNotice(noticeId: String): Flow<Notice>
+    suspend fun unpinNotice(noticeId: String): Notice
 }

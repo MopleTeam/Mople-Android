@@ -50,14 +50,14 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.decimalFormatString
-import com.moim.feature.commentdetail.CommentDetailUiAction
+import com.moim.feature.commentdetail.model.CommentDetailIntent
 
 @Composable
 fun CommentDetailItem(
     modifier: Modifier = Modifier,
     userId: String,
     comment: CommentUiModel,
-    onUiAction: (CommentDetailUiAction) -> Unit,
+    onIntent: (CommentDetailIntent) -> Unit,
 ) {
     Row(
         modifier =
@@ -75,8 +75,8 @@ fun CommentDetailItem(
                     .clip(CircleShape)
                     .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
                     .onSingleClick {
-                        onUiAction(
-                            CommentDetailUiAction.OnClickUserProfileImage(
+                        onIntent(
+                            CommentDetailIntent.UserProfileImageClick(
                                 imageUrl = comment.comment.writer.imageUrl,
                                 userName = comment.comment.writer.nickname,
                             ),
@@ -95,13 +95,13 @@ fun CommentDetailItem(
             CommentHeader(
                 userId = userId,
                 comment = comment.comment,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
             if (comment.texts.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
                 CommentText(
                     texts = comment.texts,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
 
@@ -109,12 +109,12 @@ fun CommentDetailItem(
                 Spacer(Modifier.height(8.dp))
                 CommentOpenGraph(
                     openGraph = requireNotNull(comment.openGraph),
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
             CommentFooter(
                 comment = comment.comment,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         }
     }
@@ -125,7 +125,7 @@ private fun CommentHeader(
     modifier: Modifier = Modifier,
     userId: String,
     comment: Comment,
-    onUiAction: (CommentDetailUiAction) -> Unit,
+    onIntent: (CommentDetailIntent) -> Unit,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -149,20 +149,20 @@ private fun CommentHeader(
         MoimIconButton(
             iconRes = R.drawable.ic_more,
             onClick = {
-                val uiAction =
+                val dialogIntent =
                     if (userId == comment.writer.userId) {
-                        CommentDetailUiAction.OnShowCommentEditDialog(
+                        CommentDetailIntent.CommentEditDialogShow(
                             isShow = true,
                             comment = comment,
                         )
                     } else {
-                        CommentDetailUiAction.OnShowCommentReportDialog(
+                        CommentDetailIntent.CommentReportDialogShow(
                             isShow = true,
                             comment = comment,
                         )
                     }
 
-                onUiAction(uiAction)
+                onIntent(dialogIntent)
             },
         )
     }
@@ -172,7 +172,7 @@ private fun CommentHeader(
 private fun CommentText(
     modifier: Modifier = Modifier,
     texts: List<CommentTextUiModel>,
-    onUiAction: (CommentDetailUiAction) -> Unit,
+    onIntent: (CommentDetailIntent) -> Unit,
 ) {
     val text = texts.joinToString("") { it.content }
     val spanStyle =
@@ -214,7 +214,7 @@ private fun CommentText(
                             clickable =
                                 LinkAnnotation.Clickable(
                                     tag = "URL",
-                                    linkInteractionListener = { onUiAction(CommentDetailUiAction.OnClickCommentWebLink(uiModel.content)) },
+                                    linkInteractionListener = { onIntent(CommentDetailIntent.CommentWebLinkClick(uiModel.content)) },
                                 ),
                             start = startIndex,
                             end = startIndex + uiModel.content.length,
@@ -234,7 +234,7 @@ private fun CommentText(
 @Composable
 private fun CommentOpenGraph(
     openGraph: OpenGraph,
-    onUiAction: (CommentDetailUiAction) -> Unit,
+    onIntent: (CommentDetailIntent) -> Unit,
 ) {
     Column(
         modifier =
@@ -242,7 +242,7 @@ private fun CommentOpenGraph(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(MoimTheme.colors.tertiary)
-                .onSingleClick(onClick = { onUiAction(CommentDetailUiAction.OnClickCommentWebLink(openGraph.url)) }),
+                .onSingleClick(onClick = { onIntent(CommentDetailIntent.CommentWebLinkClick(openGraph.url)) }),
     ) {
         NetworkImage(
             modifier =
@@ -279,7 +279,7 @@ private fun CommentOpenGraph(
 @Composable
 private fun CommentFooter(
     comment: Comment,
-    onUiAction: (CommentDetailUiAction) -> Unit,
+    onIntent: (CommentDetailIntent) -> Unit,
 ) {
     val iconColor =
         if (comment.isLike) {
@@ -299,7 +299,7 @@ private fun CommentFooter(
                 iconRes = R.drawable.ic_thumb_up,
                 iconCount = comment.likeCount,
                 iconColor = iconColor,
-                onClick = { onUiAction(CommentDetailUiAction.OnClickCommentLike(comment = comment)) },
+                onClick = { onIntent(CommentDetailIntent.CommentLikeClick(comment = comment)) },
             )
         }
     }

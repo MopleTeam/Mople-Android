@@ -1,32 +1,27 @@
 package com.moim.feature.participantlist
 
-import androidx.lifecycle.viewModelScope
-import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.User
 import com.moim.core.common.model.ViewIdType
-import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.isActiveCheck
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
-import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
+import com.moim.feature.participantlist.model.ParticipantListIntent
+import com.moim.feature.participantlist.model.ParticipantListSideEffect
+import com.moim.feature.participantlist.model.ParticipantListState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.syntax.Syntax
 import java.io.IOException
 
 @HiltViewModel(assistedFactory = ParticipantListViewModel.Factory::class)
@@ -35,41 +30,41 @@ class ParticipantListViewModel @AssistedInject constructor(
     private val planRepository: PlanRepository,
     private val reviewRepository: ReviewRepository,
     @Assisted val participantListRoute: DetailRoute.ParticipantList,
-) : BaseViewModel() {
+) : MVIViewModel<ParticipantListState, ParticipantListSideEffect>(participantListRoute.asState()) {
     private var pagingJob: Job? = null
     private val viewIdType = participantListRoute.viewIdType
 
-    init {
-        viewModelScope.launch {
-            setUiState(ParticipantListUiState(isMeeting = viewIdType is ViewIdType.MeetId))
-            getParticipants()
-        }
+    override suspend fun Syntax<ParticipantListState, ParticipantListSideEffect>.onContainerCreate() {
+        getParticipants()
     }
 
-    fun onUiAction(uiAction: ParticipantListUiAction) {
-        when (uiAction) {
-            is ParticipantListUiAction.OnClickBack -> {
-                setUiEvent(ParticipantListUiEvent.NavigateToBack)
-            }
+    override fun onIntent(intent: Intent) {
+        if (intent !is ParticipantListIntent) {
+            super.onIntent(intent)
+            return
+        }
 
-            is ParticipantListUiAction.OnLoadNextPage -> {
-                val uiState = uiState.value as? ParticipantListUiState ?: return
-                getParticipants(uiState.pagingInfo.nextCursor)
-            }
+        intent {
+            when (intent) {
+                is ParticipantListIntent.BackClick -> {
+                    postSideEffect(ParticipantListSideEffect.NavigateToBack)
+                }
 
-            is ParticipantListUiAction.OnClickRefresh -> {
-                val uiState = uiState.value as? ParticipantListUiState ?: return
-                getParticipants(uiState.pagingInfo.nextCursor)
-            }
+                is ParticipantListIntent.RefreshClick,
+                is ParticipantListIntent.NextPageLoad,
+                -> {
+                    getParticipants(state.pagingInfo.nextCursor)
+                }
 
-            is ParticipantListUiAction.OnClickUserImage -> {
-                setUiEvent(
-                    ParticipantListUiEvent.NavigateToImageViewer(uiAction.userImage, uiAction.userName),
-                )
-            }
+                is ParticipantListIntent.UserImageClick -> {
+                    postSideEffect(
+                        ParticipantListSideEffect.NavigateToImageViewer(intent.userImage, intent.userName),
+                    )
+                }
 
-            is ParticipantListUiAction.OnClickMeetingInvite -> {
-                getInviteLink()
+                is ParticipantListIntent.MeetingInviteClick -> {
+                    getInviteLink()
+                }
             }
         }
     }
@@ -77,14 +72,14 @@ class ParticipantListViewModel @AssistedInject constructor(
     private fun getParticipants(cursor: String? = null) {
         if (pagingJob.isActiveCheck()) return
         pagingJob =
-            viewModelScope.launch {
+            intent {
                 handlePagingData(
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         when (viewIdType) {
                             is ViewIdType.MeetId -> {
@@ -118,63 +113,54 @@ class ParticipantListViewModel @AssistedInject constructor(
                     }.getOrNull()
 
                 handlePagingData(
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
             }
     }
 
-    private fun handlePagingData(
-        pagingInfo: PaginationContainer<List<User>>?,
+    private suspend fun Syntax<ParticipantListState, ParticipantListSideEffect>.handlePagingData(
+        pagingData: PaginationContainer<List<User>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<ParticipantListUiState> {
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = this.pagingInfo,
-                    currentItems = participants,
-                    isInitialLoad = cursor == null,
-                    transform = { users -> users },
-                )
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = state.pagingInfo,
+                currentItems = state.participants,
+                isInitialLoad = cursor == null,
+                transform = { users -> users },
+            )
 
-            setUiState(
-                copy(
-                    pagingInfo = result.pagingInfo,
-                    participants = result.items,
-                ),
+        reduce {
+            state.copy(
+                pagingInfo = result.pagingInfo,
+                participants = result.items,
             )
         }
     }
 
-    private fun getInviteLink() {
-        viewModelScope.launch {
-            meetingRepository
-                .getMeetingInviteCode(viewIdType.id)
-                .asResult()
-                .onEach { setLoading(it is Result.Loading) }
-                .collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            return@collect
-                        }
+    private suspend fun Syntax<ParticipantListState, ParticipantListSideEffect>.getInviteLink() {
+        setLoading(true)
 
-                        is Result.Success -> {
-                            setUiEvent(ParticipantListUiEvent.NavigateToExternalShareUrl(result.data))
-                        }
-
-                        is Result.Error -> {
-                            when (result.exception) {
-                                is IOException -> setUiEvent(ParticipantListUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                is NetworkException -> setUiEvent(ParticipantListUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                            }
-                        }
-                    }
-                }
+        try {
+            val inviteCode = meetingRepository.getMeetingInviteCode(viewIdType.id)
+            postSideEffect(ParticipantListSideEffect.NavigateToExternalShareUrl(inviteCode))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
+    }
+
+    private suspend fun Syntax<ParticipantListState, ParticipantListSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(ParticipantListSideEffect.ShowToastMessage(message))
     }
 
     @AssistedFactory
@@ -183,40 +169,4 @@ class ParticipantListViewModel @AssistedInject constructor(
     }
 }
 
-data class ParticipantListUiState(
-    val isMeeting: Boolean = true,
-    val pagingInfo: PagingUiState = PagingUiState(),
-    val participants: List<User> = emptyList(),
-) : UiState
-
-sealed interface ParticipantListUiAction : UiAction {
-    data object OnClickBack : ParticipantListUiAction
-
-    data object OnClickRefresh : ParticipantListUiAction
-
-    data object OnClickMeetingInvite : ParticipantListUiAction
-
-    data class OnClickUserImage(
-        val userImage: String,
-        val userName: String,
-    ) : ParticipantListUiAction
-
-    data object OnLoadNextPage : ParticipantListUiAction
-}
-
-sealed interface ParticipantListUiEvent : UiEvent {
-    data object NavigateToBack : ParticipantListUiEvent
-
-    data class NavigateToImageViewer(
-        val userImage: String,
-        val userName: String,
-    ) : ParticipantListUiEvent
-
-    data class NavigateToExternalShareUrl(
-        val url: String,
-    ) : ParticipantListUiEvent
-
-    data class ShowToastMessage(
-        val toastMessage: ToastMessage,
-    ) : ParticipantListUiEvent
-}
+private fun DetailRoute.ParticipantList.asState() = ParticipantListState(isMeeting = viewIdType is ViewIdType.MeetId)

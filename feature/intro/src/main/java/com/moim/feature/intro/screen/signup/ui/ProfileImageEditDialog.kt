@@ -20,16 +20,16 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.feature.intro.screen.signup.OnSignUpUiAction
-import com.moim.feature.intro.screen.signup.SignUpUiAction
+import com.moim.feature.intro.screen.signup.OnSignUpIntent
+import com.moim.feature.intro.screen.signup.model.SignUpIntent
 import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileImageEditDialog(
     modifier: Modifier = Modifier,
-    onUiAction: OnSignUpUiAction,
+    onIntent: OnSignUpIntent,
 ) {
-    val dismissAction = SignUpUiAction.OnShowProfileEditDialog(false)
+    val dismissIntent = SignUpIntent.ProfileEditDialogShow(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -38,7 +38,7 @@ fun ProfileImageEditDialog(
         onDismiss = {
             coroutineScope
                 .launch { sheetState.hide() }
-                .invokeOnCompletion { onUiAction(dismissAction) }
+                .invokeOnCompletion { onIntent(dismissIntent) }
         },
     ) {
         Column(
@@ -62,8 +62,8 @@ fun ProfileImageEditDialog(
                 text = stringResource(R.string.common_default_select),
                 buttonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.gray.gray02),
                 onClick = {
-                    onUiAction(dismissAction)
-                    onUiAction(SignUpUiAction.OnChangeProfileUrl(null))
+                    onIntent(dismissIntent)
+                    onIntent(SignUpIntent.ProfileUrlChange(null))
                 },
             )
             Spacer(Modifier.height(12.dp))
@@ -73,8 +73,8 @@ fun ProfileImageEditDialog(
                 text = stringResource(R.string.common_album_select),
                 buttonColors = moimButtomColors(),
                 onClick = {
-                    onUiAction(dismissAction)
-                    onUiAction(SignUpUiAction.OnNavigatePhotoPicker)
+                    onIntent(dismissIntent)
+                    onIntent(SignUpIntent.PhotoPickerClick)
                 },
             )
             Spacer(Modifier.height(12.dp))

@@ -39,28 +39,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Plan
 import com.moim.core.common.model.User
 import com.moim.core.common.model.ViewIdType
+import com.moim.core.common.result.Result
+import com.moim.core.common.result.data
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.ErrorScreen
-import com.moim.core.designsystem.common.LoadingDialog
 import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.home.model.HomeIntent
+import com.moim.feature.home.model.HomeSideEffect
+import com.moim.feature.home.model.HomeState
 import com.moim.feature.home.ui.HomeCreateCards
 import com.moim.feature.home.ui.HomePlanCard
 import com.moim.feature.home.ui.HomePlanMoreCard
 import com.moim.feature.home.ui.HomeTopAppbar
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 import java.time.ZonedDateTime
-
-internal typealias OnHomeUiAction = (HomeUiAction) -> Unit
 
 @Composable
 fun HomeRoute(
@@ -73,8 +75,7 @@ fun HomeRoute(
     navigateToPlanDetail: (ViewIdType) -> Unit,
 ) {
     val context = LocalContext.current
-    val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val homeUiState by viewModel.collectAsState()
     val modifier =
         Modifier.containerScreen(
             backgroundColor = MoimTheme.colors.bg.secondary,
@@ -95,43 +96,42 @@ fun HomeRoute(
             isPostNotificationPermission = result
         }
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is HomeUiEvent.NavigateToAlarm -> navigateToAlarm()
-            is HomeUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite()
-            is HomeUiEvent.NavigateToPlanWrite -> navigateToPlanWrite()
-            is HomeUiEvent.NavigateToCalendar -> navigateToCalendar()
-            is HomeUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.viewIdType)
-            is HomeUiEvent.ShowToastMessage -> showToast(context, event.message)
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is HomeSideEffect.NavigateToAlarm -> navigateToAlarm()
+            is HomeSideEffect.NavigateToMeetingWrite -> navigateToMeetingWrite()
+            is HomeSideEffect.NavigateToPlanWrite -> navigateToPlanWrite()
+            is HomeSideEffect.NavigateToCalendar -> navigateToCalendar()
+            is HomeSideEffect.NavigateToPlanDetail -> navigateToPlanDetail(sideEffect.viewIdType)
+            is HomeSideEffect.ShowToastMessage -> showToast(context, sideEffect.message)
         }
     }
 
     LaunchedEffect(homeUiState) {
-        if ((homeUiState as? HomeUiState.Success)?.isPermissionCheck == true) return@LaunchedEffect
+        if (homeUiState.isPermissionCheck) return@LaunchedEffect
         if (isPostNotificationPermission.not() && Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
-            viewModel.onUiAction(HomeUiAction.OnUpdatePermissionCheck)
+            viewModel.onIntent(HomeIntent.PermissionCheckUpdate)
             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 
-    when (val uiState = homeUiState) {
-        is HomeUiState.Loading -> {
+    when {
+        homeUiState.isLoading -> {
             LoadingScreen(modifier = modifier)
         }
 
-        is HomeUiState.Success -> {
+        homeUiState.isSuccess -> {
             HomeScreen(
                 modifier = modifier,
-                uiState = uiState,
-                isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
+                uiState = homeUiState,
+                onIntent = viewModel::onIntent,
             )
         }
 
-        is HomeUiState.Error -> {
+        homeUiState.isError -> {
             ErrorScreen(
                 modifier = modifier,
-                onClickRefresh = { viewModel.onUiAction(HomeUiAction.OnClickRefresh) },
+                onClickRefresh = { viewModel.onIntent(HomeIntent.RefreshClick) },
             )
         }
     }
@@ -140,35 +140,34 @@ fun HomeRoute(
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    uiState: HomeUiState.Success,
-    isLoading: Boolean,
-    onUiAction: OnHomeUiAction,
+    uiState: HomeState,
+    onIntent: (HomeIntent) -> Unit,
 ) {
+    val plans = uiState.plans.data.orEmpty()
+
     TrackScreenViewEvent(screenName = "home")
     Column(modifier = modifier) {
-        HomeTopAppbar(onUiAction = onUiAction)
+        HomeTopAppbar(onIntent = onIntent)
         Column(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState()),
         ) {
-            if (uiState.plans.isEmpty()) {
+            if (plans.isEmpty()) {
                 HomePlanEmpty()
             } else {
                 HomePlanPager(
                     user = uiState.user,
-                    plans = uiState.plans,
-                    onUiAction = onUiAction,
+                    plans = plans,
+                    onIntent = onIntent,
                 )
             }
             HomeCreateCards(
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         }
     }
-
-    LoadingDialog(isLoading)
 }
 
 @Composable
@@ -203,7 +202,7 @@ fun HomePlanPager(
     modifier: Modifier = Modifier,
     user: User,
     plans: List<Plan>,
-    onUiAction: OnHomeUiAction = {},
+    onIntent: (HomeIntent) -> Unit = {},
 ) {
     val localDensity = LocalDensity.current
     val pagerState = rememberPagerState(pageCount = { plans.size + 1 })
@@ -229,12 +228,12 @@ fun HomePlanPager(
                     },
                 isHost = meetingPlan.userId == user.userId,
                 plan = meetingPlan,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         } else {
             HomePlanMoreCard(
                 modifier = modifier.then(heightModifier),
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         }
     }
@@ -250,30 +249,31 @@ private fun HomeScreenPreview() {
                     backgroundColor = MoimTheme.colors.bg.secondary,
                 ),
             uiState =
-                HomeUiState.Success(
+                HomeState(
                     user = User(userId = ""),
                     plans =
-                        listOf(
-                            Plan(
-                                meetingId = "1",
-                                meetingName = "우리중학교 동창1",
-                                planName = "술 한잔 하는 날",
-                                planMemberCount = 3,
-                                planAddress = "서울 강남구",
-                                planAt = ZonedDateTime.now(),
-                            ),
-                            Plan(
-                                meetingId = "2",
-                                meetingName = "우리중학교 동창2",
-                                planName = "술 한잔 하는 날",
-                                planMemberCount = 3,
-                                planAddress = "서울 강남구",
-                                planAt = ZonedDateTime.now(),
+                        Result.Success(
+                            listOf(
+                                Plan(
+                                    meetingId = "1",
+                                    meetingName = "우리중학교 동창1",
+                                    planName = "술 한잔 하는 날",
+                                    planMemberCount = 3,
+                                    planAddress = "서울 강남구",
+                                    planAt = ZonedDateTime.now(),
+                                ),
+                                Plan(
+                                    meetingId = "2",
+                                    meetingName = "우리중학교 동창2",
+                                    planName = "술 한잔 하는 날",
+                                    planMemberCount = 3,
+                                    planAddress = "서울 강남구",
+                                    planAt = ZonedDateTime.now(),
+                                ),
                             ),
                         ),
                 ),
-            isLoading = false,
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

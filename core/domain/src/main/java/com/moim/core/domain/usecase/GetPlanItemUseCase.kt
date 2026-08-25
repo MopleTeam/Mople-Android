@@ -6,7 +6,6 @@ import com.moim.core.common.model.item.asPlanItem
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.review.ReviewRepository
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
@@ -20,15 +19,15 @@ class GetPlanItemUseCase @Inject constructor(
         flow {
             when (val type = params.viewIdType) {
                 is ViewIdType.PlanId -> {
-                    emit(planRepository.getPlan(type.id).first().asPlanItem())
+                    emit(planRepository.getPlan(type.id).asPlanItem())
                 }
 
                 is ViewIdType.ReviewId -> {
-                    emit(reviewRepository.getReview(type.id).first().asPlanItem())
+                    emit(reviewRepository.getReview(type.id).asPlanItem())
                 }
 
                 is ViewIdType.PostId -> {
-                    emit(reviewRepository.getReviewForPostId(type.id).first().asPlanItem())
+                    emit(reviewRepository.getReviewForPostId(type.id).asPlanItem())
                 }
 
                 else -> {

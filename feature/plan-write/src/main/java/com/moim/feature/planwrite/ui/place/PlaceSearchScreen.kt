@@ -29,8 +29,8 @@ import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.planwrite.OnPlanWriteUiAction
-import com.moim.feature.planwrite.PlanWriteUiAction
+import com.moim.feature.planwrite.OnPlanWriteIntent
+import com.moim.feature.planwrite.model.PlanWriteIntent
 
 @Composable
 fun PlaceSearchScreen(
@@ -38,7 +38,7 @@ fun PlaceSearchScreen(
     isSearchResult: Boolean = false,
     searchPlaces: List<Place>,
     selectedPlace: Place? = null,
-    onUiAction: OnPlanWriteUiAction = {},
+    onIntent: OnPlanWriteIntent = {},
 ) {
     TrackScreenViewEvent(screenName = "plan_write_map_search")
 
@@ -54,7 +54,7 @@ fun PlaceSearchScreen(
                 PlaceItem(
                     place = it,
                     selectedPlace = selectedPlace,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
         }
@@ -88,7 +88,7 @@ fun PlaceItem(
     modifier: Modifier = Modifier,
     place: Place,
     selectedPlace: Place? = null,
-    onUiAction: OnPlanWriteUiAction = {},
+    onIntent: OnPlanWriteIntent = {},
 ) {
     Row(
         modifier =
@@ -100,7 +100,7 @@ fun PlaceItem(
                     } else {
                         MoimTheme.colors.bg.primary
                     },
-                ).onSingleClick { onUiAction(PlanWriteUiAction.OnClickSearchPlace(place)) }
+                ).onSingleClick { onIntent(PlanWriteIntent.SearchPlaceClick(place)) }
                 .padding(20.dp),
     ) {
         Icon(

@@ -22,18 +22,18 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.participantlist.ParticipantListUiAction
+import com.moim.feature.participantlist.model.ParticipantListIntent
 
 @Composable
 fun ParticipantMeetingInviteItem(
     modifier: Modifier = Modifier,
-    onUiAction: (ParticipantListUiAction) -> Unit,
+    onIntent: (ParticipantListIntent) -> Unit,
 ) {
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
-                .onSingleClick { onUiAction(ParticipantListUiAction.OnClickMeetingInvite) }
+                .onSingleClick { onIntent(ParticipantListIntent.MeetingInviteClick) }
                 .padding(horizontal = 20.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

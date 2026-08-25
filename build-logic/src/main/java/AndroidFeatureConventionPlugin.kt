@@ -53,6 +53,9 @@ internal class AndroidFeatureConventionPlugin : Plugin<Project> {
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.kotlinx.coroutines)
 
+                // MVI
+                implementation(libs.bundles.mvi)
+
                 // ETC
                 implementation(libs.bundles.coil)
                 implementation(libs.lottie.compose)

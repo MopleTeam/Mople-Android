@@ -10,8 +10,6 @@ import com.moim.core.remote.model.asItem
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class CommentRepositoryImpl @Inject constructor(
@@ -96,128 +94,121 @@ internal class CommentRepositoryImpl @Inject constructor(
             commentContainer.asItem { commentItems }
         }
 
-    override fun createComment(
+    override suspend fun createComment(
         postId: String,
         content: String,
         mentionIds: List<String>,
-    ): Flow<Comment> =
-        flow {
-            val comment =
-                commentRemoteDataSource
-                    .createComment(
-                        postId = postId,
-                        params =
-                            jsonOf(
-                                KEY_CONTENTS to content,
-                                KEY_MENTIONS to mentionIds,
-                            ),
-                    )
-            val openGraph =
-                openGraphRemoteDataSource
-                    .getOpenGraph(url = comment.content.findWebLink())
+    ): Comment {
+        val comment =
+            commentRemoteDataSource
+                .createComment(
+                    postId = postId,
+                    params =
+                        jsonOf(
+                            KEY_CONTENTS to content,
+                            KEY_MENTIONS to mentionIds,
+                        ),
+                )
+        val openGraph =
+            openGraphRemoteDataSource
+                .getOpenGraph(url = comment.content.findWebLink())
 
-            emit(comment.asItem(openGraph))
-        }
+        return comment.asItem(openGraph)
+    }
 
-    override fun createReplyComment(
+    override suspend fun createReplyComment(
         postId: String,
         commentId: String,
         content: String,
         mentionIds: List<String>,
-    ): Flow<Comment> =
-        flow {
-            val comment =
-                commentRemoteDataSource
-                    .createReplyComment(
-                        postId = postId,
-                        commentId = commentId,
-                        params =
-                            jsonOf(
-                                KEY_CONTENTS to content,
-                                KEY_MENTIONS to mentionIds,
-                            ),
-                    )
-            val openGraph =
-                openGraphRemoteDataSource.getOpenGraph(url = comment.content.findWebLink())
+    ): Comment {
+        val comment =
+            commentRemoteDataSource
+                .createReplyComment(
+                    postId = postId,
+                    commentId = commentId,
+                    params =
+                        jsonOf(
+                            KEY_CONTENTS to content,
+                            KEY_MENTIONS to mentionIds,
+                        ),
+                )
+        val openGraph =
+            openGraphRemoteDataSource.getOpenGraph(url = comment.content.findWebLink())
 
-            emit(comment.asItem(openGraph))
-        }
+        return comment.asItem(openGraph)
+    }
 
-    override fun updateComment(
+    override suspend fun updateComment(
         commentId: String,
         content: String,
         mentionIds: List<String>,
-    ): Flow<Comment> =
-        flow {
-            val comment =
-                commentRemoteDataSource
-                    .updateComment(
-                        commentId = commentId,
-                        params =
-                            jsonOf(
-                                KEY_CONTENTS to content,
-                                KEY_MENTIONS to mentionIds,
-                            ),
-                    )
-            val openGraph =
-                openGraphRemoteDataSource
-                    .getOpenGraph(url = comment.content.findWebLink())
+    ): Comment {
+        val comment =
+            commentRemoteDataSource
+                .updateComment(
+                    commentId = commentId,
+                    params =
+                        jsonOf(
+                            KEY_CONTENTS to content,
+                            KEY_MENTIONS to mentionIds,
+                        ),
+                )
+        val openGraph =
+            openGraphRemoteDataSource
+                .getOpenGraph(url = comment.content.findWebLink())
 
-            emit(comment.asItem(openGraph))
-        }
+        return comment.asItem(openGraph)
+    }
 
-    override fun updateLikeComment(commentId: String): Flow<Comment> =
-        flow {
-            val comment = commentRemoteDataSource.updateLikeComment(commentId)
-            val openGraph = openGraphRemoteDataSource.getOpenGraph(url = comment.content.findWebLink())
-            emit(comment.asItem(openGraph))
-        }
+    override suspend fun updateLikeComment(commentId: String): Comment {
+        val comment = commentRemoteDataSource.updateLikeComment(commentId)
+        val openGraph = openGraphRemoteDataSource.getOpenGraph(url = comment.content.findWebLink())
 
-    override fun deleteComment(commentId: String): Flow<Unit> =
-        flow {
-            emit(commentRemoteDataSource.deleteComment(commentId))
-        }
+        return comment.asItem(openGraph)
+    }
 
-    override fun createNoticeComment(
+    override suspend fun deleteComment(commentId: String) {
+        commentRemoteDataSource.deleteComment(commentId)
+    }
+
+    override suspend fun createNoticeComment(
         noticeId: String,
         content: String,
-    ): Flow<NoticeComment> =
-        flow {
-            val comment =
-                commentRemoteDataSource
-                    .createNoticeComment(
-                        postId = noticeId,
-                        params = jsonOf(KEY_CONTENTS to content),
-                    )
-            val openGraph =
-                openGraphRemoteDataSource
-                    .getOpenGraph(url = comment.content.findWebLink())
+    ): NoticeComment {
+        val comment =
+            commentRemoteDataSource
+                .createNoticeComment(
+                    postId = noticeId,
+                    params = jsonOf(KEY_CONTENTS to content),
+                )
+        val openGraph =
+            openGraphRemoteDataSource
+                .getOpenGraph(url = comment.content.findWebLink())
 
-            emit(comment.asItem(openGraph))
-        }
+        return comment.asItem(openGraph)
+    }
 
-    override fun updateNoticeComment(
+    override suspend fun updateNoticeComment(
         commentId: String,
         content: String,
-    ): Flow<NoticeComment> =
-        flow {
-            val comment =
-                commentRemoteDataSource
-                    .updateNoticeComment(
-                        commentId = commentId,
-                        params = jsonOf(KEY_CONTENTS to content),
-                    )
-            val openGraph =
-                openGraphRemoteDataSource
-                    .getOpenGraph(url = comment.content.findWebLink())
+    ): NoticeComment {
+        val comment =
+            commentRemoteDataSource
+                .updateNoticeComment(
+                    commentId = commentId,
+                    params = jsonOf(KEY_CONTENTS to content),
+                )
+        val openGraph =
+            openGraphRemoteDataSource
+                .getOpenGraph(url = comment.content.findWebLink())
 
-            emit(comment.asItem(openGraph))
-        }
+        return comment.asItem(openGraph)
+    }
 
-    override fun reportComment(commentId: String): Flow<Unit> =
-        flow {
-            emit(commentRemoteDataSource.reportComment(jsonOf(KEY_COMMENT_ID to commentId, KEY_REASON to "")))
-        }
+    override suspend fun reportComment(commentId: String) {
+        commentRemoteDataSource.reportComment(jsonOf(KEY_COMMENT_ID to commentId, KEY_REASON to ""))
+    }
 
     private fun String.findWebLink(): String? {
         val urlPattern =

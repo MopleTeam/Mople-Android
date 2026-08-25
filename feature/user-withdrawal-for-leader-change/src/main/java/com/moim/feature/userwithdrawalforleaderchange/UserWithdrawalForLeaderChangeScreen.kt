@@ -39,10 +39,14 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.ui.view.FadeAnimatedVisibility
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.showToast
+import com.moim.feature.userwithdrawalforleaderchange.model.UserWithdrawalForLeaderChangeIntent
+import com.moim.feature.userwithdrawalforleaderchange.model.UserWithdrawalForLeaderChangeSideEffect
+import com.moim.feature.userwithdrawalforleaderchange.model.UserWithdrawalForLeaderChangeState
 import com.moim.feature.userwithdrawalforleaderchange.ui.MeetingItem
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun UserWithdrawalForLeaderChangeRoute(
@@ -54,49 +58,47 @@ fun UserWithdrawalForLeaderChangeRoute(
 ) {
     val context = LocalContext.current
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is UserWithdrawalForLeaderChangeUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is UserWithdrawalForLeaderChangeSideEffect.NavigateToBack -> {
                 navigateToBack()
             }
 
-            is UserWithdrawalForLeaderChangeUiEvent.NavigateToParticipantsForLeaderChange -> {
-                navigateToParticipantsForLeaderChange(ViewIdType.MeetId(event.meetId))
+            is UserWithdrawalForLeaderChangeSideEffect.NavigateToParticipantsForLeaderChange -> {
+                navigateToParticipantsForLeaderChange(ViewIdType.MeetId(sideEffect.meetId))
             }
 
-            is UserWithdrawalForLeaderChangeUiEvent.NavigateToExit -> {
+            is UserWithdrawalForLeaderChangeSideEffect.NavigateToExit -> {
                 navigateToExit()
             }
 
-            is UserWithdrawalForLeaderChangeUiEvent.ShowServerErrorMessage -> {
+            is UserWithdrawalForLeaderChangeSideEffect.ShowServerErrorMessage -> {
                 showToast(context, R.string.common_error_disconnection)
             }
 
-            is UserWithdrawalForLeaderChangeUiEvent.ShowNetworkErrorMessage -> {
+            is UserWithdrawalForLeaderChangeSideEffect.ShowNetworkErrorMessage -> {
                 showToast(context, R.string.common_error_network)
             }
         }
     }
 
-    (uiState as? UserWithdrawalForLeaderChangeUiState)?.let { uiState ->
-        UserWithdrawalForLeaderChangeScreen(
-            uiState = uiState,
-            isLoading = isLoading,
-            modifier = modifier,
-            onUiAction = viewModel::onUiAction,
-        )
-    }
+    UserWithdrawalForLeaderChangeScreen(
+        uiState = uiState,
+        isLoading = isLoading,
+        modifier = modifier,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 private fun UserWithdrawalForLeaderChangeScreen(
-    uiState: UserWithdrawalForLeaderChangeUiState,
+    uiState: UserWithdrawalForLeaderChangeState,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
-    onUiAction: (UserWithdrawalForLeaderChangeUiAction) -> Unit,
+    onIntent: (UserWithdrawalForLeaderChangeIntent) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val paging = uiState.pagingInfo
@@ -112,7 +114,7 @@ private fun UserWithdrawalForLeaderChangeScreen(
             ) {
                 MoimTopAppbar(
                     onClickNavigate = {
-                        onUiAction(UserWithdrawalForLeaderChangeUiAction.OnClickBack)
+                        onIntent(UserWithdrawalForLeaderChangeIntent.BackClick)
                     },
                 )
                 Text(
@@ -136,22 +138,22 @@ private fun UserWithdrawalForLeaderChangeScreen(
                 modifier = contentModifier,
                 contentAlignment = Alignment.Center,
             ) {
-                FadeAnimatedVisibility(paging.isLoading) {
+                FadeAnimatedVisibility(uiState.isLoading) {
                     LoadingScreen()
                 }
 
-                FadeAnimatedVisibility(paging.isError) {
+                FadeAnimatedVisibility(uiState.isError) {
                     ErrorScreen {
-                        onUiAction(UserWithdrawalForLeaderChangeUiAction.OnClickRefresh)
+                        onIntent(UserWithdrawalForLeaderChangeIntent.RefreshClick)
                     }
                 }
 
-                FadeAnimatedVisibility(!paging.isLoading && !paging.isError) {
+                FadeAnimatedVisibility(uiState.isSuccess) {
                     PaginationEffect(
                         listState = listState,
                         threshold = 3,
                         enabled = !paging.isLast && !paging.isErrorFooter,
-                        onNext = { onUiAction(UserWithdrawalForLeaderChangeUiAction.OnLoadNextPage) },
+                        onNext = { onIntent(UserWithdrawalForLeaderChangeIntent.NextPageLoad) },
                     )
 
                     LazyColumn(
@@ -194,7 +196,7 @@ private fun UserWithdrawalForLeaderChangeScreen(
                             MeetingItem(
                                 modifier = Modifier.animateItem(),
                                 meeting = meeting,
-                                onUiAction = onUiAction,
+                                onIntent = onIntent,
                             )
                         }
 
@@ -218,7 +220,7 @@ private fun UserWithdrawalForLeaderChangeScreen(
                                             .animateItem(),
                                     backgroundColor = MoimTheme.colors.bg.secondary,
                                 ) {
-                                    onUiAction(UserWithdrawalForLeaderChangeUiAction.OnClickRefresh)
+                                    onIntent(UserWithdrawalForLeaderChangeIntent.RefreshClick)
                                 }
                             }
                         }
@@ -238,7 +240,7 @@ private fun UserWithdrawalForLeaderChangeScreen(
                 MoimPrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(R.string.user_withdrawal_for_leader_change_exit),
-                    onClick = { onUiAction(UserWithdrawalForLeaderChangeUiAction.OnShowUserDeleteDialog(true)) },
+                    onClick = { onIntent(UserWithdrawalForLeaderChangeIntent.UserDeleteDialogShow(true)) },
                     buttonColors =
                         moimButtomColors().copy(
                             containerColor = MoimTheme.colors.secondary,
@@ -253,26 +255,26 @@ private fun UserWithdrawalForLeaderChangeScreen(
 
     UserDeleteDialog(
         isShow = uiState.isShowExitDialog,
-        onUiAction = onUiAction,
+        onIntent = onIntent,
     )
 }
 
 @Composable
 private fun UserDeleteDialog(
     isShow: Boolean,
-    onUiAction: (UserWithdrawalForLeaderChangeUiAction) -> Unit,
+    onIntent: (UserWithdrawalForLeaderChangeIntent) -> Unit,
 ) {
     if (!isShow) return
-    val dismissAction = UserWithdrawalForLeaderChangeUiAction.OnShowUserDeleteDialog(false)
+    val dismissIntent = UserWithdrawalForLeaderChangeIntent.UserDeleteDialogShow(false)
     MoimAlertDialog(
         title = stringResource(R.string.user_withdrawal_for_leader_change_dialog_title),
         positiveText = stringResource(R.string.common_positive),
         negativeText = stringResource(R.string.common_cancel),
         onClickPositive = {
-            onUiAction(dismissAction)
-            onUiAction(UserWithdrawalForLeaderChangeUiAction.OnClickUserDelete)
+            onIntent(dismissIntent)
+            onIntent(UserWithdrawalForLeaderChangeIntent.UserDeleteClick)
         },
-        onClickNegative = { onUiAction(dismissAction) },
-        onDismiss = { onUiAction(dismissAction) },
+        onClickNegative = { onIntent(dismissIntent) },
+        onDismiss = { onIntent(dismissIntent) },
     )
 }

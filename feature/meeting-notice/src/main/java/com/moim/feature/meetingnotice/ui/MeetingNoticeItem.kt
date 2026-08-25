@@ -37,7 +37,7 @@ import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meetingnotice.MeetingNoticeUiAction
+import com.moim.feature.meetingnotice.model.MeetingNoticeIntent
 import com.moim.feature.meetingnotice.model.NoticeUiModel
 import java.time.ZonedDateTime
 import kotlin.math.roundToInt
@@ -55,7 +55,7 @@ fun MeetingNoticeItem(
     isHostUser: Boolean,
     openedNoticeId: String?,
     onOpenedChange: (String?) -> Unit,
-    onUiAction: (MeetingNoticeUiAction) -> Unit,
+    onIntent: (MeetingNoticeIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // 모임장만, 그리고 System이 아닌 Custom 공지만 고정할 수 있으므로 이 경우에만 드래그를 허용한다.
@@ -93,7 +93,7 @@ fun MeetingNoticeItem(
             PinAction(
                 pinned = notice.pinned,
                 onClick = {
-                    onUiAction(MeetingNoticeUiAction.OnClickPin(notice))
+                    onIntent(MeetingNoticeIntent.PinClick(notice))
                     // 고정/해제 실행 후 열린 스와이프를 닫는다.
                     onOpenedChange(null)
                 },
@@ -110,7 +110,7 @@ fun MeetingNoticeItem(
                         enabled = canPin,
                     ).fillMaxWidth()
                     .background(MoimTheme.colors.bg.primary)
-                    .onSingleClick { onUiAction(MeetingNoticeUiAction.OnClickNotice(notice)) }
+                    .onSingleClick { onIntent(MeetingNoticeIntent.NoticeClick(notice)) }
                     .padding(20.dp),
         ) {
             if (notice.pinned) {
@@ -224,14 +224,14 @@ private fun MeetingNoticeItemPreview() {
                 isHostUser = true,
                 openedNoticeId = null,
                 onOpenedChange = {},
-                onUiAction = {},
+                onIntent = {},
             )
             MeetingNoticeItem(
                 notice = notice.copy(type = NoticeType.SYSTEM, pinned = false),
                 isHostUser = true,
                 openedNoticeId = null,
                 onOpenedChange = {},
-                onUiAction = {},
+                onIntent = {},
             )
         }
     }

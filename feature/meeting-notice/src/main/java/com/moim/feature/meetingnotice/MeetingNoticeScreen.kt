@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.User
 import com.moim.core.designsystem.R
@@ -37,13 +36,18 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.view.FadeAnimatedVisibility
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.showToast
+import com.moim.feature.meetingnotice.model.MeetingNoticeIntent
+import com.moim.feature.meetingnotice.model.MeetingNoticeSideEffect
+import com.moim.feature.meetingnotice.model.MeetingNoticeState
+import com.moim.feature.meetingnotice.model.NoticeTabState
 import com.moim.feature.meetingnotice.model.NoticeUiModel
 import com.moim.feature.meetingnotice.ui.MeetingNoticeItem
 import com.moim.feature.meetingnotice.ui.MeetingNoticeTabPager
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 import java.time.ZonedDateTime
 
 @Composable
@@ -56,30 +60,30 @@ fun MeetingNoticeRoute(
 ) {
     val context = LocalContext.current
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
-    val noticeUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is MeetingNoticeUiEvent.NavigateToBack -> navigateToBack()
-            is MeetingNoticeUiEvent.NavigateToMeetingNoticeWrite -> navigateToMeetingNoticeWrite(event.meetId)
-            is MeetingNoticeUiEvent.NavigateToMeetingNoticeDetail -> navigateToMeetingNoticeDetail(event.meetId, event.noticeId)
-            is MeetingNoticeUiEvent.ShowToastMessage -> showToast(context, event.message)
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MeetingNoticeSideEffect.NavigateToBack -> navigateToBack()
+            is MeetingNoticeSideEffect.NavigateToMeetingNoticeWrite -> navigateToMeetingNoticeWrite(sideEffect.meetId)
+            is MeetingNoticeSideEffect.NavigateToMeetingNoticeDetail ->
+                navigateToMeetingNoticeDetail(sideEffect.meetId, sideEffect.noticeId)
+
+            is MeetingNoticeSideEffect.ShowToastMessage -> showToast(context, sideEffect.message)
         }
     }
 
-    (noticeUiState as? MeetingNoticeUiState)?.let { uiState ->
-        MeetingNoticeScreen(
-            modifier = modifier,
-            uiState = uiState,
-            onUiAction = viewModel::onUiAction,
-        )
-    }
+    MeetingNoticeScreen(
+        modifier = modifier,
+        uiState = uiState,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 private fun MeetingNoticeScreen(
-    uiState: MeetingNoticeUiState,
-    onUiAction: (MeetingNoticeUiAction) -> Unit,
+    uiState: MeetingNoticeState,
+    onIntent: (MeetingNoticeIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val paging = uiState.currentTab.pagingInfo
@@ -94,7 +98,7 @@ private fun MeetingNoticeScreen(
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
-            onUiAction(MeetingNoticeUiAction.OnTabSelected(page))
+            onIntent(MeetingNoticeIntent.TabSelect(page))
         }
     }
 
@@ -103,13 +107,13 @@ private fun MeetingNoticeScreen(
         backgroundColor = MoimTheme.colors.bg.primary,
         topBar = {
             MoimTopAppbar(
-                onClickNavigate = { onUiAction(MeetingNoticeUiAction.OnClickBack) },
+                onClickNavigate = { onIntent(MeetingNoticeIntent.BackClick) },
                 actions = {
                     if (uiState.isHostUser) {
                         MoimIconButton(
                             iconRes = R.drawable.ic_pen,
                             iconSize = 40.dp,
-                            onClick = { onUiAction(MeetingNoticeUiAction.OnClickWrite) },
+                            onClick = { onIntent(MeetingNoticeIntent.WriteClick) },
                         )
                     }
                 },
@@ -130,22 +134,22 @@ private fun MeetingNoticeScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    FadeAnimatedVisibility(paging.isLoading) {
+                    FadeAnimatedVisibility(uiState.isLoading) {
                         LoadingScreen()
                     }
 
-                    FadeAnimatedVisibility(paging.isError) {
+                    FadeAnimatedVisibility(uiState.isError) {
                         ErrorScreen {
-                            onUiAction(MeetingNoticeUiAction.OnClickRefresh)
+                            onIntent(MeetingNoticeIntent.RefreshClick)
                         }
                     }
 
-                    FadeAnimatedVisibility(paging.isSuccess) {
+                    FadeAnimatedVisibility(uiState.isSuccess) {
                         PaginationEffect(
                             listState = currentListState,
                             threshold = 3,
                             enabled = !paging.isLast && !paging.isErrorFooter,
-                            onNext = { onUiAction(MeetingNoticeUiAction.OnLoadNextPage) },
+                            onNext = { onIntent(MeetingNoticeIntent.NextPageLoad) },
                         )
 
                         HorizontalPager(
@@ -166,7 +170,7 @@ private fun MeetingNoticeScreen(
                                         isHostUser = uiState.isHostUser,
                                         openedNoticeId = openedNoticeId,
                                         onOpenedChange = { openedNoticeId = it },
-                                        onUiAction = onUiAction,
+                                        onIntent = onIntent,
                                     )
                                 }
                             }
@@ -213,7 +217,7 @@ private fun MeetingNoticeScreenPreview() {
 
         MeetingNoticeScreen(
             uiState =
-                MeetingNoticeUiState(
+                MeetingNoticeState(
                     user = User(userId = "", nickname = ""),
                     isHostUser = true,
                     tabStates =
@@ -226,7 +230,7 @@ private fun MeetingNoticeScreenPreview() {
                                 ),
                         ),
                 ),
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

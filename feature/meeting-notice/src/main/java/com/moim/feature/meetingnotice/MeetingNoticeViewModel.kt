@@ -1,50 +1,49 @@
 package com.moim.feature.meetingnotice
 
 import androidx.lifecycle.viewModelScope
-import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Notice
 import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.PaginationContainer
-import com.moim.core.common.model.User
-import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.notice.NoticeRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.NoticeAction
 import com.moim.core.ui.eventbus.actionStateIn
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.isActiveCheck
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
-import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
+import com.moim.feature.meetingnotice.model.MeetingNoticeIntent
+import com.moim.feature.meetingnotice.model.MeetingNoticeSideEffect
+import com.moim.feature.meetingnotice.model.MeetingNoticeState
+import com.moim.feature.meetingnotice.model.NoticeTabState
 import com.moim.feature.meetingnotice.model.NoticeUiModel
 import com.moim.feature.meetingnotice.model.asUiModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.syntax.Syntax
 import java.io.IOException
 
 @HiltViewModel(assistedFactory = MeetingNoticeViewModel.Factory::class)
 class MeetingNoticeViewModel @AssistedInject constructor(
-    userRepository: UserRepository,
+    private val userRepository: UserRepository,
     private val meetingRepository: MeetingRepository,
     private val noticeRepository: NoticeRepository,
     @Assisted val meetingNoticeRoute: DetailRoute.MeetingNotice,
     noticeEventBus: EventBus<NoticeAction>,
-) : BaseViewModel() {
+) : MVIViewModel<MeetingNoticeState, MeetingNoticeSideEffect>(MeetingNoticeState()) {
     private val pagingJobs = mutableMapOf<Int, Job?>()
     private val meetingId = meetingNoticeRoute.meetId
 
@@ -54,22 +53,9 @@ class MeetingNoticeViewModel @AssistedInject constructor(
             .actionStateIn(viewModelScope, NoticeAction.None)
 
     init {
-        viewModelScope.launch {
-            launch {
-                val user = userRepository.getUser().first()
-                val meeting = runCatching { meetingRepository.getMeeting(meetingId).first() }.getOrNull()
-
-                setUiState(
-                    MeetingNoticeUiState(
-                        user = user,
-                        isHostUser = meeting?.hostId == user.userId,
-                    ),
-                )
-                getNotices(tabIndex = 0)
-            }
-
-            launch {
-                noticeActionReceiver.collect { action ->
+        noticeActionReceiver
+            .onEach { action ->
+                intent {
                     when (action) {
                         is NoticeAction.NoticeCreate -> applyNoticeCreate(action.notice)
                         is NoticeAction.NoticeUpdate -> applyNoticeUpdate(action.notice)
@@ -77,59 +63,76 @@ class MeetingNoticeViewModel @AssistedInject constructor(
                         is NoticeAction.None -> Unit
                     }
                 }
-            }
-        }
+            }.launchIn(viewModelScope)
     }
 
-    fun onUiAction(uiAction: MeetingNoticeUiAction) {
-        when (uiAction) {
-            is MeetingNoticeUiAction.OnClickBack -> {
-                setUiEvent(MeetingNoticeUiEvent.NavigateToBack)
-            }
+    override suspend fun Syntax<MeetingNoticeState, MeetingNoticeSideEffect>.onContainerCreate() {
+        val user = userRepository.getUser().first()
+        val meeting = runCatching { meetingRepository.getMeeting(meetingId) }.getOrNull()
 
-            is MeetingNoticeUiAction.OnClickWrite -> {
-                setUiEvent(MeetingNoticeUiEvent.NavigateToMeetingNoticeWrite(meetingId))
-            }
+        reduce {
+            state.copy(
+                user = user,
+                isHostUser = meeting?.hostId == user.userId,
+            )
+        }
 
-            is MeetingNoticeUiAction.OnClickRefresh -> {
-                val current = uiState.value as? MeetingNoticeUiState ?: return
-                getNotices(tabIndex = current.selectedTabIndex)
-            }
+        getNotices(tabIndex = 0)
+    }
 
-            is MeetingNoticeUiAction.OnLoadNextPage -> {
-                val current = uiState.value as? MeetingNoticeUiState ?: return
-                getNotices(
-                    tabIndex = current.selectedTabIndex,
-                    cursor = current.currentTab.pagingInfo.nextCursor,
-                )
-            }
+    override fun onIntent(intent: Intent) {
+        if (intent !is MeetingNoticeIntent) {
+            super.onIntent(intent)
+            return
+        }
 
-            is MeetingNoticeUiAction.OnTabSelected -> {
-                val current = uiState.value as? MeetingNoticeUiState ?: return
-                if (current.selectedTabIndex == uiAction.tabIndex) return
-                setUiState(current.copy(selectedTabIndex = uiAction.tabIndex))
-
-                // 이미 불러온 탭이면 캐시를 그대로 사용하고, 처음 보는 탭만 새로 불러온다.
-                val tab = current.tabStates[uiAction.tabIndex]
-                if (tab == null || !tab.isLoaded) {
-                    getNotices(tabIndex = uiAction.tabIndex)
+        intent {
+            when (intent) {
+                is MeetingNoticeIntent.BackClick -> {
+                    postSideEffect(MeetingNoticeSideEffect.NavigateToBack)
                 }
-            }
 
-            is MeetingNoticeUiAction.OnClickNotice -> {
-                setUiEvent(
-                    MeetingNoticeUiEvent.NavigateToMeetingNoticeDetail(
-                        meetId = uiAction.notice.meetId,
-                        noticeId = uiAction.notice.noticeId,
-                    ),
-                )
-            }
+                is MeetingNoticeIntent.WriteClick -> {
+                    postSideEffect(MeetingNoticeSideEffect.NavigateToMeetingNoticeWrite(meetingId))
+                }
 
-            is MeetingNoticeUiAction.OnClickPin -> {
-                setPinNotice(
-                    noticeId = uiAction.notice.noticeId,
-                    isPin = !uiAction.notice.pinned,
-                )
+                is MeetingNoticeIntent.RefreshClick -> {
+                    getNotices(tabIndex = state.selectedTabIndex)
+                }
+
+                is MeetingNoticeIntent.NextPageLoad -> {
+                    getNotices(
+                        tabIndex = state.selectedTabIndex,
+                        cursor = state.currentTab.pagingInfo.nextCursor,
+                    )
+                }
+
+                is MeetingNoticeIntent.TabSelect -> {
+                    if (state.selectedTabIndex == intent.tabIndex) return@intent
+                    reduce { state.copy(selectedTabIndex = intent.tabIndex) }
+
+                    // 이미 불러온 탭이면 캐시를 그대로 사용하고, 처음 보는 탭만 새로 불러온다.
+                    val tab = state.tabStates[intent.tabIndex]
+                    if (tab == null || !tab.isLoaded) {
+                        getNotices(tabIndex = intent.tabIndex)
+                    }
+                }
+
+                is MeetingNoticeIntent.NoticeClick -> {
+                    postSideEffect(
+                        MeetingNoticeSideEffect.NavigateToMeetingNoticeDetail(
+                            meetId = intent.notice.meetId,
+                            noticeId = intent.notice.noticeId,
+                        ),
+                    )
+                }
+
+                is MeetingNoticeIntent.PinClick -> {
+                    setPinNotice(
+                        noticeId = intent.notice.noticeId,
+                        isPin = !intent.notice.pinned,
+                    )
+                }
             }
         }
     }
@@ -140,15 +143,15 @@ class MeetingNoticeViewModel @AssistedInject constructor(
     ) {
         if (pagingJobs[tabIndex].isActiveCheck()) return
         pagingJobs[tabIndex] =
-            viewModelScope.launch {
+            intent {
                 handlePagingData(
                     tabIndex = tabIndex,
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         noticeRepository.getNotices(
                             meetId = meetingId,
@@ -158,150 +161,141 @@ class MeetingNoticeViewModel @AssistedInject constructor(
                         )
                     }.getOrNull()
 
-                if (!isActive) return@launch
+                if (!currentCoroutineContext().isActive) return@intent
 
                 handlePagingData(
                     tabIndex = tabIndex,
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
             }
     }
 
-    private fun handlePagingData(
+    private suspend fun Syntax<MeetingNoticeState, MeetingNoticeSideEffect>.handlePagingData(
         tabIndex: Int,
-        pagingInfo: PaginationContainer<List<Notice>>?,
+        pagingData: PaginationContainer<List<Notice>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<MeetingNoticeUiState> {
-            val tab = tabStates[tabIndex] ?: NoticeTabState()
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = tab.pagingInfo,
-                    currentItems = tab.notices,
-                    isInitialLoad = cursor == null,
-                    transform = { notices -> notices.map { it.asUiModel() } },
-                )
+        val tab = state.tabStates[tabIndex] ?: NoticeTabState()
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = tab.pagingInfo,
+                currentItems = tab.notices,
+                isInitialLoad = cursor == null,
+                transform = { notices -> notices.map { it.asUiModel() } },
+            )
 
-            val updatedTab =
+        val updatedTab =
+            tab.copy(
+                pagingInfo = result.pagingInfo,
+                notices = result.items,
+                // 로드가 성공적으로 끝난 시점에 캐시됨으로 표시
+                isLoaded = tab.isLoaded || (!isLoading && pagingData != null),
+            )
+
+        reduce { state.copy(tabStates = state.tabStates + (tabIndex to updatedTab)) }
+    }
+
+    private suspend fun Syntax<MeetingNoticeState, MeetingNoticeSideEffect>.applyNoticeCreate(notice: Notice) {
+        if (notice.meetId != meetingId) return
+
+        val uiModel = notice.asUiModel()
+        // 로드된 탭들 중 필터 조건에 맞는 탭에만 새 공지를 삽입
+        val updated =
+            state.tabStates.mapValues { (tabIndex, tab) ->
+                if (!tab.isLoaded) return@mapValues tab
+                if (tab.notices.any { it.noticeId == uiModel.noticeId }) return@mapValues tab
+
+                val filter = filterTypeOf(tabIndex)
+                if (filter != null && filter != uiModel.type) return@mapValues tab
+
+                // 고정 공지 묶음 아래에 새 공지를 삽입
+                val insertIndex = tab.notices.indexOfLast { it.pinned } + 1
                 tab.copy(
-                    pagingInfo = result.pagingInfo,
-                    notices = result.items,
-                    // 로드가 성공적으로 끝난 시점에 캐시됨으로 표시
-                    isLoaded = tab.isLoaded || (!isLoading && pagingInfo != null),
+                    notices = tab.notices.toMutableList().apply { add(insertIndex, uiModel) },
                 )
+            }
 
-            setUiState(copy(tabStates = tabStates + (tabIndex to updatedTab)))
-        }
+        reduce { state.copy(tabStates = updated) }
     }
 
-    private fun applyNoticeCreate(notice: Notice) {
-        uiState.checkState<MeetingNoticeUiState> {
-            if (notice.meetId != meetingId) return@checkState
-
-            val uiModel = notice.asUiModel()
-            // 로드된 탭들 중 필터 조건에 맞는 탭에만 새 공지를 삽입
-            val updated =
-                tabStates.mapValues { (tabIndex, tab) ->
-                    if (!tab.isLoaded) return@mapValues tab
-                    if (tab.notices.any { it.noticeId == uiModel.noticeId }) return@mapValues tab
-
-                    val filter = filterTypeOf(tabIndex)
-                    if (filter != null && filter != uiModel.type) return@mapValues tab
-
-                    // 고정 공지 묶음 아래에 새 공지를 삽입
-                    val insertIndex = tab.notices.indexOfLast { it.pinned } + 1
-                    tab.copy(
-                        notices = tab.notices.toMutableList().apply { add(insertIndex, uiModel) },
-                    )
+    private suspend fun Syntax<MeetingNoticeState, MeetingNoticeSideEffect>.applyNoticeUpdate(notice: Notice) {
+        val uiModel = notice.asUiModel()
+        val updated =
+            state.tabStates.mapValues { (_, tab) ->
+                if (tab.notices.none { it.noticeId == uiModel.noticeId }) {
+                    tab
+                } else {
+                    tab.copy(notices = tab.notices.map { if (it.noticeId == uiModel.noticeId) uiModel else it })
                 }
-            setUiState(copy(tabStates = updated))
-        }
+            }
+
+        reduce { state.copy(tabStates = updated) }
     }
 
-    private fun applyNoticeUpdate(notice: Notice) {
-        uiState.checkState<MeetingNoticeUiState> {
-            val uiModel = notice.asUiModel()
-            val updated =
-                tabStates.mapValues { (_, tab) ->
-                    if (tab.notices.none { it.noticeId == uiModel.noticeId }) {
-                        tab
-                    } else {
-                        tab.copy(notices = tab.notices.map { if (it.noticeId == uiModel.noticeId) uiModel else it })
-                    }
-                }
-            setUiState(copy(tabStates = updated))
-        }
+    private suspend fun Syntax<MeetingNoticeState, MeetingNoticeSideEffect>.applyNoticeDelete(noticeId: String) {
+        val updated =
+            state.tabStates.mapValues { (_, tab) ->
+                val filtered = tab.notices.filterNot { it.noticeId == noticeId }
+                if (filtered.size == tab.notices.size) tab else tab.copy(notices = filtered)
+            }
+
+        reduce { state.copy(tabStates = updated) }
     }
 
-    private fun applyNoticeDelete(noticeId: String) {
-        uiState.checkState<MeetingNoticeUiState> {
-            val updated =
-                tabStates.mapValues { (_, tab) ->
-                    val filtered = tab.notices.filterNot { it.noticeId == noticeId }
-                    if (filtered.size == tab.notices.size) tab else tab.copy(notices = filtered)
-                }
-            setUiState(copy(tabStates = updated))
-        }
-    }
-
-    private fun setPinNotice(
+    private suspend fun Syntax<MeetingNoticeState, MeetingNoticeSideEffect>.setPinNotice(
         noticeId: String,
         isPin: Boolean,
     ) {
-        viewModelScope.launch {
-            if (isPin) {
-                noticeRepository.pinNotice(noticeId = noticeId)
-            } else {
-                noticeRepository.unpinNotice(noticeId = noticeId)
-            }.asResult()
-                .onEach { setLoading(it is Result.Loading) }
-                .collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            return@collect
-                        }
+        setLoading(true)
 
-                        is Result.Success -> {
-                            applyNoticePinned(result.data)
-                        }
-
-                        is Result.Error -> {
-                            when (result.exception) {
-                                is IOException -> setUiEvent(MeetingNoticeUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                is NetworkException -> setUiEvent(MeetingNoticeUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                            }
-                        }
-                    }
+        try {
+            val notice =
+                if (isPin) {
+                    noticeRepository.pinNotice(noticeId = noticeId)
+                } else {
+                    noticeRepository.unpinNotice(noticeId = noticeId)
                 }
+
+            applyNoticePinned(notice)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun applyNoticePinned(notice: Notice) {
-        uiState.checkState<MeetingNoticeUiState> {
-            val uiModel = notice.asUiModel()
-            val updated =
-                tabStates.mapValues { (_, tab) ->
-                    if (tab.notices.none { it.noticeId == uiModel.noticeId }) {
-                        tab
-                    } else {
-                        // 고정 상태를 반영한 뒤 고정 공지가 항상 위로 오도록 재정렬한다.
-                        val reordered =
-                            tab.notices
-                                .map { if (it.noticeId == uiModel.noticeId) uiModel else it }
-                                .sortedWith(
-                                    compareByDescending<NoticeUiModel> { it.pinned }
-                                        .thenByDescending { it.createdAt },
-                                )
-                        tab.copy(notices = reordered)
-                    }
+    private suspend fun Syntax<MeetingNoticeState, MeetingNoticeSideEffect>.applyNoticePinned(notice: Notice) {
+        val uiModel = notice.asUiModel()
+        val updated =
+            state.tabStates.mapValues { (_, tab) ->
+                if (tab.notices.none { it.noticeId == uiModel.noticeId }) {
+                    tab
+                } else {
+                    // 고정 상태를 반영한 뒤 고정 공지가 항상 위로 오도록 재정렬한다.
+                    val reordered =
+                        tab.notices
+                            .map { if (it.noticeId == uiModel.noticeId) uiModel else it }
+                            .sortedWith(
+                                compareByDescending<NoticeUiModel> { it.pinned }
+                                    .thenByDescending { it.createdAt },
+                            )
+                    tab.copy(notices = reordered)
                 }
-            setUiState(copy(tabStates = updated))
-        }
+            }
+
+        reduce { state.copy(tabStates = updated) }
+    }
+
+    private suspend fun Syntax<MeetingNoticeState, MeetingNoticeSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(MeetingNoticeSideEffect.ShowToastMessage(message))
     }
 
     private fun filterTypeOf(tabIndex: Int): NoticeType? =
@@ -323,58 +317,3 @@ class MeetingNoticeViewModel @AssistedInject constructor(
 }
 
 const val MEETING_NOTICE_TAB_COUNT = 3
-
-data class MeetingNoticeUiState(
-    val user: User = User(userId = ""),
-    val isHostUser: Boolean = false,
-    val selectedTabIndex: Int = 0,
-    val tabStates: Map<Int, NoticeTabState> = emptyMap(),
-) : UiState {
-    val currentTab: NoticeTabState
-        get() = tabStates[selectedTabIndex] ?: NoticeTabState()
-}
-
-data class NoticeTabState(
-    val notices: List<NoticeUiModel> = emptyList(),
-    val pagingInfo: PagingUiState = PagingUiState(),
-    val isLoaded: Boolean = false,
-)
-
-sealed interface MeetingNoticeUiAction : UiAction {
-    data object OnClickBack : MeetingNoticeUiAction
-
-    data object OnClickWrite : MeetingNoticeUiAction
-
-    data object OnClickRefresh : MeetingNoticeUiAction
-
-    data class OnClickNotice(
-        val notice: NoticeUiModel,
-    ) : MeetingNoticeUiAction
-
-    data class OnClickPin(
-        val notice: NoticeUiModel,
-    ) : MeetingNoticeUiAction
-
-    data object OnLoadNextPage : MeetingNoticeUiAction
-
-    data class OnTabSelected(
-        val tabIndex: Int,
-    ) : MeetingNoticeUiAction
-}
-
-sealed interface MeetingNoticeUiEvent : UiEvent {
-    data object NavigateToBack : MeetingNoticeUiEvent
-
-    data class NavigateToMeetingNoticeWrite(
-        val meetId: String,
-    ) : MeetingNoticeUiEvent
-
-    data class NavigateToMeetingNoticeDetail(
-        val meetId: String,
-        val noticeId: String,
-    ) : MeetingNoticeUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : MeetingNoticeUiEvent
-}

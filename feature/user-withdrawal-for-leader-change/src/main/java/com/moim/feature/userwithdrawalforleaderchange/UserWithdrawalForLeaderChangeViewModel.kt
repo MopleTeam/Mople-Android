@@ -3,27 +3,25 @@ package com.moim.feature.userwithdrawalforleaderchange
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.PaginationContainer
-import com.moim.core.common.model.User
-import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.util.isActiveCheck
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
-import com.moim.core.ui.view.PagingUiState
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
+import com.moim.feature.userwithdrawalforleaderchange.model.UserWithdrawalForLeaderChangeIntent
+import com.moim.feature.userwithdrawalforleaderchange.model.UserWithdrawalForLeaderChangeSideEffect
+import com.moim.feature.userwithdrawalforleaderchange.model.UserWithdrawalForLeaderChangeState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import okio.IOException
+import org.orbitmvi.orbit.syntax.Syntax
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,86 +29,83 @@ class UserWithdrawalForLeaderChangeViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val meetingRepository: MeetingRepository,
     meetingEventBus: EventBus<MeetingAction>,
-) : BaseViewModel() {
+) : MVIViewModel<UserWithdrawalForLeaderChangeState, UserWithdrawalForLeaderChangeSideEffect>(
+        UserWithdrawalForLeaderChangeState(),
+    ) {
     private var pagingJob: Job? = null
 
     init {
-        viewModelScope.launch {
-            launch {
-                val user = userRepository.getUser().first()
-                setUiState(UserWithdrawalForLeaderChangeUiState(user = user))
-                getMeetings()
-            }
+        meetingEventBus.action
+            .onEach { action ->
+                intent {
+                    when (action) {
+                        is MeetingAction.MeetingUpdate -> {
+                            val meetings =
+                                state.meetings
+                                    .map { meeting ->
+                                        if (meeting.id == action.meeting.id) action.meeting else meeting
+                                    }.filter { it.hostId != state.user.userId }
 
-            launch {
-                meetingEventBus.action.collect { action ->
-                    uiState.checkState<UserWithdrawalForLeaderChangeUiState> {
-                        when (action) {
-                            is MeetingAction.MeetingUpdate -> {
-                                val meetings =
-                                    meetings
-                                        .map { meeting ->
-                                            if (meeting.id == action.meeting.id) {
-                                                action.meeting
-                                            } else {
-                                                meeting
-                                            }
-                                        }.filter {
-                                            it.hostId != user.userId
-                                        }
+                            reduce { state.copy(meetings = meetings) }
+                        }
 
-                                setUiState(copy(meetings = meetings))
-                            }
+                        is MeetingAction.MeetingDelete -> {
+                            val meetings = state.meetings.filterNot { it.id == action.meetId }
 
-                            is MeetingAction.MeetingInvalidate -> {
-                                getMeetings()
-                            }
+                            reduce { state.copy(meetings = meetings) }
+                        }
 
-                            is MeetingAction.MeetingDelete -> {
-                                val meetings =
-                                    meetings
-                                        .toMutableList()
-                                        .apply { removeIf { it.id == action.meetId } }
+                        is MeetingAction.MeetingInvalidate -> {
+                            getMeetings()
+                        }
 
-                                setUiState(copy(meetings = meetings))
-                            }
-
-                            else -> {
-                                return@collect
-                            }
+                        else -> {
+                            return@intent
                         }
                     }
                 }
-            }
-        }
+            }.launchIn(viewModelScope)
     }
 
-    fun onUiAction(uiAction: UserWithdrawalForLeaderChangeUiAction) {
-        when (uiAction) {
-            is UserWithdrawalForLeaderChangeUiAction.OnClickBack -> {
-                setUiEvent(UserWithdrawalForLeaderChangeUiEvent.NavigateToBack)
-            }
+    override suspend fun Syntax<UserWithdrawalForLeaderChangeState, UserWithdrawalForLeaderChangeSideEffect>.onContainerCreate() {
+        // 모임장 필터링에 필요하므로 목록보다 먼저 채운다.
+        val user = userRepository.getUser().first()
+        reduce { state.copy(user = user) }
 
-            is UserWithdrawalForLeaderChangeUiAction.OnClickUserDelete -> {
-                deleteUser()
-            }
+        getMeetings()
+    }
 
-            is UserWithdrawalForLeaderChangeUiAction.OnClickMeeting -> {
-                setUiEvent(UserWithdrawalForLeaderChangeUiEvent.NavigateToParticipantsForLeaderChange(uiAction.meetId))
-            }
+    override fun onIntent(intent: Intent) {
+        if (intent !is UserWithdrawalForLeaderChangeIntent) {
+            super.onIntent(intent)
+            return
+        }
 
-            is UserWithdrawalForLeaderChangeUiAction.OnShowUserDeleteDialog -> {
-                showDeleteUserDialog(uiAction.isShow)
-            }
+        intent {
+            when (intent) {
+                is UserWithdrawalForLeaderChangeIntent.BackClick -> {
+                    postSideEffect(UserWithdrawalForLeaderChangeSideEffect.NavigateToBack)
+                }
 
-            is UserWithdrawalForLeaderChangeUiAction.OnClickRefresh -> {
-                val uiState = uiState.value as? UserWithdrawalForLeaderChangeUiState ?: return
-                getMeetings(uiState.pagingInfo.nextCursor)
-            }
+                is UserWithdrawalForLeaderChangeIntent.MeetingClick -> {
+                    postSideEffect(
+                        UserWithdrawalForLeaderChangeSideEffect.NavigateToParticipantsForLeaderChange(intent.meetId),
+                    )
+                }
 
-            is UserWithdrawalForLeaderChangeUiAction.OnLoadNextPage -> {
-                val uiState = uiState.value as? UserWithdrawalForLeaderChangeUiState ?: return
-                getMeetings(uiState.pagingInfo.nextCursor)
+                is UserWithdrawalForLeaderChangeIntent.UserDeleteDialogShow -> {
+                    reduce { state.copy(isShowExitDialog = intent.isShow) }
+                }
+
+                is UserWithdrawalForLeaderChangeIntent.UserDeleteClick -> {
+                    deleteUser()
+                }
+
+                is UserWithdrawalForLeaderChangeIntent.RefreshClick,
+                is UserWithdrawalForLeaderChangeIntent.NextPageLoad,
+                -> {
+                    getMeetings(state.pagingInfo.nextCursor)
+                }
             }
         }
     }
@@ -118,14 +113,14 @@ class UserWithdrawalForLeaderChangeViewModel @Inject constructor(
     private fun getMeetings(cursor: String? = null) {
         if (pagingJob.isActiveCheck()) return
         pagingJob =
-            viewModelScope.launch {
+            intent {
                 handlePagingData(
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         meetingRepository.getMeetingsForHost(
                             cursor = cursor ?: "",
@@ -134,112 +129,54 @@ class UserWithdrawalForLeaderChangeViewModel @Inject constructor(
                     }.getOrNull()
 
                 handlePagingData(
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
             }
     }
 
-    private fun handlePagingData(
-        pagingInfo: PaginationContainer<List<Meeting>>?,
+    private suspend fun Syntax<UserWithdrawalForLeaderChangeState, UserWithdrawalForLeaderChangeSideEffect>.handlePagingData(
+        pagingData: PaginationContainer<List<Meeting>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<UserWithdrawalForLeaderChangeUiState> {
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = this.pagingInfo,
-                    currentItems = meetings,
-                    isInitialLoad = cursor == null,
-                    transform = { meetings -> meetings.filter { it.memberCount > 1 } },
-                )
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = state.pagingInfo,
+                currentItems = state.meetings,
+                isInitialLoad = cursor == null,
+                transform = { meetings -> meetings.filter { it.memberCount > 1 } },
+            )
 
-            setUiState(
-                copy(
-                    pagingInfo = result.pagingInfo,
-                    meetings = result.items,
-                ),
+        reduce {
+            state.copy(
+                pagingInfo = result.pagingInfo,
+                meetings = result.items,
             )
         }
     }
 
-    private fun showDeleteUserDialog(isShow: Boolean) {
-        uiState.checkState<UserWithdrawalForLeaderChangeUiState> {
-            setUiState(copy(isShowExitDialog = isShow))
+    private suspend fun Syntax<UserWithdrawalForLeaderChangeState, UserWithdrawalForLeaderChangeSideEffect>.deleteUser() {
+        setLoading(true)
+
+        try {
+            userRepository.deleteUser()
+            userRepository.clearMoimStorage()
+
+            postSideEffect(UserWithdrawalForLeaderChangeSideEffect.NavigateToExit)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (e is IOException) {
+                postSideEffect(UserWithdrawalForLeaderChangeSideEffect.ShowNetworkErrorMessage)
+            } else {
+                postSideEffect(UserWithdrawalForLeaderChangeSideEffect.ShowServerErrorMessage)
+            }
+        } finally {
+            setLoading(false)
         }
     }
-
-    private fun deleteUser() {
-        viewModelScope.launch {
-            userRepository
-                .deleteUser()
-                .asResult()
-                .onEach { result -> setLoading(result is Result.Loading) }
-                .collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            return@collect
-                        }
-
-                        is Result.Success -> {
-                            clearUserData()
-                        }
-
-                        is Result.Error -> {
-                            when (result.exception) {
-                                is IOException -> setUiEvent(UserWithdrawalForLeaderChangeUiEvent.ShowNetworkErrorMessage)
-                                else -> setUiEvent(UserWithdrawalForLeaderChangeUiEvent.ShowServerErrorMessage)
-                            }
-                        }
-                    }
-                }
-        }
-    }
-
-    private suspend fun clearUserData() {
-        userRepository.clearMoimStorage()
-        setUiEvent(UserWithdrawalForLeaderChangeUiEvent.NavigateToExit)
-    }
-}
-
-data class UserWithdrawalForLeaderChangeUiState(
-    val pagingInfo: PagingUiState = PagingUiState(),
-    val user: User,
-    val meetings: List<Meeting> = emptyList(),
-    val isShowExitDialog: Boolean = false,
-) : UiState
-
-sealed interface UserWithdrawalForLeaderChangeUiAction : UiAction {
-    data object OnClickBack : UserWithdrawalForLeaderChangeUiAction
-
-    data class OnClickMeeting(
-        val meetId: String,
-    ) : UserWithdrawalForLeaderChangeUiAction
-
-    data class OnShowUserDeleteDialog(
-        val isShow: Boolean,
-    ) : UserWithdrawalForLeaderChangeUiAction
-
-    data object OnClickUserDelete : UserWithdrawalForLeaderChangeUiAction
-
-    data object OnClickRefresh : UserWithdrawalForLeaderChangeUiAction
-
-    data object OnLoadNextPage : UserWithdrawalForLeaderChangeUiAction
-}
-
-sealed interface UserWithdrawalForLeaderChangeUiEvent : UiEvent {
-    data object NavigateToBack : UserWithdrawalForLeaderChangeUiEvent
-
-    data object NavigateToExit : UserWithdrawalForLeaderChangeUiEvent
-
-    data object ShowNetworkErrorMessage : UserWithdrawalForLeaderChangeUiEvent
-
-    data object ShowServerErrorMessage : UserWithdrawalForLeaderChangeUiEvent
-
-    data class NavigateToParticipantsForLeaderChange(
-        val meetId: String,
-    ) : UserWithdrawalForLeaderChangeUiEvent
 }

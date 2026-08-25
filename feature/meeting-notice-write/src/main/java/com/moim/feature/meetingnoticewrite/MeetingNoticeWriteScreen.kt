@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moim.core.common.result.Result
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.ErrorScreen
@@ -27,8 +27,12 @@ import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.meetingnoticewrite.model.MeetingNoticeWriteIntent
+import com.moim.feature.meetingnoticewrite.model.MeetingNoticeWriteSideEffect
+import com.moim.feature.meetingnoticewrite.model.MeetingNoticeWriteState
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun MeetingNoticeWriteRoute(
@@ -38,29 +42,27 @@ fun MeetingNoticeWriteRoute(
 ) {
     val context = LocalContext.current
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is MeetingNoticeWriteUiEvent.NavigateToBack -> navigateToBack()
-            is MeetingNoticeWriteUiEvent.ShowToastMessage -> showToast(context, event.message)
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MeetingNoticeWriteSideEffect.NavigateToBack -> navigateToBack()
+            is MeetingNoticeWriteSideEffect.ShowToastMessage -> showToast(context, sideEffect.message)
         }
     }
 
-    (uiState as? MeetingNoticeWriteUiState)?.let {
-        MeetingNoticeWriteScreen(
-            modifier = modifier,
-            uiState = it,
-            onUiAction = viewModel::onUiAction,
-        )
-    }
+    MeetingNoticeWriteScreen(
+        modifier = modifier,
+        uiState = uiState,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 private fun MeetingNoticeWriteScreen(
     modifier: Modifier = Modifier,
-    uiState: MeetingNoticeWriteUiState,
-    onUiAction: (MeetingNoticeWriteUiAction) -> Unit,
+    uiState: MeetingNoticeWriteState,
+    onIntent: (MeetingNoticeWriteIntent) -> Unit,
 ) {
     MoimScaffold(
         modifier =
@@ -69,13 +71,13 @@ private fun MeetingNoticeWriteScreen(
                 .imePadding(),
         topBar = {
             MoimTopAppbar(
-                onClickNavigate = { onUiAction(MeetingNoticeWriteUiAction.OnClickBack) },
+                onClickNavigate = { onIntent(MeetingNoticeWriteIntent.BackClick) },
                 title = stringResource(R.string.meeting_notice_write_title),
             )
         },
         content = { padding ->
-            when (uiState) {
-                is MeetingNoticeWriteUiState.Loading -> {
+            when {
+                uiState.isLoading -> {
                     LoadingScreen(
                         modifier =
                             Modifier
@@ -84,10 +86,10 @@ private fun MeetingNoticeWriteScreen(
                     )
                 }
 
-                is MeetingNoticeWriteUiState.Success -> {
+                uiState.isSuccess -> {
                     LaunchedEffect(uiState.noticeState.text) {
-                        onUiAction(
-                            MeetingNoticeWriteUiAction.OnChangeEnable(
+                        onIntent(
+                            MeetingNoticeWriteIntent.EnableChange(
                                 isEnable = uiState.noticeState.text.isNotBlank(),
                             ),
                         )
@@ -113,21 +115,21 @@ private fun MeetingNoticeWriteScreen(
                     }
                 }
 
-                is MeetingNoticeWriteUiState.Error -> {
+                uiState.isError -> {
                     ErrorScreen(
                         modifier =
                             Modifier
                                 .fillMaxSize()
                                 .padding(padding),
                         onClickRefresh = {
-                            onUiAction(MeetingNoticeWriteUiAction.OnClickRefresh)
+                            onIntent(MeetingNoticeWriteIntent.RefreshClick)
                         },
                     )
                 }
             }
         },
         bottomBar = {
-            if (uiState is MeetingNoticeWriteUiState.Success) {
+            if (uiState.isSuccess) {
                 MoimPrimaryButton(
                     modifier =
                         Modifier
@@ -136,8 +138,8 @@ private fun MeetingNoticeWriteScreen(
                     text = stringResource(R.string.meeting_notice_write_completed),
                     enable = uiState.enabled,
                     onClick = {
-                        onUiAction(
-                            MeetingNoticeWriteUiAction.OnClickConfirm(
+                        onIntent(
+                            MeetingNoticeWriteIntent.ConfirmClick(
                                 meetId = uiState.meetId,
                                 noticeId = uiState.noticeId,
                             ),
@@ -154,8 +156,8 @@ private fun MeetingNoticeWriteScreen(
 private fun MeetingNoticeWriteScreenPreview() {
     MoimTheme {
         MeetingNoticeWriteScreen(
-            uiState = MeetingNoticeWriteUiState.Success(),
-            onUiAction = {},
+            uiState = MeetingNoticeWriteState(loadState = Result.Success(Unit)),
+            onIntent = {},
         )
     }
 }

@@ -16,15 +16,15 @@ import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.designsystem.theme.moimTextFieldColors
-import com.moim.feature.intro.screen.signup.OnSignUpUiAction
-import com.moim.feature.intro.screen.signup.SignUpUiAction
+import com.moim.feature.intro.screen.signup.OnSignUpIntent
+import com.moim.feature.intro.screen.signup.model.SignUpIntent
 
 @Composable
 fun NicknameTextField(
     nickname: String = "",
     isDuplicated: Boolean? = false,
     isRegexError: Boolean = false,
-    onUiAction: OnSignUpUiAction = {},
+    onIntent: OnSignUpIntent = {},
 ) {
     MoimText(
         text = stringResource(R.string.sign_up_nickname),
@@ -46,7 +46,7 @@ fun NicknameTextField(
         supportText = if (isDuplicated == false) stringResource(R.string.sign_up_duplicate_pass) else null,
         text = nickname,
         textMaxLength = 12,
-        onTextChanged = { onUiAction(SignUpUiAction.OnChangeNickname(it)) },
+        onTextChanged = { onIntent(SignUpIntent.NicknameChange(it)) },
         trailingIcon = {
             Box(
                 modifier = Modifier.padding(end = 16.dp),
@@ -57,7 +57,7 @@ fun NicknameTextField(
                     verticalPadding = 8.dp,
                     text = stringResource(R.string.sign_up_duplicate_check),
                     style = MoimTheme.typography.body01.semiBold,
-                    onClick = { onUiAction(SignUpUiAction.OnClickDuplicatedCheck) },
+                    onClick = { onIntent(SignUpIntent.DuplicatedCheckClick) },
                 )
             }
         },

@@ -4,42 +4,41 @@ import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.Plan
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiEvent
 
-sealed interface MeetingDetailUiEvent : UiEvent {
-    data object NavigateToBack : MeetingDetailUiEvent
+sealed interface MeetingDetailSideEffect {
+    data object NavigateToBack : MeetingDetailSideEffect
 
     data class NavigateToPlanWrite(
         val plan: Plan,
-    ) : MeetingDetailUiEvent
+    ) : MeetingDetailSideEffect
 
     data class NavigateToMeetingSetting(
         val meeting: Meeting,
-    ) : MeetingDetailUiEvent
+    ) : MeetingDetailSideEffect
 
     data class NavigateToMeetingNotice(
         val meetId: String,
-    ) : MeetingDetailUiEvent
+    ) : MeetingDetailSideEffect
 
     data class NavigateToMeetingNoticeDetail(
         val meetId: String,
         val noticeId: String,
-    ) : MeetingDetailUiEvent
+    ) : MeetingDetailSideEffect
 
     data class NavigateToPlanDetail(
         val viewIdType: ViewIdType,
-    ) : MeetingDetailUiEvent
+    ) : MeetingDetailSideEffect
 
     data class NavigateToImageViewer(
         val imageUrl: String,
         val meetingName: String,
-    ) : MeetingDetailUiEvent
+    ) : MeetingDetailSideEffect
 
     data class NavigateToExternalShareUrl(
         val url: String,
-    ) : MeetingDetailUiEvent
+    ) : MeetingDetailSideEffect
 
     data class ShowToastMessage(
         val message: ToastMessage,
-    ) : MeetingDetailUiEvent
+    ) : MeetingDetailSideEffect
 }

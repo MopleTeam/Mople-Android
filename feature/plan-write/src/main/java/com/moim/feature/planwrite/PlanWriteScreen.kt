@@ -34,8 +34,10 @@ import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.planwrite.model.PlanWriteIntent
+import com.moim.feature.planwrite.model.PlanWriteSideEffect
+import com.moim.feature.planwrite.model.PlanWriteState
 import com.moim.feature.planwrite.ui.MoimDatePickerDialog
 import com.moim.feature.planwrite.ui.MoimTimePickerDialog
 import com.moim.feature.planwrite.ui.PlanWriteMeetingsDialog
@@ -44,7 +46,7 @@ import com.moim.feature.planwrite.ui.PlanWriteTextField
 import com.moim.feature.planwrite.ui.place.PlaceContainerScreen
 import java.time.ZonedDateTime
 
-internal typealias OnPlanWriteUiAction = (PlanWriteUiAction) -> Unit
+internal typealias OnPlanWriteIntent = (PlanWriteIntent) -> Unit
 
 @Composable
 fun PlanWriteRoute(
@@ -54,38 +56,34 @@ fun PlanWriteRoute(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val planWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
 
     BackHandler {
-        viewModel.onUiAction(PlanWriteUiAction.OnClickBack)
+        viewModel.onIntent(PlanWriteIntent.BackClick)
     }
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is PlanWriteUiEvent.NavigateToBack -> navigateToBack()
-            is PlanWriteUiEvent.ShowToastMessage -> showToast(context, event.message)
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is PlanWriteSideEffect.NavigateToBack -> navigateToBack()
+            is PlanWriteSideEffect.ShowToastMessage -> showToast(context, sideEffect.message)
         }
     }
 
-    when (val uiState = planWriteUiState) {
-        is PlanWriteUiState.PlanWrite -> {
-            PlanWriteScreen(
-                modifier = modifier,
-                uiState = uiState,
-                isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
-            )
-        }
-    }
+    PlanWriteScreen(
+        modifier = modifier,
+        uiState = uiState,
+        isLoading = isLoading,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 fun PlanWriteScreen(
     modifier: Modifier = Modifier,
-    uiState: PlanWriteUiState.PlanWrite,
+    uiState: PlanWriteState,
     isLoading: Boolean = false,
-    onUiAction: OnPlanWriteUiAction = {},
+    onIntent: OnPlanWriteIntent = {},
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -99,7 +97,7 @@ fun PlanWriteScreen(
                     stringResource(
                         if (uiState.planId.isNullOrEmpty()) R.string.plan_write_title_for_create else R.string.plan_write_title_for_update,
                     ),
-                onClickNavigate = { onUiAction(PlanWriteUiAction.OnClickBack) },
+                onClickNavigate = { onIntent(PlanWriteIntent.BackClick) },
             )
         },
         content = {
@@ -117,27 +115,27 @@ fun PlanWriteScreen(
                     hint = stringResource(R.string.plan_write_meeting_select_hint),
                     value = uiState.selectMeetingName,
                     enable = uiState.enableMeetingSelected,
-                    onClick = { onUiAction(PlanWriteUiAction.OnShowMeetingsDialog(true)) },
+                    onClick = { onIntent(PlanWriteIntent.MeetingsDialogShow(true)) },
                 )
                 PlanWriteTextField(
                     title = stringResource(R.string.plan_write_name),
                     hint = stringResource(R.string.plan_write_name_hint),
                     value = uiState.planName ?: "",
-                    onTextChange = { onUiAction(PlanWriteUiAction.OnChangePlanName(it)) },
+                    onTextChange = { onIntent(PlanWriteIntent.PlanNameChange(it)) },
                 )
                 PlanWriteSelectedBox(
                     title = stringResource(R.string.plan_write_date_select),
                     hint = stringResource(R.string.plan_write_date_select_hint),
                     value = uiState.planDate?.parseDateString(stringResource(R.string.regex_date_year_month_day)),
                     iconRes = R.drawable.ic_calendar,
-                    onClick = { onUiAction(PlanWriteUiAction.OnShowDatePickerDialog(true)) },
+                    onClick = { onIntent(PlanWriteIntent.DatePickerDialogShow(true)) },
                 )
                 PlanWriteSelectedBox(
                     title = stringResource(R.string.plan_write_time_select),
                     hint = stringResource(R.string.plan_write_time_select_hint),
                     value = uiState.planTime?.parseDateString(stringResource(R.string.regex_date_time)),
                     iconRes = R.drawable.ic_clock,
-                    onClick = { onUiAction(PlanWriteUiAction.OnShowTimePickerDialog(true)) },
+                    onClick = { onIntent(PlanWriteIntent.TimePickerDialogShow(true)) },
                 )
                 PlanWriteSelectedBox(
                     title = stringResource(R.string.plan_write_place_select),
@@ -148,7 +146,7 @@ fun PlanWriteScreen(
                     onClick = {
                         keyboardController?.hide()
                         focusManager.clearFocus()
-                        onUiAction(PlanWriteUiAction.OnShowPlaceMapScreen(true))
+                        onIntent(PlanWriteIntent.PlaceMapScreenShow(true))
                     },
                 )
                 PlanWriteTextField(
@@ -159,7 +157,7 @@ fun PlanWriteScreen(
                     value = uiState.planDescription ?: "",
                     isSingleLine = false,
                     maxLength = 100,
-                    onTextChange = { onUiAction(PlanWriteUiAction.OnChangePlanDescription(it)) },
+                    onTextChange = { onIntent(PlanWriteIntent.PlanDescriptionChange(it)) },
                 )
             }
         },
@@ -175,7 +173,7 @@ fun PlanWriteScreen(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(if (uiState.planId.isNullOrEmpty()) R.string.plan_write_create else R.string.plan_write_update),
                     enable = uiState.enabledSubmit,
-                    onClick = { onUiAction(PlanWriteUiAction.OnClickPlanWrite) },
+                    onClick = { onIntent(PlanWriteIntent.PlanWriteClick) },
                 )
             }
         },
@@ -185,26 +183,26 @@ fun PlanWriteScreen(
         PlanWriteMeetingsDialog(
             meetings = uiState.meetings,
             pagingInfo = uiState.meetingsPagingInfo,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
     if (uiState.isShowDatePickerDialog) {
         MoimDatePickerDialog(
             date = uiState.planDate.parseLongTime(),
-            onDateSelected = { onUiAction(PlanWriteUiAction.OnClickPlanDate(it)) },
-            onDismiss = { onUiAction(PlanWriteUiAction.OnShowDatePickerDialog(false)) },
+            onDateSelected = { onIntent(PlanWriteIntent.PlanDateSelect(it)) },
+            onDismiss = { onIntent(PlanWriteIntent.DatePickerDialogShow(false)) },
         )
     }
     if (uiState.isShowTimePickerDialog) {
         MoimTimePickerDialog(
             date = uiState.planTime ?: ZonedDateTime.now().plusHours(1).withMinute(0),
-            onDateSelected = { onUiAction(PlanWriteUiAction.OnClickPlanTime(it)) },
-            onDismiss = { onUiAction(PlanWriteUiAction.OnShowTimePickerDialog(false)) },
+            onDateSelected = { onIntent(PlanWriteIntent.PlanTimeSelect(it)) },
+            onDismiss = { onIntent(PlanWriteIntent.TimePickerDialogShow(false)) },
         )
     }
     if (uiState.isShowMapScreen) {
         PlaceContainerScreen(
-            onUiAction = onUiAction,
+            onIntent = onIntent,
             searchKeyword = uiState.searchKeyword,
             searchPlaces = uiState.searchPlaces,
             selectedPlace = uiState.selectedPlace,
@@ -224,7 +222,7 @@ private fun PlanWriteScreenPreview() {
     MoimTheme {
         PlanWriteScreen(
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
-            uiState = PlanWriteUiState.PlanWrite(),
+            uiState = PlanWriteState(),
         )
     }
 }

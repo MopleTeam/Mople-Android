@@ -30,15 +30,15 @@ import com.moim.core.designsystem.component.MoimBottomSheetDialog
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.mapdetail.MapDetailUiAction
+import com.moim.feature.mapdetail.model.MapDetailIntent
 import kotlinx.coroutines.launch
 
 @Composable
 fun MapDetailMapAppDialog(
     modifier: Modifier = Modifier,
-    onUiAction: (MapDetailUiAction) -> Unit,
+    onIntent: (MapDetailIntent) -> Unit,
 ) {
-    val dismissAction = MapDetailUiAction.OnShowMapAppDialog(false)
+    val dismissIntent = MapDetailIntent.MapAppDialogShow(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -57,7 +57,7 @@ fun MapDetailMapAppDialog(
         onDismiss = {
             coroutineScope
                 .launch { sheetState.hide() }
-                .invokeOnCompletion { onUiAction(dismissAction) }
+                .invokeOnCompletion { onIntent(dismissIntent) }
         },
     ) {
         Column(
@@ -75,8 +75,8 @@ fun MapDetailMapAppDialog(
                     appLogoRes = R.drawable.img_map_app_logo_for_naver,
                     appName = stringResource(R.string.map_detail_map_for_naver),
                     onClick = {
-                        onUiAction(MapDetailUiAction.OnClickMapAddress(MapType.NAVER))
-                        onUiAction(dismissAction)
+                        onIntent(MapDetailIntent.MapAddressClick(MapType.NAVER))
+                        onIntent(dismissIntent)
                     },
                 )
 
@@ -84,8 +84,8 @@ fun MapDetailMapAppDialog(
                     appLogoRes = R.drawable.img_map_app_logo_for_kakao,
                     appName = stringResource(R.string.map_detail_map_for_kakao),
                     onClick = {
-                        onUiAction(MapDetailUiAction.OnClickMapAddress(MapType.KAKAO))
-                        onUiAction(dismissAction)
+                        onIntent(MapDetailIntent.MapAddressClick(MapType.KAKAO))
+                        onIntent(dismissIntent)
                     },
                 )
             }

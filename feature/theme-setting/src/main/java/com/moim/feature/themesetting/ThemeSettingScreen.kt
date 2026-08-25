@@ -42,7 +42,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.common.model.Theme
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
@@ -51,8 +50,12 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
+import com.moim.feature.themesetting.model.ThemeSettingIntent
+import com.moim.feature.themesetting.model.ThemeSettingSideEffect
+import com.moim.feature.themesetting.model.ThemeSettingState
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun ThemeSettingRoute(
@@ -65,55 +68,53 @@ fun ThemeSettingRoute(
             backgroundColor = MoimTheme.colors.bg.primary,
             padding = padding,
         )
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val themeSettingUiState by viewModel.collectAsState()
     val graphicsLayer = rememberGraphicsLayer()
     val scope = rememberCoroutineScope()
     var bitmap by remember { mutableStateOf<ImageBitmap?>(null) }
     val bitmapVisibility = remember { Animatable(1f) }
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is ThemeSettingUiEvent.NavigateToBack -> navigateToBack()
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is ThemeSettingSideEffect.NavigateToBack -> navigateToBack()
         }
     }
 
-    (uiState as? ThemeSettingUiState)?.let {
-        Box(modifier.fillMaxSize()) {
-            ThemeSettingScreen(
-                modifier =
-                    Modifier.drawWithContent {
-                        graphicsLayer.record {
-                            this@drawWithContent.drawContent()
-                        }
-                        drawLayer(graphicsLayer)
-                    },
-                uiState = it,
-                onUiAction = { uiAction ->
-                    if (uiAction is ThemeSettingUiAction.OnClickTheme) {
-                        scope.launch {
-                            bitmap = graphicsLayer.toImageBitmap()
-                            bitmapVisibility.snapTo(1f)
-                            bitmapVisibility.animateTo(0f, tween(700, easing = EaseOutQuad))
-                            bitmap = null
-                        }
+    Box(modifier.fillMaxSize()) {
+        ThemeSettingScreen(
+            modifier =
+                Modifier.drawWithContent {
+                    graphicsLayer.record {
+                        this@drawWithContent.drawContent()
                     }
-                    viewModel.onUiAction(uiAction)
+                    drawLayer(graphicsLayer)
                 },
-            )
+            uiState = themeSettingUiState,
+            onIntent = { intent ->
+                if (intent is ThemeSettingIntent.ThemeClick) {
+                    scope.launch {
+                        bitmap = graphicsLayer.toImageBitmap()
+                        bitmapVisibility.snapTo(1f)
+                        bitmapVisibility.animateTo(0f, tween(700, easing = EaseOutQuad))
+                        bitmap = null
+                    }
+                }
+                viewModel.onIntent(intent)
+            },
+        )
 
-            bitmap?.let { bitmap ->
-                Image(
-                    bitmap = bitmap,
-                    contentDescription = null,
-                    modifier =
-                        Modifier
-                            .fillMaxHeight(fraction = bitmapVisibility.value)
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter),
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.BottomCenter,
-                )
-            }
+        bitmap?.let { bitmap ->
+            Image(
+                bitmap = bitmap,
+                contentDescription = null,
+                modifier =
+                    Modifier
+                        .fillMaxHeight(fraction = bitmapVisibility.value)
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.BottomCenter,
+            )
         }
     }
 }
@@ -121,15 +122,15 @@ fun ThemeSettingRoute(
 @Composable
 private fun ThemeSettingScreen(
     modifier: Modifier = Modifier,
-    uiState: ThemeSettingUiState,
-    onUiAction: (ThemeSettingUiAction) -> Unit,
+    uiState: ThemeSettingState,
+    onIntent: (ThemeSettingIntent) -> Unit,
 ) {
     MoimScaffold(
         modifier = modifier,
         topBar = {
             MoimTopAppbar(
                 title = stringResource(R.string.theme_setting),
-                onClickNavigate = { onUiAction(ThemeSettingUiAction.OnClickBack) },
+                onClickNavigate = { onIntent(ThemeSettingIntent.BackClick) },
             )
         },
         content = {
@@ -148,17 +149,17 @@ private fun ThemeSettingScreen(
                     ThemeItem(
                         isSelected = uiState.theme == Theme.LIGHT,
                         theme = Theme.LIGHT,
-                        onSelectTheme = { theme -> onUiAction(ThemeSettingUiAction.OnClickTheme(theme)) },
+                        onSelectTheme = { theme -> onIntent(ThemeSettingIntent.ThemeClick(theme)) },
                     )
                     ThemeItem(
                         isSelected = uiState.theme == Theme.DARK,
                         theme = Theme.DARK,
-                        onSelectTheme = { theme -> onUiAction(ThemeSettingUiAction.OnClickTheme(theme)) },
+                        onSelectTheme = { theme -> onIntent(ThemeSettingIntent.ThemeClick(theme)) },
                     )
                     ThemeItem(
                         isSelected = uiState.theme == Theme.SYSTEM,
                         theme = Theme.SYSTEM,
-                        onSelectTheme = { theme -> onUiAction(ThemeSettingUiAction.OnClickTheme(theme)) },
+                        onSelectTheme = { theme -> onIntent(ThemeSettingIntent.ThemeClick(theme)) },
                     )
                 }
             }
@@ -242,10 +243,10 @@ private fun ThemeItemPreview() {
     MoimTheme {
         ThemeSettingScreen(
             uiState =
-                ThemeSettingUiState(
+                ThemeSettingState(
                     theme = Theme.LIGHT,
                 ),
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

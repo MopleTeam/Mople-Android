@@ -28,7 +28,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.participantlist.ParticipantListUiAction
+import com.moim.feature.participantlist.model.ParticipantListIntent
 
 private const val PLAN_WRITER = "CREATOR"
 private const val MEET_WRITER = "HOST"
@@ -38,7 +38,7 @@ fun ParticipantListItem(
     modifier: Modifier = Modifier,
     isMeeting: Boolean,
     participant: User,
-    onUiAction: (ParticipantListUiAction) -> Unit,
+    onIntent: (ParticipantListIntent) -> Unit,
 ) {
     Row(
         modifier =
@@ -55,8 +55,8 @@ fun ParticipantListItem(
                         .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = CircleShape)
                         .size(40.dp)
                         .onSingleClick {
-                            onUiAction(
-                                ParticipantListUiAction.OnClickUserImage(
+                            onIntent(
+                                ParticipantListIntent.UserImageClick(
                                     userImage = participant.profileUrl,
                                     userName = participant.nickname,
                                 ),
@@ -121,7 +121,7 @@ private fun ParticipantListItemPreview() {
                     nickname = "퉁퉁이",
                     userRole = "HOST",
                 ),
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

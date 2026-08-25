@@ -25,12 +25,12 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.meetingdetail.model.MeetingDetailNoticeUiModel
-import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
+import com.moim.feature.meetingdetail.model.MeetingDetailIntent
 
 @Composable
 fun MeetingDetailNotice(
     notice: MeetingDetailNoticeUiModel,
-    onUiAction: (MeetingDetailUiAction) -> Unit,
+    onIntent: (MeetingDetailIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -42,7 +42,7 @@ fun MeetingDetailNotice(
                 .clip(RoundedCornerShape(16.dp))
                 .background(MoimTheme.colors.bg.primary)
                 .onSingleClick {
-                    onUiAction(MeetingDetailUiAction.OnClickMeetingNoticeDetail(notice.noticeId))
+                    onIntent(MeetingDetailIntent.MeetingNoticeDetailClick(notice.noticeId))
                 }.padding(16.dp),
     ) {
         Row(
@@ -104,7 +104,7 @@ private fun MeetingDetailNoticePreview() {
                         noticeType = NoticeType.CUSTOM,
                         content = "11/28일 모임 18:00 → 20:00 변경 되었습니다. 날씨이슈로 인해서 부득이하게 변경합니다. 양해 부탁드립니다.",
                     ),
-                onUiAction = {},
+                onIntent = {},
             )
         }
     }

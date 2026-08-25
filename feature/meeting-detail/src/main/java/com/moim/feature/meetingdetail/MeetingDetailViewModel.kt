@@ -1,7 +1,6 @@
 package com.moim.feature.meetingdetail
 
 import androidx.lifecycle.viewModelScope
-import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Notice
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.Plan
@@ -9,7 +8,7 @@ import com.moim.core.common.model.Review
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.asPlanItem
 import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
+import com.moim.core.common.result.data
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.notice.NoticeRepository
 import com.moim.core.data.datasource.plan.PlanRepository
@@ -19,26 +18,28 @@ import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
 import com.moim.core.ui.eventbus.NoticeAction
 import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.isActiveCheck
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.checkState
-import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
-import com.moim.feature.meetingdetail.model.MeetingDetailUiEvent
-import com.moim.feature.meetingdetail.model.MeetingDetailUiState
+import com.moim.feature.meetingdetail.model.MeetingDetailIntent
+import com.moim.feature.meetingdetail.model.MeetingDetailSideEffect
+import com.moim.feature.meetingdetail.model.MeetingDetailState
 import com.moim.feature.meetingdetail.model.toUiModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.syntax.Syntax
 import java.io.IOException
 import java.time.ZonedDateTime
 
@@ -49,26 +50,23 @@ class MeetingDetailViewModel @AssistedInject constructor(
     private val meetingRepository: MeetingRepository,
     private val userRepository: UserRepository,
     private val noticeRepository: NoticeRepository,
-    private val meetingEventBus: EventBus<MeetingAction>,
     private val planEventBus: EventBus<PlanAction>,
-    private val noticeEventBus: EventBus<NoticeAction>,
+    meetingEventBus: EventBus<MeetingAction>,
+    noticeEventBus: EventBus<NoticeAction>,
     @Assisted val meetingDetailRoute: DetailRoute.MeetingDetail,
-) : BaseViewModel() {
+) : MVIViewModel<MeetingDetailState, MeetingDetailSideEffect>(MeetingDetailState()) {
     private val meetingId = meetingDetailRoute.meetingId
     private var plansPagingJob: Job? = null
     private var reviewsPagingJob: Job? = null
 
     init {
-        viewModelScope.launch {
-            launch { loadInitial() }
-
-            launch {
-                meetingEventBus.action.collect { action ->
+        meetingEventBus.action
+            .onEach { action ->
+                intent {
                     when (action) {
                         is MeetingAction.MeetingUpdate -> {
-                            uiState.checkState<MeetingDetailUiState.Success> {
-                                setUiState(copy(meeting = action.meeting))
-                            }
+                            if (!state.isSuccess) return@intent
+                            reduce { state.copy(meeting = Result.Success(action.meeting)) }
                         }
 
                         is MeetingAction.MeetingInvalidate -> {
@@ -76,14 +74,17 @@ class MeetingDetailViewModel @AssistedInject constructor(
                         }
 
                         else -> {
-                            return@collect
+                            return@intent
                         }
                     }
                 }
-            }
+            }.launchIn(viewModelScope)
 
-            launch {
-                planEventBus.action.collect { action ->
+        planEventBus.action
+            .onEach { action ->
+                intent {
+                    if (!state.isSuccess) return@intent
+
                     when (action) {
                         is PlanAction.PlanCreate -> {
                             applyPlanCreate(action.planItem)
@@ -103,14 +104,17 @@ class MeetingDetailViewModel @AssistedInject constructor(
                         }
 
                         is PlanAction.None -> {
-                            return@collect
+                            return@intent
                         }
                     }
                 }
-            }
+            }.launchIn(viewModelScope)
 
-            launch {
-                noticeEventBus.action.collect { action ->
+        noticeEventBus.action
+            .onEach { action ->
+                intent {
+                    if (!state.isSuccess) return@intent
+
                     when (action) {
                         is NoticeAction.NoticeCreate -> {
                             applyNoticeCreate(action.notice)
@@ -125,104 +129,134 @@ class MeetingDetailViewModel @AssistedInject constructor(
                         }
 
                         is NoticeAction.None -> {
-                            return@collect
+                            return@intent
                         }
+                    }
+                }
+            }.launchIn(viewModelScope)
+    }
+
+    override suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.onContainerCreate() {
+        loadInitial()
+    }
+
+    override fun onIntent(intent: Intent) {
+        if (intent !is MeetingDetailIntent) {
+            super.onIntent(intent)
+            return
+        }
+
+        intent {
+            when (intent) {
+                is MeetingDetailIntent.BackClick -> {
+                    postSideEffect(MeetingDetailSideEffect.NavigateToBack)
+                }
+
+                is MeetingDetailIntent.RefreshClick -> {
+                    loadInitial()
+                }
+
+                is MeetingDetailIntent.PlanWriteClick -> {
+                    navigateToPlanWrite()
+                }
+
+                is MeetingDetailIntent.MeetingSettingClick -> {
+                    navigateToMeetingSetting()
+                }
+
+                is MeetingDetailIntent.MeetingNoticeClick -> {
+                    postSideEffect(MeetingDetailSideEffect.NavigateToMeetingNotice(meetingId))
+                }
+
+                is MeetingDetailIntent.MeetingNoticeDetailClick -> {
+                    postSideEffect(
+                        MeetingDetailSideEffect.NavigateToMeetingNoticeDetail(
+                            meetId = meetingId,
+                            noticeId = intent.noticeId,
+                        ),
+                    )
+                }
+
+                is MeetingDetailIntent.MeetingInviteClick -> {
+                    getInviteLink()
+                }
+
+                is MeetingDetailIntent.PlanTabClick -> {
+                    if (state.isPlanSelected == intent.isBefore) return@intent
+                    reduce { state.copy(isPlanSelected = intent.isBefore) }
+                }
+
+                is MeetingDetailIntent.PlanApplyClick -> {
+                    setPlanApply(intent.planItem, intent.isApply)
+                }
+
+                is MeetingDetailIntent.PlanDetailClick -> {
+                    postSideEffect(MeetingDetailSideEffect.NavigateToPlanDetail(intent.viewIdType))
+                }
+
+                is MeetingDetailIntent.MeetingImageClick -> {
+                    postSideEffect(
+                        MeetingDetailSideEffect.NavigateToImageViewer(intent.imageUrl, intent.meetingName),
+                    )
+                }
+
+                is MeetingDetailIntent.NextPageLoad -> {
+                    if (state.isPlanSelected) {
+                        getPlans(state.plansPagingInfo.nextCursor)
+                    } else {
+                        getReviews(state.reviewsPagingInfo.nextCursor)
+                    }
+                }
+
+                is MeetingDetailIntent.PlanApplyCancelDialogShow -> {
+                    reduce {
+                        state.copy(
+                            isShowApplyCancelDialog = intent.isShow,
+                            cancelPlanItem = intent.cancelPlanItem,
+                        )
                     }
                 }
             }
         }
     }
 
-    fun onUiAction(uiAction: MeetingDetailUiAction) {
-        when (uiAction) {
-            is MeetingDetailUiAction.OnClickBack -> {
-                setUiEvent(MeetingDetailUiEvent.NavigateToBack)
-            }
-
-            is MeetingDetailUiAction.OnClickRefresh -> {
-                loadInitial()
-            }
-
-            is MeetingDetailUiAction.OnClickPlanWrite -> {
-                navigateToPlanWrite()
-            }
-
-            is MeetingDetailUiAction.OnClickMeetingSetting -> {
-                navigateToMeetingSetting()
-            }
-
-            is MeetingDetailUiAction.OnClickMeetingNotice -> {
-                navigateToMeetingNotice()
-            }
-
-            is MeetingDetailUiAction.OnClickMeetingNoticeDetail -> {
-                navigateToMeetingNoticeDetail(uiAction.noticeId)
-            }
-
-            is MeetingDetailUiAction.OnClickPlanTab -> {
-                setPlanTab(uiAction.isBefore)
-            }
-
-            is MeetingDetailUiAction.OnClickPlanApply -> {
-                setPlanApply(uiAction.planItem, uiAction.isApply)
-            }
-
-            is MeetingDetailUiAction.OnClickPlanDetail -> {
-                setUiEvent(MeetingDetailUiEvent.NavigateToPlanDetail(uiAction.viewIdType))
-            }
-
-            is MeetingDetailUiAction.OnClickMeetingImage -> {
-                setUiEvent(
-                    MeetingDetailUiEvent.NavigateToImageViewer(uiAction.imageUrl, uiAction.meetingName),
-                )
-            }
-
-            is MeetingDetailUiAction.OnClickMeetingInvite -> {
-                getInviteLink()
-            }
-
-            is MeetingDetailUiAction.OnLoadNextPage -> {
-                val current = uiState.value as? MeetingDetailUiState.Success ?: return
-                if (current.isPlanSelected) {
-                    getPlans(current.plansPagingInfo.nextCursor)
-                } else {
-                    getReviews(current.reviewsPagingInfo.nextCursor)
-                }
-            }
-
-            is MeetingDetailUiAction.OnShowPlanApplyCancelDialog -> {
-                showApplyCancelDialog(uiAction.isShow, uiAction.cancelPlanItem)
-            }
-        }
-    }
-
     private fun loadInitial() {
-        viewModelScope.launch {
-            setUiState(MeetingDetailUiState.Loading)
-            runCatching {
-                coroutineScope {
-                    val userDeferred = async { userRepository.getUser().first() }
-                    val meetingDeferred = async { meetingRepository.getMeeting(meetingId).first() }
-                    Pair(userDeferred.await(), meetingDeferred.await())
+        intent {
+            reduce { state.copy(meeting = Result.Loading) }
+
+            try {
+                val (user, meeting) =
+                    coroutineScope {
+                        val userDeferred = async { userRepository.getUser().first() }
+                        val meetingDeferred = async { meetingRepository.getMeeting(meetingId) }
+                        userDeferred.await() to meetingDeferred.await()
+                    }
+
+                reduce {
+                    state.copy(
+                        userId = user.userId,
+                        meeting = Result.Success(meeting),
+                    )
                 }
-            }.onSuccess { (user, meeting) ->
-                setUiState(MeetingDetailUiState.Success(userId = user.userId, meeting = meeting))
-                getCurrentNotice(meeting.id)
+
+                getCurrentNotice()
                 getPlans()
                 getReviews()
-            }.onFailure {
-                setUiState(MeetingDetailUiState.Error)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                reduce { state.copy(meeting = Result.Error(e)) }
             }
         }
     }
 
-    private fun getCurrentNotice(meetId: String) {
-        viewModelScope.launch {
+    private fun getCurrentNotice() {
+        intent {
             val notice =
                 runCatching {
                     noticeRepository
                         .getNotices(
-                            meetId = meetId,
+                            meetId = meetingId,
                             cursor = "",
                             size = 1,
                             filterType = null,
@@ -230,23 +264,21 @@ class MeetingDetailViewModel @AssistedInject constructor(
                         .firstOrNull()
                 }.getOrNull()
 
-            uiState.checkState<MeetingDetailUiState.Success> {
-                setUiState(copy(notice = notice?.toUiModel()))
-            }
+            reduce { state.copy(notice = notice?.toUiModel()) }
         }
     }
 
     private fun getPlans(cursor: String? = null) {
         if (plansPagingJob.isActiveCheck()) return
         plansPagingJob =
-            viewModelScope.launch {
+            intent {
                 handlePlansPagingData(
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         planRepository.getPlans(
                             meetingId = meetingId,
@@ -256,7 +288,7 @@ class MeetingDetailViewModel @AssistedInject constructor(
                     }.getOrNull()
 
                 handlePlansPagingData(
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
@@ -266,14 +298,14 @@ class MeetingDetailViewModel @AssistedInject constructor(
     private fun getReviews(cursor: String? = null) {
         if (reviewsPagingJob.isActiveCheck()) return
         reviewsPagingJob =
-            viewModelScope.launch {
+            intent {
                 handleReviewsPagingData(
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         reviewRepository.getReviews(
                             meetingId = meetingId,
@@ -283,240 +315,184 @@ class MeetingDetailViewModel @AssistedInject constructor(
                     }.getOrNull()
 
                 handleReviewsPagingData(
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
             }
     }
 
-    private fun handlePlansPagingData(
-        pagingInfo: PaginationContainer<List<Plan>>?,
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.handlePlansPagingData(
+        pagingData: PaginationContainer<List<Plan>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = plansPagingInfo,
-                    currentItems = plans,
-                    isInitialLoad = cursor == null,
-                    transform = { items -> items.map(Plan::asPlanItem) },
-                )
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = state.plansPagingInfo,
+                currentItems = state.plans,
+                isInitialLoad = cursor == null,
+                transform = { items -> items.map(Plan::asPlanItem) },
+            )
 
-            setUiState(
-                copy(
-                    plansPagingInfo = result.pagingInfo,
-                    plans = result.items,
-                    planTotalCount = result.pagingInfo.totalCount,
-                ),
+        reduce {
+            state.copy(
+                plansPagingInfo = result.pagingInfo,
+                plans = result.items,
+                planTotalCount = result.pagingInfo.totalCount,
             )
         }
     }
 
-    private fun handleReviewsPagingData(
-        pagingInfo: PaginationContainer<List<Review>>?,
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.handleReviewsPagingData(
+        pagingData: PaginationContainer<List<Review>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = reviewsPagingInfo,
-                    currentItems = reviews,
-                    isInitialLoad = cursor == null,
-                    transform = { items -> items.map(Review::asPlanItem) },
-                )
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = state.reviewsPagingInfo,
+                currentItems = state.reviews,
+                isInitialLoad = cursor == null,
+                transform = { items -> items.map(Review::asPlanItem) },
+            )
 
-            setUiState(
-                copy(
-                    reviewsPagingInfo = result.pagingInfo,
-                    reviews = result.items,
-                    reviewTotalCount = result.pagingInfo.totalCount,
-                ),
+        reduce {
+            state.copy(
+                reviewsPagingInfo = result.pagingInfo,
+                reviews = result.items,
+                reviewTotalCount = result.pagingInfo.totalCount,
             )
         }
     }
 
-    private fun applyPlanCreate(newItem: PlanItem) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            if (newItem.meetingId != meetingId || newItem.isPlanAtBefore.not()) return@checkState
-            setUiState(
-                copy(
-                    plans = listOf(newItem) + plans,
-                    planTotalCount = planTotalCount + 1,
-                ),
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.applyPlanCreate(newItem: PlanItem) {
+        if (newItem.meetingId != meetingId || newItem.isPlanAtBefore.not()) return
+
+        reduce {
+            state.copy(
+                plans = listOf(newItem) + state.plans,
+                planTotalCount = state.planTotalCount + 1,
             )
         }
     }
 
-    private fun applyPlanUpdate(newItem: PlanItem) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            if (newItem.meetingId != meetingId) return@checkState
-            if (newItem.isPlanAtBefore) {
-                val updated = plans.map { if (it.postId == newItem.postId) newItem else it }
-                setUiState(copy(plans = updated))
-            } else {
-                val updated = reviews.map { if (it.postId == newItem.postId) newItem else it }
-                setUiState(copy(reviews = updated))
-            }
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.applyPlanUpdate(newItem: PlanItem) {
+        if (newItem.meetingId != meetingId) return
+
+        if (newItem.isPlanAtBefore) {
+            val updated = state.plans.map { if (it.postId == newItem.postId) newItem else it }
+            reduce { state.copy(plans = updated) }
+        } else {
+            val updated = state.reviews.map { if (it.postId == newItem.postId) newItem else it }
+            reduce { state.copy(reviews = updated) }
         }
     }
 
-    private fun applyPlanDelete(postId: String) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            val newPlans = plans.filterNot { it.postId == postId }
-            val newReviews = reviews.filterNot { it.postId == postId }
-            setUiState(
-                copy(
-                    plans = newPlans,
-                    reviews = newReviews,
-                    planTotalCount = if (newPlans.size != plans.size) (planTotalCount - 1).coerceAtLeast(0) else planTotalCount,
-                    reviewTotalCount = if (newReviews.size != reviews.size) (reviewTotalCount - 1).coerceAtLeast(0) else reviewTotalCount,
-                ),
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.applyPlanDelete(postId: String) {
+        reduce {
+            val newPlans = state.plans.filterNot { it.postId == postId }
+            val newReviews = state.reviews.filterNot { it.postId == postId }
+            val isPlanRemoved = newPlans.size != state.plans.size
+            val isReviewRemoved = newReviews.size != state.reviews.size
+
+            state.copy(
+                plans = newPlans,
+                reviews = newReviews,
+                planTotalCount = if (isPlanRemoved) (state.planTotalCount - 1).coerceAtLeast(0) else state.planTotalCount,
+                reviewTotalCount = if (isReviewRemoved) (state.reviewTotalCount - 1).coerceAtLeast(0) else state.reviewTotalCount,
             )
         }
     }
 
-    private fun applyNoticeCreate(notice: Notice) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            if (notice.meetId != meetingId) return@checkState
-            setUiState(copy(notice = notice.toUiModel()))
-        }
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.applyNoticeCreate(notice: Notice) {
+        if (notice.meetId != meetingId) return
+
+        reduce { state.copy(notice = notice.toUiModel()) }
     }
 
-    private fun applyNoticeUpdate(notice: Notice) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            if (this.notice?.noticeId != notice.noticeId) return@checkState
-            setUiState(copy(notice = notice.toUiModel()))
-        }
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.applyNoticeUpdate(notice: Notice) {
+        if (state.notice?.noticeId != notice.noticeId) return
+
+        reduce { state.copy(notice = notice.toUiModel()) }
     }
 
-    private fun applyNoticeDelete(noticeId: String) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            if (notice?.noticeId != noticeId) return@checkState
-            getCurrentNotice(meeting.id)
-        }
+    private fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.applyNoticeDelete(noticeId: String) {
+        if (state.notice?.noticeId != noticeId) return
+
+        getCurrentNotice()
     }
 
-    private fun setPlanApply(
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.setPlanApply(
         planItem: PlanItem,
         isApply: Boolean,
     ) {
-        viewModelScope.launch {
+        setLoading(true)
+
+        try {
             if (isApply) {
                 planRepository.joinPlan(planItem.postId)
             } else {
                 planRepository.leavePlan(planItem.postId)
-            }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
-                uiState.checkState<MeetingDetailUiState.Success> {
-                    when (result) {
-                        is Result.Loading -> {
-                            return@collect
-                        }
-
-                        is Result.Success -> {
-                            planEventBus.send(PlanAction.PlanUpdate(planItem = planItem.copy(isParticipant = !planItem.isParticipant)))
-                            if (isApply.not()) {
-                                setUiState(copy(cancelPlanItem = null, isShowApplyCancelDialog = false))
-                            }
-                        }
-
-                        is Result.Error -> {
-                            showErrorMessage(result.exception)
-                        }
-                    }
-                }
             }
-        }
-    }
 
-    private fun setPlanTab(isBefore: Boolean) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            if (isPlanSelected == isBefore) return@checkState
-            setUiState(copy(isPlanSelected = isBefore))
-        }
-    }
+            planEventBus.send(PlanAction.PlanUpdate(planItem = planItem.copy(isParticipant = !planItem.isParticipant)))
 
-    private fun getInviteLink() {
-        viewModelScope.launch {
-            uiState.checkState<MeetingDetailUiState.Success> {
-                meetingRepository
-                    .getMeetingInviteCode(meeting.id)
-                    .asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> return@collect
-                            is Result.Success -> setUiEvent(MeetingDetailUiEvent.NavigateToExternalShareUrl(result.data))
-                            is Result.Error -> showErrorMessage(result.exception)
-                        }
-                    }
+            if (isApply.not()) {
+                reduce { state.copy(cancelPlanItem = null, isShowApplyCancelDialog = false) }
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun showApplyCancelDialog(
-        isShow: Boolean,
-        cancelPlanItem: PlanItem?,
-    ) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            setUiState(
-                copy(
-                    isShowApplyCancelDialog = isShow,
-                    cancelPlanItem = cancelPlanItem,
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.getInviteLink() {
+        setLoading(true)
+
+        try {
+            val inviteCode = meetingRepository.getMeetingInviteCode(meetingId)
+            postSideEffect(MeetingDetailSideEffect.NavigateToExternalShareUrl(inviteCode))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.navigateToPlanWrite() {
+        val meeting = state.meeting.data ?: return
+
+        postSideEffect(
+            MeetingDetailSideEffect.NavigateToPlanWrite(
+                Plan(
+                    meetingId = meeting.id,
+                    meetingName = meeting.name,
+                    meetingImageUrl = meeting.imageUrl,
+                    planAt = ZonedDateTime.now(),
                 ),
-            )
-        }
+            ),
+        )
     }
 
-    private fun showErrorMessage(error: Throwable) {
-        when (error) {
-            is IOException -> setUiEvent(MeetingDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-            is NetworkException -> setUiEvent(MeetingDetailUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-        }
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.navigateToMeetingSetting() {
+        val meeting = state.meeting.data ?: return
+
+        postSideEffect(MeetingDetailSideEffect.NavigateToMeetingSetting(meeting))
     }
 
-    private fun navigateToPlanWrite() {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            setUiEvent(
-                MeetingDetailUiEvent.NavigateToPlanWrite(
-                    Plan(
-                        meetingId = meeting.id,
-                        meetingName = meeting.name,
-                        meetingImageUrl = meeting.imageUrl,
-                        planAt = ZonedDateTime.now(),
-                    ),
-                ),
-            )
-        }
-    }
-
-    private fun navigateToMeetingSetting() {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            setUiEvent(MeetingDetailUiEvent.NavigateToMeetingSetting(meeting))
-        }
-    }
-
-    private fun navigateToMeetingNotice() {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            setUiEvent(MeetingDetailUiEvent.NavigateToMeetingNotice(meeting.id))
-        }
-    }
-
-    private fun navigateToMeetingNoticeDetail(noticeId: String) {
-        uiState.checkState<MeetingDetailUiState.Success> {
-            setUiEvent(
-                MeetingDetailUiEvent.NavigateToMeetingNoticeDetail(
-                    meetId = meeting.id,
-                    noticeId = noticeId,
-                ),
-            )
-        }
+    private suspend fun Syntax<MeetingDetailState, MeetingDetailSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(MeetingDetailSideEffect.ShowToastMessage(message))
     }
 
     @AssistedFactory

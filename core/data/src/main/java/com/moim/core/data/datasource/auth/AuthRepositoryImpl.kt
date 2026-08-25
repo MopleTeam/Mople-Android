@@ -10,7 +10,6 @@ import com.moim.core.remote.model.asItem
 import com.moim.core.remote.util.convertToToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class AuthRepositoryImpl @Inject constructor(
@@ -20,13 +19,13 @@ internal class AuthRepositoryImpl @Inject constructor(
 ) : AuthRepository {
     override fun getToken(): Flow<Token?> = preferenceStorage.token
 
-    override fun signUp(
+    override suspend fun signUp(
         socialType: String,
         token: String,
         email: String,
         nickname: String,
         profileUrl: String?,
-    ) = flow {
+    ): Token {
         val uploadProfileUrl = imageUploadRemoteDataSource.uploadImage(profileUrl, "profile")
         val authToken =
             authRemoteDataSource
@@ -43,44 +42,37 @@ internal class AuthRepositoryImpl @Inject constructor(
                 ).asItem()
                 .also { preferenceStorage.saveUserToken(it) }
 
-        emit(authToken)
+        return authToken
     }
 
-    override fun signIn(
+    override suspend fun signIn(
         socialType: String,
         token: String,
         email: String,
-    ) = flow {
-        val authToken =
-            authRemoteDataSource
-                .signIn(
-                    params =
-                        jsonOf(
-                            KEY_SOCIAL_PROVIDER to socialType,
-                            KEY_PROVIDER_TOKEN to token,
-                            KEY_EMAIL to email,
-                        ),
-                ).asItem()
-                .also { preferenceStorage.saveUserToken(it) }
+    ): Token =
+        authRemoteDataSource
+            .signIn(
+                params =
+                    jsonOf(
+                        KEY_SOCIAL_PROVIDER to socialType,
+                        KEY_PROVIDER_TOKEN to token,
+                        KEY_EMAIL to email,
+                    ),
+            ).asItem()
+            .also { preferenceStorage.saveUserToken(it) }
 
-        emit(authToken)
-    }
+    override suspend fun signOut(userId: String) {
+        val token = preferenceStorage.token.first()?.accessToken
 
-    override fun signOut(userId: String): Flow<Unit> =
-        flow {
-            val token = preferenceStorage.token.first()?.accessToken
-
-            emit(
-                authRemoteDataSource.signOut(
-                    token = token.convertToToken(),
-                    params =
-                        jsonOf(
-                            KEY_ID to userId,
-                            KEY_ROLE to "ADMIN",
-                        ),
+        authRemoteDataSource.signOut(
+            token = token.convertToToken(),
+            params =
+                jsonOf(
+                    KEY_ID to userId,
+                    KEY_ROLE to "ADMIN",
                 ),
-            )
-        }
+        )
+    }
 
     companion object {
         private const val KEY_SOCIAL_PROVIDER = "socialProvider"

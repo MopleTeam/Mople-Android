@@ -27,13 +27,17 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.intro.screen.signup.model.SignUpIntent
+import com.moim.feature.intro.screen.signup.model.SignUpSideEffect
+import com.moim.feature.intro.screen.signup.model.SignUpState
 import com.moim.feature.intro.screen.signup.ui.NicknameTextField
 import com.moim.feature.intro.screen.signup.ui.ProfileImage
 import com.moim.feature.intro.screen.signup.ui.ProfileImageEditDialog
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
-internal typealias OnSignUpUiAction = (SignUpUiAction) -> Unit
+internal typealias OnSignUpIntent = (SignUpIntent) -> Unit
 
 @Composable
 fun SignUpRoute(
@@ -42,50 +46,46 @@ fun SignUpRoute(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val signUpUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val signUpUiState by viewModel.collectAsState()
 
     val singlePhotoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickVisualMedia(),
-            onResult = { uri -> if (uri != null) viewModel.onUiAction(SignUpUiAction.OnChangeProfileUrl(uri.toString())) },
+            onResult = { uri -> if (uri != null) viewModel.onIntent(SignUpIntent.ProfileUrlChange(uri.toString())) },
         )
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is SignUpUiEvent.NavigateToPhotoPicker -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is SignUpSideEffect.NavigateToPhotoPicker -> {
                 singlePhotoPickerLauncher.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                 )
             }
 
-            is SignUpUiEvent.NavigateToMain -> {
+            is SignUpSideEffect.NavigateToMain -> {
                 navigateToMain()
             }
 
-            is SignUpUiEvent.ShowToastMessage -> {
-                showToast(context, event.message)
+            is SignUpSideEffect.ShowToastMessage -> {
+                showToast(context, sideEffect.message)
             }
         }
     }
 
-    when (val uiState = signUpUiState) {
-        is SignUpUiState.SignUp -> {
-            SignUpScreen(
-                modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
-                uiState = uiState,
-                isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
-            )
-        }
-    }
+    SignUpScreen(
+        modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
+        uiState = signUpUiState,
+        isLoading = isLoading,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 fun SignUpScreen(
     modifier: Modifier = Modifier,
-    uiState: SignUpUiState.SignUp = SignUpUiState.SignUp(),
+    uiState: SignUpState = SignUpState(),
     isLoading: Boolean = false,
-    onUiAction: OnSignUpUiAction = {},
+    onIntent: OnSignUpIntent = {},
 ) {
     TrackScreenViewEvent(screenName = "sign_up")
     Column(
@@ -105,14 +105,14 @@ fun SignUpScreen(
 
         ProfileImage(
             profileUrl = uiState.profileUrl,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
 
         NicknameTextField(
             nickname = uiState.nickname,
             isDuplicated = uiState.isDuplicatedName,
             isRegexError = uiState.isRegexError,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
 
         Spacer(Modifier.weight(1f))
@@ -124,12 +124,12 @@ fun SignUpScreen(
                     .padding(top = 28.dp),
             enable = uiState.enableSignUp,
             text = stringResource(R.string.sign_up_start),
-            onClick = { onUiAction(SignUpUiAction.OnClickSignUp) },
+            onClick = { onIntent(SignUpIntent.SignUpClick) },
         )
     }
 
     if (uiState.isShowProfileEditDialog) {
-        ProfileImageEditDialog(onUiAction = onUiAction)
+        ProfileImageEditDialog(onIntent = onIntent)
     }
 
     LoadingDialog(isLoading)
@@ -141,7 +141,7 @@ private fun SignUpScreenPreview() {
     MoimTheme {
         SignUpScreen(
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
-            uiState = SignUpUiState.SignUp(enableSignUp = true),
+            uiState = SignUpState(enableSignUp = true),
         )
     }
 }

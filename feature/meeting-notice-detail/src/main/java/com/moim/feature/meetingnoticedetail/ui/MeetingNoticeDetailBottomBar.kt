@@ -17,14 +17,14 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meetingnoticedetail.MeetingNoticeDetailUiAction
-import com.moim.feature.meetingnoticedetail.OnMeetingNoticeDetailUiAction
+import com.moim.feature.meetingnoticedetail.OnMeetingNoticeDetailIntent
+import com.moim.feature.meetingnoticedetail.model.MeetingNoticeDetailIntent
 
 @Composable
 fun MeetingNoticeDetailBottomBar(
     modifier: Modifier = Modifier,
     commentState: TextFieldState = TextFieldState(),
-    onUiAction: OnMeetingNoticeDetailUiAction = {},
+    onIntent: OnMeetingNoticeDetailIntent = {},
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -59,7 +59,7 @@ fun MeetingNoticeDetailBottomBar(
             onClick = {
                 keyboardController?.hide()
                 focusManager.clearFocus()
-                onUiAction(MeetingNoticeDetailUiAction.OnClickCommentUpload)
+                onIntent(MeetingNoticeDetailIntent.CommentUploadClick)
             },
         )
     }

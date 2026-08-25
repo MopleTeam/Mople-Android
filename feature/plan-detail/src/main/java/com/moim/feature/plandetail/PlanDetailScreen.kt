@@ -26,6 +26,7 @@ import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
+import com.moim.core.common.result.data
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -40,9 +41,11 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.ui.util.toValidUrl
 import com.moim.core.ui.view.FadeAnimatedVisibility
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.showToast
+import com.moim.feature.plandetail.model.PlanDetailIntent
+import com.moim.feature.plandetail.model.PlanDetailSideEffect
+import com.moim.feature.plandetail.model.PlanDetailState
 import com.moim.feature.plandetail.ui.PlanDetailBottomBar
 import com.moim.feature.plandetail.ui.PlanDetailCommentEditDialog
 import com.moim.feature.plandetail.ui.PlanDetailCommentHeader
@@ -55,7 +58,7 @@ import com.moim.feature.plandetail.ui.PlanDetailReportDialog
 import com.moim.feature.plandetail.ui.PlanDetailReviewImages
 import com.moim.feature.plandetail.ui.PlanDetailTopAppbar
 
-internal typealias OnPlanDetailUiAction = (PlanDetailUiAction) -> Unit
+internal typealias OnPlanDetailIntent = (PlanDetailIntent) -> Unit
 
 @Composable
 fun PlanDetailRoute(
@@ -90,87 +93,87 @@ fun PlanDetailRoute(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val planDetailUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is PlanDetailUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is PlanDetailSideEffect.NavigateToBack -> {
                 navigateToBack()
             }
 
-            is PlanDetailUiEvent.NavigateToParticipants -> {
-                navigateToParticipants(event.viewIdType)
+            is PlanDetailSideEffect.NavigateToParticipants -> {
+                navigateToParticipants(sideEffect.viewIdType)
             }
 
-            is PlanDetailUiEvent.NavigateToPlanWrite -> {
-                navigateToPlanWrite(event.planItem)
+            is PlanDetailSideEffect.NavigateToPlanWrite -> {
+                navigateToPlanWrite(sideEffect.planItem)
             }
 
-            is PlanDetailUiEvent.NavigateToReviewWrite -> {
-                navigateToReviewWrite(event.postId, true)
+            is PlanDetailSideEffect.NavigateToReviewWrite -> {
+                navigateToReviewWrite(sideEffect.postId, true)
             }
 
-            is PlanDetailUiEvent.NavigateToCommentDetail -> {
-                navigateToCommentDetail(event.meetId, event.postId, event.comment)
+            is PlanDetailSideEffect.NavigateToCommentDetail -> {
+                navigateToCommentDetail(sideEffect.meetId, sideEffect.postId, sideEffect.comment)
             }
 
-            is PlanDetailUiEvent.NavigateToMapDetail -> {
-                navigateToMapDetail(event.placeName, event.address, event.latitude, event.longitude)
+            is PlanDetailSideEffect.NavigateToMapDetail -> {
+                navigateToMapDetail(sideEffect.placeName, sideEffect.address, sideEffect.latitude, sideEffect.longitude)
             }
 
-            is PlanDetailUiEvent.NavigateToImageViewerForReview -> {
+            is PlanDetailSideEffect.NavigateToImageViewerForReview -> {
                 navigateToImageViewer(
                     context.getString(R.string.plan_detail_image),
-                    event.images,
-                    event.position,
+                    sideEffect.images,
+                    sideEffect.position,
                     R.drawable.ic_empty_user_logo,
                 )
             }
 
-            is PlanDetailUiEvent.NavigateToImageViewerForUser -> {
-                navigateToImageViewer(event.userName, listOf(event.image), 0, R.drawable.ic_empty_user_logo)
+            is PlanDetailSideEffect.NavigateToImageViewerForUser -> {
+                navigateToImageViewer(sideEffect.userName, listOf(sideEffect.image), 0, R.drawable.ic_empty_user_logo)
             }
 
-            is PlanDetailUiEvent.NavigateToWebBrowser -> {
+            is PlanDetailSideEffect.NavigateToWebBrowser -> {
                 runCatching {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, event.webLink.toValidUrl()))
+                    context.startActivity(Intent(Intent.ACTION_VIEW, sideEffect.webLink.toValidUrl()))
                 }.onFailure {
                     showToast(context, context.getString(R.string.common_error_open_browser))
                 }
             }
 
-            is PlanDetailUiEvent.ShowToastMessage -> {
-                showToast(context, event.message)
+            is PlanDetailSideEffect.ShowToastMessage -> {
+                showToast(context, sideEffect.message)
             }
         }
     }
 
-    when (val uiState = planDetailUiState) {
-        is PlanDetailUiState.Loading -> {
+    when {
+        uiState.isLoading -> {
             LoadingScreen(modifier)
         }
 
-        is PlanDetailUiState.Success -> {
+        uiState.isSuccess -> {
             PlanDetailScreen(
                 modifier = modifier,
                 uiState = uiState,
                 isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
+                onIntent = viewModel::onIntent,
             )
         }
 
-        is PlanDetailUiState.NotFoundError -> {
+        uiState.isNotFoundError -> {
             NotFoundErrorScreen(
                 modifier = modifier,
-                onClickBack = { viewModel.onUiAction(PlanDetailUiAction.OnClickBack) },
+                onClickBack = { viewModel.onIntent(PlanDetailIntent.BackClick) },
             )
         }
 
-        is PlanDetailUiState.CommonError -> {
+        uiState.isError -> {
             ErrorScreen(
                 modifier = modifier,
-                onClickRefresh = { viewModel.onUiAction(PlanDetailUiAction.OnClickRefresh) },
+                onClickRefresh = { viewModel.onIntent(PlanDetailIntent.RefreshClick) },
             )
         }
     }
@@ -179,11 +182,12 @@ fun PlanDetailRoute(
 @Composable
 fun PlanDetailScreen(
     modifier: Modifier = Modifier,
-    uiState: PlanDetailUiState.Success,
+    uiState: PlanDetailState,
     isLoading: Boolean,
-    onUiAction: OnPlanDetailUiAction,
+    onIntent: OnPlanDetailIntent,
 ) {
-    val screenName = if (uiState.planItem.isPlanAtBefore) "plan_detail" else "review_detail"
+    val planItem = uiState.planItem.data ?: return
+    val screenName = if (planItem.isPlanAtBefore) "plan_detail" else "review_detail"
     val comments = uiState.comments
     val pagingInfo = uiState.commentsPagingInfo
     val listState = rememberLazyListState()
@@ -192,7 +196,7 @@ fun PlanDetailScreen(
         listState = listState,
         threshold = 3,
         enabled = !pagingInfo.isLast && !pagingInfo.isErrorFooter,
-        onNext = { onUiAction(PlanDetailUiAction.OnLoadNextCommentsPage) },
+        onNext = { onIntent(PlanDetailIntent.NextCommentsPageLoad) },
     )
 
     TrackScreenViewEvent(screenName = screenName)
@@ -203,8 +207,8 @@ fun PlanDetailScreen(
                 .imePadding(),
         topBar = {
             PlanDetailTopAppbar(
-                isMyPlan = uiState.user.userId == uiState.planItem.userId,
-                onUiAction = onUiAction,
+                isMyPlan = uiState.user.userId == planItem.userId,
+                onIntent = onIntent,
             )
         },
         content = {
@@ -220,10 +224,10 @@ fun PlanDetailScreen(
                 ) {
                     item {
                         PlanDetailContent(
-                            isMyPlan = uiState.user.userId == uiState.planItem.userId,
-                            planItem = uiState.planItem,
+                            isMyPlan = uiState.user.userId == planItem.userId,
+                            planItem = planItem,
                             isShowApplyButton = uiState.isShowApplyButton,
-                            onUiAction = onUiAction,
+                            onIntent = onIntent,
                         )
                     }
 
@@ -233,8 +237,8 @@ fun PlanDetailScreen(
 
                     item {
                         PlanDetailReviewImages(
-                            images = uiState.planItem.reviewImages,
-                            onUiAction = onUiAction,
+                            images = planItem.reviewImages,
+                            onIntent = onIntent,
                         )
                     }
 
@@ -244,7 +248,7 @@ fun PlanDetailScreen(
 
                     item {
                         PlanDetailCommentHeader(
-                            commentCount = uiState.planItem.commentCount,
+                            commentCount = planItem.commentCount,
                         )
                     }
 
@@ -256,7 +260,7 @@ fun PlanDetailScreen(
                             modifier = Modifier.animateItem(),
                             userId = uiState.user.userId,
                             comment = commentUiModel,
-                            onUiAction = onUiAction,
+                            onIntent = onIntent,
                         )
                     }
 
@@ -278,7 +282,7 @@ fun PlanDetailScreen(
                                     Modifier
                                         .fillMaxWidth()
                                         .background(MoimTheme.colors.bg.primary),
-                                onClickRetry = { onUiAction(PlanDetailUiAction.OnLoadNextCommentsPage) },
+                                onClickRetry = { onIntent(PlanDetailIntent.NextCommentsPageLoad) },
                             )
                         }
                     }
@@ -291,7 +295,7 @@ fun PlanDetailScreen(
                                 .align(Alignment.BottomCenter)
                                 .padding(horizontal = 20.dp, vertical = 8.dp),
                         userList = uiState.searchMentions,
-                        onUiAction = onUiAction,
+                        onIntent = onIntent,
                     )
                 }
             }
@@ -301,46 +305,46 @@ fun PlanDetailScreen(
                 updateComment = uiState.selectedUpdateComment,
                 commentState = uiState.commentState,
                 selectedMentions = uiState.selectedMentions,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         },
     )
 
     if (uiState.isShowApplyCancelDialog) {
-        val dismissAction = PlanDetailUiAction.OnShowPlanApplyCancelDialog(false)
+        val dismissIntent = PlanDetailIntent.PlanApplyCancelDialogShow(false)
 
         MoimAlertDialog(
             title = stringResource(R.string.meeting_detail_plan_cancel),
             positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
-            onDismiss = { onUiAction(dismissAction) },
-            onClickNegative = { onUiAction(dismissAction) },
-            onClickPositive = { onUiAction(PlanDetailUiAction.OnClickPlanApply(false)) },
+            onDismiss = { onIntent(dismissIntent) },
+            onClickNegative = { onIntent(dismissIntent) },
+            onClickPositive = { onIntent(PlanDetailIntent.PlanApplyClick(false)) },
         )
     }
 
     if (uiState.isShowPlanEditDialog) {
         PlanDetailEditDialog(
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 
     if (uiState.isShowPlanReportDialog) {
         PlanDetailReportDialog(
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 
     if (uiState.isShowCommentEditDialog && uiState.selectedComment != null) {
         PlanDetailCommentEditDialog(
             comment = uiState.selectedComment,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 
     if (uiState.isShowCommentReportDialog && uiState.selectedComment != null) {
         PlanDetailCommentReportDialog(
             comment = uiState.selectedComment,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 

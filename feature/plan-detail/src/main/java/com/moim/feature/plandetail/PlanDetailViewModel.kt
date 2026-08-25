@@ -1,12 +1,9 @@
 package com.moim.feature.plandetail
 
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.insert
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.exception.ForbiddenException
-import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.exception.NotFoundException
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.PaginationContainer
@@ -16,7 +13,7 @@ import com.moim.core.common.model.isChild
 import com.moim.core.common.model.item.CommentUiModel
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
+import com.moim.core.common.result.data
 import com.moim.core.crashreport.CrashReporter
 import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.meeting.MeetingRepository
@@ -27,6 +24,8 @@ import com.moim.core.domain.usecase.GetPlanItemUseCase
 import com.moim.core.ui.eventbus.CommentAction
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.cancelIfActive
 import com.moim.core.ui.util.createCommentUiModel
@@ -34,37 +33,32 @@ import com.moim.core.ui.util.createMentionTagMessage
 import com.moim.core.ui.util.filterMentionedUsers
 import com.moim.core.ui.util.isActiveCheck
 import com.moim.core.ui.util.parseMentionTagMessage
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
-import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
-import com.moim.core.ui.view.restartableStateIn
+import com.moim.feature.plandetail.model.PlanDetailIntent
+import com.moim.feature.plandetail.model.PlanDetailSideEffect
+import com.moim.feature.plandetail.model.PlanDetailState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.syntax.Syntax
 import java.io.IOException
 import java.time.ZonedDateTime
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel(assistedFactory = PlanDetailViewModel.Factory::class)
 class PlanDetailViewModel @AssistedInject constructor(
-    private val savedStateHandle: SavedStateHandle,
-    userRepository: UserRepository,
-    getPlanItemUseCase: GetPlanItemUseCase,
+    private val userRepository: UserRepository,
+    private val getPlanItemUseCase: GetPlanItemUseCase,
     private val planRepository: PlanRepository,
     private val meetingRepository: MeetingRepository,
     private val reviewRepository: ReviewRepository,
@@ -73,131 +67,38 @@ class PlanDetailViewModel @AssistedInject constructor(
     private val commentEventBus: EventBus<CommentAction>,
     private val crashReporter: CrashReporter,
     @Assisted val planDetailRoute: DetailRoute.PlanDetail,
-) : BaseViewModel() {
+) : MVIViewModel<PlanDetailState, PlanDetailSideEffect>(PlanDetailState()) {
     private val viewIdType = planDetailRoute.viewIdType
-    private val meetId = savedStateHandle.getStateFlow<String?>(KEY_MEET_ID, null)
-    private val commentCheckId = savedStateHandle.getStateFlow<String?>(key = KEY_COMMENT_CHECK_ID, null)
 
     private var searchJob: Job? = null
     private var commentsPagingJob: Job? = null
 
-    private val meetingParticipants =
-        meetId
-            .filterNotNull()
-            .mapLatest {
-                meetingRepository
-                    .getMeetingParticipants(
-                        meetingId = it,
-                        cursor = "",
-                        size = 100,
-                    ).content
-            }.asResult()
-            .mapLatest {
-                if (it is Result.Success) {
-                    it.data
-                } else {
-                    null
-                }
-            }.stateIn(viewModelScope, SharingStarted.Lazily, null)
-
-    private val planDetailUiState =
-        combine(
-            userRepository.getUser(),
-            getPlanItemUseCase(GetPlanItemUseCase.Params(viewIdType)),
-            ::Pair,
-        ).mapLatest { (user, post) ->
-            val isShowApplyButton = post.planAt.isAfter(ZonedDateTime.now()) && user.userId != post.userId
-            PlanDetailUiState.Success(
-                user = user,
-                planItem = post,
-                isShowApplyButton = isShowApplyButton,
-            )
-        }.asResult()
-            .mapLatest { result ->
-                when (result) {
-                    is Result.Loading -> {
-                        PlanDetailUiState.Loading
-                    }
-
-                    is Result.Success -> {
-                        result.data
-                    }
-
-                    is Result.Error -> {
-                        when (result.exception) {
-                            is ForbiddenException,
-                            is NotFoundException,
-                            -> {
-                                PlanDetailUiState.NotFoundError
-                            }
-
-                            else -> {
-                                crashReporter.logException(result.exception)
-                                PlanDetailUiState.CommonError
-                            }
-                        }
-                    }
-                }
-            }.restartableStateIn(viewModelScope, SharingStarted.Lazily, PlanDetailUiState.Loading)
-
     init {
-        viewModelScope.launch {
-            launch {
-                planDetailUiState.collect { uiState ->
-                    if (uiState is PlanDetailUiState.Success) {
-                        val current = this@PlanDetailViewModel.uiState.value as? PlanDetailUiState.Success
-                        setUiState(
-                            uiState.copy(
-                                comments = current?.comments ?: emptyList(),
-                                commentsPagingInfo = current?.commentsPagingInfo ?: PagingUiState(),
-                                meetingParticipants = current?.meetingParticipants ?: emptyList(),
-                            ),
-                        )
-                        savedStateHandle[KEY_COMMENT_CHECK_ID] = uiState.planItem.commentCheckId
-                        savedStateHandle[KEY_MEET_ID] = uiState.planItem.meetingId
-                    } else {
-                        setUiState(uiState)
-                    }
-                }
-            }
-
-            launch {
-                commentCheckId
-                    .filterNotNull()
-                    .distinctUntilChanged()
-                    .collect { getComments() }
-            }
-
-            launch {
-                meetingParticipants.filterNotNull().collect {
-                    uiState.checkState<PlanDetailUiState.Success> {
-                        setUiState(uiState = copy(meetingParticipants = it))
-                    }
-                }
-            }
-
-            launch {
-                planEventBus.action.collect { action ->
+        planEventBus.action
+            .onEach { action ->
+                intent {
                     when (action) {
                         is PlanAction.PlanUpdate -> {
-                            uiState.checkState<PlanDetailUiState.Success> {
-                                setUiState(copy(planItem = action.planItem))
-                            }
+                            if (!state.isSuccess) return@intent
+                            reduce { state.copy(planItem = Result.Success(action.planItem)) }
                         }
 
                         is PlanAction.PlanInvalidate -> {
-                            planDetailUiState.restart()
+                            loadPlanDetail()
                         }
 
                         else -> {
-                            Unit
+                            return@intent
                         }
                     }
                 }
-            }
+            }.launchIn(viewModelScope)
 
-            launch {
-                commentEventBus.action.collect { action ->
+        commentEventBus.action
+            .onEach { action ->
+                intent {
+                    if (!state.isSuccess) return@intent
+
                     when (action) {
                         is CommentAction.CommentCreate -> applyCommentCreate(action.commentUiModel)
                         is CommentAction.CommentUpdate -> applyCommentUpdate(action.commentUiModel)
@@ -205,128 +106,201 @@ class PlanDetailViewModel @AssistedInject constructor(
                         is CommentAction.None -> Unit
                     }
                 }
+            }.launchIn(viewModelScope)
+    }
+
+    override suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.onContainerCreate() {
+        loadPlanDetail()
+    }
+
+    override fun onIntent(intent: Intent) {
+        if (intent !is PlanDetailIntent) {
+            super.onIntent(intent)
+            return
+        }
+
+        intent {
+            when (intent) {
+                is PlanDetailIntent.BackClick -> {
+                    postSideEffect(PlanDetailSideEffect.NavigateToBack)
+                }
+
+                is PlanDetailIntent.RefreshClick -> {
+                    loadPlanDetail()
+                }
+
+                is PlanDetailIntent.ParticipantsClick -> {
+                    navigateToParticipants()
+                }
+
+                is PlanDetailIntent.PlanUpdateClick -> {
+                    navigateToPlanWrite()
+                }
+
+                is PlanDetailIntent.PlanDeleteClick -> {
+                    deletePlan()
+                }
+
+                is PlanDetailIntent.PlanReportClick -> {
+                    reportPlan()
+                }
+
+                is PlanDetailIntent.PlanApplyClick -> {
+                    planApply(intent.isApply)
+                }
+
+                is PlanDetailIntent.MapDetailClick -> {
+                    navigateToMapDetail()
+                }
+
+                is PlanDetailIntent.CommentLikeClick -> {
+                    setLikeComment(intent.comment)
+                }
+
+                is PlanDetailIntent.CommentAddReplyClick -> {
+                    navigateToCommentDetail(intent.comment)
+                }
+
+                is PlanDetailIntent.CommentUploadClick -> {
+                    uploadComment(intent.updateComment)
+                }
+
+                is PlanDetailIntent.CommentReportClick -> {
+                    reportComment(intent.comment)
+                }
+
+                is PlanDetailIntent.CommentUpdateClick -> {
+                    updateComment(intent.comment)
+                }
+
+                is PlanDetailIntent.CommentDeleteClick -> {
+                    deleteComment(intent.comment)
+                }
+
+                is PlanDetailIntent.CommentWebLinkClick -> {
+                    postSideEffect(PlanDetailSideEffect.NavigateToWebBrowser(intent.webLink))
+                }
+
+                is PlanDetailIntent.ReviewImageClick -> {
+                    navigateToImageViewerForReview(intent.selectedImageIndex)
+                }
+
+                is PlanDetailIntent.UserProfileImageClick -> {
+                    postSideEffect(
+                        PlanDetailSideEffect.NavigateToImageViewerForUser(
+                            image = intent.imageUrl,
+                            userName = intent.userName,
+                        ),
+                    )
+                }
+
+                is PlanDetailIntent.MentionUserClick -> {
+                    setSelectedUser(intent.user)
+                }
+
+                is PlanDetailIntent.NextCommentsPageLoad -> {
+                    getComments(state.commentsPagingInfo.nextCursor)
+                }
+
+                is PlanDetailIntent.MentionDialogShow -> {
+                    showMentionDialog(intent.keyword)
+                }
+
+                is PlanDetailIntent.PlanApplyCancelDialogShow -> {
+                    reduce { state.copy(isShowApplyCancelDialog = intent.isShow) }
+                }
+
+                is PlanDetailIntent.PlanEditDialogShow -> {
+                    reduce { state.copy(isShowPlanEditDialog = intent.isShow) }
+                }
+
+                is PlanDetailIntent.PlanReportDialogShow -> {
+                    reduce { state.copy(isShowPlanReportDialog = intent.isShow) }
+                }
+
+                is PlanDetailIntent.CommentEditDialogShow -> {
+                    reduce {
+                        state.copy(
+                            isShowCommentEditDialog = intent.isShow,
+                            selectedComment = intent.comment,
+                        )
+                    }
+                }
+
+                is PlanDetailIntent.CommentReportDialogShow -> {
+                    reduce {
+                        state.copy(
+                            isShowCommentReportDialog = intent.isShow,
+                            selectedComment = intent.comment,
+                        )
+                    }
+                }
             }
         }
     }
 
-    fun onUiAction(uiAction: PlanDetailUiAction) {
-        when (uiAction) {
-            is PlanDetailUiAction.OnClickBack -> {
-                setUiEvent(PlanDetailUiEvent.NavigateToBack)
-            }
+    private fun loadPlanDetail() {
+        intent {
+            reduce { state.copy(planItem = Result.Loading, isNotFoundError = false) }
 
-            is PlanDetailUiAction.OnClickRefresh -> {
-                planDetailUiState.restart()
+            try {
+                val (user, post) =
+                    coroutineScope {
+                        val userDeferred = async { userRepository.getUser().first() }
+                        val postDeferred = async { getPlanItemUseCase(GetPlanItemUseCase.Params(viewIdType)).first() }
+                        userDeferred.await() to postDeferred.await()
+                    }
+
+                reduce {
+                    state.copy(
+                        user = user,
+                        planItem = Result.Success(post),
+                        isShowApplyButton = post.planAt.isAfter(ZonedDateTime.now()) && user.userId != post.userId,
+                    )
+                }
+
                 getComments()
-            }
+                getMeetingParticipants(post.meetingId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                val isNotFoundError = e is ForbiddenException || e is NotFoundException
+                if (!isNotFoundError) crashReporter.logException(e)
 
-            is PlanDetailUiAction.OnClickParticipants -> {
-                navigateToParticipants()
+                reduce { state.copy(planItem = Result.Error(e), isNotFoundError = isNotFoundError) }
             }
+        }
+    }
 
-            is PlanDetailUiAction.OnClickPlanUpdate -> {
-                navigateToPlanWrite()
-            }
+    private fun getMeetingParticipants(meetingId: String) {
+        intent {
+            val participants =
+                runCatching {
+                    meetingRepository
+                        .getMeetingParticipants(
+                            meetingId = meetingId,
+                            cursor = "",
+                            size = 100,
+                        ).content
+                }.getOrNull() ?: return@intent
 
-            is PlanDetailUiAction.OnClickPlanDelete -> {
-                deletePlan()
-            }
-
-            is PlanDetailUiAction.OnClickPlanReport -> {
-                reportPlan()
-            }
-
-            is PlanDetailUiAction.OnClickPlanApply -> {
-                planApply(uiAction.isApply)
-            }
-
-            is PlanDetailUiAction.OnClickMapDetail -> {
-                navigateToMapDetail()
-            }
-
-            is PlanDetailUiAction.OnClickCommentLike -> {
-                setLikeComment(uiAction.comment)
-            }
-
-            is PlanDetailUiAction.OnClickCommentAddReply -> {
-                navigateToCommentDetail(uiAction.comment)
-            }
-
-            is PlanDetailUiAction.OnClickCommentUpload -> {
-                uploadComment(uiAction.updateComment)
-            }
-
-            is PlanDetailUiAction.OnClickCommentReport -> {
-                reportComment(uiAction.comment)
-            }
-
-            is PlanDetailUiAction.OnClickCommentUpdate -> {
-                updateComment(uiAction.comment)
-            }
-
-            is PlanDetailUiAction.OnClickCommentDelete -> {
-                deleteComment(uiAction.comment)
-            }
-
-            is PlanDetailUiAction.OnClickCommentWebLink -> {
-                setUiEvent(PlanDetailUiEvent.NavigateToWebBrowser(uiAction.webLink))
-            }
-
-            is PlanDetailUiAction.OnClickReviewImage -> {
-                navigateToImageViewerForReview(uiAction.selectedImageIndex)
-            }
-
-            is PlanDetailUiAction.OnClickUserProfileImage -> {
-                navigateToImageViewerForUser(uiAction.imageUrl, uiAction.userName)
-            }
-
-            is PlanDetailUiAction.OnClickMentionUser -> {
-                setSelectedUser(uiAction.user)
-            }
-
-            is PlanDetailUiAction.OnLoadNextCommentsPage -> {
-                val current = uiState.value as? PlanDetailUiState.Success ?: return
-                getComments(current.commentsPagingInfo.nextCursor)
-            }
-
-            is PlanDetailUiAction.OnShowMentionDialog -> {
-                showMentionDialog(uiAction.keyword)
-            }
-
-            is PlanDetailUiAction.OnShowPlanApplyCancelDialog -> {
-                showApplyCancelDialog(uiAction.isShow)
-            }
-
-            is PlanDetailUiAction.OnShowPlanEditDialog -> {
-                showPlanEditDialog(uiAction.isShow)
-            }
-
-            is PlanDetailUiAction.OnShowPlanReportDialog -> {
-                showPlanReportDialog(uiAction.isShow)
-            }
-
-            is PlanDetailUiAction.OnShowCommentEditDialog -> {
-                showCommentEditDialog(uiAction.isShow, uiAction.comment)
-            }
-
-            is PlanDetailUiAction.OnShowCommentReportDialog -> {
-                showCommentReportDialog(uiAction.isShow, uiAction.comment)
-            }
+            reduce { state.copy(meetingParticipants = participants) }
         }
     }
 
     private fun getComments(cursor: String? = null) {
         if (commentsPagingJob.isActiveCheck()) return
-        val postId = commentCheckId.value ?: return
         commentsPagingJob =
-            viewModelScope.launch {
+            intent {
+                val postId = state.planItem.data?.commentCheckId ?: return@intent
+
                 handleCommentsPagingData(
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         commentRepository.getComments(
                             postId = postId,
@@ -336,209 +310,195 @@ class PlanDetailViewModel @AssistedInject constructor(
                     }.getOrNull()
 
                 handleCommentsPagingData(
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
             }
     }
 
-    private fun handleCommentsPagingData(
-        pagingInfo: PaginationContainer<List<Comment>>?,
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.handleCommentsPagingData(
+        pagingData: PaginationContainer<List<Comment>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = commentsPagingInfo,
-                    currentItems = comments,
-                    isInitialLoad = cursor == null,
-                    transform = { items -> items.map { it.createCommentUiModel() } },
-                )
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = state.commentsPagingInfo,
+                currentItems = state.comments,
+                isInitialLoad = cursor == null,
+                transform = { items -> items.map { it.createCommentUiModel() } },
+            )
 
-            setUiState(
-                copy(
-                    commentsPagingInfo = result.pagingInfo,
-                    comments = result.items,
-                ),
+        reduce {
+            state.copy(
+                commentsPagingInfo = result.pagingInfo,
+                comments = result.items,
             )
         }
     }
 
-    private fun applyCommentCreate(newItem: CommentUiModel) {
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.applyCommentCreate(newItem: CommentUiModel) {
         if (newItem.comment.isChild()) return
-        uiState.checkState<PlanDetailUiState.Success> {
-            if (comments.any { it.comment.commentId == newItem.comment.commentId }) return@checkState
-            setUiState(copy(comments = listOf(newItem) + comments))
-        }
+        if (state.comments.any { it.comment.commentId == newItem.comment.commentId }) return
+
+        reduce { state.copy(comments = listOf(newItem) + state.comments) }
     }
 
-    private fun applyCommentUpdate(newItem: CommentUiModel) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            val updated =
-                comments.map {
-                    if (it.comment.commentId == newItem.comment.commentId) newItem else it
-                }
-            setUiState(copy(comments = updated))
-        }
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.applyCommentUpdate(newItem: CommentUiModel) {
+        val updated =
+            state.comments.map {
+                if (it.comment.commentId == newItem.comment.commentId) newItem else it
+            }
+
+        reduce { state.copy(comments = updated) }
     }
 
-    private fun applyCommentDelete(commentId: String) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            val filtered = comments.filterNot { it.comment.commentId == commentId }
-            setUiState(copy(comments = filtered))
-        }
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.applyCommentDelete(commentId: String) {
+        val filtered = state.comments.filterNot { it.comment.commentId == commentId }
+
+        reduce { state.copy(comments = filtered) }
     }
 
-    private fun updateComment(comment: Comment) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            val selectedMentions =
-                comment.mentions.map {
-                    User(
-                        userId = it.userId,
-                        nickname = it.nickname,
-                        profileUrl = it.imageUrl,
-                    )
-                }
-            val message =
-                parseMentionTagMessage(
-                    mentionUsers = selectedMentions,
-                    message = comment.content,
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.updateComment(comment: Comment) {
+        val selectedMentions =
+            comment.mentions.map {
+                User(
+                    userId = it.userId,
+                    nickname = it.nickname,
+                    profileUrl = it.imageUrl,
                 )
+            }
+        val message =
+            parseMentionTagMessage(
+                mentionUsers = selectedMentions,
+                message = comment.content,
+            )
 
-            commentState.clearText()
-            commentState.edit { insert(0, message) }
-            setUiState(
-                copy(
-                    selectedUpdateComment = comment,
-                    selectedMentions = selectedMentions,
-                ),
+        state.commentState.clearText()
+        state.commentState.edit { insert(0, message) }
+
+        reduce {
+            state.copy(
+                selectedUpdateComment = comment,
+                selectedMentions = selectedMentions,
             )
         }
     }
 
-    private fun planApply(isApply: Boolean) {
-        viewModelScope.launch {
-            uiState.checkState<PlanDetailUiState.Success> {
-                if (isApply) {
-                    planRepository.joinPlan(viewIdType.id)
-                } else {
-                    planRepository.leavePlan(viewIdType.id)
-                }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            return@collect
-                        }
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.planApply(isApply: Boolean) {
+        val currentPlanItem = state.planItem.data ?: return
 
-                        is Result.Success -> {
-                            val planItem = planItem.copy(isParticipant = isApply)
-                            planEventBus.send(PlanAction.PlanUpdate(planItem = planItem))
-                            setUiState(
-                                copy(
-                                    planItem = planItem,
-                                    isShowApplyCancelDialog = false,
-                                ),
-                            )
-                        }
+        setLoading(true)
 
-                        is Result.Error -> {
-                            showErrorToast(result.exception)
-                        }
-                    }
-                }
+        try {
+            if (isApply) {
+                planRepository.joinPlan(viewIdType.id)
+            } else {
+                planRepository.leavePlan(viewIdType.id)
             }
-        }
-    }
 
-    private fun reportPlan() {
-        viewModelScope.launch {
-            uiState.checkState<PlanDetailUiState.Success> {
-                if (planItem.isPlanAtBefore) {
-                    planRepository.reportPlan(planId = planItem.postId)
-                } else {
-                    reviewRepository.reportReview(reviewId = planItem.postId)
-                }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
-                    when (result) {
-                        is Result.Loading -> return@collect
-                        is Result.Success -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.ReportCompletedMessage))
-                        is Result.Error -> showErrorToast(result.exception)
-                    }
-                }
+            val planItem = currentPlanItem.copy(isParticipant = isApply)
+            planEventBus.send(PlanAction.PlanUpdate(planItem = planItem))
+
+            reduce {
+                state.copy(
+                    planItem = Result.Success(planItem),
+                    isShowApplyCancelDialog = false,
+                )
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun deletePlan() {
-        viewModelScope.launch {
-            uiState.checkState<PlanDetailUiState.Success> {
-                if (planItem.isPlanAtBefore) {
-                    planRepository.deletePlan(planId = planItem.postId)
-                } else {
-                    reviewRepository.deleteReview(reviewId = planItem.postId)
-                }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            return@collect
-                        }
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.reportPlan() {
+        val planItem = state.planItem.data ?: return
 
-                        is Result.Success -> {
-                            planEventBus.send(PlanAction.PlanDelete(postId = planItem.postId))
-                            setUiEvent(PlanDetailUiEvent.NavigateToBack)
-                        }
+        setLoading(true)
 
-                        is Result.Error -> {
-                            showErrorToast(result.exception)
-                        }
-                    }
-                }
+        try {
+            if (planItem.isPlanAtBefore) {
+                planRepository.reportPlan(planId = planItem.postId)
+            } else {
+                reviewRepository.reportReview(reviewId = planItem.postId)
             }
+
+            postSideEffect(PlanDetailSideEffect.ShowToastMessage(ToastMessage.ReportCompletedMessage))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun setLikeComment(updateComment: Comment) {
-        viewModelScope.launch {
-            commentRepository
-                .updateLikeComment(updateComment.commentId)
-                .asResult()
-                .onEach { setLoading(it is Result.Loading) }
-                .collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            return@collect
-                        }
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.deletePlan() {
+        val planItem = state.planItem.data ?: return
 
-                        is Result.Success -> {
-                            commentEventBus.send(CommentAction.CommentUpdate(commentUiModel = result.data.createCommentUiModel()))
-                        }
+        setLoading(true)
 
-                        is Result.Error -> {
-                            showErrorToast(result.exception)
-                        }
-                    }
-                }
+        try {
+            if (planItem.isPlanAtBefore) {
+                planRepository.deletePlan(planId = planItem.postId)
+            } else {
+                reviewRepository.deleteReview(reviewId = planItem.postId)
+            }
+
+            planEventBus.send(PlanAction.PlanDelete(postId = planItem.postId))
+            postSideEffect(PlanDetailSideEffect.NavigateToBack)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun uploadComment(updateComment: Comment?) {
-        viewModelScope.launch {
-            uiState.checkState<PlanDetailUiState.Success> {
-                val tagMessage =
-                    createMentionTagMessage(
-                        mentionUsers = selectedMentions,
-                        message = commentState.text.toString(),
-                    )
-                val selectedMentionUsers =
-                    filterMentionedUsers(
-                        mentionUsers = selectedMentions,
-                        message = tagMessage,
-                    )
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.setLikeComment(updateComment: Comment) {
+        setLoading(true)
 
+        try {
+            val newComment = commentRepository.updateLikeComment(updateComment.commentId)
+
+            commentEventBus.send(CommentAction.CommentUpdate(commentUiModel = newComment.createCommentUiModel()))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.uploadComment(updateComment: Comment?) {
+        val currentPlanItem = state.planItem.data ?: return
+        val tagMessage =
+            createMentionTagMessage(
+                mentionUsers = state.selectedMentions,
+                message = state.commentState.text.toString(),
+            )
+        val selectedMentionUsers =
+            filterMentionedUsers(
+                mentionUsers = state.selectedMentions,
+                message = tagMessage,
+            )
+
+        setLoading(true)
+
+        try {
+            val newComment =
                 if (updateComment == null) {
                     commentRepository.createComment(
-                        postId = planItem.commentCheckId,
+                        postId = currentPlanItem.commentCheckId,
                         content = tagMessage.trim(),
                         mentionIds = selectedMentionUsers.map { it.userId },
                     )
@@ -548,129 +508,111 @@ class PlanDetailViewModel @AssistedInject constructor(
                         content = tagMessage.trim(),
                         mentionIds = selectedMentionUsers.map { it.userId },
                     )
-                }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
-                    uiState.checkState<PlanDetailUiState.Success> {
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
+                }.createCommentUiModel()
 
-                            is Result.Success -> {
-                                val newComment = result.data.createCommentUiModel()
-                                if (updateComment == null) {
-                                    commentEventBus.send(CommentAction.CommentCreate(commentUiModel = newComment))
-                                    commentState.clearText()
-                                    setUiState(
-                                        copy(
-                                            planItem = planItem.copy(commentCount = planItem.commentCount.plus(1)),
-                                            comments = listOf(newComment) + comments,
-                                            selectedMentions = emptyList(),
-                                        ),
-                                    )
-                                } else {
-                                    commentEventBus.send(CommentAction.CommentUpdate(commentUiModel = newComment))
-                                    commentState.clearText()
-                                    val updated =
-                                        comments.map { uiModel ->
-                                            if (uiModel.comment.commentId == newComment.comment.commentId) {
-                                                newComment
-                                            } else {
-                                                uiModel
-                                            }
-                                        }
-                                    setUiState(
-                                        copy(
-                                            comments = updated,
-                                            selectedUpdateComment = null,
-                                            selectedMentions = emptyList(),
-                                        ),
-                                    )
-                                }
-                            }
+            state.commentState.clearText()
 
-                            is Result.Error -> {
-                                showErrorToast(result.exception)
-                            }
+            if (updateComment == null) {
+                commentEventBus.send(CommentAction.CommentCreate(commentUiModel = newComment))
+
+                reduce {
+                    val planItem = requireNotNull(state.planItem.data)
+
+                    state.copy(
+                        planItem = Result.Success(planItem.copy(commentCount = planItem.commentCount.plus(1))),
+                        comments = listOf(newComment) + state.comments,
+                        selectedMentions = emptyList(),
+                    )
+                }
+            } else {
+                commentEventBus.send(CommentAction.CommentUpdate(commentUiModel = newComment))
+
+                reduce {
+                    val updated =
+                        state.comments.map { uiModel ->
+                            if (uiModel.comment.commentId == newComment.comment.commentId) newComment else uiModel
                         }
-                    }
+
+                    state.copy(
+                        comments = updated,
+                        selectedUpdateComment = null,
+                        selectedMentions = emptyList(),
+                    )
                 }
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun deleteComment(comment: Comment) {
-        viewModelScope.launch {
-            commentRepository
-                .deleteComment(comment.commentId)
-                .asResult()
-                .onEach { setLoading(it is Result.Loading) }
-                .collect { result ->
-                    uiState.checkState<PlanDetailUiState.Success> {
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.deleteComment(comment: Comment) {
+        setLoading(true)
 
-                            is Result.Success -> {
-                                commentEventBus.send(CommentAction.CommentDelete(commentId = comment.commentId))
-                                if (selectedUpdateComment != null) {
-                                    commentState.clearText()
-                                }
-                                setUiState(
-                                    copy(
-                                        planItem = planItem.copy(commentCount = planItem.commentCount.minus(1)),
-                                        comments = comments.filterNot { it.comment.commentId == comment.commentId },
-                                        selectedUpdateComment = null,
-                                    ),
-                                )
-                            }
+        try {
+            commentRepository.deleteComment(comment.commentId)
 
-                            is Result.Error -> {
-                                showErrorToast(result.exception)
-                            }
-                        }
-                    }
-                }
-        }
-    }
+            commentEventBus.send(CommentAction.CommentDelete(commentId = comment.commentId))
+            if (state.selectedUpdateComment != null) state.commentState.clearText()
 
-    private fun reportComment(comment: Comment) {
-        viewModelScope.launch {
-            commentRepository
-                .reportComment(commentId = comment.commentId)
-                .asResult()
-                .onEach { setLoading(it is Result.Loading) }
-                .collect { result ->
-                    uiState.checkState<PlanDetailUiState.Success> {
-                        when (result) {
-                            is Result.Loading -> return@collect
-                            is Result.Success -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.ReportCompletedMessage))
-                            is Result.Error -> showErrorToast(result.exception)
-                        }
-                    }
-                }
-        }
-    }
+            reduce {
+                val planItem = requireNotNull(state.planItem.data)
 
-    private fun setSelectedUser(user: User) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            val selectMentions = selectedMentions.toMutableList().apply { add(user) }.distinct()
-            val mentionText =
-                insertTextAtCursor(
-                    inputKeyword = user.nickname,
-                    currentMessage = commentState.text.toString(),
-                    currentSelection = commentState.selection.start,
+                state.copy(
+                    planItem = Result.Success(planItem.copy(commentCount = planItem.commentCount.minus(1))),
+                    comments = state.comments.filterNot { it.comment.commentId == comment.commentId },
+                    selectedUpdateComment = null,
                 )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
+        }
+    }
 
-            commentState.clearText()
-            commentState.edit { insert(0, mentionText) }
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.reportComment(comment: Comment) {
+        setLoading(true)
 
-            setUiState(
-                copy(
-                    selectedMentions = selectMentions,
-                    searchMentions = emptyList(),
-                    isShowMentionDialog = false,
-                ),
+        try {
+            commentRepository.reportComment(commentId = comment.commentId)
+
+            postSideEffect(PlanDetailSideEffect.ShowToastMessage(ToastMessage.ReportCompletedMessage))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.setSelectedUser(user: User) {
+        val selectMentions =
+            state.selectedMentions
+                .toMutableList()
+                .apply { add(user) }
+                .distinct()
+        val mentionText =
+            insertTextAtCursor(
+                inputKeyword = user.nickname,
+                currentMessage = state.commentState.text.toString(),
+                currentSelection = state.commentState.selection.start,
+            )
+
+        state.commentState.clearText()
+        state.commentState.edit { insert(0, mentionText) }
+
+        reduce {
+            state.copy(
+                selectedMentions = selectMentions,
+                searchMentions = emptyList(),
+                isShowMentionDialog = false,
             )
         }
     }
@@ -705,145 +647,94 @@ class PlanDetailViewModel @AssistedInject constructor(
     private fun showMentionDialog(keyword: String?) {
         searchJob.cancelIfActive()
         searchJob =
-            viewModelScope.launch {
-                delay(400)
-                uiState.checkState<PlanDetailUiState.Success> {
-                    val userList =
-                        if (keyword != null) {
-                            meetingParticipants.filter { it.nickname.contains(keyword) }
-                        } else {
-                            emptyList()
-                        }
+            intent {
+                delay(MENTION_SEARCH_DEBOUNCE_MILLIS.milliseconds)
 
-                    setUiState(
-                        copy(
-                            searchMentions = userList,
-                            isShowMentionDialog = userList.isNotEmpty(),
-                        ),
+                val userList =
+                    if (keyword != null) {
+                        state.meetingParticipants.filter { it.nickname.contains(keyword) }
+                    } else {
+                        emptyList()
+                    }
+
+                reduce {
+                    state.copy(
+                        searchMentions = userList,
+                        isShowMentionDialog = userList.isNotEmpty(),
                     )
                 }
             }
     }
 
-    private fun showApplyCancelDialog(isShow: Boolean) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiState(copy(isShowApplyCancelDialog = isShow))
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.navigateToPlanWrite() {
+        val planItem = state.planItem.data ?: return
+
+        if (planItem.isPlanAtBefore) {
+            postSideEffect(PlanDetailSideEffect.NavigateToPlanWrite(planItem))
+        } else {
+            postSideEffect(PlanDetailSideEffect.NavigateToReviewWrite(planItem.postId))
         }
     }
 
-    private fun showPlanEditDialog(isShow: Boolean) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiState(copy(isShowPlanEditDialog = isShow))
-        }
-    }
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.navigateToMapDetail() {
+        val planItem = state.planItem.data ?: return
 
-    private fun showPlanReportDialog(isShow: Boolean) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiState(copy(isShowPlanReportDialog = isShow))
-        }
-    }
-
-    private fun showCommentEditDialog(
-        isShow: Boolean,
-        comment: Comment?,
-    ) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiState(copy(isShowCommentEditDialog = isShow, selectedComment = comment))
-        }
-    }
-
-    private fun showCommentReportDialog(
-        isShow: Boolean,
-        comment: Comment?,
-    ) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiState(copy(isShowCommentReportDialog = isShow, selectedComment = comment))
-        }
-    }
-
-    private fun showErrorToast(exception: Throwable) {
-        when (exception) {
-            is IOException -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-            is NetworkException -> setUiEvent(PlanDetailUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-        }
-    }
-
-    private fun navigateToPlanWrite() {
-        uiState.checkState<PlanDetailUiState.Success> {
-            if (planItem.isPlanAtBefore) {
-                setUiEvent(PlanDetailUiEvent.NavigateToPlanWrite(planItem))
-            } else {
-                setUiEvent(PlanDetailUiEvent.NavigateToReviewWrite(planItem.postId))
-            }
-        }
-    }
-
-    private fun navigateToMapDetail() {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiEvent(
-                PlanDetailUiEvent.NavigateToMapDetail(
-                    placeName = planItem.placeName,
-                    address = planItem.loadAddress,
-                    latitude = planItem.latitude,
-                    longitude = planItem.longitude,
-                ),
-            )
-        }
-    }
-
-    private fun navigateToParticipants() {
-        uiState.checkState<PlanDetailUiState.Success> {
-            val viewIdType =
-                if (planItem.isPlanAtBefore) {
-                    ViewIdType.PlanId(planItem.postId)
-                } else {
-                    ViewIdType.ReviewId(planItem.postId)
-                }
-
-            setUiEvent(PlanDetailUiEvent.NavigateToParticipants(viewIdType))
-        }
-    }
-
-    private fun navigateToImageViewerForReview(selectedImageIndex: Int) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiEvent(
-                PlanDetailUiEvent.NavigateToImageViewerForReview(
-                    images = this.planItem.reviewImages.map { it.imageUrl },
-                    position = selectedImageIndex,
-                ),
-            )
-        }
-    }
-
-    private fun navigateToImageViewerForUser(
-        userImageUrl: String,
-        userName: String,
-    ) {
-        setUiEvent(
-            PlanDetailUiEvent.NavigateToImageViewerForUser(
-                image = userImageUrl,
-                userName = userName,
+        postSideEffect(
+            PlanDetailSideEffect.NavigateToMapDetail(
+                placeName = planItem.placeName,
+                address = planItem.loadAddress,
+                latitude = planItem.latitude,
+                longitude = planItem.longitude,
             ),
         )
     }
 
-    private fun navigateToCommentDetail(comment: Comment) {
-        uiState.checkState<PlanDetailUiState.Success> {
-            setUiState(
-                copy(
-                    selectedUpdateComment = null,
-                    selectedComment = null,
-                ),
-            )
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.navigateToParticipants() {
+        val planItem = state.planItem.data ?: return
 
-            setUiEvent(
-                PlanDetailUiEvent.NavigateToCommentDetail(
-                    meetId = planItem.meetingId,
-                    postId = planItem.commentCheckId,
-                    comment = comment,
-                ),
+        val participantsViewIdType =
+            if (planItem.isPlanAtBefore) {
+                ViewIdType.PlanId(planItem.postId)
+            } else {
+                ViewIdType.ReviewId(planItem.postId)
+            }
+
+        postSideEffect(PlanDetailSideEffect.NavigateToParticipants(participantsViewIdType))
+    }
+
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.navigateToImageViewerForReview(selectedImageIndex: Int) {
+        val planItem = state.planItem.data ?: return
+
+        postSideEffect(
+            PlanDetailSideEffect.NavigateToImageViewerForReview(
+                images = planItem.reviewImages.map { it.imageUrl },
+                position = selectedImageIndex,
+            ),
+        )
+    }
+
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.navigateToCommentDetail(comment: Comment) {
+        val planItem = state.planItem.data ?: return
+
+        reduce {
+            state.copy(
+                selectedUpdateComment = null,
+                selectedComment = null,
             )
         }
+
+        postSideEffect(
+            PlanDetailSideEffect.NavigateToCommentDetail(
+                meetId = planItem.meetingId,
+                postId = planItem.commentCheckId,
+                comment = comment,
+            ),
+        )
+    }
+
+    private suspend fun Syntax<PlanDetailState, PlanDetailSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(PlanDetailSideEffect.ShowToastMessage(message))
     }
 
     @AssistedFactory
@@ -852,172 +743,6 @@ class PlanDetailViewModel @AssistedInject constructor(
     }
 
     companion object {
-        private const val KEY_COMMENT_CHECK_ID = "commentCheckId"
-        private const val KEY_MEET_ID = "meetId"
+        private const val MENTION_SEARCH_DEBOUNCE_MILLIS = 400L
     }
-}
-
-sealed interface PlanDetailUiState : UiState {
-    data object Loading : PlanDetailUiState
-
-    data class Success(
-        val user: User,
-        val planItem: PlanItem,
-        val commentState: TextFieldState = TextFieldState(),
-        val comments: List<CommentUiModel> = emptyList(),
-        val commentsPagingInfo: PagingUiState = PagingUiState(),
-        val meetingParticipants: List<User> = emptyList(),
-        val searchMentions: List<User> = emptyList(),
-        val selectedMentions: List<User> = emptyList(),
-        val selectedImageIndex: Int = 0,
-        val selectedComment: Comment? = null,
-        val selectedUpdateComment: Comment? = null,
-        val isShowApplyButton: Boolean = false,
-        val isShowApplyCancelDialog: Boolean = false,
-        val isShowPlanEditDialog: Boolean = false,
-        val isShowPlanReportDialog: Boolean = false,
-        val isShowCommentEditDialog: Boolean = false,
-        val isShowCommentReportDialog: Boolean = false,
-        val isShowMentionDialog: Boolean = false,
-    ) : PlanDetailUiState
-
-    data object NotFoundError : PlanDetailUiState
-
-    data object CommonError : PlanDetailUiState
-}
-
-sealed interface PlanDetailUiAction : UiAction {
-    data object OnClickBack : PlanDetailUiAction
-
-    data object OnClickRefresh : PlanDetailUiAction
-
-    data object OnClickParticipants : PlanDetailUiAction
-
-    data object OnClickPlanDelete : PlanDetailUiAction
-
-    data object OnClickPlanUpdate : PlanDetailUiAction
-
-    data object OnClickPlanReport : PlanDetailUiAction
-
-    data object OnClickMapDetail : PlanDetailUiAction
-
-    data object OnLoadNextCommentsPage : PlanDetailUiAction
-
-    data class OnClickPlanApply(
-        val isApply: Boolean,
-    ) : PlanDetailUiAction
-
-    data class OnClickCommentLike(
-        val comment: Comment,
-    ) : PlanDetailUiAction
-
-    data class OnClickCommentAddReply(
-        val comment: Comment,
-    ) : PlanDetailUiAction
-
-    data class OnClickCommentReport(
-        val comment: Comment,
-    ) : PlanDetailUiAction
-
-    data class OnClickCommentUpdate(
-        val comment: Comment,
-    ) : PlanDetailUiAction
-
-    data class OnClickCommentDelete(
-        val comment: Comment,
-    ) : PlanDetailUiAction
-
-    data class OnClickCommentUpload(
-        val updateComment: Comment?,
-    ) : PlanDetailUiAction
-
-    data class OnClickCommentWebLink(
-        val webLink: String,
-    ) : PlanDetailUiAction
-
-    data class OnClickReviewImage(
-        val selectedImageIndex: Int,
-    ) : PlanDetailUiAction
-
-    data class OnClickUserProfileImage(
-        val imageUrl: String,
-        val userName: String,
-    ) : PlanDetailUiAction
-
-    data class OnClickMentionUser(
-        val user: User,
-    ) : PlanDetailUiAction
-
-    data class OnShowMentionDialog(
-        val keyword: String?,
-    ) : PlanDetailUiAction
-
-    data class OnShowPlanApplyCancelDialog(
-        val isShow: Boolean,
-    ) : PlanDetailUiAction
-
-    data class OnShowPlanEditDialog(
-        val isShow: Boolean,
-    ) : PlanDetailUiAction
-
-    data class OnShowPlanReportDialog(
-        val isShow: Boolean,
-    ) : PlanDetailUiAction
-
-    data class OnShowCommentEditDialog(
-        val isShow: Boolean,
-        val comment: Comment?,
-    ) : PlanDetailUiAction
-
-    data class OnShowCommentReportDialog(
-        val isShow: Boolean,
-        val comment: Comment?,
-    ) : PlanDetailUiAction
-}
-
-sealed interface PlanDetailUiEvent : UiEvent {
-    data object NavigateToBack : PlanDetailUiEvent
-
-    data class NavigateToParticipants(
-        val viewIdType: ViewIdType,
-    ) : PlanDetailUiEvent
-
-    data class NavigateToPlanWrite(
-        val planItem: PlanItem,
-    ) : PlanDetailUiEvent
-
-    data class NavigateToReviewWrite(
-        val postId: String,
-    ) : PlanDetailUiEvent
-
-    data class NavigateToMapDetail(
-        val placeName: String,
-        val address: String,
-        val latitude: Double,
-        val longitude: Double,
-    ) : PlanDetailUiEvent
-
-    data class NavigateToImageViewerForReview(
-        val images: List<String>,
-        val position: Int,
-    ) : PlanDetailUiEvent
-
-    data class NavigateToImageViewerForUser(
-        val image: String,
-        val userName: String,
-    ) : PlanDetailUiEvent
-
-    data class NavigateToWebBrowser(
-        val webLink: String,
-    ) : PlanDetailUiEvent
-
-    data class NavigateToCommentDetail(
-        val meetId: String,
-        val postId: String,
-        val comment: Comment,
-    ) : PlanDetailUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : PlanDetailUiEvent
 }

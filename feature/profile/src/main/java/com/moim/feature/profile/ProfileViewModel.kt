@@ -1,23 +1,24 @@
 package com.moim.feature.profile
 
 import androidx.lifecycle.viewModelScope
-import com.moim.core.common.model.User
-import com.moim.core.common.result.Result
 import com.moim.core.common.result.asResult
+import com.moim.core.common.result.data
 import com.moim.core.data.datasource.auth.AuthRepository
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
-import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
+import com.moim.core.ui.util.cancelIfActive
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
-import com.moim.core.ui.view.restartableStateIn
+import com.moim.feature.profile.model.ProfileIntent
+import com.moim.feature.profile.model.ProfileSideEffect
+import com.moim.feature.profile.model.ProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.syntax.Syntax
 import java.io.IOException
 import javax.inject.Inject
 
@@ -26,193 +27,138 @@ class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val authRepository: AuthRepository,
     private val meetingRepository: MeetingRepository,
-) : BaseViewModel() {
-    private val userResult =
-        userRepository
-            .getUser()
-            .asResult()
-            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+) : MVIViewModel<ProfileState, ProfileSideEffect>(ProfileState()) {
+    private var userJob: Job? = null
 
-    init {
-        viewModelScope.launch {
-            userResult.collect { result ->
-                when (result) {
-                    is Result.Loading -> setUiState(ProfileUiState.Loading)
-                    is Result.Success -> setUiState(ProfileUiState.Success(result.data))
-                    is Result.Error -> setUiState(ProfileUiState.Error)
+    override suspend fun Syntax<ProfileState, ProfileSideEffect>.onContainerCreate() {
+        observeUser()
+    }
+
+    override fun onIntent(intent: Intent) {
+        if (intent !is ProfileIntent) {
+            super.onIntent(intent)
+            return
+        }
+
+        intent {
+            when (intent) {
+                is ProfileIntent.ProfileClick -> {
+                    postSideEffect(ProfileSideEffect.NavigateToProfileUpdate)
+                }
+
+                is ProfileIntent.AlarmSettingClick -> {
+                    postSideEffect(ProfileSideEffect.NavigateToAlarmSetting)
+                }
+
+                is ProfileIntent.ThemeSettingClick -> {
+                    postSideEffect(ProfileSideEffect.NavigateToThemeSetting)
+                }
+
+                is ProfileIntent.PrivacyPolicyClick -> {
+                    postSideEffect(ProfileSideEffect.NavigateToPrivacyPolicy)
+                }
+
+                is ProfileIntent.RefreshClick -> {
+                    observeUser()
+                }
+
+                is ProfileIntent.LogoutClick -> {
+                    logout()
+                }
+
+                is ProfileIntent.UserDeleteClick -> {
+                    deleteUser()
+                }
+
+                is ProfileIntent.UserWithdrawalClick -> {
+                    validMyMeeting()
+                }
+
+                is ProfileIntent.UserLogoutDialogShow -> {
+                    reduce { state.copy(isShowUserLogoutDialog = intent.isShow) }
+                }
+
+                is ProfileIntent.UserDeleteDialogShow -> {
+                    reduce { state.copy(isShowUserDeleteDialog = intent.isShow) }
                 }
             }
         }
     }
 
-    fun onUiAction(uiAction: ProfileUiAction) {
-        when (uiAction) {
-            is ProfileUiAction.OnClickProfile -> setUiEvent(ProfileUiEvent.NavigateToProfileUpdate)
-            is ProfileUiAction.OnClickAlarmSetting -> setUiEvent(ProfileUiEvent.NavigateToAlarmSetting)
-            is ProfileUiAction.OnClickThemeSetting -> setUiEvent(ProfileUiEvent.NavigateToThemeSetting)
-            is ProfileUiAction.OnClickPrivacyPolicy -> setUiEvent(ProfileUiEvent.NavigateToPrivacyPolicy)
-            is ProfileUiAction.OnClickLogout -> logout()
-            is ProfileUiAction.OnClickUserDelete -> deleteUser()
-            is ProfileUiAction.OnClickUserWithdrawal -> validMyMeeting()
-            is ProfileUiAction.OnClickRefresh -> userResult.restart()
-            is ProfileUiAction.OnShowUserLogoutDialog -> showUserLogoutDialog(uiAction.isShow)
-            is ProfileUiAction.OnShowUserDeleteDialog -> showUserDeleteDialog(uiAction.isShow)
-        }
+    // 로컬 저장소 Flow라 프로필 수정 후 돌아왔을 때도 자동 반영된다.
+    private fun observeUser() {
+        userJob.cancelIfActive()
+        userJob =
+            userRepository
+                .getUser()
+                .asResult()
+                .onEach { result -> intent { reduce { state.copy(user = result) } } }
+                .launchIn(viewModelScope)
     }
 
-    private fun validMyMeeting() {
-        viewModelScope.launch {
-            runCatching {
-                setLoading(true)
+    private suspend fun Syntax<ProfileState, ProfileSideEffect>.validMyMeeting() {
+        setLoading(true)
+
+        try {
+            val myMeetings =
                 meetingRepository
                     .getMeetingsForHost("", 100)
                     .content
                     .filter { it.memberCount > 1 }
-            }.onFailure { error ->
-                when (error) {
-                    is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                    else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                }
-            }.onSuccess { myMeetings ->
-                if (myMeetings.isNotEmpty()) {
-                    setUiEvent(ProfileUiEvent.NavigateToUserWithdrawalForLeaderChange)
-                } else {
-                    showUserDeleteDialog(true)
-                }
-            }.also {
-                setLoading(false)
+
+            if (myMeetings.isNotEmpty()) {
+                postSideEffect(ProfileSideEffect.NavigateToUserWithdrawalForLeaderChange)
+            } else {
+                reduce { state.copy(isShowUserDeleteDialog = true) }
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun showUserLogoutDialog(isShow: Boolean) {
-        uiState.checkState<ProfileUiState.Success> {
-            setUiState(copy(isShowUserLogoutDialog = isShow))
+    private suspend fun Syntax<ProfileState, ProfileSideEffect>.logout() {
+        val user = state.user.data ?: return
+
+        setLoading(true)
+
+        try {
+            authRepository.signOut(user.userId)
+            clearUserData()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun showUserDeleteDialog(isShow: Boolean) {
-        uiState.checkState<ProfileUiState.Success> {
-            setUiState(copy(isShowUserDeleteDialog = isShow))
+    private suspend fun Syntax<ProfileState, ProfileSideEffect>.deleteUser() {
+        setLoading(true)
+
+        try {
+            userRepository.deleteUser()
+            clearUserData()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun logout() {
-        viewModelScope.launch {
-            uiState.checkState<ProfileUiState.Success> {
-                authRepository
-                    .signOut(user.userId)
-                    .asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
-
-                            is Result.Success -> {
-                                clearUserData()
-                            }
-
-                            is Result.Error -> {
-                                when (result.exception) {
-                                    is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                    else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                                }
-                            }
-                        }
-                    }
-            }
-        }
-    }
-
-    private fun deleteUser() {
-        viewModelScope.launch {
-            uiState.checkState<ProfileUiState.Success> {
-                userRepository
-                    .deleteUser()
-                    .asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
-
-                            is Result.Success -> {
-                                clearUserData()
-                            }
-
-                            is Result.Error -> {
-                                when (result.exception) {
-                                    is IOException -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                    else -> setUiEvent(ProfileUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                                }
-                            }
-                        }
-                    }
-            }
-        }
-    }
-
-    private suspend fun clearUserData() {
+    private suspend fun Syntax<ProfileState, ProfileSideEffect>.clearUserData() {
         userRepository.clearMoimStorage()
-        setUiEvent(ProfileUiEvent.NavigateToIntro)
+        postSideEffect(ProfileSideEffect.NavigateToIntro)
     }
-}
 
-sealed interface ProfileUiState : UiState {
-    data object Loading : ProfileUiState
-
-    data class Success(
-        val user: User,
-        val isShowUserLogoutDialog: Boolean = false,
-        val isShowUserDeleteDialog: Boolean = false,
-    ) : ProfileUiState
-
-    data object Error : ProfileUiState
-}
-
-sealed interface ProfileUiAction : UiAction {
-    data object OnClickProfile : ProfileUiAction
-
-    data object OnClickAlarmSetting : ProfileUiAction
-
-    data object OnClickThemeSetting : ProfileUiAction
-
-    data object OnClickPrivacyPolicy : ProfileUiAction
-
-    data object OnClickLogout : ProfileUiAction
-
-    data object OnClickUserWithdrawal : ProfileUiAction
-
-    data object OnClickUserDelete : ProfileUiAction
-
-    data object OnClickRefresh : ProfileUiAction
-
-    data class OnShowUserLogoutDialog(
-        val isShow: Boolean,
-    ) : ProfileUiAction
-
-    data class OnShowUserDeleteDialog(
-        val isShow: Boolean,
-    ) : ProfileUiAction
-}
-
-sealed interface ProfileUiEvent : UiEvent {
-    data object NavigateToProfileUpdate : ProfileUiEvent
-
-    data object NavigateToAlarmSetting : ProfileUiEvent
-
-    data object NavigateToThemeSetting : ProfileUiEvent
-
-    data object NavigateToPrivacyPolicy : ProfileUiEvent
-
-    data object NavigateToUserWithdrawalForLeaderChange : ProfileUiEvent
-
-    data object NavigateToIntro : ProfileUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : ProfileUiEvent
+    private suspend fun Syntax<ProfileState, ProfileSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(ProfileSideEffect.ShowToastMessage(message))
+    }
 }

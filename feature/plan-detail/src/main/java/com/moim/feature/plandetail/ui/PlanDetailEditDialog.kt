@@ -7,26 +7,26 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.feature.plandetail.OnPlanDetailUiAction
-import com.moim.feature.plandetail.PlanDetailUiAction
+import com.moim.feature.plandetail.OnPlanDetailIntent
+import com.moim.feature.plandetail.model.PlanDetailIntent
 
 @Composable
-fun PlanDetailEditDialog(onUiAction: OnPlanDetailUiAction) {
-    val dismissAction = PlanDetailUiAction.OnShowPlanEditDialog(false)
+fun PlanDetailEditDialog(onIntent: OnPlanDetailIntent) {
+    val dismissIntent = PlanDetailIntent.PlanEditDialogShow(false)
 
     MoimAlertDialog(
         title = stringResource(R.string.plan_detail_edit),
         description = stringResource(R.string.plan_detail_update_title, stringResource(R.string.plan_detail_plan)),
         negativeText = stringResource(R.string.plan_detail_delete),
         positiveText = stringResource(R.string.plan_detail_update),
-        onDismiss = { onUiAction(dismissAction) },
+        onDismiss = { onIntent(dismissIntent) },
         onClickNegative = {
-            onUiAction(dismissAction)
-            onUiAction(PlanDetailUiAction.OnClickPlanDelete)
+            onIntent(dismissIntent)
+            onIntent(PlanDetailIntent.PlanDeleteClick)
         },
         onClickPositive = {
-            onUiAction(dismissAction)
-            onUiAction(PlanDetailUiAction.OnClickPlanUpdate)
+            onIntent(dismissIntent)
+            onIntent(PlanDetailIntent.PlanUpdateClick)
         },
     )
 }
@@ -34,30 +34,30 @@ fun PlanDetailEditDialog(onUiAction: OnPlanDetailUiAction) {
 @Composable
 fun PlanDetailCommentEditDialog(
     comment: Comment,
-    onUiAction: OnPlanDetailUiAction,
+    onIntent: OnPlanDetailIntent,
 ) {
-    val dismissAction = PlanDetailUiAction.OnShowCommentEditDialog(false, null)
+    val dismissIntent = PlanDetailIntent.CommentEditDialogShow(false, null)
 
     MoimAlertDialog(
         title = stringResource(R.string.plan_detail_edit),
         description = stringResource(R.string.plan_detail_update_title, stringResource(R.string.plan_detail_comment)),
         negativeText = stringResource(R.string.plan_detail_delete),
         positiveText = stringResource(R.string.plan_detail_update),
-        onDismiss = { onUiAction(dismissAction) },
+        onDismiss = { onIntent(dismissIntent) },
         onClickNegative = {
-            onUiAction(dismissAction)
-            onUiAction(PlanDetailUiAction.OnClickCommentDelete(comment))
+            onIntent(dismissIntent)
+            onIntent(PlanDetailIntent.CommentDeleteClick(comment))
         },
         onClickPositive = {
-            onUiAction(dismissAction)
-            onUiAction(PlanDetailUiAction.OnClickCommentUpdate(comment))
+            onIntent(dismissIntent)
+            onIntent(PlanDetailIntent.CommentUpdateClick(comment))
         },
     )
 }
 
 @Composable
-fun PlanDetailReportDialog(onUiAction: OnPlanDetailUiAction) {
-    val dismissAction = PlanDetailUiAction.OnShowPlanReportDialog(false)
+fun PlanDetailReportDialog(onIntent: OnPlanDetailIntent) {
+    val dismissIntent = PlanDetailIntent.PlanReportDialogShow(false)
 
     MoimAlertDialog(
         title = stringResource(R.string.plan_detail_report_title, stringResource(R.string.plan_detail_plan)),
@@ -65,11 +65,11 @@ fun PlanDetailReportDialog(onUiAction: OnPlanDetailUiAction) {
         negativeText = stringResource(R.string.common_negative),
         positiveText = stringResource(R.string.plan_detail_report),
         positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
-        onDismiss = { onUiAction(dismissAction) },
-        onClickNegative = { onUiAction(dismissAction) },
+        onDismiss = { onIntent(dismissIntent) },
+        onClickNegative = { onIntent(dismissIntent) },
         onClickPositive = {
-            onUiAction(dismissAction)
-            onUiAction(PlanDetailUiAction.OnClickPlanReport)
+            onIntent(dismissIntent)
+            onIntent(PlanDetailIntent.PlanReportClick)
         },
     )
 }
@@ -77,20 +77,20 @@ fun PlanDetailReportDialog(onUiAction: OnPlanDetailUiAction) {
 @Composable
 fun PlanDetailCommentReportDialog(
     comment: Comment,
-    onUiAction: OnPlanDetailUiAction,
+    onIntent: OnPlanDetailIntent,
 ) {
-    val dismissAction = PlanDetailUiAction.OnShowCommentReportDialog(false, null)
+    val dismissIntent = PlanDetailIntent.CommentReportDialogShow(false, null)
 
     MoimAlertDialog(
         title = stringResource(R.string.plan_detail_report_title, stringResource(R.string.plan_detail_comment)),
         description = stringResource(R.string.plan_detail_report_description),
         negativeText = stringResource(R.string.common_negative),
         positiveText = stringResource(R.string.plan_detail_report),
-        onDismiss = { onUiAction(dismissAction) },
-        onClickNegative = { onUiAction(dismissAction) },
+        onDismiss = { onIntent(dismissIntent) },
+        onClickNegative = { onIntent(dismissIntent) },
         onClickPositive = {
-            onUiAction(dismissAction)
-            onUiAction(PlanDetailUiAction.OnClickCommentReport(comment))
+            onIntent(dismissIntent)
+            onIntent(PlanDetailIntent.CommentReportClick(comment))
         },
     )
 }

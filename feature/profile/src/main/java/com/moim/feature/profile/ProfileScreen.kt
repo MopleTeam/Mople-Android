@@ -20,6 +20,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.consts.NOTION_URL
 import com.moim.core.common.model.User
+import com.moim.core.common.result.Result
+import com.moim.core.common.result.data
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.ErrorScreen
@@ -30,13 +32,17 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.profile.model.ProfileIntent
+import com.moim.feature.profile.model.ProfileSideEffect
+import com.moim.feature.profile.model.ProfileState
 import com.moim.feature.profile.ui.ProfileAuthSettingContainer
 import com.moim.feature.profile.ui.ProfileImage
 import com.moim.feature.profile.ui.ProfileSettingContainer
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
-internal typealias OnProfileUiAction = (ProfileUiAction) -> Unit
+internal typealias OnProfileIntent = (ProfileIntent) -> Unit
 
 @Composable
 fun ProfileRoute(
@@ -51,39 +57,39 @@ fun ProfileRoute(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val profileUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary, padding = padding)
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is ProfileUiEvent.NavigateToProfileUpdate -> navigateToProfileUpdate()
-            is ProfileUiEvent.NavigateToAlarmSetting -> navigateToAlarmSetting()
-            is ProfileUiEvent.NavigateToPrivacyPolicy -> navigateToPrivacyPolicy(NOTION_URL)
-            is ProfileUiEvent.NavigateToThemeSetting -> navigateToThemeSetting()
-            is ProfileUiEvent.NavigateToUserWithdrawalForLeaderChange -> navigateToUserWithdrawalForLeaderChange()
-            is ProfileUiEvent.NavigateToIntro -> navigateToIntro()
-            is ProfileUiEvent.ShowToastMessage -> showToast(context, event.message)
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is ProfileSideEffect.NavigateToProfileUpdate -> navigateToProfileUpdate()
+            is ProfileSideEffect.NavigateToAlarmSetting -> navigateToAlarmSetting()
+            is ProfileSideEffect.NavigateToPrivacyPolicy -> navigateToPrivacyPolicy(NOTION_URL)
+            is ProfileSideEffect.NavigateToThemeSetting -> navigateToThemeSetting()
+            is ProfileSideEffect.NavigateToUserWithdrawalForLeaderChange -> navigateToUserWithdrawalForLeaderChange()
+            is ProfileSideEffect.NavigateToIntro -> navigateToIntro()
+            is ProfileSideEffect.ShowToastMessage -> showToast(context, sideEffect.message)
         }
     }
 
-    when (val uiState = profileUiState) {
-        is ProfileUiState.Loading -> {
+    when {
+        uiState.isLoading -> {
             LoadingScreen(modifier)
         }
 
-        is ProfileUiState.Success -> {
+        uiState.isSuccess -> {
             ProfileScreen(
                 modifier = modifier,
                 uiState = uiState,
                 isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
+                onIntent = viewModel::onIntent,
             )
         }
 
-        is ProfileUiState.Error -> {
+        uiState.isError -> {
             ErrorScreen(
                 modifier = modifier,
-                onClickRefresh = { viewModel.onUiAction(ProfileUiAction.OnClickRefresh) },
+                onClickRefresh = { viewModel.onIntent(ProfileIntent.RefreshClick) },
             )
         }
     }
@@ -92,10 +98,12 @@ fun ProfileRoute(
 @Composable
 private fun ProfileScreen(
     modifier: Modifier = Modifier,
-    uiState: ProfileUiState.Success,
+    uiState: ProfileState,
     isLoading: Boolean = false,
-    onUiAction: OnProfileUiAction,
+    onIntent: OnProfileIntent,
 ) {
+    val user = uiState.user.data ?: return
+
     TrackScreenViewEvent(screenName = "profile")
     Column(
         modifier = modifier,
@@ -110,39 +118,39 @@ private fun ProfileScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState()),
         ) {
-            ProfileImage(user = uiState.user, onUiAction = onUiAction)
+            ProfileImage(user = user, onIntent = onIntent)
             ProfileDivider()
-            ProfileSettingContainer(onUiAction = onUiAction)
+            ProfileSettingContainer(onIntent = onIntent)
             ProfileDivider()
-            ProfileAuthSettingContainer(onUiAction = onUiAction)
+            ProfileAuthSettingContainer(onIntent = onIntent)
         }
     }
 
     if (uiState.isShowUserLogoutDialog) {
-        val dismissAction = ProfileUiAction.OnShowUserLogoutDialog(false)
+        val dismissIntent = ProfileIntent.UserLogoutDialogShow(false)
         MoimAlertDialog(
             title = stringResource(R.string.profile_logout_title),
             onClickPositive = {
-                onUiAction(dismissAction)
-                onUiAction(ProfileUiAction.OnClickLogout)
+                onIntent(dismissIntent)
+                onIntent(ProfileIntent.LogoutClick)
             },
-            onClickNegative = { onUiAction(dismissAction) },
-            onDismiss = { onUiAction(dismissAction) },
+            onClickNegative = { onIntent(dismissIntent) },
+            onDismiss = { onIntent(dismissIntent) },
         )
     }
     if (uiState.isShowUserDeleteDialog) {
-        val dismissAction = ProfileUiAction.OnShowUserDeleteDialog(false)
+        val dismissIntent = ProfileIntent.UserDeleteDialogShow(false)
         MoimAlertDialog(
             title = stringResource(R.string.profile_user_delete_title),
             description = stringResource(R.string.profile_user_delete_description),
             positiveText = stringResource(R.string.profile_user_delete),
             positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
             onClickPositive = {
-                onUiAction(dismissAction)
-                onUiAction(ProfileUiAction.OnClickUserDelete)
+                onIntent(dismissIntent)
+                onIntent(ProfileIntent.UserDeleteClick)
             },
-            onClickNegative = { onUiAction(dismissAction) },
-            onDismiss = { onUiAction(dismissAction) },
+            onClickNegative = { onIntent(dismissIntent) },
+            onDismiss = { onIntent(dismissIntent) },
         )
     }
 
@@ -166,17 +174,19 @@ private fun ProfileScreenPreview() {
     MoimTheme {
         ProfileScreen(
             uiState =
-                ProfileUiState.Success(
+                ProfileState(
                     user =
-                        User(
-                            userId = "",
-                            nickname = "옥수수붕어빵",
+                        Result.Success(
+                            User(
+                                userId = "",
+                                nickname = "옥수수붕어빵",
+                            ),
                         ),
                     isShowUserLogoutDialog = false,
                     isShowUserDeleteDialog = false,
                 ),
             isLoading = false,
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

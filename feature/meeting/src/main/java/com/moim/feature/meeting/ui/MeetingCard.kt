@@ -35,7 +35,7 @@ import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meeting.MeetingUiAction
+import com.moim.feature.meeting.model.MeetingIntent
 import com.moim.feature.meeting.model.MeetingUiModel
 import kotlin.math.absoluteValue
 
@@ -43,7 +43,7 @@ import kotlin.math.absoluteValue
 fun MeetingCard(
     modifier: Modifier = Modifier,
     uiModel: MeetingUiModel,
-    onUiAction: (MeetingUiAction) -> Unit = {},
+    onIntent: (MeetingIntent) -> Unit = {},
 ) {
     val (count, comment) =
         uiModel
@@ -60,7 +60,7 @@ fun MeetingCard(
 
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingUiAction.OnClickMeeting(meetingId = uiModel.meeting.id)) },
+        onClick = { onIntent(MeetingIntent.MeetingClick(meetingId = uiModel.meeting.id)) },
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -175,7 +175,7 @@ private fun MeetingCardPreview() {
                         meeting = Meeting(name = "우리중학교 동창 우리중학교 동창 우리중학교 동창"),
                         isLeader = true,
                     ),
-                onUiAction = {},
+                onIntent = {},
             )
         }
     }

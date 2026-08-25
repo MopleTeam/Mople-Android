@@ -22,12 +22,12 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
+import com.moim.feature.meetingdetail.model.MeetingDetailIntent
 
 @Composable
 fun MeetingDetailTopAppbar(
     meeting: Meeting,
-    onUiAction: (MeetingDetailUiAction) -> Unit,
+    onIntent: (MeetingDetailIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     MoimTopAppbar(
@@ -35,12 +35,12 @@ fun MeetingDetailTopAppbar(
         actions = {
             MoimIconButton(
                 iconRes = R.drawable.ic_notice,
-                onClick = { onUiAction(MeetingDetailUiAction.OnClickMeetingNotice) },
+                onClick = { onIntent(MeetingDetailIntent.MeetingNoticeClick) },
             )
             Spacer(Modifier.width(8.dp))
             MoimIconButton(
                 iconRes = R.drawable.ic_burger,
-                onClick = { onUiAction(MeetingDetailUiAction.OnClickMeetingSetting) },
+                onClick = { onIntent(MeetingDetailIntent.MeetingSettingClick) },
             )
         },
         title = {
@@ -54,8 +54,8 @@ fun MeetingDetailTopAppbar(
                             .clip(RoundedCornerShape(6.dp))
                             .border(BorderStroke(1.dp, MoimTheme.colors.stroke), RoundedCornerShape(6.dp))
                             .onSingleClick {
-                                onUiAction(
-                                    MeetingDetailUiAction.OnClickMeetingImage(
+                                onIntent(
+                                    MeetingDetailIntent.MeetingImageClick(
                                         imageUrl = meeting.imageUrl,
                                         meetingName = meeting.name,
                                     ),
@@ -74,7 +74,7 @@ fun MeetingDetailTopAppbar(
                 )
             }
         },
-        onClickNavigate = { onUiAction(MeetingDetailUiAction.OnClickBack) },
+        onClickNavigate = { onIntent(MeetingDetailIntent.BackClick) },
     )
 }
 
@@ -88,7 +88,7 @@ private fun MeetingDetailTopAppbarPreview() {
                     id = "0",
                     name = "우리중학교 동창",
                 ),
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

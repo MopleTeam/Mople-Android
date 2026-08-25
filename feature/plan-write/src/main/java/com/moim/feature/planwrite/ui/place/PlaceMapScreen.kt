@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.planwrite.PlanWriteUiAction
+import com.moim.feature.planwrite.model.PlanWriteIntent
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
@@ -35,7 +35,7 @@ fun PlaceMapScreen(
     markerLongitude: Double?,
     markerLatitude: Double?,
     onLocationChange: (Location) -> Unit,
-    onUiAction: (PlanWriteUiAction) -> Unit,
+    onIntent: (PlanWriteIntent) -> Unit,
 ) {
     val cameraPositionState = rememberCameraPositionState()
     val markerState = rememberUpdatedMarkerState(position = LatLng(markerLatitude ?: 0.0, markerLongitude ?: 0.0))
@@ -74,7 +74,7 @@ fun PlaceMapScreen(
                 keys = arrayOf("location"),
                 state = markerState,
                 onClick = {
-                    onUiAction(PlanWriteUiAction.OnShowPlaceInfoDialog(true))
+                    onIntent(PlanWriteIntent.PlaceInfoDialogShow(true))
                     true
                 },
             ) {

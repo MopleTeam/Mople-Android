@@ -6,15 +6,15 @@ import androidx.compose.ui.res.stringResource
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimTopAppbar
-import com.moim.feature.calendar.CalendarUiAction
-import com.moim.feature.calendar.OnCalendarUiAction
+import com.moim.feature.calendar.OnCalendarIntent
+import com.moim.feature.calendar.model.CalendarIntent
 import java.time.ZonedDateTime
 
 @Composable
 fun CalendarTopAppbar(
     modifier: Modifier = Modifier,
     currentDate: ZonedDateTime,
-    onUiAction: OnCalendarUiAction = {},
+    onIntent: OnCalendarIntent = {},
 ) {
     MoimTopAppbar(
         modifier = modifier,
@@ -23,7 +23,7 @@ fun CalendarTopAppbar(
         actions = {
             MoimIconButton(
                 iconRes = R.drawable.ic_calendar,
-                onClick = { onUiAction(CalendarUiAction.OnClickExpandable(currentDate)) },
+                onClick = { onIntent(CalendarIntent.ExpandableClick(currentDate)) },
             )
         },
     )

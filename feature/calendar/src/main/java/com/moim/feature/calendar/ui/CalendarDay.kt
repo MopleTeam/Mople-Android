@@ -18,8 +18,8 @@ import com.moim.core.common.util.default
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.calendar.CalendarUiAction
-import com.moim.feature.calendar.OnCalendarUiAction
+import com.moim.feature.calendar.OnCalendarIntent
+import com.moim.feature.calendar.model.CalendarIntent
 import java.time.DayOfWeek
 import java.time.ZonedDateTime
 
@@ -31,7 +31,7 @@ fun CalendarDay(
     selectedDay: ZonedDateTime? = null,
     isCurrentDatePosition: Boolean = true,
     enabled: Boolean = false,
-    onUiAction: OnCalendarUiAction = {},
+    onIntent: OnCalendarIntent = {},
 ) {
     val isToday = (day == ZonedDateTime.now().default())
     val isSelected = (day == selectedDay)
@@ -92,7 +92,7 @@ fun CalendarDay(
                 .clip(CircleShape)
                 .onSingleClick(
                     enabled = enabled,
-                    onClick = { onUiAction(CalendarUiAction.OnClickDateDay(day)) },
+                    onClick = { onIntent(CalendarIntent.DateDayClick(day)) },
                 ),
         contentAlignment = Alignment.Center,
     ) {

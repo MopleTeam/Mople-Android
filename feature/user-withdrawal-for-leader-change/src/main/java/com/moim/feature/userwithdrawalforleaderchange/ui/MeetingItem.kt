@@ -30,17 +30,17 @@ import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.userwithdrawalforleaderchange.UserWithdrawalForLeaderChangeUiAction
+import com.moim.feature.userwithdrawalforleaderchange.model.UserWithdrawalForLeaderChangeIntent
 
 @Composable
 fun MeetingItem(
     modifier: Modifier = Modifier,
     meeting: Meeting,
-    onUiAction: (UserWithdrawalForLeaderChangeUiAction) -> Unit = {},
+    onIntent: (UserWithdrawalForLeaderChangeIntent) -> Unit = {},
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(UserWithdrawalForLeaderChangeUiAction.OnClickMeeting(meeting.id)) },
+        onClick = { onIntent(UserWithdrawalForLeaderChangeIntent.MeetingClick(meeting.id)) },
     ) {
         Column(
             modifier = Modifier.padding(16.dp),

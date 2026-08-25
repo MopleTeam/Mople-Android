@@ -9,8 +9,6 @@ import com.moim.core.remote.datasource.meeting.MeetingRemoteDataSource
 import com.moim.core.remote.model.MeetingResponse
 import com.moim.core.remote.model.UserResponse
 import com.moim.core.remote.model.asItem
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 internal class MeetingRepositoryImpl @Inject constructor(
@@ -41,15 +39,9 @@ internal class MeetingRepositoryImpl @Inject constructor(
                 it.map(MeetingResponse::asItem)
             }
 
-    override fun getMeeting(meetingId: String) =
-        flow {
-            emit(meetingRemoteDataSource.getMeeting(meetingId).asItem())
-        }
+    override suspend fun getMeeting(meetingId: String): Meeting = meetingRemoteDataSource.getMeeting(meetingId).asItem()
 
-    override fun getMeetingInviteCode(meetingId: String) =
-        flow {
-            emit(meetingRemoteDataSource.getMeetingInviteCode(meetingId))
-        }
+    override suspend fun getMeetingInviteCode(meetingId: String): String = meetingRemoteDataSource.getMeetingInviteCode(meetingId)
 
     override suspend fun getMeetingParticipants(
         meetingId: String,
@@ -81,61 +73,51 @@ internal class MeetingRepositoryImpl @Inject constructor(
                 it.map(UserResponse::asItem)
             }
 
-    override fun createMeeting(
+    override suspend fun createMeeting(
         meetingName: String,
         meetingImageUrl: String?,
-    ): Flow<Meeting> =
-        flow {
-            val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
-            emit(meetingRemoteDataSource.createMeeting(jsonOf(KEY_NAME to meetingName, KEY_IMAGE to uploadImageUrl)).asItem())
-        }
+    ): Meeting {
+        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
 
-    override fun updateMeeting(
+        return meetingRemoteDataSource.createMeeting(jsonOf(KEY_NAME to meetingName, KEY_IMAGE to uploadImageUrl)).asItem()
+    }
+
+    override suspend fun updateMeeting(
         meetingId: String,
         meetingName: String,
         meetingImageUrl: String?,
-    ): Flow<Meeting> =
-        flow {
-            val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
+    ): Meeting {
+        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(meetingImageUrl, "meet")
 
-            emit(
-                meetingRemoteDataSource
-                    .updateMeeting(
-                        id = meetingId,
-                        params =
-                            jsonOf(
-                                KEY_NAME to meetingName,
-                                KEY_IMAGE to uploadImageUrl,
-                            ),
-                    ).asItem(),
-            )
-        }
+        return meetingRemoteDataSource
+            .updateMeeting(
+                id = meetingId,
+                params =
+                    jsonOf(
+                        KEY_NAME to meetingName,
+                        KEY_IMAGE to uploadImageUrl,
+                    ),
+            ).asItem()
+    }
 
-    override fun updateMeetingLeader(
+    override suspend fun updateMeetingLeader(
         meetingId: String,
         newHostId: String,
-    ): Flow<Unit> =
-        flow {
-            emit(
-                meetingRemoteDataSource.updateMeetingLeader(
-                    id = meetingId,
-                    params =
-                        jsonOf(
-                            KEY_NEW_HOST_ID to newHostId,
-                        ),
+    ) {
+        meetingRemoteDataSource.updateMeetingLeader(
+            id = meetingId,
+            params =
+                jsonOf(
+                    KEY_NEW_HOST_ID to newHostId,
                 ),
-            )
-        }
+        )
+    }
 
-    override fun joinMeeting(code: String): Flow<Meeting> =
-        flow {
-            emit(meetingRemoteDataSource.joinMeeting(code).asItem())
-        }
+    override suspend fun joinMeeting(code: String): Meeting = meetingRemoteDataSource.joinMeeting(code).asItem()
 
-    override fun deleteMeeting(meetingId: String): Flow<Unit> =
-        flow {
-            emit(meetingRemoteDataSource.deleteMeeting(meetingId))
-        }
+    override suspend fun deleteMeeting(meetingId: String) {
+        meetingRemoteDataSource.deleteMeeting(meetingId)
+    }
 
     companion object {
         private const val KEY_NAME = "name"

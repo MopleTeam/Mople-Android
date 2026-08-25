@@ -22,13 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
-import kotlinx.coroutines.flow.filterIsInstance
+import com.moim.feature.webview.model.WebViewIntent
+import com.moim.feature.webview.model.WebViewSideEffect
+import com.moim.feature.webview.model.WebViewState
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun WebViewRoute(
@@ -37,28 +39,26 @@ fun WebViewRoute(
     navigateToBack: () -> Unit,
 ) {
     val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary, padding = padding)
-    val webViewUiState by viewModel.uiState
-        .filterIsInstance<WebViewUiState>()
-        .collectAsStateWithLifecycle(WebViewUiState())
+    val webViewUiState by viewModel.collectAsState()
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is WebViewUiEvent.NavigateToBack -> navigateToBack()
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is WebViewSideEffect.NavigateToBack -> navigateToBack()
         }
     }
 
     WebViewScreen(
         modifier = modifier,
         uiState = webViewUiState,
-        onUiAction = viewModel::onUiAction,
+        onIntent = viewModel::onIntent,
     )
 }
 
 @Composable
 fun WebViewScreen(
     modifier: Modifier = Modifier,
-    uiState: WebViewUiState,
-    onUiAction: (WebViewUiAction) -> Unit,
+    uiState: WebViewState,
+    onIntent: (WebViewIntent) -> Unit,
 ) {
     MoimScaffold(
         modifier = modifier.fillMaxSize(),
@@ -67,7 +67,7 @@ fun WebViewScreen(
                 MoimTopAppbar(
                     modifier = Modifier.fillMaxWidth(),
                     title = uiState.webTitle,
-                    onClickNavigate = { onUiAction(WebViewUiAction.OnClickBack) },
+                    onClickNavigate = { onIntent(WebViewIntent.BackClick) },
                 )
                 AnimatedVisibility(uiState.loadProgress < 1f) {
                     LinearProgressIndicator(
@@ -84,8 +84,8 @@ fun WebViewScreen(
             WebViewContainer(
                 modifier = Modifier.padding(it),
                 webUrl = uiState.webUrl,
-                onProgress = { onUiAction(WebViewUiAction.UpdatedProgress(it)) },
-                onWebTitle = { onUiAction(WebViewUiAction.UpdatedWebTitle(it)) },
+                onProgress = { onIntent(WebViewIntent.ProgressUpdate(it)) },
+                onWebTitle = { onIntent(WebViewIntent.WebTitleUpdate(it)) },
             )
         },
     )
@@ -167,8 +167,8 @@ private fun WebViewScreenPreview() {
     MoimTheme {
         WebViewScreen(
             modifier = Modifier.containerScreen(),
-            uiState = WebViewUiState(webUrl = "", webTitle = "공지사항"),
-            onUiAction = {},
+            uiState = WebViewState(webUrl = "", webTitle = "공지사항"),
+            onIntent = {},
         )
     }
 }

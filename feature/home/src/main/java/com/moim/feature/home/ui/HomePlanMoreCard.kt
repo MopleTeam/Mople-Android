@@ -20,17 +20,16 @@ import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.home.HomeUiAction
-import com.moim.feature.home.OnHomeUiAction
+import com.moim.feature.home.model.HomeIntent
 
 @Composable
 fun HomePlanMoreCard(
     modifier: Modifier = Modifier,
-    onUiAction: OnHomeUiAction,
+    onIntent: (HomeIntent) -> Unit,
 ) {
     MoimCard(
         modifier = modifier.fillMaxHeight(),
-        onClick = { onUiAction(HomeUiAction.OnClickPlanMore) },
+        onClick = { onIntent(HomeIntent.PlanMoreClick) },
     ) {
         Column(
             modifier =
@@ -63,7 +62,7 @@ private fun HomeMeetingMoreCardPreview() {
     MoimTheme {
         HomePlanMoreCard(
             modifier = Modifier.height(240.dp),
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

@@ -38,8 +38,8 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.decimalFormatString
-import com.moim.feature.calendar.CalendarUiAction
-import com.moim.feature.calendar.OnCalendarUiAction
+import com.moim.feature.calendar.OnCalendarIntent
+import com.moim.feature.calendar.model.CalendarIntent
 import java.time.ZonedDateTime
 
 @Composable
@@ -47,7 +47,7 @@ fun CalendarPlanContent(
     modifier: Modifier = Modifier,
     selectDate: ZonedDateTime,
     plans: List<PlanItem> = emptyList(),
-    onUiAction: OnCalendarUiAction = {},
+    onIntent: OnCalendarIntent = {},
 ) {
     LazyColumn(
         modifier =
@@ -77,7 +77,7 @@ fun CalendarPlanContent(
         ) {
             CalendarPlanItem(
                 plan = it,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         }
     }
@@ -87,13 +87,13 @@ fun CalendarPlanContent(
 private fun CalendarPlanItem(
     modifier: Modifier = Modifier,
     plan: PlanItem,
-    onUiAction: OnCalendarUiAction = {},
+    onIntent: OnCalendarIntent = {},
 ) {
     MoimCard(
         modifier = modifier,
         onClick = {
-            onUiAction(
-                CalendarUiAction.OnClickMeetingPlan(
+            onIntent(
+                CalendarIntent.MeetingPlanClick(
                     if (plan.isPlanAtBefore) {
                         ViewIdType.PlanId(plan.postId)
                     } else {

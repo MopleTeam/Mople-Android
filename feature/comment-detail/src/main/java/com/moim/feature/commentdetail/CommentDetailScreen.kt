@@ -31,15 +31,19 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.toValidUrl
 import com.moim.core.ui.view.FadeAnimatedVisibility
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.showToast
+import com.moim.feature.commentdetail.model.CommentDetailIntent
+import com.moim.feature.commentdetail.model.CommentDetailSideEffect
+import com.moim.feature.commentdetail.model.CommentDetailState
 import com.moim.feature.commentdetail.ui.CommentDetailBottomBar
 import com.moim.feature.commentdetail.ui.CommentDetailEditDialog
 import com.moim.feature.commentdetail.ui.CommentDetailItem
 import com.moim.feature.commentdetail.ui.CommentDetailMentionDialog
 import com.moim.feature.commentdetail.ui.CommentDetailReportDialog
 import com.moim.feature.commentdetail.ui.CommentDetailTopAppbar
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun CommentDetailRoute(
@@ -55,49 +59,47 @@ fun CommentDetailRoute(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is CommentDetailUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is CommentDetailSideEffect.NavigateToBack -> {
                 navigateToBack()
             }
 
-            is CommentDetailUiEvent.NavigateToImageViewerForUser -> {
-                navigateToImageViewer(event.userName, listOf(event.image), 0, R.drawable.ic_empty_user_logo)
+            is CommentDetailSideEffect.NavigateToImageViewerForUser -> {
+                navigateToImageViewer(sideEffect.userName, listOf(sideEffect.image), 0, R.drawable.ic_empty_user_logo)
             }
 
-            is CommentDetailUiEvent.NavigateToWebBrowser -> {
+            is CommentDetailSideEffect.NavigateToWebBrowser -> {
                 try {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, event.webLink.toValidUrl()))
+                    context.startActivity(Intent(Intent.ACTION_VIEW, sideEffect.webLink.toValidUrl()))
                 } catch (e: Exception) {
                     showToast(context, context.getString(R.string.common_error_open_browser))
                 }
             }
 
-            is CommentDetailUiEvent.ShowToastMessage -> {
-                showToast(context, event.message)
+            is CommentDetailSideEffect.ShowToastMessage -> {
+                showToast(context, sideEffect.message)
             }
         }
     }
 
-    (uiState as? CommentDetailUiState)?.let { uiState ->
-        CommentDetailScreen(
-            modifier = modifier,
-            uiState = uiState,
-            isLoading = isLoading,
-            onUiAction = viewModel::onUiAction,
-        )
-    }
+    CommentDetailScreen(
+        modifier = modifier,
+        uiState = uiState,
+        isLoading = isLoading,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 fun CommentDetailScreen(
     modifier: Modifier = Modifier,
-    uiState: CommentDetailUiState,
+    uiState: CommentDetailState,
     isLoading: Boolean,
-    onUiAction: (CommentDetailUiAction) -> Unit,
+    onIntent: (CommentDetailIntent) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val paging = uiState.pagingInfo
@@ -110,7 +112,7 @@ fun CommentDetailScreen(
         topBar = {
             CommentDetailTopAppbar(
                 modifier = Modifier.fillMaxWidth(),
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         },
         content = {
@@ -121,30 +123,30 @@ fun CommentDetailScreen(
                         .padding(it),
                 contentAlignment = Alignment.Center,
             ) {
-                FadeAnimatedVisibility(paging.isLoading) {
+                FadeAnimatedVisibility(uiState.isLoading) {
                     LoadingScreen()
                 }
 
-                FadeAnimatedVisibility(paging.isError) {
+                FadeAnimatedVisibility(uiState.isError) {
                     if (uiState.isNotFoundError) {
                         NotFoundErrorScreen(
                             modifier = modifier,
                             description = stringResource(R.string.comment_detail_not_found_error),
-                            onClickBack = { onUiAction(CommentDetailUiAction.OnClickBack) },
+                            onClickBack = { onIntent(CommentDetailIntent.BackClick) },
                         )
                     } else {
                         ErrorScreen {
-                            onUiAction(CommentDetailUiAction.OnClickRefresh)
+                            onIntent(CommentDetailIntent.RefreshClick)
                         }
                     }
                 }
 
-                FadeAnimatedVisibility(uiState.pagingInfo.isSuccess) {
+                FadeAnimatedVisibility(uiState.isSuccess) {
                     PaginationEffect(
                         listState = listState,
                         threshold = 3,
                         enabled = !paging.isLast && !paging.isErrorFooter,
-                        onNext = { onUiAction(CommentDetailUiAction.OnLoadNextPage) },
+                        onNext = { onIntent(CommentDetailIntent.NextPageLoad) },
                     )
 
                     LazyColumn(
@@ -156,7 +158,7 @@ fun CommentDetailScreen(
                                 modifier = Modifier.animateItem(),
                                 userId = uiState.user.userId,
                                 comment = uiState.parentComment,
-                                onUiAction = onUiAction,
+                                onIntent = onIntent,
                             )
                         }
 
@@ -168,7 +170,7 @@ fun CommentDetailScreen(
                                 modifier = Modifier.animateItem(),
                                 userId = uiState.user.userId,
                                 comment = comment,
-                                onUiAction = onUiAction,
+                                onIntent = onIntent,
                             )
                         }
 
@@ -191,7 +193,7 @@ fun CommentDetailScreen(
                                             .fillMaxWidth()
                                             .animateItem(),
                                 ) {
-                                    onUiAction(CommentDetailUiAction.OnClickRefresh)
+                                    onIntent(CommentDetailIntent.RefreshClick)
                                 }
                             }
                         }
@@ -205,7 +207,7 @@ fun CommentDetailScreen(
                                 .align(Alignment.BottomCenter)
                                 .padding(horizontal = 20.dp, vertical = 8.dp),
                         userList = uiState.searchMentions,
-                        onUiAction = onUiAction,
+                        onIntent = onIntent,
                     )
                 }
             }
@@ -215,7 +217,7 @@ fun CommentDetailScreen(
                 updateComment = uiState.selectedUpdateComment,
                 commentState = uiState.commentState,
                 selectedMentions = uiState.selectedMentions,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         },
     )
@@ -223,14 +225,14 @@ fun CommentDetailScreen(
     if (uiState.isShowCommentEditDialog && uiState.selectedComment != null) {
         CommentDetailEditDialog(
             comment = uiState.selectedComment,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 
     if (uiState.isShowCommentReportDialog && uiState.selectedComment != null) {
         CommentDetailReportDialog(
             comment = uiState.selectedComment,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 

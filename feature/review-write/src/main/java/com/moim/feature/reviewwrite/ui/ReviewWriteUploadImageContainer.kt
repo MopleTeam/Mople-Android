@@ -35,13 +35,13 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.decimalFormatString
-import com.moim.feature.reviewwrite.ReviewWriteUiAction
+import com.moim.feature.reviewwrite.model.ReviewWriteIntent
 
 @Composable
 fun ReviewWriteUploadImageContainer(
     modifier: Modifier = Modifier,
     images: List<ReviewImage>,
-    onUiAction: (ReviewWriteUiAction) -> Unit = {},
+    onIntent: (ReviewWriteIntent) -> Unit = {},
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -76,7 +76,7 @@ fun ReviewWriteUploadImageContainer(
                 item {
                     ImageUploadBox(
                         modifier = Modifier.animateItem(),
-                        onUiAction = onUiAction,
+                        onIntent = onIntent,
                     )
                 }
             }
@@ -87,7 +87,7 @@ fun ReviewWriteUploadImageContainer(
                 ReviewImageBox(
                     modifier = Modifier.animateItem(),
                     image = it,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
         }
@@ -98,14 +98,14 @@ fun ReviewWriteUploadImageContainer(
 @Composable
 private fun ImageUploadBox(
     modifier: Modifier = Modifier,
-    onUiAction: (ReviewWriteUiAction) -> Unit,
+    onIntent: (ReviewWriteIntent) -> Unit,
 ) {
     Box(
         modifier =
             modifier
                 .size(110.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .onSingleClick { onUiAction(ReviewWriteUiAction.OnClickImageUpload) }
+                .onSingleClick { onIntent(ReviewWriteIntent.ImageUploadClick) }
                 .border(BorderStroke(1.dp, MoimTheme.colors.stroke))
                 .background(MoimTheme.colors.bg.primary),
     ) {
@@ -125,7 +125,7 @@ private fun ImageUploadBox(
 private fun ReviewImageBox(
     modifier: Modifier = Modifier,
     image: ReviewImage,
-    onUiAction: (ReviewWriteUiAction) -> Unit,
+    onIntent: (ReviewWriteIntent) -> Unit,
 ) {
     Box(
         modifier = modifier,
@@ -153,7 +153,7 @@ private fun ReviewImageBox(
                 modifier =
                     Modifier
                         .padding(4.dp)
-                        .onSingleClick { onUiAction(ReviewWriteUiAction.OnClickRemoveImage(image)) },
+                        .onSingleClick { onIntent(ReviewWriteIntent.ImageRemoveClick(image)) },
                 imageVector = ImageVector.vectorResource(R.drawable.ic_close),
                 contentDescription = "",
                 tint = MoimTheme.colors.bg.primary,

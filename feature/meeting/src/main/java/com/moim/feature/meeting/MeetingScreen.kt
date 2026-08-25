@@ -22,7 +22,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
@@ -36,9 +35,13 @@ import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.view.FadeAnimatedVisibility
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
+import com.moim.feature.meeting.model.MeetingIntent
+import com.moim.feature.meeting.model.MeetingSideEffect
+import com.moim.feature.meeting.model.MeetingState
 import com.moim.feature.meeting.ui.MeetingCard
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun MeetingRoute(
@@ -48,29 +51,27 @@ fun MeetingRoute(
     navigateToMeetingDetail: (String) -> Unit,
 ) {
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is MeetingUiEvent.NavigateToMeetingWrite -> navigateToMeetingWrite()
-            is MeetingUiEvent.NavigateToMeetingDetail -> navigateToMeetingDetail(event.meetingId)
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MeetingSideEffect.NavigateToMeetingWrite -> navigateToMeetingWrite()
+            is MeetingSideEffect.NavigateToMeetingDetail -> navigateToMeetingDetail(sideEffect.meetingId)
         }
     }
 
-    (uiState as? MeetingUiState)?.let {
-        MeetingScreen(
-            modifier = modifier,
-            uiState = it,
-            onUiAction = viewModel::onUiAction,
-        )
-    }
+    MeetingScreen(
+        modifier = modifier,
+        uiState = uiState,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 private fun MeetingScreen(
     modifier: Modifier = Modifier,
-    uiState: MeetingUiState,
-    onUiAction: (MeetingUiAction) -> Unit = {},
+    uiState: MeetingState,
+    onIntent: (MeetingIntent) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     val paging = uiState.pagingInfo
@@ -96,22 +97,22 @@ private fun MeetingScreen(
                 modifier = contentModifier,
                 contentAlignment = Alignment.Center,
             ) {
-                FadeAnimatedVisibility(paging.isLoading) {
+                FadeAnimatedVisibility(uiState.isLoading) {
                     LoadingScreen()
                 }
 
-                FadeAnimatedVisibility(paging.isError) {
+                FadeAnimatedVisibility(uiState.isError) {
                     ErrorScreen {
-                        onUiAction(MeetingUiAction.OnClickRefresh)
+                        onIntent(MeetingIntent.RefreshClick)
                     }
                 }
 
-                FadeAnimatedVisibility(uiState.pagingInfo.isSuccess && uiState.meetings.isNotEmpty()) {
+                FadeAnimatedVisibility(uiState.isSuccess && uiState.meetings.isNotEmpty()) {
                     PaginationEffect(
                         listState = listState,
                         threshold = 3,
                         enabled = !paging.isLast && !paging.isErrorFooter,
-                        onNext = { onUiAction(MeetingUiAction.OnLoadNextPage) },
+                        onNext = { onIntent(MeetingIntent.NextPageLoad) },
                     )
 
                     LazyColumn(
@@ -130,7 +131,7 @@ private fun MeetingScreen(
                             MeetingCard(
                                 modifier = Modifier.animateItem(),
                                 uiModel = uiModel,
-                                onUiAction = onUiAction,
+                                onIntent = onIntent,
                             )
                         }
 
@@ -154,14 +155,14 @@ private fun MeetingScreen(
                                             .animateItem(),
                                     backgroundColor = MoimTheme.colors.bg.secondary,
                                 ) {
-                                    onUiAction(MeetingUiAction.OnClickRefresh)
+                                    onIntent(MeetingIntent.RefreshClick)
                                 }
                             }
                         }
                     }
                 }
 
-                FadeAnimatedVisibility(uiState.pagingInfo.isSuccess && uiState.meetings.isEmpty()) {
+                FadeAnimatedVisibility(uiState.isSuccess && uiState.meetings.isEmpty()) {
                     MeetingEmptyScreen(
                         modifier =
                             Modifier
@@ -175,7 +176,7 @@ private fun MeetingScreen(
             MoimFloatingActionButton(
                 minWidth = 54.dp,
                 minHeight = 54.dp,
-                onClick = { onUiAction(MeetingUiAction.OnClickMeetingWrite) },
+                onClick = { onIntent(MeetingIntent.MeetingWriteClick) },
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_add),

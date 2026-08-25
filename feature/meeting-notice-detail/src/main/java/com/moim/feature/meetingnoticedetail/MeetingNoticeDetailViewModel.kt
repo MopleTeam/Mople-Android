@@ -1,19 +1,14 @@
 package com.moim.feature.meetingnoticedetail
 
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.insert
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.exception.ForbiddenException
-import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.exception.NotFoundException
 import com.moim.core.common.model.Notice
 import com.moim.core.common.model.NoticeComment
 import com.moim.core.common.model.PaginationContainer
-import com.moim.core.common.model.User
-import com.moim.core.common.model.item.NoticeCommentUiModel
 import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.crashreport.CrashReporter
 import com.moim.core.data.datasource.comment.CommentRepository
 import com.moim.core.data.datasource.meeting.MeetingRepository
@@ -22,45 +17,43 @@ import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.NoticeAction
 import com.moim.core.ui.eventbus.actionStateIn
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.createNoticeCommentUiModel
 import com.moim.core.ui.util.isActiveCheck
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
-import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
-import com.moim.core.ui.view.restartableStateIn
-import com.moim.feature.meetingnoticedetail.model.NoticeUiModel
+import com.moim.feature.meetingnoticedetail.model.MeetingNoticeDetailIntent
+import com.moim.feature.meetingnoticedetail.model.MeetingNoticeDetailSideEffect
+import com.moim.feature.meetingnoticedetail.model.MeetingNoticeDetailState
 import com.moim.feature.meetingnoticedetail.model.asUiModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.syntax.Syntax
 import java.io.IOException
 
 @HiltViewModel(assistedFactory = MeetingNoticeDetailViewModel.Factory::class)
 class MeetingNoticeDetailViewModel @AssistedInject constructor(
-    userRepository: UserRepository,
-    meetingRepository: MeetingRepository,
+    private val userRepository: UserRepository,
+    private val meetingRepository: MeetingRepository,
     private val noticeRepository: NoticeRepository,
     private val commentRepository: CommentRepository,
     private val crashReporter: CrashReporter,
     private val noticeEventBus: EventBus<NoticeAction>,
     @Assisted val meetingNoticeDetailRoute: DetailRoute.MeetingNoticeDetail,
-) : BaseViewModel() {
+) : MVIViewModel<MeetingNoticeDetailState, MeetingNoticeDetailSideEffect>(MeetingNoticeDetailState()) {
     private val meetId = meetingNoticeDetailRoute.meetId
     private val noticeId = meetingNoticeDetailRoute.noticeId
 
@@ -71,180 +64,153 @@ class MeetingNoticeDetailViewModel @AssistedInject constructor(
             .action
             .actionStateIn(viewModelScope, NoticeAction.None)
 
-    private val noticeDetailUiState =
-        combine(
-            userRepository.getUser(),
-            getNoticeFlow(),
-            meetingRepository.getMeeting(meetId),
-        ) { user, notice, meeting ->
-            MeetingNoticeDetailUiState.Success(
-                user = user,
-                notice = notice.asUiModel(),
-                isHostUser = meeting.hostId == user.userId,
-            )
-        }.asResult()
-            .mapLatest { result ->
-                when (result) {
-                    is Result.Loading -> {
-                        MeetingNoticeDetailUiState.Loading
-                    }
-
-                    is Result.Success -> {
-                        result.data
-                    }
-
-                    is Result.Error -> {
-                        when (result.exception) {
-                            is ForbiddenException,
-                            is NotFoundException,
-                            -> {
-                                MeetingNoticeDetailUiState.NotFoundError
-                            }
-
-                            else -> {
-                                crashReporter.logException(result.exception)
-                                MeetingNoticeDetailUiState.CommonError
-                            }
-                        }
-                    }
-                }
-            }.restartableStateIn(viewModelScope, SharingStarted.Lazily, MeetingNoticeDetailUiState.Loading)
-
     init {
-        viewModelScope.launch {
-            launch {
-                noticeDetailUiState.collect { uiState ->
-                    if (uiState is MeetingNoticeDetailUiState.Success) {
-                        val current = this@MeetingNoticeDetailViewModel.uiState.value as? MeetingNoticeDetailUiState.Success
-                        setUiState(
-                            uiState.copy(
-                                comments = current?.comments ?: emptyList(),
-                                commentsPagingInfo = current?.commentsPagingInfo ?: PagingUiState(),
-                            ),
-                        )
-                    } else {
-                        setUiState(uiState)
-                    }
-                }
-            }
-
-            launch {
-                noticeDetailUiState
-                    .filterIsInstance<MeetingNoticeDetailUiState.Success>()
-                    .take(1)
-                    .collect { getComments() }
-            }
-
-            launch {
-                noticeActionReceiver.collect { action ->
+        noticeActionReceiver
+            .onEach { action ->
+                intent {
                     when (action) {
                         is NoticeAction.NoticeUpdate -> {
                             applyNoticeUpdate(action.notice)
                         }
 
                         else -> {
-                            return@collect
+                            return@intent
                         }
                     }
                 }
+            }.launchIn(viewModelScope)
+    }
+
+    override suspend fun Syntax<MeetingNoticeDetailState, MeetingNoticeDetailSideEffect>.onContainerCreate() {
+        loadNoticeDetail()
+    }
+
+    override fun onIntent(intent: Intent) {
+        if (intent !is MeetingNoticeDetailIntent) {
+            super.onIntent(intent)
+            return
+        }
+
+        intent {
+            when (intent) {
+                is MeetingNoticeDetailIntent.BackClick -> {
+                    postSideEffect(MeetingNoticeDetailSideEffect.NavigateToBack)
+                }
+
+                is MeetingNoticeDetailIntent.RefreshClick -> {
+                    loadNoticeDetail()
+                }
+
+                is MeetingNoticeDetailIntent.NextCommentsPageLoad -> {
+                    getComments(state.commentsPagingInfo.nextCursor)
+                }
+
+                is MeetingNoticeDetailIntent.CommentUploadClick -> {
+                    uploadComment()
+                }
+
+                is MeetingNoticeDetailIntent.CommentWebLinkClick -> {
+                    postSideEffect(MeetingNoticeDetailSideEffect.NavigateToWebBrowser(intent.webLink))
+                }
+
+                is MeetingNoticeDetailIntent.NoticeEditDialogShow -> {
+                    reduce { state.copy(isShowNoticeEditDialog = intent.isShow) }
+                }
+
+                is MeetingNoticeDetailIntent.NoticeUpdateClick -> {
+                    val noticeId = noticeId ?: return@intent
+                    postSideEffect(MeetingNoticeDetailSideEffect.NavigateToMeetingNoticeWrite(meetId, noticeId))
+                }
+
+                is MeetingNoticeDetailIntent.NoticeDeleteClick -> {
+                    deleteNotice()
+                }
+
+                is MeetingNoticeDetailIntent.CommentEditDialogShow -> {
+                    reduce {
+                        state.copy(
+                            isShowCommentEditDialog = intent.isShow,
+                            selectedComment = intent.comment,
+                        )
+                    }
+                }
+
+                is MeetingNoticeDetailIntent.CommentReportDialogShow -> {
+                    reduce {
+                        state.copy(
+                            isShowCommentReportDialog = intent.isShow,
+                            selectedComment = intent.comment,
+                        )
+                    }
+                }
+
+                is MeetingNoticeDetailIntent.CommentUpdateClick -> {
+                    updateComment(intent.comment)
+                }
+
+                is MeetingNoticeDetailIntent.CommentDeleteClick -> {
+                    deleteComment(intent.comment)
+                }
+
+                is MeetingNoticeDetailIntent.CommentReportClick -> {
+                    reportComment(intent.comment)
+                }
             }
         }
     }
 
-    fun onUiAction(uiAction: MeetingNoticeDetailUiAction) {
-        when (uiAction) {
-            is MeetingNoticeDetailUiAction.OnClickBack -> {
-                setUiEvent(MeetingNoticeDetailUiEvent.NavigateToBack)
+    private fun loadNoticeDetail() {
+        intent {
+            reduce { state.copy(notice = Result.Loading, isNotFoundError = false) }
+
+            val noticeId = noticeId
+            if (noticeId == null) {
+                val exception = NotFoundException(message = "noticeId is null", throwable = null)
+                reduce { state.copy(notice = Result.Error(exception), isNotFoundError = true) }
+                return@intent
             }
 
-            is MeetingNoticeDetailUiAction.OnClickRefresh -> {
-                noticeDetailUiState.restart()
+            try {
+                val (user, notice, meeting) =
+                    coroutineScope {
+                        val userDeferred = async { userRepository.getUser().first() }
+                        val noticeDeferred = async { noticeRepository.getNotice(noticeId) }
+                        val meetingDeferred = async { meetingRepository.getMeeting(meetId) }
+                        Triple(userDeferred.await(), noticeDeferred.await(), meetingDeferred.await())
+                    }
+
+                reduce {
+                    state.copy(
+                        user = user,
+                        notice = Result.Success(notice.asUiModel()),
+                        isHostUser = meeting.hostId == user.userId,
+                    )
+                }
+
                 getComments()
-            }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                val isNotFoundError = e is ForbiddenException || e is NotFoundException
+                if (!isNotFoundError) crashReporter.logException(e)
 
-            is MeetingNoticeDetailUiAction.OnLoadNextCommentsPage -> {
-                val current = uiState.value as? MeetingNoticeDetailUiState.Success ?: return
-                getComments(current.commentsPagingInfo.nextCursor)
-            }
-
-            is MeetingNoticeDetailUiAction.OnClickCommentUpload -> {
-                uploadComment()
-            }
-
-            is MeetingNoticeDetailUiAction.OnClickCommentWebLink -> {
-                setUiEvent(MeetingNoticeDetailUiEvent.NavigateToWebBrowser(uiAction.webLink))
-            }
-
-            is MeetingNoticeDetailUiAction.OnShowNoticeEditDialog -> {
-                uiState.checkState<MeetingNoticeDetailUiState.Success> {
-                    setUiState(copy(isShowNoticeEditDialog = uiAction.isShow))
-                }
-            }
-
-            is MeetingNoticeDetailUiAction.OnClickNoticeUpdate -> {
-                val noticeId = noticeId ?: return
-                setUiEvent(MeetingNoticeDetailUiEvent.NavigateToMeetingNoticeWrite(meetId, noticeId))
-            }
-
-            is MeetingNoticeDetailUiAction.OnClickNoticeDelete -> {
-                deleteNotice()
-            }
-
-            is MeetingNoticeDetailUiAction.OnShowCommentEditDialog -> {
-                uiState.checkState<MeetingNoticeDetailUiState.Success> {
-                    setUiState(
-                        copy(
-                            isShowCommentEditDialog = uiAction.isShow,
-                            selectedComment = uiAction.comment,
-                        ),
-                    )
-                }
-            }
-
-            is MeetingNoticeDetailUiAction.OnShowCommentReportDialog -> {
-                uiState.checkState<MeetingNoticeDetailUiState.Success> {
-                    setUiState(
-                        copy(
-                            isShowCommentReportDialog = uiAction.isShow,
-                            selectedComment = uiAction.comment,
-                        ),
-                    )
-                }
-            }
-
-            is MeetingNoticeDetailUiAction.OnClickCommentUpdate -> {
-                updateComment(uiAction.comment)
-            }
-
-            is MeetingNoticeDetailUiAction.OnClickCommentDelete -> {
-                deleteComment(uiAction.comment)
-            }
-
-            is MeetingNoticeDetailUiAction.OnClickCommentReport -> {
-                reportComment(uiAction.comment)
+                reduce { state.copy(notice = Result.Error(e), isNotFoundError = isNotFoundError) }
             }
         }
     }
-
-    private fun getNoticeFlow() =
-        if (noticeId == null) {
-            throw NotFoundException(message = "noticeId is null", throwable = null)
-        } else {
-            noticeRepository.getNotice(noticeId = noticeId)
-        }
 
     private fun getComments(cursor: String? = null) {
         if (commentsPagingJob.isActiveCheck()) return
         val noticeId = noticeId ?: return
         commentsPagingJob =
-            viewModelScope.launch {
+            intent {
                 handleCommentsPagingData(
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         commentRepository.getNoticeComments(
                             noticeId = noticeId,
@@ -253,49 +219,50 @@ class MeetingNoticeDetailViewModel @AssistedInject constructor(
                         )
                     }.getOrNull()
 
-                if (!isActive) return@launch
+                if (!currentCoroutineContext().isActive) return@intent
 
                 handleCommentsPagingData(
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
             }
     }
 
-    private fun handleCommentsPagingData(
-        pagingInfo: PaginationContainer<List<NoticeComment>>?,
+    private suspend fun Syntax<MeetingNoticeDetailState, MeetingNoticeDetailSideEffect>.handleCommentsPagingData(
+        pagingData: PaginationContainer<List<NoticeComment>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<MeetingNoticeDetailUiState.Success> {
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = commentsPagingInfo,
-                    currentItems = comments,
-                    isInitialLoad = cursor == null,
-                    transform = { items -> items.map { it.createNoticeCommentUiModel() } },
-                )
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = state.commentsPagingInfo,
+                currentItems = state.comments,
+                isInitialLoad = cursor == null,
+                transform = { items -> items.map { it.createNoticeCommentUiModel() } },
+            )
 
-            setUiState(
-                copy(
-                    commentsPagingInfo = result.pagingInfo,
-                    comments = result.items,
-                ),
+        reduce {
+            state.copy(
+                commentsPagingInfo = result.pagingInfo,
+                comments = result.items,
             )
         }
     }
 
-    private fun uploadComment() {
+    private suspend fun Syntax<MeetingNoticeDetailState, MeetingNoticeDetailSideEffect>.uploadComment() {
         val noticeId = noticeId ?: return
-        viewModelScope.launch {
-            uiState.checkState<MeetingNoticeDetailUiState.Success> {
-                val content = commentState.text.toString().trim()
-                if (content.isEmpty()) return@checkState
+        val content = state.commentState.text.toString().trim()
+        if (content.isEmpty()) return
 
-                val updateComment = selectedUpdateComment
+        val updateComment = state.selectedUpdateComment
+
+        setLoading(true)
+
+        try {
+            val newComment =
                 if (updateComment == null) {
                     commentRepository.createNoticeComment(
                         noticeId = noticeId,
@@ -306,242 +273,120 @@ class MeetingNoticeDetailViewModel @AssistedInject constructor(
                         commentId = updateComment.commentId,
                         content = content,
                     )
-                }.asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        uiState.checkState<MeetingNoticeDetailUiState.Success> {
-                            when (result) {
-                                is Result.Loading -> {
-                                    return@collect
-                                }
+                }.createNoticeCommentUiModel()
 
-                                is Result.Success -> {
-                                    val newComment = result.data.createNoticeCommentUiModel()
-                                    commentState.clearText()
-                                    if (updateComment == null) {
-                                        setUiState(
-                                            copy(
-                                                comments = listOf(newComment) + comments,
-                                                commentsPagingInfo =
-                                                    commentsPagingInfo.copy(
-                                                        totalCount = commentsPagingInfo.totalCount + 1,
-                                                    ),
-                                            ),
-                                        )
-                                    } else {
-                                        setUiState(
-                                            copy(
-                                                comments =
-                                                    comments.map { uiModel ->
-                                                        if (uiModel.comment.commentId == newComment.comment.commentId) {
-                                                            newComment
-                                                        } else {
-                                                            uiModel
-                                                        }
-                                                    },
-                                                selectedUpdateComment = null,
-                                            ),
-                                        )
-                                    }
-                                }
+            state.commentState.clearText()
 
-                                is Result.Error -> {
-                                    showErrorToast(result.exception)
-                                }
-                            }
-                        }
-                    }
+            if (updateComment == null) {
+                reduce {
+                    state.copy(
+                        comments = listOf(newComment) + state.comments,
+                        commentsPagingInfo =
+                            state.commentsPagingInfo.copy(
+                                totalCount = state.commentsPagingInfo.totalCount + 1,
+                            ),
+                    )
+                }
+            } else {
+                reduce {
+                    state.copy(
+                        comments =
+                            state.comments.map { uiModel ->
+                                if (uiModel.comment.commentId == newComment.comment.commentId) newComment else uiModel
+                            },
+                        selectedUpdateComment = null,
+                    )
+                }
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun updateComment(comment: NoticeComment) {
-        uiState.checkState<MeetingNoticeDetailUiState.Success> {
-            commentState.clearText()
-            commentState.edit { insert(0, comment.content) }
-            setUiState(copy(selectedUpdateComment = comment))
+    private suspend fun Syntax<MeetingNoticeDetailState, MeetingNoticeDetailSideEffect>.updateComment(comment: NoticeComment) {
+        state.commentState.clearText()
+        state.commentState.edit { insert(0, comment.content) }
+
+        reduce { state.copy(selectedUpdateComment = comment) }
+    }
+
+    private suspend fun Syntax<MeetingNoticeDetailState, MeetingNoticeDetailSideEffect>.deleteComment(comment: NoticeComment) {
+        setLoading(true)
+
+        try {
+            commentRepository.deleteComment(comment.commentId)
+
+            if (state.selectedUpdateComment != null) state.commentState.clearText()
+
+            reduce {
+                state.copy(
+                    comments = state.comments.filterNot { it.comment.commentId == comment.commentId },
+                    commentsPagingInfo =
+                        state.commentsPagingInfo.copy(
+                            totalCount = (state.commentsPagingInfo.totalCount - 1).coerceAtLeast(0),
+                        ),
+                    selectedUpdateComment = null,
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun deleteComment(comment: NoticeComment) {
-        viewModelScope.launch {
-            commentRepository
-                .deleteComment(comment.commentId)
-                .asResult()
-                .onEach { setLoading(it is Result.Loading) }
-                .collect { result ->
-                    uiState.checkState<MeetingNoticeDetailUiState.Success> {
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
+    private suspend fun Syntax<MeetingNoticeDetailState, MeetingNoticeDetailSideEffect>.reportComment(comment: NoticeComment) {
+        setLoading(true)
 
-                            is Result.Success -> {
-                                if (selectedUpdateComment != null) {
-                                    commentState.clearText()
-                                }
-                                setUiState(
-                                    copy(
-                                        comments = comments.filterNot { it.comment.commentId == comment.commentId },
-                                        commentsPagingInfo =
-                                            commentsPagingInfo.copy(
-                                                totalCount = (commentsPagingInfo.totalCount - 1).coerceAtLeast(0),
-                                            ),
-                                        selectedUpdateComment = null,
-                                    ),
-                                )
-                            }
-
-                            is Result.Error -> {
-                                showErrorToast(result.exception)
-                            }
-                        }
-                    }
-                }
+        try {
+            commentRepository.reportComment(commentId = comment.commentId)
+            postSideEffect(MeetingNoticeDetailSideEffect.ShowToastMessage(ToastMessage.ReportCompletedMessage))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun reportComment(comment: NoticeComment) {
-        viewModelScope.launch {
-            commentRepository
-                .reportComment(commentId = comment.commentId)
-                .asResult()
-                .onEach { setLoading(it is Result.Loading) }
-                .collect { result ->
-                    when (result) {
-                        is Result.Loading -> return@collect
-                        is Result.Success -> setUiEvent(MeetingNoticeDetailUiEvent.ShowToastMessage(ToastMessage.ReportCompletedMessage))
-                        is Result.Error -> showErrorToast(result.exception)
-                    }
-                }
-        }
-    }
-
-    private fun deleteNotice() {
+    private suspend fun Syntax<MeetingNoticeDetailState, MeetingNoticeDetailSideEffect>.deleteNotice() {
         val noticeId = noticeId ?: return
-        viewModelScope.launch {
-            noticeRepository
-                .deleteNotice(noticeId = noticeId)
-                .asResult()
-                .onEach { setLoading(it is Result.Loading) }
-                .collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            return@collect
-                        }
 
-                        is Result.Success -> {
-                            noticeEventBus.send(NoticeAction.NoticeDelete(noticeId = noticeId))
-                            setUiEvent(MeetingNoticeDetailUiEvent.NavigateToBack)
-                        }
+        setLoading(true)
 
-                        is Result.Error -> {
-                            showErrorToast(result.exception)
-                        }
-                    }
-                }
+        try {
+            noticeRepository.deleteNotice(noticeId = noticeId)
+            noticeEventBus.send(NoticeAction.NoticeDelete(noticeId = noticeId))
+            postSideEffect(MeetingNoticeDetailSideEffect.NavigateToBack)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun applyNoticeUpdate(notice: Notice) {
-        if (notice.noticeId != noticeId) return
-        uiState.checkState<MeetingNoticeDetailUiState.Success> {
-            setUiState(copy(notice = notice.asUiModel()))
-        }
+    private suspend fun Syntax<MeetingNoticeDetailState, MeetingNoticeDetailSideEffect>.applyNoticeUpdate(notice: Notice) {
+        if (notice.noticeId != noticeId || !state.isSuccess) return
+
+        reduce { state.copy(notice = Result.Success(notice.asUiModel())) }
     }
 
-    private fun showErrorToast(exception: Throwable) {
-        when (exception) {
-            is IOException -> setUiEvent(MeetingNoticeDetailUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-            is NetworkException -> setUiEvent(MeetingNoticeDetailUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-        }
+    private suspend fun Syntax<MeetingNoticeDetailState, MeetingNoticeDetailSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(MeetingNoticeDetailSideEffect.ShowToastMessage(message))
     }
 
     @AssistedFactory
     interface Factory {
         fun create(meetingDetailRoute: DetailRoute.MeetingNoticeDetail): MeetingNoticeDetailViewModel
     }
-}
-
-sealed interface MeetingNoticeDetailUiState : UiState {
-    data object Loading : MeetingNoticeDetailUiState
-
-    data class Success(
-        val user: User,
-        val notice: NoticeUiModel,
-        val isHostUser: Boolean = false,
-        val isShowNoticeEditDialog: Boolean = false,
-        val isShowCommentEditDialog: Boolean = false,
-        val isShowCommentReportDialog: Boolean = false,
-        val selectedComment: NoticeComment? = null,
-        val selectedUpdateComment: NoticeComment? = null,
-        val commentState: TextFieldState = TextFieldState(),
-        val comments: List<NoticeCommentUiModel> = emptyList(),
-        val commentsPagingInfo: PagingUiState = PagingUiState(),
-    ) : MeetingNoticeDetailUiState
-
-    data object NotFoundError : MeetingNoticeDetailUiState
-
-    data object CommonError : MeetingNoticeDetailUiState
-}
-
-sealed interface MeetingNoticeDetailUiAction : UiAction {
-    data object OnClickBack : MeetingNoticeDetailUiAction
-
-    data object OnClickRefresh : MeetingNoticeDetailUiAction
-
-    data object OnLoadNextCommentsPage : MeetingNoticeDetailUiAction
-
-    data object OnClickCommentUpload : MeetingNoticeDetailUiAction
-
-    data class OnClickCommentWebLink(
-        val webLink: String,
-    ) : MeetingNoticeDetailUiAction
-
-    data class OnShowNoticeEditDialog(
-        val isShow: Boolean,
-    ) : MeetingNoticeDetailUiAction
-
-    data object OnClickNoticeUpdate : MeetingNoticeDetailUiAction
-
-    data object OnClickNoticeDelete : MeetingNoticeDetailUiAction
-
-    data class OnShowCommentEditDialog(
-        val isShow: Boolean,
-        val comment: NoticeComment? = null,
-    ) : MeetingNoticeDetailUiAction
-
-    data class OnShowCommentReportDialog(
-        val isShow: Boolean,
-        val comment: NoticeComment? = null,
-    ) : MeetingNoticeDetailUiAction
-
-    data class OnClickCommentUpdate(
-        val comment: NoticeComment,
-    ) : MeetingNoticeDetailUiAction
-
-    data class OnClickCommentDelete(
-        val comment: NoticeComment,
-    ) : MeetingNoticeDetailUiAction
-
-    data class OnClickCommentReport(
-        val comment: NoticeComment,
-    ) : MeetingNoticeDetailUiAction
-}
-
-sealed interface MeetingNoticeDetailUiEvent : UiEvent {
-    data object NavigateToBack : MeetingNoticeDetailUiEvent
-
-    data class NavigateToMeetingNoticeWrite(
-        val meetId: String,
-        val noticeId: String,
-    ) : MeetingNoticeDetailUiEvent
-
-    data class NavigateToWebBrowser(
-        val webLink: String,
-    ) : MeetingNoticeDetailUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : MeetingNoticeDetailUiEvent
 }

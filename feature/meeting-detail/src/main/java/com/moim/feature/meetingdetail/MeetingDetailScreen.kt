@@ -25,6 +25,8 @@ import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.model.item.asPlanItem
+import com.moim.core.common.result.Result
+import com.moim.core.common.result.data
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.common.ErrorScreen
@@ -36,16 +38,17 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.ui.util.externalShareForUrl
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.meetingdetail.model.MeetingDetailIntent
 import com.moim.feature.meetingdetail.model.MeetingDetailNoticeUiModel
-import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
-import com.moim.feature.meetingdetail.model.MeetingDetailUiEvent
-import com.moim.feature.meetingdetail.model.MeetingDetailUiState
+import com.moim.feature.meetingdetail.model.MeetingDetailSideEffect
+import com.moim.feature.meetingdetail.model.MeetingDetailState
 import com.moim.feature.meetingdetail.ui.MeetingDetailHeader
 import com.moim.feature.meetingdetail.ui.MeetingDetailNotice
 import com.moim.feature.meetingdetail.ui.MeetingDetailPlanContent
 import com.moim.feature.meetingdetail.ui.MeetingDetailTopAppbar
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun MeetingDetailRoute(
@@ -61,72 +64,72 @@ fun MeetingDetailRoute(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val meetingDetailUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is MeetingDetailUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MeetingDetailSideEffect.NavigateToBack -> {
                 navigateToBack()
             }
 
-            is MeetingDetailUiEvent.NavigateToMeetingSetting -> {
-                navigateToMeetingSetting(event.meeting)
+            is MeetingDetailSideEffect.NavigateToMeetingSetting -> {
+                navigateToMeetingSetting(sideEffect.meeting)
             }
 
-            is MeetingDetailUiEvent.NavigateToMeetingNotice -> {
-                navigateToMeetingNotice(event.meetId)
+            is MeetingDetailSideEffect.NavigateToMeetingNotice -> {
+                navigateToMeetingNotice(sideEffect.meetId)
             }
 
-            is MeetingDetailUiEvent.NavigateToMeetingNoticeDetail -> {
-                navigateToMeetingNoticeDetail(event.meetId, event.noticeId)
+            is MeetingDetailSideEffect.NavigateToMeetingNoticeDetail -> {
+                navigateToMeetingNoticeDetail(sideEffect.meetId, sideEffect.noticeId)
             }
 
-            is MeetingDetailUiEvent.NavigateToPlanDetail -> {
-                navigateToPlanDetail(event.viewIdType)
+            is MeetingDetailSideEffect.NavigateToPlanDetail -> {
+                navigateToPlanDetail(sideEffect.viewIdType)
             }
 
-            is MeetingDetailUiEvent.NavigateToPlanWrite -> {
-                navigateToPlanWrite(event.plan.asPlanItem())
+            is MeetingDetailSideEffect.NavigateToPlanWrite -> {
+                navigateToPlanWrite(sideEffect.plan.asPlanItem())
             }
 
-            is MeetingDetailUiEvent.NavigateToImageViewer -> {
+            is MeetingDetailSideEffect.NavigateToImageViewer -> {
                 navigateToImageViewer(
-                    event.meetingName,
-                    listOf(event.imageUrl),
+                    sideEffect.meetingName,
+                    listOf(sideEffect.imageUrl),
                     0,
                     R.drawable.ic_empty_meeting,
                 )
             }
 
-            is MeetingDetailUiEvent.NavigateToExternalShareUrl -> {
-                context.externalShareForUrl(event.url)
+            is MeetingDetailSideEffect.NavigateToExternalShareUrl -> {
+                context.externalShareForUrl(sideEffect.url)
             }
 
-            is MeetingDetailUiEvent.ShowToastMessage -> {
-                showToast(context, event.message)
+            is MeetingDetailSideEffect.ShowToastMessage -> {
+                showToast(context, sideEffect.message)
             }
         }
     }
 
-    when (val uiState = meetingDetailUiState) {
-        is MeetingDetailUiState.Loading -> {
+    when {
+        uiState.isLoading -> {
             LoadingScreen(modifier)
         }
 
-        is MeetingDetailUiState.Success -> {
+        uiState.isSuccess -> {
             MeetingDetailScreen(
                 modifier = modifier,
                 uiState = uiState,
                 isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
+                onIntent = viewModel::onIntent,
             )
         }
 
-        is MeetingDetailUiState.Error -> {
+        uiState.isError -> {
             ErrorScreen(
                 modifier = modifier,
-                onClickRefresh = { viewModel.onUiAction(MeetingDetailUiAction.OnClickRefresh) },
+                onClickRefresh = { viewModel.onIntent(MeetingDetailIntent.RefreshClick) },
             )
         }
     }
@@ -135,17 +138,19 @@ fun MeetingDetailRoute(
 @Composable
 fun MeetingDetailScreen(
     modifier: Modifier = Modifier,
-    uiState: MeetingDetailUiState.Success,
+    uiState: MeetingDetailState,
     isLoading: Boolean = false,
-    onUiAction: (MeetingDetailUiAction) -> Unit,
+    onIntent: (MeetingDetailIntent) -> Unit,
 ) {
+    val meeting = uiState.meeting.data ?: return
+
     TrackScreenViewEvent(screenName = "meet_detail")
     Column(
         modifier = modifier,
     ) {
         MeetingDetailTopAppbar(
-            meeting = uiState.meeting,
-            onUiAction = onUiAction,
+            meeting = meeting,
+            onIntent = onIntent,
         )
 
         uiState.notice?.let {
@@ -154,14 +159,14 @@ fun MeetingDetailScreen(
             ) {
                 MeetingDetailNotice(
                     notice = it,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
         }
 
         MeetingDetailHeader(
             isSelectedFuturePlan = uiState.isPlanSelected,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
 
         Box(
@@ -179,7 +184,7 @@ fun MeetingDetailScreen(
                 reviewsPagingInfo = uiState.reviewsPagingInfo,
                 planTotalCount = uiState.planTotalCount,
                 reviewTotalCount = uiState.reviewTotalCount,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
 
             MoimFloatingActionButton(
@@ -188,7 +193,7 @@ fun MeetingDetailScreen(
                         .padding(end = 24.dp, bottom = 20.dp)
                         .size(54.dp)
                         .align(Alignment.BottomEnd),
-                onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanWrite) },
+                onClick = { onIntent(MeetingDetailIntent.PlanWriteClick) },
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_add),
@@ -199,16 +204,16 @@ fun MeetingDetailScreen(
     }
 
     if (uiState.isShowApplyCancelDialog) {
-        val dismissAction = MeetingDetailUiAction.OnShowPlanApplyCancelDialog(false, null)
+        val dismissIntent = MeetingDetailIntent.PlanApplyCancelDialogShow(false, null)
 
         MoimAlertDialog(
             title = stringResource(R.string.meeting_detail_plan_cancel),
             positiveButtonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.secondary),
-            onDismiss = { onUiAction(dismissAction) },
-            onClickNegative = { onUiAction(dismissAction) },
+            onDismiss = { onIntent(dismissIntent) },
+            onClickNegative = { onIntent(dismissIntent) },
             onClickPositive = {
                 if (uiState.cancelPlanItem == null) return@MoimAlertDialog
-                onUiAction(MeetingDetailUiAction.OnClickPlanApply(uiState.cancelPlanItem, false))
+                onIntent(MeetingDetailIntent.PlanApplyClick(uiState.cancelPlanItem, false))
             },
         )
     }
@@ -222,9 +227,9 @@ private fun MeetingDetailScreenPreview() {
     MoimTheme {
         MeetingDetailScreen(
             uiState =
-                MeetingDetailUiState.Success(
+                MeetingDetailState(
                     userId = "",
-                    meeting = Meeting(name = "모닝커피클럽"),
+                    meeting = Result.Success(Meeting(name = "모닝커피클럽")),
                     notice =
                         MeetingDetailNoticeUiModel(
                             noticeId = "",
@@ -233,7 +238,7 @@ private fun MeetingDetailScreenPreview() {
                         ),
                 ),
             isLoading = false,
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

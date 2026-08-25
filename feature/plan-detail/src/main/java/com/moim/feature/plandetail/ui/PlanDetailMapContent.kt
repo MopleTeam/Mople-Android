@@ -16,7 +16,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.plandetail.PlanDetailUiAction
+import com.moim.feature.plandetail.model.PlanDetailIntent
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
@@ -35,7 +35,7 @@ fun PlanDetailMapContent(
     modifier: Modifier = Modifier,
     latitude: Double,
     longitude: Double,
-    onUiAction: (PlanDetailUiAction) -> Unit,
+    onIntent: (PlanDetailIntent) -> Unit,
 ) {
     val cameraPositionState =
         rememberCameraPositionState().apply {
@@ -64,7 +64,7 @@ fun PlanDetailMapContent(
                     isLocationButtonEnabled = false,
                     isLogoClickEnabled = false,
                 ),
-            onMapClick = { _, _ -> onUiAction(PlanDetailUiAction.OnClickMapDetail) },
+            onMapClick = { _, _ -> onIntent(PlanDetailIntent.MapDetailClick) },
             cameraPositionState = cameraPositionState,
             locationSource = rememberFusedLocationSource(),
             properties = MapProperties(locationTrackingMode = LocationTrackingMode.Follow),

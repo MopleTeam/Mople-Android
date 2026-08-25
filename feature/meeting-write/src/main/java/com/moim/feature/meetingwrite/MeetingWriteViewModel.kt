@@ -1,24 +1,21 @@
 package com.moim.feature.meetingwrite
 
-import androidx.lifecycle.viewModelScope
-import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
+import com.moim.feature.meetingwrite.model.MeetingWriteIntent
+import com.moim.feature.meetingwrite.model.MeetingWriteSideEffect
+import com.moim.feature.meetingwrite.model.MeetingWriteState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import org.orbitmvi.orbit.syntax.Syntax
 import java.io.IOException
 
 @HiltViewModel(assistedFactory = MeetingWriteViewModel.Factory::class)
@@ -26,94 +23,90 @@ class MeetingWriteViewModel @AssistedInject constructor(
     private val meetingRepository: MeetingRepository,
     private val meetingEventBus: EventBus<MeetingAction>,
     @Assisted val meetingWriteRoute: DetailRoute.MeetingWrite,
-) : BaseViewModel() {
-    private val meeting = meetingWriteRoute.meeting
+) : MVIViewModel<MeetingWriteState, MeetingWriteSideEffect>(meetingWriteRoute.asState()) {
+    override fun onIntent(intent: Intent) {
+        if (intent !is MeetingWriteIntent) {
+            super.onIntent(intent)
+            return
+        }
 
-    init {
-        viewModelScope.launch {
-            meeting?.let {
-                setUiState(
-                    MeetingWriteUiState.MeetingWrite(
-                        meetingId = it.id,
-                        meetingUrl = it.imageUrl,
-                        meetingName = it.name,
-                        enableMeetingWrite = true,
-                    ),
-                )
-            } ?: run { setUiState(MeetingWriteUiState.MeetingWrite()) }
+        intent {
+            when (intent) {
+                is MeetingWriteIntent.BackClick -> {
+                    postSideEffect(MeetingWriteSideEffect.NavigateToBack)
+                }
+
+                is MeetingWriteIntent.MeetingWriteClick -> {
+                    setMeeting()
+                }
+
+                is MeetingWriteIntent.PhotoPickerClick -> {
+                    postSideEffect(MeetingWriteSideEffect.NavigateToPhotoPicker)
+                }
+
+                is MeetingWriteIntent.MeetingPhotoUrlChange -> {
+                    reduce { state.copy(meetingUrl = intent.meetingPhotoUrl) }
+                }
+
+                is MeetingWriteIntent.MeetingNameChange -> {
+                    val trimName = intent.name.trim()
+
+                    reduce {
+                        state.copy(
+                            meetingName = trimName,
+                            enableMeetingWrite = trimName.length >= 2,
+                        )
+                    }
+                }
+
+                is MeetingWriteIntent.MeetingPhotoEditDialogShow -> {
+                    reduce { state.copy(isShowPhotoEditDialog = intent.isShow) }
+                }
+            }
         }
     }
 
-    fun onUiAction(uiAction: MeetingWriteUiAction) {
-        when (uiAction) {
-            is MeetingWriteUiAction.OnClickMeetingWrite -> setMeeting()
-            is MeetingWriteUiAction.OnClickBack -> setUiEvent(MeetingWriteUiEvent.NavigateToBack)
-            is MeetingWriteUiAction.OnChangeMeetingPhotoUrl -> setMeetingPhotoUrl(uiAction.meetingPhotoUrl)
-            is MeetingWriteUiAction.OnChangeMeetingName -> setMeetingName(uiAction.name)
-            is MeetingWriteUiAction.OnShowMeetingPhotoEditDialog -> showMeetingPhotoEditDialog(uiAction.isShow)
-            is MeetingWriteUiAction.OnNavigatePhotoPicker -> setUiEvent(MeetingWriteUiEvent.NavigateToPhotoPicker)
-        }
-    }
+    private suspend fun Syntax<MeetingWriteState, MeetingWriteSideEffect>.setMeeting() {
+        val meetingId = state.meetingId
+        val meetingName = state.meetingName
+        val meetingImageUrl = state.meetingUrl
 
-    private fun showMeetingPhotoEditDialog(isShow: Boolean) {
-        uiState.checkState<MeetingWriteUiState.MeetingWrite> {
-            setUiState(copy(isShowPhotoEditDialog = isShow))
-        }
-    }
+        setLoading(true)
 
-    private fun setMeetingPhotoUrl(imageUrl: String?) {
-        uiState.checkState<MeetingWriteUiState.MeetingWrite> {
-            setUiState(copy(meetingUrl = imageUrl))
-        }
-    }
-
-    private fun setMeetingName(name: String) {
-        uiState.checkState<MeetingWriteUiState.MeetingWrite> {
-            val trimName = name.trim()
-            val enableMeetingWrite = trimName.length >= 2
-            setUiState(copy(meetingName = trimName, enableMeetingWrite = enableMeetingWrite))
-        }
-    }
-
-    private fun setMeeting() {
-        viewModelScope.launch {
-            uiState.checkState<MeetingWriteUiState.MeetingWrite> {
+        try {
+            val meeting =
                 if (meetingId.isNullOrEmpty()) {
                     meetingRepository.createMeeting(
                         meetingName = meetingName,
-                        meetingImageUrl = meetingUrl,
+                        meetingImageUrl = meetingImageUrl,
                     )
                 } else {
                     meetingRepository.updateMeeting(
                         meetingId = meetingId,
                         meetingName = meetingName,
-                        meetingImageUrl = meetingUrl,
+                        meetingImageUrl = meetingImageUrl,
                     )
-                }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            return@collect
-                        }
-
-                        is Result.Success -> {
-                            if (meetingId.isNullOrEmpty()) {
-                                meetingEventBus.send(MeetingAction.MeetingCreate(meeting = result.data))
-                            } else {
-                                meetingEventBus.send(MeetingAction.MeetingUpdate(meeting = result.data))
-                            }
-                            setUiEvent(MeetingWriteUiEvent.NavigateToBack)
-                        }
-
-                        is Result.Error -> {
-                            when (result.exception) {
-                                is IOException -> setUiEvent(MeetingWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                else -> setUiEvent(MeetingWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                            }
-                        }
-                    }
                 }
+
+            if (meetingId.isNullOrEmpty()) {
+                meetingEventBus.send(MeetingAction.MeetingCreate(meeting = meeting))
+            } else {
+                meetingEventBus.send(MeetingAction.MeetingUpdate(meeting = meeting))
             }
+
+            postSideEffect(MeetingWriteSideEffect.NavigateToBack)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
+    }
+
+    private suspend fun Syntax<MeetingWriteState, MeetingWriteSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(MeetingWriteSideEffect.ShowToastMessage(message))
     }
 
     @AssistedFactory
@@ -122,42 +115,12 @@ class MeetingWriteViewModel @AssistedInject constructor(
     }
 }
 
-sealed interface MeetingWriteUiState : UiState {
-    data class MeetingWrite(
-        val meetingId: String? = null,
-        val meetingUrl: String? = null,
-        val meetingName: String = "",
-        val enableMeetingWrite: Boolean = false,
-        val isShowPhotoEditDialog: Boolean = false,
-    ) : MeetingWriteUiState
-}
-
-sealed interface MeetingWriteUiAction : UiAction {
-    data object OnClickMeetingWrite : MeetingWriteUiAction
-
-    data object OnClickBack : MeetingWriteUiAction
-
-    data class OnChangeMeetingPhotoUrl(
-        val meetingPhotoUrl: String?,
-    ) : MeetingWriteUiAction
-
-    data class OnChangeMeetingName(
-        val name: String,
-    ) : MeetingWriteUiAction
-
-    data class OnShowMeetingPhotoEditDialog(
-        val isShow: Boolean,
-    ) : MeetingWriteUiAction
-
-    data object OnNavigatePhotoPicker : MeetingWriteUiAction
-}
-
-sealed interface MeetingWriteUiEvent : UiEvent {
-    data object NavigateToBack : MeetingWriteUiEvent
-
-    data object NavigateToPhotoPicker : MeetingWriteUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : MeetingWriteUiEvent
-}
+private fun DetailRoute.MeetingWrite.asState() =
+    meeting?.let {
+        MeetingWriteState(
+            meetingId = it.id,
+            meetingUrl = it.imageUrl,
+            meetingName = it.name,
+            enableMeetingWrite = true,
+        )
+    } ?: MeetingWriteState()

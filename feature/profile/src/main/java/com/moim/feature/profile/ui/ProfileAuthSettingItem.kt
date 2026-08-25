@@ -12,13 +12,13 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.profile.OnProfileUiAction
-import com.moim.feature.profile.ProfileUiAction
+import com.moim.feature.profile.OnProfileIntent
+import com.moim.feature.profile.model.ProfileIntent
 
 @Composable
 fun ProfileAuthSettingContainer(
     modifier: Modifier = Modifier,
-    onUiAction: OnProfileUiAction,
+    onIntent: OnProfileIntent,
 ) {
     Column(
         modifier = modifier.padding(vertical = 8.dp),
@@ -28,14 +28,14 @@ fun ProfileAuthSettingContainer(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .onSingleClick { onUiAction(ProfileUiAction.OnShowUserLogoutDialog(true)) },
+                    .onSingleClick { onIntent(ProfileIntent.UserLogoutDialogShow(true)) },
             text = stringResource(R.string.profile_logout),
         )
         ProfileAuthSettingItem(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .onSingleClick { onUiAction(ProfileUiAction.OnClickUserWithdrawal) },
+                    .onSingleClick { onIntent(ProfileIntent.UserWithdrawalClick) },
             text = stringResource(R.string.profile_user_delete),
         )
     }

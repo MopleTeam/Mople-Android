@@ -9,8 +9,6 @@ import com.moim.core.remote.datasource.user.UserRemoteDataSource
 import com.moim.core.remote.model.asItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
@@ -21,41 +19,32 @@ internal class UserRepositoryImpl @Inject constructor(
 ) : UserRepository {
     override fun getUser(): Flow<User> =
         preferenceStorage.user
-            .onEach { if (it == null) fetchUser().first() }
+            .onEach { if (it == null) fetchUser() }
             .filterNotNull()
 
-    override fun fetchUser(): Flow<User> =
-        flow {
-            emit(userRemoteDataSource.getUser().asItem().also { preferenceStorage.saveUser(it) })
-        }
+    override suspend fun fetchUser(): User = userRemoteDataSource.getUser().asItem().also { preferenceStorage.saveUser(it) }
 
-    override fun updateUser(
+    override suspend fun updateUser(
         profileUrl: String?,
         nickname: String,
-    ): Flow<User> =
-        flow {
-            val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(url = profileUrl, folderName = "profile")
-            emit(
-                userRemoteDataSource
-                    .updateUser(
-                        jsonOf(
-                            KEY_IMAGE to uploadImageUrl,
-                            KEY_NICKNAME to nickname,
-                        ),
-                    ).asItem()
-                    .also { preferenceStorage.saveUser(it) },
-            )
-        }
+    ): User {
+        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(url = profileUrl, folderName = "profile")
 
-    override fun deleteUser() =
-        flow {
-            emit(userRemoteDataSource.deleteUser())
-        }
+        return userRemoteDataSource
+            .updateUser(
+                jsonOf(
+                    KEY_IMAGE to uploadImageUrl,
+                    KEY_NICKNAME to nickname,
+                ),
+            ).asItem()
+            .also { preferenceStorage.saveUser(it) }
+    }
 
-    override fun checkedNickname(nickname: String) =
-        flow {
-            emit(userRemoteDataSource.checkedNickname(nickname))
-        }
+    override suspend fun deleteUser() {
+        userRemoteDataSource.deleteUser()
+    }
+
+    override suspend fun checkedNickname(nickname: String): Boolean = userRemoteDataSource.checkedNickname(nickname)
 
     override fun getTheme(): Flow<Theme> = preferenceStorage.getTheme()
 
