@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.consts.MAP_INTENT_FOR_KAKAO
 import com.moim.core.common.consts.MAP_INTENT_FOR_NAVER
@@ -20,12 +19,15 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.mapdetail.model.MapDetailIntent
+import com.moim.feature.mapdetail.model.MapDetailSideEffect
+import com.moim.feature.mapdetail.model.MapDetailState
 import com.moim.feature.mapdetail.ui.MapContainer
 import com.moim.feature.mapdetail.ui.MapDetailMapAppDialog
 import com.moim.feature.mapdetail.ui.MapDetailPlaceInfoDialog
-import kotlinx.coroutines.flow.filterIsInstance
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun MapDetailRoute(
@@ -35,22 +37,20 @@ fun MapDetailRoute(
 ) {
     val context = LocalContext.current
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
-    val uiState by viewModel.uiState
-        .filterIsInstance<MapDetailUiState>()
-        .collectAsStateWithLifecycle(null)
+    val mapDetailUiState by viewModel.collectAsState()
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is MapDetailUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MapDetailSideEffect.NavigateToBack -> {
                 navigateToBack()
             }
 
-            is MapDetailUiEvent.NavigateToMapApp -> {
-                val latitude = event.latitude.toString()
-                val longitude = event.longitude.toString()
+            is MapDetailSideEffect.NavigateToMapApp -> {
+                val latitude = sideEffect.latitude.toString()
+                val longitude = sideEffect.longitude.toString()
 
                 try {
-                    when (event.mapType) {
+                    when (sideEffect.mapType) {
                         MapType.KAKAO -> {
                             val kakaoMapUrl = MAP_INTENT_FOR_KAKAO.format(latitude, longitude)
                             val intent = Intent(Intent.ACTION_VIEW, kakaoMapUrl.toUri())
@@ -58,7 +58,7 @@ fun MapDetailRoute(
                         }
 
                         MapType.NAVER -> {
-                            val naverMapUrl = MAP_INTENT_FOR_NAVER.format(latitude, longitude, event.address)
+                            val naverMapUrl = MAP_INTENT_FOR_NAVER.format(latitude, longitude, sideEffect.address)
                             val intent = Intent.parseUri(naverMapUrl, Intent.URI_INTENT_SCHEME)
                             context.startActivity(intent)
                         }
@@ -70,20 +70,18 @@ fun MapDetailRoute(
         }
     }
 
-    uiState?.let {
-        MapDetailScreen(
-            modifier = modifier,
-            uiState = it,
-            onUiAction = viewModel::onUiAction,
-        )
-    }
+    MapDetailScreen(
+        modifier = modifier,
+        uiState = mapDetailUiState,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 fun MapDetailScreen(
     modifier: Modifier = Modifier,
-    uiState: MapDetailUiState,
-    onUiAction: (MapDetailUiAction) -> Unit = {},
+    uiState: MapDetailState,
+    onIntent: (MapDetailIntent) -> Unit = {},
 ) {
     TrackScreenViewEvent(screenName = "map_detail")
 
@@ -92,26 +90,26 @@ fun MapDetailScreen(
     ) {
         MoimTopAppbar(
             title = stringResource(R.string.map_detail_title),
-            onClickNavigate = { onUiAction(MapDetailUiAction.OnClickBack) },
+            onClickNavigate = { onIntent(MapDetailIntent.BackClick) },
         )
 
         Box {
             MapContainer(
                 latitude = uiState.latitude,
                 longitude = uiState.longitude,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
 
             if (uiState.isShowPlaceInfoDialog) {
                 MapDetailPlaceInfoDialog(
                     placeName = uiState.placeName,
                     address = uiState.address,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
 
             if (uiState.isShowMapAppDialog) {
-                MapDetailMapAppDialog(onUiAction = onUiAction)
+                MapDetailMapAppDialog(onIntent = onIntent)
             }
         }
     }

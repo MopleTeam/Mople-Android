@@ -1,267 +1,215 @@
 package com.moim.feature.home
 
 import androidx.lifecycle.viewModelScope
-import com.moim.core.common.model.Plan
-import com.moim.core.common.model.User
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.model.item.asPlan
 import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
+import com.moim.core.common.result.data
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
 import com.moim.core.ui.eventbus.PlanAction
-import com.moim.core.ui.eventbus.actionStateIn
-import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
-import com.moim.core.ui.view.restartableStateIn
+import com.moim.feature.home.model.HomeIntent
+import com.moim.feature.home.model.HomeSideEffect
+import com.moim.feature.home.model.HomeState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.orbitmvi.orbit.syntax.Syntax
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    userRepository: UserRepository,
-    planRepository: PlanRepository,
+    private val userRepository: UserRepository,
+    private val planRepository: PlanRepository,
     meetingEventBus: EventBus<MeetingAction>,
     planEventBus: EventBus<PlanAction>,
-) : BaseViewModel() {
-    private val meetingActionReceiver =
-        meetingEventBus
-            .action
-            .actionStateIn(viewModelScope, MeetingAction.None)
-    private val planActionReceiver =
-        planEventBus
-            .action
-            .actionStateIn(viewModelScope, PlanAction.None)
-
-    private val meetingPlansResult =
-        combine(
-            userRepository.getUser(),
-            planRepository.getCurrentPlans(),
-            ::Pair,
-        ).mapLatest { (user, meetContainer) -> user to meetContainer }
-            .asResult()
-            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
-
+) : MVIViewModel<HomeState, HomeSideEffect>(HomeState()) {
     init {
-        viewModelScope.launch {
-            launch {
-                meetingPlansResult.collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            setUiState(HomeUiState.Loading)
+        meetingEventBus.action
+            .onEach { action ->
+                intent {
+                    val currentPlans = state.plans.data ?: return@intent
+
+                    when (action) {
+                        is MeetingAction.MeetingCreate -> {
+                            reduce { state.copy(hasJoinedMeet = true) }
                         }
 
-                        is Result.Success -> {
-                            val (user, meetContainer) = result.data
-
-                            setUiState(
-                                HomeUiState.Success(
-                                    user = user,
-                                    plans = meetContainer.plans,
-                                    hasJoinedMeet = meetContainer.hasJoinedMeet,
-                                ),
-                            )
-                        }
-
-                        is Result.Error -> {
-                            setUiState(HomeUiState.Error)
-                        }
-                    }
-                }
-            }
-
-            launch {
-                meetingActionReceiver.collect { action ->
-                    uiState.checkState<HomeUiState.Success> {
-                        when (action) {
-                            is MeetingAction.MeetingCreate -> {
-                                setUiState(copy(hasJoinedMeet = true))
-                            }
-
-                            is MeetingAction.MeetingUpdate -> {
-                                val plans =
-                                    plans.map { plan ->
-                                        if (plan.meetingId == action.meeting.id) {
-                                            plan.copy(
-                                                meetingName = action.meeting.name,
-                                                meetingImageUrl = action.meeting.imageUrl,
-                                            )
-                                        } else {
-                                            plan
-                                        }
+                        is MeetingAction.MeetingUpdate -> {
+                            val plans =
+                                currentPlans.map { plan ->
+                                    if (plan.meetingId == action.meeting.id) {
+                                        plan.copy(
+                                            meetingName = action.meeting.name,
+                                            meetingImageUrl = action.meeting.imageUrl,
+                                        )
+                                    } else {
+                                        plan
                                     }
+                                }
 
-                                setUiState(copy(plans = plans))
-                            }
+                            reduce { state.copy(plans = Result.Success(plans)) }
+                        }
 
-                            is MeetingAction.MeetingDelete,
-                            is MeetingAction.MeetingInvalidate, -> {
-                                meetingPlansResult.restart()
-                            }
+                        is MeetingAction.MeetingDelete,
+                        is MeetingAction.MeetingInvalidate,
+                        -> {
+                            getData()
+                        }
 
-                            else -> {
-                                return@collect
-                            }
+                        else -> {
+                            return@intent
                         }
                     }
                 }
-            }
+            }.launchIn(viewModelScope)
 
-            launch {
-                planActionReceiver.collect { action ->
-                    uiState.checkState<HomeUiState.Success> {
-                        when (action) {
-                            is PlanAction.PlanCreate -> {
+        planEventBus.action
+            .onEach { action ->
+                intent {
+                    val currentPlans = state.plans.data ?: return@intent
+
+                    when (action) {
+                        is PlanAction.PlanCreate -> {
+                            val plans =
+                                currentPlans
+                                    .toMutableList()
+                                    .apply {
+                                        withIndex()
+                                            .firstOrNull {
+                                                val newPlanTime = action.planItem.planAt
+                                                val currentPlanTime = it.value.planAt
+                                                newPlanTime.isBefore(currentPlanTime)
+                                            }?.let { add(it.index, action.planItem.asPlan()) }
+                                            ?: run { add(action.planItem.asPlan()) }
+                                    }.take(5)
+
+                            reduce { state.copy(plans = Result.Success(plans)) }
+                        }
+
+                        is PlanAction.PlanUpdate -> {
+                            if (currentPlans.isEmpty()) {
+                                getData()
+                            } else {
                                 val plans =
-                                    plans
+                                    currentPlans
                                         .toMutableList()
                                         .apply {
                                             withIndex()
-                                                .firstOrNull {
-                                                    val newPlanTime = action.planItem.planAt
-                                                    val currentPlanTime = it.value.planAt
-                                                    newPlanTime.isBefore(currentPlanTime)
-                                                }?.let { add(it.index, action.planItem.asPlan()) }
+                                                .firstOrNull { action.planItem.postId == it.value.planId }
+                                                ?.index
+                                                ?.let { index -> set(index, action.planItem.asPlan()) }
                                                 ?: run { add(action.planItem.asPlan()) }
-                                        }.take(5)
+                                        }.sortedBy {
+                                            it.planAt
+                                        }.filter {
+                                            it.isParticipant || it.userId == state.user.userId
+                                        }
 
-                                setUiState(copy(plans = plans))
-                            }
-
-                            is PlanAction.PlanUpdate -> {
-                                if (plans.isEmpty()) {
-                                    meetingPlansResult.restart()
-                                } else {
-                                    val plans =
-                                        plans
-                                            .toMutableList()
-                                            .apply {
-                                                withIndex()
-                                                    .firstOrNull { action.planItem.postId == it.value.planId }
-                                                    ?.index
-                                                    ?.let { index -> set(index, action.planItem.asPlan()) }
-                                                    ?: run { add(action.planItem.asPlan()) }
-                                            }.sortedBy {
-                                                it.planAt
-                                            }.filter {
-                                                it.isParticipant || it.userId == user.userId
-                                            }
-
-                                    setUiState(copy(plans = plans))
-                                }
-                            }
-
-                            is PlanAction.PlanDelete -> {
-                                val plans =
-                                    plans.toMutableList().apply {
-                                        withIndex()
-                                            .firstOrNull { action.postId == it.value.planId }
-                                            ?.index
-                                            ?.let { index -> removeAt(index) }
-                                    }
-
-                                setUiState(copy(plans = plans))
-                            }
-
-                            is PlanAction.PlanInvalidate -> {
-                                meetingPlansResult.restart()
-                            }
-
-                            else -> {
-                                return@collect
+                                reduce { state.copy(plans = Result.Success(plans)) }
                             }
                         }
+
+                        is PlanAction.PlanDelete -> {
+                            val plans =
+                                currentPlans.toMutableList().apply {
+                                    withIndex()
+                                        .firstOrNull { action.postId == it.value.planId }
+                                        ?.index
+                                        ?.let { index -> removeAt(index) }
+                                }
+
+                            reduce { state.copy(plans = Result.Success(plans)) }
+                        }
+
+                        is PlanAction.PlanInvalidate -> {
+                            getData()
+                        }
+
+                        else -> {
+                            return@intent
+                        }
                     }
+                }
+            }.launchIn(viewModelScope)
+    }
+
+    override suspend fun Syntax<HomeState, HomeSideEffect>.onContainerCreate() {
+        repeatOnSubscription {
+            getData()
+        }
+    }
+
+    override fun onIntent(intent: Intent) {
+        if (intent !is HomeIntent) {
+            super.onIntent(intent)
+            return
+        }
+
+        intent {
+            when (intent) {
+                is HomeIntent.RefreshClick -> {
+                    getData()
+                }
+
+                is HomeIntent.AlarmClick -> {
+                    postSideEffect(HomeSideEffect.NavigateToAlarm)
+                }
+
+                is HomeIntent.MeetingWriteClick -> {
+                    postSideEffect(HomeSideEffect.NavigateToMeetingWrite)
+                }
+
+                is HomeIntent.PlanWriteClick -> {
+                    if (!state.hasJoinedMeet) {
+                        postSideEffect(HomeSideEffect.ShowToastMessage(ToastMessage.EmptyPlanErrorMessage))
+                    } else {
+                        postSideEffect(HomeSideEffect.NavigateToPlanWrite)
+                    }
+                }
+
+                is HomeIntent.PlanMoreClick -> {
+                    postSideEffect(HomeSideEffect.NavigateToCalendar)
+                }
+
+                is HomeIntent.PlanClick -> {
+                    postSideEffect(HomeSideEffect.NavigateToPlanDetail(ViewIdType.PlanId(intent.planId)))
+                }
+
+                is HomeIntent.PermissionCheckUpdate -> {
+                    reduce { state.copy(isPermissionCheck = true) }
                 }
             }
         }
     }
 
-    fun onUiAction(uiAction: HomeUiAction) {
-        when (uiAction) {
-            is HomeUiAction.OnClickRefresh -> meetingPlansResult.restart()
-            is HomeUiAction.OnClickAlarm -> setUiEvent(HomeUiEvent.NavigateToAlarm)
-            is HomeUiAction.OnClickMeetingWrite -> setUiEvent(HomeUiEvent.NavigateToMeetingWrite)
-            is HomeUiAction.OnClickPlanWrite -> navigateToPlanWrite()
-            is HomeUiAction.OnClickPlanMore -> setUiEvent(HomeUiEvent.NavigateToCalendar)
-            is HomeUiAction.OnClickPlan -> setUiEvent(HomeUiEvent.NavigateToPlanDetail(ViewIdType.PlanId(uiAction.planId)))
-            is HomeUiAction.OnUpdatePermissionCheck -> setPermissionCheck()
-        }
-    }
+    private fun getData() {
+        intent {
+            reduce { state.copy(plans = Result.Loading) }
 
-    private fun setPermissionCheck() {
-        uiState.checkState<HomeUiState.Success> {
-            setUiState(copy(isPermissionCheck = true))
-        }
-    }
+            try {
+                val user = userRepository.getUser().first()
+                val meetContainer = planRepository.getCurrentPlans()
 
-    private fun navigateToPlanWrite() {
-        uiState.checkState<HomeUiState.Success> {
-            if (!hasJoinedMeet) {
-                setUiEvent(HomeUiEvent.ShowToastMessage(ToastMessage.EmptyPlanErrorMessage))
-            } else {
-                setUiEvent(HomeUiEvent.NavigateToPlanWrite)
+                reduce {
+                    state.copy(
+                        user = user,
+                        plans = Result.Success(meetContainer.plans),
+                        hasJoinedMeet = meetContainer.hasJoinedMeet,
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                reduce { state.copy(plans = Result.Error(e)) }
             }
         }
     }
-}
-
-sealed interface HomeUiState : UiState {
-    data object Loading : HomeUiState
-
-    data class Success(
-        val user: User,
-        val plans: List<Plan> = emptyList(),
-        val hasJoinedMeet: Boolean = false,
-        val isPermissionCheck: Boolean = false,
-    ) : HomeUiState
-
-    data object Error : HomeUiState
-}
-
-sealed interface HomeUiAction : UiAction {
-    data object OnClickRefresh : HomeUiAction
-
-    data object OnClickAlarm : HomeUiAction
-
-    data object OnClickMeetingWrite : HomeUiAction
-
-    data object OnClickPlanWrite : HomeUiAction
-
-    data object OnClickPlanMore : HomeUiAction
-
-    data class OnClickPlan(
-        val planId: String,
-        val isPlan: Boolean,
-    ) : HomeUiAction
-
-    data object OnUpdatePermissionCheck : HomeUiAction
-}
-
-sealed interface HomeUiEvent : UiEvent {
-    data object NavigateToAlarm : HomeUiEvent
-
-    data object NavigateToMeetingWrite : HomeUiEvent
-
-    data object NavigateToPlanWrite : HomeUiEvent
-
-    data object NavigateToCalendar : HomeUiEvent
-
-    data class NavigateToPlanDetail(
-        val viewIdType: ViewIdType,
-    ) : HomeUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : HomeUiEvent
 }

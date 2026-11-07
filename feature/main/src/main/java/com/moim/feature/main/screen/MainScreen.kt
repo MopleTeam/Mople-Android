@@ -15,9 +15,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.moim.core.designsystem.component.MoimScaffold
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
-import com.moim.feature.main.MainUiEvent
 import com.moim.feature.main.MainViewModel
+import com.moim.feature.main.model.MainSideEffect
 import com.moim.feature.main.navigation.MainNavController
 import com.moim.feature.main.navigation.MainTab
 import com.moim.feature.main.navigation.alarmScreenEntry
@@ -47,6 +46,7 @@ import com.moim.feature.main.navigation.toEntries
 import com.moim.feature.main.navigation.userWithdrawalForLeaderChangeScreenEntry
 import com.moim.feature.main.navigation.webViewScreenEntry
 import com.moim.feature.main.screen.ui.MainBottomBar
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 private const val NAV_ANIMATION_DELAY = 500
 
@@ -59,14 +59,14 @@ fun MainScreen(
     val navigator = mainNavController.navigator
     val navigationState = mainNavController.navigationState
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is MainUiEvent.NavigateToPlanDetail -> {
-                navigator.navigateToPlanDetail(event.viewIdType)
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MainSideEffect.NavigateToPlanDetail -> {
+                navigator.navigateToPlanDetail(sideEffect.viewIdType)
             }
 
-            is MainUiEvent.NavigateToMeetingDetail -> {
-                navigator.navigateToMeetingDetail(event.meetingId)
+            is MainSideEffect.NavigateToMeetingDetail -> {
+                navigator.navigateToMeetingDetail(sideEffect.meetingId)
             }
         }
     }

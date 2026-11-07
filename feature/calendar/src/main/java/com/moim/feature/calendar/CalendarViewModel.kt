@@ -1,35 +1,28 @@
 package com.moim.feature.calendar
 
 import androidx.lifecycle.viewModelScope
-import com.kizitonwose.calendar.core.daysOfWeek
-import com.moim.core.common.exception.NetworkException
-import com.moim.core.common.model.ViewIdType
-import com.moim.core.common.model.item.PlanItem
 import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
-import com.moim.core.common.util.default
+import com.moim.core.common.result.data
 import com.moim.core.common.util.parseDateString
 import com.moim.core.data.datasource.holiday.HolidayRepository
 import com.moim.core.domain.usecase.GetPlanItemForCalendarUseCase
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
 import com.moim.core.ui.eventbus.PlanAction
-import com.moim.core.ui.eventbus.actionStateIn
-import com.moim.core.ui.view.BaseViewModel
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
-import com.moim.core.ui.view.restartableStateIn
+import com.moim.feature.calendar.model.CalendarIntent
+import com.moim.feature.calendar.model.CalendarSideEffect
+import com.moim.feature.calendar.model.CalendarState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import okio.IOException
-import java.time.DayOfWeek
+import org.orbitmvi.orbit.syntax.Syntax
+import java.io.IOException
 import java.time.ZonedDateTime
 import javax.inject.Inject
 
@@ -39,253 +32,198 @@ class CalendarViewModel @Inject constructor(
     private val getPlanItemForCalendarUseCase: GetPlanItemForCalendarUseCase,
     planEventBus: EventBus<PlanAction>,
     meetingEventBus: EventBus<MeetingAction>,
-) : BaseViewModel() {
-    private val meetingActionReceiver =
-        meetingEventBus
-            .action
-            .actionStateIn(viewModelScope, MeetingAction.None)
-    private val planActionReceiver =
-        planEventBus
-            .action
-            .actionStateIn(viewModelScope, PlanAction.None)
-
-    private val meetingPlanResult =
-        combine(
-            holidayRepository.getHolidays(ZonedDateTime.now()),
-            getPlanItemForCalendarUseCase(ZonedDateTime.now().parseDateString("yyyyMM")),
-            ::Pair,
-        ).asResult()
-            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
-
+) : MVIViewModel<CalendarState, CalendarSideEffect>(CalendarState()) {
     init {
-        viewModelScope.launch {
-            launch {
-                meetingPlanResult.collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            setUiState(CalendarUiState.Loading)
+        meetingEventBus.action
+            .onEach { action ->
+                intent {
+                    val currentPlans = state.plans.data ?: return@intent
+
+                    when (action) {
+                        is MeetingAction.MeetingDelete -> {
+                            val plans = currentPlans.filterNot { it.meetingId == action.meetId }
+
+                            reduce { state.copy(plans = Result.Success(plans)) }
                         }
 
-                        is Result.Success -> {
-                            val (holidays, plans) = result.data
-
-                            setUiState(
-                                CalendarUiState.Success(
-                                    plans = plans,
-                                    holidays = holidays.map { it.date },
-                                ),
-                            )
-                        }
-
-                        is Result.Error -> {
-                            setUiState(CalendarUiState.Error)
-                        }
-                    }
-                }
-            }
-
-            launch {
-                meetingActionReceiver.collect { action ->
-                    uiState.checkState<CalendarUiState.Success> {
-                        when (action) {
-                            is MeetingAction.MeetingDelete -> {
-                                val plan = plans.find { it.meetingId == action.meetId }
-                                setUiState(copy(plans = plans.toMutableList().apply { remove(plan) }))
-                            }
-
-                            is MeetingAction.MeetingUpdate -> {
-                                val plans =
-                                    plans.map { plan ->
-                                        if (plan.meetingId == action.meeting.id) {
-                                            plan.copy(
-                                                meetingName = action.meeting.name,
-                                                meetingImageUrl = action.meeting.imageUrl,
-                                            )
-                                        } else {
-                                            plan
-                                        }
+                        is MeetingAction.MeetingUpdate -> {
+                            val plans =
+                                currentPlans.map { plan ->
+                                    if (plan.meetingId == action.meeting.id) {
+                                        plan.copy(
+                                            meetingName = action.meeting.name,
+                                            meetingImageUrl = action.meeting.imageUrl,
+                                        )
+                                    } else {
+                                        plan
                                     }
+                                }
 
-                                setUiState(copy(plans = plans))
-                            }
+                            reduce { state.copy(plans = Result.Success(plans)) }
+                        }
 
-                            is MeetingAction.MeetingInvalidate -> {
-                                meetingPlanResult.restart()
-                            }
+                        is MeetingAction.MeetingInvalidate -> {
+                            getData()
+                        }
 
-                            else -> {
-                                return@collect
-                            }
+                        else -> {
+                            return@intent
                         }
                     }
                 }
-            }
+            }.launchIn(viewModelScope)
 
-            launch {
-                planActionReceiver.collect { action ->
-                    uiState.checkState<CalendarUiState.Success> {
-                        when (action) {
-                            is PlanAction.PlanCreate -> {
-                                val newPlans =
-                                    plans
-                                        .toMutableList()
-                                        .apply { add(action.planItem) }
-                                        .sortedBy { it.planAt }
+        planEventBus.action
+            .onEach { action ->
+                intent {
+                    val currentPlans = state.plans.data ?: return@intent
 
-                                setUiState(copy(plans = newPlans))
-                            }
+                    when (action) {
+                        is PlanAction.PlanCreate -> {
+                            val plans = (currentPlans + action.planItem).sortedBy { it.planAt }
 
-                            is PlanAction.PlanUpdate -> {
-                                val newPlan = action.planItem
-                                val findIndex =
-                                    plans
-                                        .withIndex()
-                                        .find { it.value.postId == newPlan.postId }
-                                        ?.index ?: return@collect
-                                val newPlans =
-                                    plans
-                                        .toMutableList()
-                                        .apply { this[findIndex] = newPlan }
-                                        .sortedBy { it.planAt }
+                            reduce { state.copy(plans = Result.Success(plans)) }
+                        }
 
-                                setUiState(copy(plans = newPlans))
-                            }
+                        is PlanAction.PlanUpdate -> {
+                            val newPlan = action.planItem
+                            val findIndex =
+                                currentPlans
+                                    .withIndex()
+                                    .find { it.value.postId == newPlan.postId }
+                                    ?.index ?: return@intent
+                            val plans =
+                                currentPlans
+                                    .toMutableList()
+                                    .apply { this[findIndex] = newPlan }
+                                    .sortedBy { it.planAt }
 
-                            is PlanAction.PlanDelete -> {
-                                val deletePlans = plans.toMutableList().apply { removeIf { it.postId == action.postId } }
-                                setUiState(copy(plans = deletePlans))
-                            }
+                            reduce { state.copy(plans = Result.Success(plans)) }
+                        }
 
-                            is PlanAction.PlanInvalidate -> {
-                                meetingPlanResult.restart()
-                            }
+                        is PlanAction.PlanDelete -> {
+                            val plans = currentPlans.filterNot { it.postId == action.postId }
 
-                            is PlanAction.None -> {
-                                return@collect
-                            }
+                            reduce { state.copy(plans = Result.Success(plans)) }
+                        }
+
+                        is PlanAction.PlanInvalidate -> {
+                            getData()
+                        }
+
+                        else -> {
+                            return@intent
                         }
                     }
+                }
+            }.launchIn(viewModelScope)
+    }
+
+    override suspend fun Syntax<CalendarState, CalendarSideEffect>.onContainerCreate() {
+        getData()
+    }
+
+    override fun onIntent(intent: Intent) {
+        if (intent !is CalendarIntent) {
+            super.onIntent(intent)
+            return
+        }
+
+        intent {
+            when (intent) {
+                is CalendarIntent.RefreshClick -> {
+                    getData()
+                }
+
+                is CalendarIntent.DateDayClick -> {
+                    if (state.selectDay == intent.date) return@intent
+
+                    reduce { state.copy(selectDay = intent.date, isExpandable = false) }
+                }
+
+                is CalendarIntent.ExpandableClick -> {
+                    reduce {
+                        state.copy(
+                            isExpandable = state.isExpandable.not(),
+                            selectDayOfMonth = intent.date,
+                        )
+                    }
+                }
+
+                is CalendarIntent.MeetingPlanClick -> {
+                    postSideEffect(CalendarSideEffect.NavigateToPlanDetail(intent.viewIdType))
+                }
+
+                is CalendarIntent.DateChange -> {
+                    getSelectDatePlan(intent.date)
                 }
             }
         }
     }
 
-    fun onUiAction(uiAction: CalendarUiAction) {
-        when (uiAction) {
-            is CalendarUiAction.OnClickRefresh -> meetingPlanResult.restart()
-            is CalendarUiAction.OnClickDateDay -> setSelectDay(uiAction.date)
-            is CalendarUiAction.OnClickExpandable -> setExpandable(uiAction.date)
-            is CalendarUiAction.OnClickMeetingPlan -> setUiEvent(CalendarUiEvent.NavigateToPlanDetail(uiAction.viewIdType))
-            is CalendarUiAction.OnChangeDate -> getSelectDatePlan(uiAction.date)
-        }
-    }
+    private fun getData() {
+        intent {
+            reduce { state.copy(plans = Result.Loading) }
 
-    private fun setSelectDay(date: ZonedDateTime) {
-        uiState.checkState<CalendarUiState.Success> {
-            if (selectDay == date) return
-            setUiState(copy(selectDay = date, isExpandable = false))
-        }
-    }
+            try {
+                val date = ZonedDateTime.now()
+                val (holidays, plans) = fetchCalendar(date)
 
-    private fun setExpandable(dateTime: ZonedDateTime) {
-        uiState.checkState<CalendarUiState.Success> {
-            setUiState(copy(isExpandable = isExpandable.not(), selectDayOfMonth = dateTime))
+                // 갱신 시 선택 날짜/로드된 월 정보도 초기화
+                reduce {
+                    CalendarState(
+                        plans = Result.Success(plans),
+                        holidays = holidays,
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                reduce { state.copy(plans = Result.Error(e)) }
+            }
         }
     }
 
     private fun getSelectDatePlan(date: ZonedDateTime) {
-        viewModelScope.launch {
-            uiState.checkState<CalendarUiState.Success> {
-                if (loadDates.any { it == date }) return@launch
-                val isHolidayFetch = loadDates.any { it.year != date.year }
-                val fetchHolidays =
-                    if (isHolidayFetch) {
-                        holidayRepository.getHolidays(date)
-                    } else {
-                        flowOf(emptyList())
-                    }
+        intent {
+            if (!state.isSuccess) return@intent
+            if (state.loadDates.any { it == date }) return@intent
 
-                combine(
-                    fetchHolidays,
-                    getPlanItemForCalendarUseCase(date.parseDateString("yyyyMM")),
-                    ::Pair,
-                ).asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
+            val isHolidayFetch = state.loadDates.any { it.year != date.year }
 
-                            is Result.Success -> {
-                                val (newHoliday, newPlan) = result.data
-                                val newHolidays = newHoliday.map { it.date }
+            setLoading(true)
 
-                                setUiState(
-                                    copy(
-                                        plans = plans + newPlan,
-                                        holidays = holidays + newHolidays,
-                                        loadDates = loadDates.toMutableList().apply { add(date) },
-                                    ),
-                                )
-                            }
+            try {
+                val (newHolidays, newPlans) = fetchCalendar(date, isHolidayFetch)
 
-                            is Result.Error -> {
-                                when (result.exception) {
-                                    is IOException -> setUiEvent(CalendarUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                    is NetworkException -> setUiEvent(CalendarUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                                }
-                            }
-                        }
-                    }
+                reduce {
+                    state.copy(
+                        plans = Result.Success(state.plans.data.orEmpty() + newPlans),
+                        holidays = state.holidays + newHolidays,
+                        loadDates = state.loadDates + date,
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                val message = if (e is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+                postSideEffect(CalendarSideEffect.ShowToastMessage(message))
+            } finally {
+                setLoading(false)
             }
         }
     }
-}
 
-sealed interface CalendarUiState : UiState {
-    data object Loading : CalendarUiState
+    private suspend fun fetchCalendar(
+        date: ZonedDateTime,
+        isHolidayFetch: Boolean = true,
+    ) = coroutineScope {
+        val holidays =
+            async {
+                if (isHolidayFetch) holidayRepository.getHolidays(date).map { it.date } else emptyList()
+            }
+        val plans = async { getPlanItemForCalendarUseCase(date.parseDateString("yyyyMM")) }
 
-    data class Success(
-        val plans: List<PlanItem>,
-        val selectDayOfMonth: ZonedDateTime = ZonedDateTime.now().default().withDayOfMonth(1),
-        val selectDay: ZonedDateTime? = null,
-        val loadDates: List<ZonedDateTime> = listOf(selectDayOfMonth),
-        val daysOfWeek: List<DayOfWeek> = daysOfWeek(),
-        val holidays: List<ZonedDateTime> = emptyList(),
-        val isExpandable: Boolean = true,
-        val isShowDatePickerDialog: Boolean = false,
-    ) : CalendarUiState
-
-    data object Error : CalendarUiState
-}
-
-sealed interface CalendarUiAction : UiAction {
-    data object OnClickRefresh : CalendarUiAction
-
-    data class OnClickDateDay(
-        val date: ZonedDateTime,
-    ) : CalendarUiAction
-
-    data class OnClickExpandable(
-        val date: ZonedDateTime,
-    ) : CalendarUiAction
-
-    data class OnClickMeetingPlan(
-        val viewIdType: ViewIdType,
-    ) : CalendarUiAction
-
-    data class OnChangeDate(
-        val date: ZonedDateTime,
-    ) : CalendarUiAction
-}
-
-sealed interface CalendarUiEvent : UiEvent {
-    data class NavigateToPlanDetail(
-        val viewIdType: ViewIdType,
-    ) : CalendarUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : CalendarUiEvent
+        holidays.await() to plans.await()
+    }
 }

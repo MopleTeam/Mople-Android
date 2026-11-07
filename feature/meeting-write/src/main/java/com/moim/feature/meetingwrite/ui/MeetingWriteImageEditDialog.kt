@@ -20,16 +20,16 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.feature.meetingwrite.MeetingWriteUiAction
-import com.moim.feature.meetingwrite.OnMeetingWriteUiAction
+import com.moim.feature.meetingwrite.OnMeetingWriteIntent
+import com.moim.feature.meetingwrite.model.MeetingWriteIntent
 import kotlinx.coroutines.launch
 
 @Composable
 fun MeetingWriteImageEditDialog(
     modifier: Modifier = Modifier,
-    onUiAction: OnMeetingWriteUiAction,
+    onIntent: OnMeetingWriteIntent,
 ) {
-    val dismissAction = MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(false)
+    val dismissIntent = MeetingWriteIntent.MeetingPhotoEditDialogShow(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -38,7 +38,7 @@ fun MeetingWriteImageEditDialog(
         onDismiss = {
             coroutineScope
                 .launch { sheetState.hide() }
-                .invokeOnCompletion { onUiAction(dismissAction) }
+                .invokeOnCompletion { onIntent(dismissIntent) }
         },
     ) {
         Column(
@@ -61,8 +61,8 @@ fun MeetingWriteImageEditDialog(
                 text = stringResource(R.string.common_default_select),
                 buttonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.gray.gray02),
                 onClick = {
-                    onUiAction(dismissAction)
-                    onUiAction(MeetingWriteUiAction.OnChangeMeetingPhotoUrl(null))
+                    onIntent(dismissIntent)
+                    onIntent(MeetingWriteIntent.MeetingPhotoUrlChange(null))
                 },
             )
             Spacer(Modifier.height(12.dp))
@@ -72,8 +72,8 @@ fun MeetingWriteImageEditDialog(
                 text = stringResource(R.string.common_album_select),
                 buttonColors = moimButtomColors(),
                 onClick = {
-                    onUiAction(dismissAction)
-                    onUiAction(MeetingWriteUiAction.OnNavigatePhotoPicker)
+                    onIntent(dismissIntent)
+                    onIntent(MeetingWriteIntent.PhotoPickerClick)
                 },
             )
             Spacer(Modifier.height(12.dp))

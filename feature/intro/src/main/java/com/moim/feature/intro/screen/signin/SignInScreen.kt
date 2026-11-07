@@ -35,10 +35,12 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.color_FEE500
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.intro.screen.signin.model.SignInIntent
+import com.moim.feature.intro.screen.signin.model.SignInSideEffect
+import org.orbitmvi.orbit.compose.collectSideEffect
 
-internal typealias OnSignInUiAction = (SignInUiAction) -> Unit
+internal typealias OnSignInIntent = (SignInIntent) -> Unit
 
 @Composable
 fun SignInRoute(
@@ -49,18 +51,18 @@ fun SignInRoute(
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is SignInUiEvent.NavigateToSignUp -> navigateToSignUp(event.email, event.token)
-            is SignInUiEvent.NavigateToMain -> navigateToMain()
-            is SignInUiEvent.ShowToastMessage -> showToast(context, event.message)
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is SignInSideEffect.NavigateToSignUp -> navigateToSignUp(sideEffect.email, sideEffect.token)
+            is SignInSideEffect.NavigateToMain -> navigateToMain()
+            is SignInSideEffect.ShowToastMessage -> showToast(context, sideEffect.message)
         }
     }
 
     SignInScreen(
         modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
         isLoading = isLoading,
-        onUiAction = viewModel::onUiAction,
+        onIntent = viewModel::onIntent,
     )
 }
 
@@ -68,7 +70,7 @@ fun SignInRoute(
 fun SignInScreen(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
-    onUiAction: OnSignInUiAction,
+    onIntent: OnSignInIntent,
 ) {
     TrackScreenViewEvent(screenName = "sign_in")
     val imageRes =
@@ -104,16 +106,14 @@ fun SignInScreen(
             )
         }
 
-        KakaoLoginButton(onUiAction = onUiAction)
+        KakaoLoginButton(onIntent = onIntent)
     }
 
     LoadingDialog(isShow = isLoading)
 }
 
 @Composable
-private fun BoxScope.KakaoLoginButton(onUiAction: OnSignInUiAction) {
-    val context = LocalContext.current
-
+private fun BoxScope.KakaoLoginButton(onIntent: OnSignInIntent) {
     MoimPrimaryButton(
         modifier =
             Modifier
@@ -124,7 +124,7 @@ private fun BoxScope.KakaoLoginButton(onUiAction: OnSignInUiAction) {
                 containerColor = color_FEE500,
                 contentColor = MoimTheme.colors.global.black,
             ),
-        onClick = { onUiAction(SignInUiAction.OnClickKakaoLogin(context)) },
+        onClick = { onIntent(SignInIntent.KakaoLoginClick) },
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -148,7 +148,7 @@ private fun SignInScreenPreview() {
     MoimTheme {
         SignInScreen(
             modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary),
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

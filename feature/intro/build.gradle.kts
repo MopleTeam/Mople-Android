@@ -30,4 +30,5 @@ android {
 
 dependencies {
     implementation(libs.kakao.login)
+    implementation(libs.androidx.startup)
 }

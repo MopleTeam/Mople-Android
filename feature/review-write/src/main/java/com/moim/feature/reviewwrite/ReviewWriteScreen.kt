@@ -22,6 +22,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.ViewIdType
+import com.moim.core.common.result.data
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -32,10 +33,14 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.reviewwrite.model.ReviewWriteIntent
+import com.moim.feature.reviewwrite.model.ReviewWriteSideEffect
+import com.moim.feature.reviewwrite.model.ReviewWriteState
 import com.moim.feature.reviewwrite.ui.ReviewWritePlanInfo
 import com.moim.feature.reviewwrite.ui.ReviewWriteUploadImageContainer
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun ReviewWriteRoute(
@@ -45,56 +50,56 @@ fun ReviewWriteRoute(
     navigateToParticipants: (ViewIdType) -> Unit,
 ) {
     val context = LocalContext.current
-    val reviewWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val modifier = Modifier.containerScreen(backgroundColor = MoimTheme.colors.bg.primary, padding = padding)
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
     val multiPhotoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickMultipleVisualMedia(5),
             onResult = { uris ->
-                if (uris.isNotEmpty()) viewModel.onUiAction(ReviewWriteUiAction.OnClickAddImages(uris.map { it.toString() }))
+                if (uris.isNotEmpty()) viewModel.onIntent(ReviewWriteIntent.ImagesAdd(uris.map { it.toString() }))
             },
         )
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is ReviewWriteUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is ReviewWriteSideEffect.NavigateToBack -> {
                 navigateToBack()
             }
 
-            is ReviewWriteUiEvent.NavigateToParticipants -> {
-                navigateToParticipants(event.viewIdType)
+            is ReviewWriteSideEffect.NavigateToParticipants -> {
+                navigateToParticipants(sideEffect.viewIdType)
             }
 
-            is ReviewWriteUiEvent.NavigateToPhotoPicker -> {
+            is ReviewWriteSideEffect.NavigateToPhotoPicker -> {
                 multiPhotoPickerLauncher.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                 )
             }
 
-            is ReviewWriteUiEvent.ShowToastMessage -> {
-                showToast(context, event.toastMessage)
+            is ReviewWriteSideEffect.ShowToastMessage -> {
+                showToast(context, sideEffect.toastMessage)
             }
         }
     }
 
-    when (val uiState = reviewWriteUiState) {
-        is ReviewWriteUiState.Loading -> {
+    when {
+        uiState.isLoading -> {
             LoadingScreen(modifier)
         }
 
-        is ReviewWriteUiState.Success -> {
+        uiState.isSuccess -> {
             ReviewWriteScreen(
                 modifier = modifier,
                 uiState = uiState,
                 isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
+                onIntent = viewModel::onIntent,
             )
         }
 
-        is ReviewWriteUiState.Error -> {
+        uiState.isError -> {
             ErrorScreen(modifier = modifier) {
-                viewModel.onUiAction(ReviewWriteUiAction.OnClickRefresh)
+                viewModel.onIntent(ReviewWriteIntent.RefreshClick)
             }
         }
     }
@@ -103,17 +108,19 @@ fun ReviewWriteRoute(
 @Composable
 fun ReviewWriteScreen(
     modifier: Modifier = Modifier,
-    uiState: ReviewWriteUiState.Success,
+    uiState: ReviewWriteState,
     isLoading: Boolean,
-    onUiAction: (ReviewWriteUiAction) -> Unit,
+    onIntent: (ReviewWriteIntent) -> Unit,
 ) {
+    val review = uiState.review.data ?: return
+
     TrackScreenViewEvent(screenName = "review_write")
     MoimScaffold(
         modifier = modifier,
         topBar = {
             MoimTopAppbar(
                 title = stringResource(if (uiState.isUpdated) R.string.review_write_title_update else R.string.review_write_title_create),
-                onClickNavigate = { onUiAction(ReviewWriteUiAction.OnClickBack) },
+                onClickNavigate = { onIntent(ReviewWriteIntent.BackClick) },
             )
         },
         content = {
@@ -131,12 +138,12 @@ fun ReviewWriteScreen(
 
                 ReviewWriteUploadImageContainer(
                     images = uiState.uploadImages,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
                 ReviewWriteDivider()
                 ReviewWritePlanInfo(
-                    review = uiState.review,
-                    onUiAction = onUiAction,
+                    review = review,
+                    onIntent = onIntent,
                 )
             }
         },
@@ -158,7 +165,7 @@ fun ReviewWriteScreen(
                         } else {
                             stringResource(R.string.review_write_create)
                         },
-                    onClick = { onUiAction(ReviewWriteUiAction.OnClickSubmit) },
+                    onClick = { onIntent(ReviewWriteIntent.SubmitClick) },
                 )
             }
         },

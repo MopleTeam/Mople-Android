@@ -1,156 +1,164 @@
 package com.moim.feature.reviewwrite
 
-import androidx.lifecycle.viewModelScope
-import com.moim.core.common.model.Review
 import com.moim.core.common.model.ReviewImage
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
+import com.moim.core.common.result.data
 import com.moim.core.data.datasource.review.ReviewRepository
 import com.moim.core.domain.usecase.UpdateReviewImagesUseCase
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
-import com.moim.core.ui.view.restartableStateIn
+import com.moim.feature.reviewwrite.model.ReviewWriteIntent
+import com.moim.feature.reviewwrite.model.ReviewWriteSideEffect
+import com.moim.feature.reviewwrite.model.ReviewWriteState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import org.orbitmvi.orbit.syntax.Syntax
 import java.io.IOException
 
 @HiltViewModel(assistedFactory = ReviewWriteViewModel.Factory::class)
 class ReviewWriteViewModel @AssistedInject constructor(
-    reviewRepository: ReviewRepository,
+    private val reviewRepository: ReviewRepository,
     private val updateReviewImagesUseCase: UpdateReviewImagesUseCase,
     private val planEventBus: EventBus<PlanAction>,
     @Assisted val reviewWriteRoute: DetailRoute.ReviewWrite,
-) : BaseViewModel() {
+) : MVIViewModel<ReviewWriteState, ReviewWriteSideEffect>(reviewWriteRoute.asState()) {
     private val postId = reviewWriteRoute.postId
-    private val isUpdated = reviewWriteRoute.isUpdated
 
-    private val reviewWriteResult =
-        reviewRepository
-            .getReview(postId)
-            .asResult()
-            .restartableStateIn(viewModelScope, SharingStarted.Lazily, Result.Loading)
+    override suspend fun Syntax<ReviewWriteState, ReviewWriteSideEffect>.onContainerCreate() {
+        loadReview()
+    }
 
-    init {
-        viewModelScope.launch {
-            reviewWriteResult.collect { result ->
-                when (result) {
-                    is Result.Loading -> {
-                        setUiState(ReviewWriteUiState.Loading)
-                    }
+    override fun onIntent(intent: Intent) {
+        if (intent !is ReviewWriteIntent) {
+            super.onIntent(intent)
+            return
+        }
 
-                    is Result.Success -> {
-                        val images = result.data.images
+        intent {
+            when (intent) {
+                is ReviewWriteIntent.BackClick -> {
+                    postSideEffect(ReviewWriteSideEffect.NavigateToBack)
+                }
 
-                        setUiState(
-                            ReviewWriteUiState.Success(
-                                review = result.data,
-                                isUpdated = isUpdated,
-                                uploadImages = images,
-                                removeImageIds = emptyList(),
-                                enableSubmit = images.isNotEmpty(),
-                            ),
-                        )
-                    }
+                is ReviewWriteIntent.RefreshClick -> {
+                    loadReview()
+                }
 
-                    is Result.Error -> {
-                        setUiState(ReviewWriteUiState.Error)
-                    }
+                is ReviewWriteIntent.ImageUploadClick -> {
+                    postSideEffect(ReviewWriteSideEffect.NavigateToPhotoPicker)
+                }
+
+                is ReviewWriteIntent.ParticipantsClick -> {
+                    postSideEffect(ReviewWriteSideEffect.NavigateToParticipants(ViewIdType.ReviewId(postId)))
+                }
+
+                is ReviewWriteIntent.SubmitClick -> {
+                    submitReviewImages()
+                }
+
+                is ReviewWriteIntent.ImagesAdd -> {
+                    addUploadImages(intent.imageUrls)
+                }
+
+                is ReviewWriteIntent.ImageRemoveClick -> {
+                    removeImage(intent.reviewImage)
                 }
             }
         }
     }
 
-    fun onUiAction(uiAction: ReviewWriteUiAction) {
-        when (uiAction) {
-            is ReviewWriteUiAction.OnClickBack -> setUiEvent(ReviewWriteUiEvent.NavigateToBack)
-            is ReviewWriteUiAction.OnClickRefresh -> reviewWriteResult.restart()
-            is ReviewWriteUiAction.OnClickImageUpload -> setUiEvent(ReviewWriteUiEvent.NavigateToPhotoPicker)
-            is ReviewWriteUiAction.OnClickAddImages -> addUploadImages(uiAction.imageUrls)
-            is ReviewWriteUiAction.OnClickRemoveImage -> removeImages(uiAction.reviewImage)
-            is ReviewWriteUiAction.OnClickParticipants -> setUiEvent(ReviewWriteUiEvent.NavigateToParticipants(ViewIdType.ReviewId(postId)))
-            is ReviewWriteUiAction.OnClickSubmit -> submitReviewImages()
-        }
-    }
+    private fun loadReview() {
+        intent {
+            reduce { state.copy(review = Result.Loading) }
 
-    private fun addUploadImages(images: List<String>) {
-        uiState.checkState<ReviewWriteUiState.Success> {
-            val addImages =
-                images.map {
-                    ReviewImage(
-                        imageId = "",
-                        imageUrl = it,
+            try {
+                val review = reviewRepository.getReview(postId)
+
+                reduce {
+                    state.copy(
+                        review = Result.Success(review),
+                        uploadImages = review.images,
+                        removeImageIds = emptyList(),
+                        enableSubmit = review.images.isNotEmpty(),
                     )
                 }
-
-            setUiState(
-                copy(
-                    uploadImages = uploadImages + addImages,
-                    enableSubmit = true,
-                ),
-            )
-        }
-    }
-
-    private fun removeImages(image: ReviewImage) {
-        uiState.checkState<ReviewWriteUiState.Success> {
-            val uploadImages = uploadImages.toMutableList().apply { removeIf { it.imageUrl == image.imageUrl } }
-            val removeImageIds = removeImageIds.toMutableList().apply { if (image.imageId.isNotEmpty()) add(image.imageId) }
-
-            setUiState(
-                copy(
-                    uploadImages = uploadImages,
-                    removeImageIds = removeImageIds,
-                    enableSubmit = uploadImages.isNotEmpty() || removeImageIds.isNotEmpty(),
-                ),
-            )
-        }
-    }
-
-    private fun submitReviewImages() {
-        viewModelScope.launch {
-            uiState.checkState<ReviewWriteUiState.Success> {
-                updateReviewImagesUseCase(
-                    UpdateReviewImagesUseCase.Params(
-                        reviewId = review.reviewId,
-                        uploadImages = uploadImages.map { it.imageUrl },
-                        removeImageIds = removeImageIds,
-                    ),
-                ).asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
-
-                            is Result.Success -> {
-                                planEventBus.send(PlanAction.PlanInvalidate())
-                                setUiEvent(ReviewWriteUiEvent.NavigateToBack)
-                            }
-
-                            is Result.Error -> {
-                                when (result.exception) {
-                                    is IOException -> setUiEvent(ReviewWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                    else -> setUiEvent(ReviewWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                                }
-                            }
-                        }
-                    }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                reduce { state.copy(review = Result.Error(e)) }
             }
         }
+    }
+
+    private suspend fun Syntax<ReviewWriteState, ReviewWriteSideEffect>.addUploadImages(images: List<String>) {
+        val addImages =
+            images.map {
+                ReviewImage(
+                    imageId = "",
+                    imageUrl = it,
+                )
+            }
+
+        reduce {
+            state.copy(
+                uploadImages = state.uploadImages + addImages,
+                enableSubmit = true,
+            )
+        }
+    }
+
+    private suspend fun Syntax<ReviewWriteState, ReviewWriteSideEffect>.removeImage(image: ReviewImage) {
+        val uploadImages = state.uploadImages.filterNot { it.imageUrl == image.imageUrl }
+        val removeImageIds =
+            state.removeImageIds.toMutableList().apply { if (image.imageId.isNotEmpty()) add(image.imageId) }
+
+        reduce {
+            state.copy(
+                uploadImages = uploadImages,
+                removeImageIds = removeImageIds,
+                enableSubmit = uploadImages.isNotEmpty() || removeImageIds.isNotEmpty(),
+            )
+        }
+    }
+
+    private suspend fun Syntax<ReviewWriteState, ReviewWriteSideEffect>.submitReviewImages() {
+        val review = state.review.data ?: return
+        val uploadImages = state.uploadImages.map { it.imageUrl }
+        val removeImageIds = state.removeImageIds
+
+        setLoading(true)
+
+        try {
+            updateReviewImagesUseCase(
+                UpdateReviewImagesUseCase.Params(
+                    reviewId = review.reviewId,
+                    uploadImages = uploadImages,
+                    removeImageIds = removeImageIds,
+                ),
+            )
+
+            planEventBus.send(PlanAction.PlanInvalidate())
+            postSideEffect(ReviewWriteSideEffect.NavigateToBack)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    private suspend fun Syntax<ReviewWriteState, ReviewWriteSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(ReviewWriteSideEffect.ShowToastMessage(message))
     }
 
     @AssistedFactory
@@ -159,50 +167,4 @@ class ReviewWriteViewModel @AssistedInject constructor(
     }
 }
 
-sealed interface ReviewWriteUiState : UiState {
-    data object Loading : ReviewWriteUiState
-
-    data class Success(
-        val review: Review,
-        val isUpdated: Boolean,
-        val uploadImages: List<ReviewImage>,
-        val removeImageIds: List<String>,
-        val enableSubmit: Boolean,
-    ) : ReviewWriteUiState
-
-    data object Error : ReviewWriteUiState
-}
-
-sealed interface ReviewWriteUiAction : UiAction {
-    data object OnClickBack : ReviewWriteUiAction
-
-    data object OnClickRefresh : ReviewWriteUiAction
-
-    data object OnClickImageUpload : ReviewWriteUiAction
-
-    data class OnClickAddImages(
-        val imageUrls: List<String>,
-    ) : ReviewWriteUiAction
-
-    data class OnClickRemoveImage(
-        val reviewImage: ReviewImage,
-    ) : ReviewWriteUiAction
-
-    data object OnClickParticipants : ReviewWriteUiAction
-
-    data object OnClickSubmit : ReviewWriteUiAction
-}
-
-sealed interface ReviewWriteUiEvent : UiEvent {
-    data object NavigateToBack : ReviewWriteUiEvent
-
-    data object NavigateToPhotoPicker : ReviewWriteUiEvent
-
-    data class NavigateToParticipants(
-        val viewIdType: ViewIdType,
-    ) : ReviewWriteUiEvent
-
-    data class ShowToastMessage(
-        val toastMessage: ToastMessage,
-    ) : ReviewWriteUiEvent
-}
+private fun DetailRoute.ReviewWrite.asState() = ReviewWriteState(isUpdated = isUpdated)

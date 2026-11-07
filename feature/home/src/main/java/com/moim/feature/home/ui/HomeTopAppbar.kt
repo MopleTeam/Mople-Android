@@ -17,13 +17,12 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.home.HomeUiAction
-import com.moim.feature.home.OnHomeUiAction
+import com.moim.feature.home.model.HomeIntent
 
 @Composable
 fun HomeTopAppbar(
     modifier: Modifier = Modifier,
-    onUiAction: OnHomeUiAction = {},
+    onIntent: (HomeIntent) -> Unit = {},
 ) {
     Row(
         modifier =
@@ -42,7 +41,7 @@ fun HomeTopAppbar(
         Spacer(Modifier.weight(1f))
 
         MoimIconButton(
-            onClick = { onUiAction(HomeUiAction.OnClickAlarm) },
+            onClick = { onIntent(HomeIntent.AlarmClick) },
             iconRes = R.drawable.ic_alarm,
         )
     }

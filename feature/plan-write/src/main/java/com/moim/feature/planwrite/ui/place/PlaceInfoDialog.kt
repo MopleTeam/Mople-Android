@@ -20,16 +20,16 @@ import com.moim.core.designsystem.component.MoimBottomSheetDialog
 import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.planwrite.PlanWriteUiAction
+import com.moim.feature.planwrite.model.PlanWriteIntent
 import kotlinx.coroutines.launch
 
 @Composable
 fun PlaceInfoDialog(
     modifier: Modifier = Modifier,
     place: Place,
-    onUiAction: (PlanWriteUiAction) -> Unit,
+    onIntent: (PlanWriteIntent) -> Unit,
 ) {
-    val dismissAction = PlanWriteUiAction.OnShowPlaceInfoDialog(false)
+    val dismissIntent = PlanWriteIntent.PlaceInfoDialogShow(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -38,7 +38,7 @@ fun PlaceInfoDialog(
         onDismiss = {
             coroutineScope
                 .launch { sheetState.hide() }
-                .invokeOnCompletion { onUiAction(dismissAction) }
+                .invokeOnCompletion { onIntent(dismissIntent) }
         },
     ) {
         Column(
@@ -67,8 +67,8 @@ fun PlaceInfoDialog(
             MoimPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    onUiAction(PlanWriteUiAction.OnClickPlanPlace(place))
-                    onUiAction(dismissAction)
+                    onIntent(PlanWriteIntent.PlanPlaceClick(place))
+                    onIntent(dismissIntent)
                 },
             ) {
                 Text(

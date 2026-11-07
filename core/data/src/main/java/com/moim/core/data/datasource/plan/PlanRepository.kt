@@ -6,12 +6,11 @@ import com.moim.core.common.model.Place
 import com.moim.core.common.model.Plan
 import com.moim.core.common.model.PlanReviewContainer
 import com.moim.core.common.model.User
-import kotlinx.coroutines.flow.Flow
 
 interface PlanRepository {
-    fun getCurrentPlans(): Flow<MeetingPlanContainer>
+    suspend fun getCurrentPlans(): MeetingPlanContainer
 
-    fun getPlan(planId: String): Flow<Plan>
+    suspend fun getPlan(planId: String): Plan
 
     suspend fun getPlans(
         meetingId: String,
@@ -19,13 +18,13 @@ interface PlanRepository {
         size: Int,
     ): PaginationContainer<List<Plan>>
 
-    fun getPlansForCalendar(date: String): Flow<PlanReviewContainer>
+    suspend fun getPlansForCalendar(date: String): PlanReviewContainer
 
-    fun getSearchPlace(
+    suspend fun getSearchPlace(
         keyword: String,
         xPoint: String,
         yPoint: String,
-    ): Flow<List<Place>>
+    ): List<Place>
 
     suspend fun getPlanParticipants(
         planId: String,
@@ -33,7 +32,7 @@ interface PlanRepository {
         size: Int,
     ): PaginationContainer<List<User>>
 
-    fun createPlan(
+    suspend fun createPlan(
         meetingId: String,
         planName: String,
         planTime: String,
@@ -43,13 +42,13 @@ interface PlanRepository {
         title: String,
         longitude: Double?,
         latitude: Double?,
-    ): Flow<Plan>
+    ): Plan
 
-    fun joinPlan(planId: String): Flow<Unit>
+    suspend fun joinPlan(planId: String)
 
-    fun leavePlan(planId: String): Flow<Unit>
+    suspend fun leavePlan(planId: String)
 
-    fun updatePlan(
+    suspend fun updatePlan(
         planId: String,
         planName: String,
         planTime: String,
@@ -59,9 +58,9 @@ interface PlanRepository {
         title: String,
         longitude: Double?,
         latitude: Double?,
-    ): Flow<Plan>
+    ): Plan
 
-    fun deletePlan(planId: String): Flow<Unit>
+    suspend fun deletePlan(planId: String)
 
-    fun reportPlan(planId: String): Flow<Unit>
+    suspend fun reportPlan(planId: String)
 }

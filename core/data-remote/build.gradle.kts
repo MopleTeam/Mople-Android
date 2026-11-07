@@ -35,8 +35,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines)
     implementation(libs.kotlinx.serialization.json)
 
-    // Retrofit
-    implementation(libs.bundles.retrofit)
+    // Ktor
+    implementation(libs.bundles.ktor)
 
     // Firebase
     implementation(platform(libs.firebase.bom))

@@ -19,13 +19,13 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.feature.profile.BuildConfig
-import com.moim.feature.profile.OnProfileUiAction
-import com.moim.feature.profile.ProfileUiAction
+import com.moim.feature.profile.OnProfileIntent
+import com.moim.feature.profile.model.ProfileIntent
 
 @Composable
 fun ProfileSettingContainer(
     modifier: Modifier = Modifier,
-    onUiAction: OnProfileUiAction,
+    onIntent: OnProfileIntent,
 ) {
     val prefix = if (BuildConfig.DEBUG) "[DEV] " else ""
 
@@ -37,15 +37,15 @@ fun ProfileSettingContainer(
     ) {
         ProfileSettingItem(
             text = stringResource(R.string.profile_alarm),
-            onClick = { onUiAction(ProfileUiAction.OnClickAlarmSetting) },
+            onClick = { onIntent(ProfileIntent.AlarmSettingClick) },
         )
         ProfileSettingItem(
             text = stringResource(R.string.profile_theme),
-            onClick = { onUiAction(ProfileUiAction.OnClickThemeSetting) },
+            onClick = { onIntent(ProfileIntent.ThemeSettingClick) },
         )
         ProfileSettingItem(
             text = stringResource(R.string.profile_privacy_policy),
-            onClick = { onUiAction(ProfileUiAction.OnClickPrivacyPolicy) },
+            onClick = { onIntent(ProfileIntent.PrivacyPolicyClick) },
         )
         ProfileSettingItem(
             text = stringResource(R.string.profile_version),

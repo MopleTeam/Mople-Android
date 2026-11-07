@@ -34,15 +34,15 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meetingsetting.MeetingSettingUiAction
-import com.moim.feature.meetingsetting.OnMeetingSettingUiAction
+import com.moim.feature.meetingsetting.OnMeetingSettingIntent
+import com.moim.feature.meetingsetting.model.MeetingSettingIntent
 
 @Composable
 fun MeetingSettingProfile(
     modifier: Modifier = Modifier,
     meeting: Meeting,
     isMeetingHost: Boolean,
-    onUiAction: OnMeetingSettingUiAction = {},
+    onIntent: OnMeetingSettingIntent = {},
 ) {
     Column(
         modifier =
@@ -57,7 +57,7 @@ fun MeetingSettingProfile(
                     .clip(RoundedCornerShape(10.dp))
                     .onSingleClick(
                         enabled = isMeetingHost,
-                        onClick = { onUiAction(MeetingSettingUiAction.OnClickMeetingEdit(meeting)) },
+                        onClick = { onIntent(MeetingSettingIntent.MeetingEditClick(meeting)) },
                     ),
             verticalAlignment = Alignment.CenterVertically,
         ) {

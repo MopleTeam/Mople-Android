@@ -11,13 +11,13 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimTextFieldColors
-import com.moim.feature.meetingwrite.MeetingWriteUiAction
-import com.moim.feature.meetingwrite.OnMeetingWriteUiAction
+import com.moim.feature.meetingwrite.OnMeetingWriteIntent
+import com.moim.feature.meetingwrite.model.MeetingWriteIntent
 
 @Composable
 fun MeetingWriteNameTextField(
     meetingName: String,
-    onUiAction: OnMeetingWriteUiAction = {},
+    onIntent: OnMeetingWriteIntent = {},
 ) {
     MoimText(
         text = stringResource(R.string.meeting_write_name),
@@ -30,6 +30,6 @@ fun MeetingWriteNameTextField(
         textFieldColors = moimTextFieldColors(),
         text = meetingName,
         textMaxLength = 30,
-        onTextChanged = { onUiAction(MeetingWriteUiAction.OnChangeMeetingName(it)) },
+        onTextChanged = { onIntent(MeetingWriteIntent.MeetingNameChange(it)) },
     )
 }

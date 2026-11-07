@@ -24,14 +24,14 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meetingwrite.MeetingWriteUiAction
-import com.moim.feature.meetingwrite.OnMeetingWriteUiAction
+import com.moim.feature.meetingwrite.OnMeetingWriteIntent
+import com.moim.feature.meetingwrite.model.MeetingWriteIntent
 
 @Composable
 fun MeetingWriteImage(
     modifier: Modifier = Modifier,
     meetingImageUrl: String?,
-    onUiAction: OnMeetingWriteUiAction,
+    onIntent: OnMeetingWriteIntent,
 ) {
     Column(
         modifier =
@@ -51,7 +51,7 @@ fun MeetingWriteImage(
                             .clip(RoundedCornerShape(20.dp))
                             .background(color = MoimTheme.colors.bg.primary)
                             .align(Alignment.Center)
-                            .onSingleClick { onUiAction(MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(true)) },
+                            .onSingleClick { onIntent(MeetingWriteIntent.MeetingPhotoEditDialogShow(true)) },
                 ) {
                     Icon(
                         modifier = Modifier.align(Alignment.Center),
@@ -68,7 +68,7 @@ fun MeetingWriteImage(
                             .border(BorderStroke(1.dp, MoimTheme.colors.stroke), shape = RoundedCornerShape(20.dp))
                             .size(80.dp)
                             .align(Alignment.Center)
-                            .onSingleClick { onUiAction(MeetingWriteUiAction.OnShowMeetingPhotoEditDialog(true)) },
+                            .onSingleClick { onIntent(MeetingWriteIntent.MeetingPhotoEditDialogShow(true)) },
                     imageUrl = meetingImageUrl,
                     errorImage = painterResource(R.drawable.ic_empty_image),
                 )
@@ -99,7 +99,7 @@ private fun MeetingWriteImagePreview() {
         ) {
             MeetingWriteImage(
                 meetingImageUrl = null,
-                onUiAction = {},
+                onIntent = {},
             )
         }
     }

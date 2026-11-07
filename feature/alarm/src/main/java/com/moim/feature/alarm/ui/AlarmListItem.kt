@@ -26,7 +26,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.alarm.AlarmUiAction
+import com.moim.feature.alarm.model.AlarmIntent
 import com.moim.feature.alarm.model.AlarmUiModel
 import java.time.ZonedDateTime
 
@@ -34,13 +34,13 @@ import java.time.ZonedDateTime
 fun AlarmListItem(
     modifier: Modifier = Modifier,
     alarm: AlarmUiModel,
-    onUiAction: (AlarmUiAction) -> Unit,
+    onIntent: (AlarmIntent) -> Unit,
 ) {
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
-                .onSingleClick { onUiAction(AlarmUiAction.OnClickAlarm(alarm)) }
+                .onSingleClick { onIntent(AlarmIntent.AlarmClick(alarm)) }
                 .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -128,7 +128,7 @@ private fun AlarmListItemPreview() {
                     planDate = ZonedDateTime.now(),
                     sendAt = ZonedDateTime.now(),
                 ),
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

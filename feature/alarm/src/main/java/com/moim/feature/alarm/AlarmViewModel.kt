@@ -1,63 +1,60 @@
 package com.moim.feature.alarm
 
-import androidx.lifecycle.viewModelScope
 import com.moim.core.common.model.Notification
 import com.moim.core.common.model.NotificationType
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.ViewIdType
 import com.moim.core.data.datasource.notification.NotificationRepository
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.util.isActiveCheck
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
-import com.moim.core.ui.view.PagingUiState
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
+import com.moim.feature.alarm.model.AlarmIntent
+import com.moim.feature.alarm.model.AlarmSideEffect
+import com.moim.feature.alarm.model.AlarmState
 import com.moim.feature.alarm.model.AlarmUiModel
 import com.moim.feature.alarm.model.asUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.syntax.Syntax
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
-) : BaseViewModel() {
+) : MVIViewModel<AlarmState, AlarmSideEffect>(AlarmState()) {
     private var pagingJob: Job? = null
 
-    init {
-        viewModelScope.launch {
-            setUiState(AlarmUiState())
-            getAlarms()
-        }
+    override suspend fun Syntax<AlarmState, AlarmSideEffect>.onContainerCreate() {
+        getAlarms()
     }
 
-    fun onUiAction(uiAction: AlarmUiAction) {
-        when (uiAction) {
-            is AlarmUiAction.OnClickBack -> {
-                setUiEvent(AlarmUiEvent.NavigateToBack)
-            }
+    override fun onIntent(intent: Intent) {
+        if (intent !is AlarmIntent) {
+            super.onIntent(intent)
+            return
+        }
 
-            is AlarmUiAction.OnClickRefresh -> {
-                val uiState = uiState.value as? AlarmUiState ?: return
-                getAlarms(uiState.pagingInfo.nextCursor)
-            }
+        intent {
+            when (intent) {
+                is AlarmIntent.BackClick -> {
+                    postSideEffect(AlarmSideEffect.NavigateToBack)
+                }
 
-            is AlarmUiAction.OnLoadNextPage -> {
-                val uiState = uiState.value as? AlarmUiState ?: return
-                getAlarms(uiState.pagingInfo.nextCursor)
-            }
+                is AlarmIntent.RefreshClick,
+                is AlarmIntent.NextPageLoad,
+                -> {
+                    getAlarms(state.pagingInfo.nextCursor)
+                }
 
-            is AlarmUiAction.OnUpdateNotificationCount -> {
-                clearNotificationCount()
-            }
+                is AlarmIntent.NotificationCountUpdate -> {
+                    clearNotificationCount()
+                }
 
-            is AlarmUiAction.OnClickAlarm -> {
-                navigateToNotifyTarget(uiAction.item)
+                is AlarmIntent.AlarmClick -> {
+                    navigateToNotifyTarget(intent.item)
+                }
             }
         }
     }
@@ -65,14 +62,14 @@ class AlarmViewModel @Inject constructor(
     private fun getAlarms(cursor: String? = null) {
         if (pagingJob.isActiveCheck()) return
         pagingJob =
-            viewModelScope.launch {
+            intent {
                 handlePagingData(
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         notificationRepository.getNotifications(
                             cursor = cursor ?: "",
@@ -81,56 +78,52 @@ class AlarmViewModel @Inject constructor(
                     }.getOrNull()
 
                 handlePagingData(
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
             }
     }
 
-    private fun handlePagingData(
-        pagingInfo: PaginationContainer<List<Notification>>?,
+    private suspend fun Syntax<AlarmState, AlarmSideEffect>.handlePagingData(
+        pagingData: PaginationContainer<List<Notification>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<AlarmUiState> {
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = this.pagingInfo,
-                    currentItems = alarms,
-                    isInitialLoad = cursor == null,
-                    transform = { notifications ->
-                        notifications.map { notification ->
-                            notification.asUiModel()
-                        }
-                    },
-                )
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = state.pagingInfo,
+                currentItems = state.alarms,
+                isInitialLoad = cursor == null,
+                transform = { notifications ->
+                    notifications.map { notification ->
+                        notification.asUiModel()
+                    }
+                },
+            )
 
-            setUiState(
-                copy(
-                    pagingInfo = result.pagingInfo,
-                    alarms = result.items,
-                ),
+        reduce {
+            state.copy(
+                pagingInfo = result.pagingInfo,
+                alarms = result.items,
             )
         }
     }
 
-    private fun clearNotificationCount() {
-        viewModelScope.launch {
-            runCatching {
-                notificationRepository.clearNotificationCount().first()
-            }
+    private suspend fun clearNotificationCount() {
+        runCatching {
+            notificationRepository.clearNotificationCount()
         }
     }
 
-    private fun navigateToNotifyTarget(alarmUiModel: AlarmUiModel) {
+    private suspend fun Syntax<AlarmState, AlarmSideEffect>.navigateToNotifyTarget(alarmUiModel: AlarmUiModel) {
         when (alarmUiModel.type) {
             NotificationType.MEET_NEW_MEMBER,
             NotificationType.PLAN_DELETE,
             -> {
-                setUiEvent(AlarmUiEvent.NavigateToMeetingDetail(requireNotNull(alarmUiModel.meetId)))
+                postSideEffect(AlarmSideEffect.NavigateToMeetingDetail(requireNotNull(alarmUiModel.meetId)))
             }
 
             NotificationType.COMMENT_REPLY,
@@ -153,9 +146,9 @@ class AlarmViewModel @Inject constructor(
                 val isPlan = (alarmUiModel.planDate?.toLocalDate()?.isAfter(LocalDate.now()) == true)
 
                 if (!isPlan && viewIdType is ViewIdType.PlanId) {
-                    setUiEvent(AlarmUiEvent.NavigateToPlanDetail(ViewIdType.PostId(viewIdType.id)))
+                    postSideEffect(AlarmSideEffect.NavigateToPlanDetail(ViewIdType.PostId(viewIdType.id)))
                 } else {
-                    setUiEvent(AlarmUiEvent.NavigateToPlanDetail(viewIdType))
+                    postSideEffect(AlarmSideEffect.NavigateToPlanDetail(viewIdType))
                 }
             }
 
@@ -164,35 +157,4 @@ class AlarmViewModel @Inject constructor(
             }
         }
     }
-}
-
-data class AlarmUiState(
-    val pagingInfo: PagingUiState = PagingUiState(),
-    val alarms: List<AlarmUiModel> = emptyList(),
-) : UiState
-
-sealed interface AlarmUiAction : UiAction {
-    data object OnClickBack : AlarmUiAction
-
-    data object OnClickRefresh : AlarmUiAction
-
-    data class OnClickAlarm(
-        val item: AlarmUiModel,
-    ) : AlarmUiAction
-
-    data object OnUpdateNotificationCount : AlarmUiAction
-
-    data object OnLoadNextPage : AlarmUiAction
-}
-
-sealed interface AlarmUiEvent : UiEvent {
-    data object NavigateToBack : AlarmUiEvent
-
-    data class NavigateToMeetingDetail(
-        val meetingId: String,
-    ) : AlarmUiEvent
-
-    data class NavigateToPlanDetail(
-        val viewIdType: ViewIdType,
-    ) : AlarmUiEvent
 }

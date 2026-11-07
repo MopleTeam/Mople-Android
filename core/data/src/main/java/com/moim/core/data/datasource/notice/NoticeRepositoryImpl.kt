@@ -4,16 +4,13 @@ import com.moim.core.common.model.Notice
 import com.moim.core.common.model.NoticeType
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.util.catchFlow
+import com.moim.core.remote.datasource.notice.NoticeRemoteDataSource
 import com.moim.core.remote.model.NoticeResponse
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.service.NoticeApi
-import com.moim.core.remote.util.converterException
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 internal class NoticeRepositoryImpl @Inject constructor(
-    private val noticeApi: NoticeApi,
+    private val noticeRemoteDataSource: NoticeRemoteDataSource,
 ) : NoticeRepository {
     override suspend fun getNotices(
         meetId: String,
@@ -21,73 +18,51 @@ internal class NoticeRepositoryImpl @Inject constructor(
         size: Int,
         filterType: NoticeType?,
     ): PaginationContainer<List<Notice>> =
-        try {
-            noticeApi
-                .getNotices(
-                    meetId = meetId,
-                    cursor = cursor,
-                    size = size,
-                    type = filterType?.name,
-                ).asItem { it.map(NoticeResponse::asItem) }
-        } catch (e: Exception) {
-            throw converterException(e)
-        }
+        noticeRemoteDataSource
+            .getNotices(
+                meetId = meetId,
+                cursor = cursor,
+                size = size,
+                type = filterType?.name,
+            ).asItem { it.map(NoticeResponse::asItem) }
 
-    override fun getNotice(noticeId: String): Flow<Notice> =
-        catchFlow {
-            emit(noticeApi.getNotice(noticeId).asItem())
-        }
+    override suspend fun getNotice(noticeId: String): Notice = noticeRemoteDataSource.getNotice(noticeId).asItem()
 
-    override fun createNotice(
+    override suspend fun createNotice(
         meetId: String,
         content: String,
-    ): Flow<Notice> =
-        catchFlow {
-            emit(
-                noticeApi
-                    .createNotice(
-                        params =
-                            jsonOf(
-                                KEY_MEET_ID to meetId,
-                                KEY_CONTENT to content,
-                            ),
-                    ).asItem(),
-            )
-        }
+    ): Notice =
+        noticeRemoteDataSource
+            .createNotice(
+                params =
+                    jsonOf(
+                        KEY_MEET_ID to meetId,
+                        KEY_CONTENT to content,
+                    ),
+            ).asItem()
 
-    override fun updateNotice(
+    override suspend fun updateNotice(
         noticeId: String,
         meetId: String,
         content: String,
-    ): Flow<Notice> =
-        catchFlow {
-            emit(
-                noticeApi
-                    .updateNotice(
-                        noticeId = noticeId,
-                        params =
-                            jsonOf(
-                                KEY_MEET_ID to meetId,
-                                KEY_CONTENT to content,
-                            ),
-                    ).asItem(),
-            )
-        }
+    ): Notice =
+        noticeRemoteDataSource
+            .updateNotice(
+                noticeId = noticeId,
+                params =
+                    jsonOf(
+                        KEY_MEET_ID to meetId,
+                        KEY_CONTENT to content,
+                    ),
+            ).asItem()
 
-    override fun deleteNotice(noticeId: String): Flow<Unit> =
-        catchFlow {
-            emit(noticeApi.deleteNotice(noticeId = noticeId))
-        }
+    override suspend fun deleteNotice(noticeId: String) {
+        noticeRemoteDataSource.deleteNotice(noticeId = noticeId)
+    }
 
-    override fun pinNotice(noticeId: String): Flow<Notice> =
-        catchFlow {
-            emit(noticeApi.pinNotice(noticeId = noticeId).asItem())
-        }
+    override suspend fun pinNotice(noticeId: String): Notice = noticeRemoteDataSource.pinNotice(noticeId = noticeId).asItem()
 
-    override fun unpinNotice(noticeId: String): Flow<Notice> =
-        catchFlow {
-            emit(noticeApi.unpinNotice(noticeId = noticeId).asItem())
-        }
+    override suspend fun unpinNotice(noticeId: String): Notice = noticeRemoteDataSource.unpinNotice(noticeId = noticeId).asItem()
 
     companion object {
         private const val KEY_MEET_ID = "meetId"

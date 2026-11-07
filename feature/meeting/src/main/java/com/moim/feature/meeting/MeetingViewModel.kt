@@ -3,180 +3,141 @@ package com.moim.feature.meeting
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.PaginationContainer
-import com.moim.core.common.model.User
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.user.UserRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
 import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.util.isActiveCheck
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
-import com.moim.core.ui.view.PagingUiState
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
+import com.moim.feature.meeting.model.MeetingIntent
+import com.moim.feature.meeting.model.MeetingSideEffect
+import com.moim.feature.meeting.model.MeetingState
 import com.moim.feature.meeting.model.MeetingUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.orbitmvi.orbit.syntax.Syntax
 import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class MeetingViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    private val meetingRepository: MeetingRepository,
     meetingEventBus: EventBus<MeetingAction>,
     planEventBus: EventBus<PlanAction>,
-    userRepository: UserRepository,
-    private val meetingRepository: MeetingRepository,
-) : BaseViewModel() {
+) : MVIViewModel<MeetingState, MeetingSideEffect>(MeetingState()) {
     private var pagingJob: Job? = null
 
     init {
-        viewModelScope.launch {
-            launch {
-                val user = userRepository.getUser().first()
-                setUiState(MeetingUiState(user = user))
-                getMeetings()
-            }
+        planEventBus.action
+            .onEach { action ->
+                intent {
+                    when (action) {
+                        is PlanAction.PlanCreate -> {
+                            updateLastPlanAt(action.planItem.meetingId, action.planItem.planAt)
+                        }
 
-            launch {
-                planEventBus.action.collect { action ->
-                    uiState.checkState<MeetingUiState> {
-                        when (action) {
-                            is PlanAction.None -> {
-                                return@collect
-                            }
+                        is PlanAction.PlanUpdate -> {
+                            updateLastPlanAt(action.planItem.meetingId, action.planItem.planAt)
+                        }
 
-                            is PlanAction.PlanCreate -> {
-                                val meetings =
-                                    meetings.map { uiModel ->
-                                        if (uiModel.meeting.id == action.planItem.meetingId) {
-                                            uiModel.copy(
-                                                meeting =
-                                                    updateLastPlanAt(
-                                                        meeting = uiModel.meeting,
-                                                        planAt = action.planItem.planAt,
-                                                    ),
-                                            )
-                                        } else {
-                                            uiModel
-                                        }
-                                    }
+                        is PlanAction.PlanDelete,
+                        is PlanAction.PlanInvalidate,
+                        -> {
+                            getMeetings()
+                        }
 
-                                setUiState(copy(meetings = meetings))
-                            }
-
-                            is PlanAction.PlanUpdate -> {
-                                val meetings =
-                                    meetings.map { uiModel ->
-                                        if (uiModel.meeting.id == action.planItem.meetingId) {
-                                            uiModel.copy(
-                                                meeting =
-                                                    updateLastPlanAt(
-                                                        meeting = uiModel.meeting,
-                                                        planAt = action.planItem.planAt,
-                                                    ),
-                                            )
-                                        } else {
-                                            uiModel
-                                        }
-                                    }
-
-                                setUiState(copy(meetings = meetings))
-                            }
-
-                            is PlanAction.PlanDelete,
-                            is PlanAction.PlanInvalidate,
-                            -> {
-                                getMeetings()
-                            }
+                        is PlanAction.None -> {
+                            return@intent
                         }
                     }
                 }
-            }
+            }.launchIn(viewModelScope)
 
-            launch {
-                meetingEventBus.action.collect { action ->
-                    uiState.checkState<MeetingUiState> {
-                        when (action) {
-                            is MeetingAction.None -> {
-                                return@collect
-                            }
+        meetingEventBus.action
+            .onEach { action ->
+                intent {
+                    when (action) {
+                        is MeetingAction.MeetingCreate -> {
+                            val newMeeting =
+                                MeetingUiModel(
+                                    meeting = action.meeting,
+                                    isLeader = state.user.userId == action.meeting.hostId,
+                                )
 
-                            is MeetingAction.MeetingCreate -> {
-                                val isLeader = user.userId == action.meeting.hostId
-                                val meetings =
-                                    meetings
-                                        .toMutableList()
-                                        .apply {
-                                            add(
-                                                MeetingUiModel(
-                                                    meeting = action.meeting,
-                                                    isLeader = isLeader,
-                                                ),
-                                            )
-                                        }
+                            reduce { state.copy(meetings = state.meetings + newMeeting) }
+                        }
 
-                                setUiState(copy(meetings = meetings))
-                            }
-
-                            is MeetingAction.MeetingUpdate -> {
-                                val isLeader = user.userId == action.meeting.hostId
-                                val meetings =
-                                    meetings.map { uiModel ->
-                                        if (uiModel.meeting.id == action.meeting.id) {
-                                            uiModel.copy(
-                                                meeting = action.meeting,
-                                                isLeader = isLeader,
-                                            )
-                                        } else {
-                                            uiModel
-                                        }
+                        is MeetingAction.MeetingUpdate -> {
+                            val isLeader = state.user.userId == action.meeting.hostId
+                            val meetings =
+                                state.meetings.map { uiModel ->
+                                    if (uiModel.meeting.id == action.meeting.id) {
+                                        uiModel.copy(
+                                            meeting = action.meeting,
+                                            isLeader = isLeader,
+                                        )
+                                    } else {
+                                        uiModel
                                     }
+                                }
 
-                                setUiState(copy(meetings = meetings))
-                            }
+                            reduce { state.copy(meetings = meetings) }
+                        }
 
-                            is MeetingAction.MeetingDelete -> {
-                                val meetings =
-                                    meetings
-                                        .toMutableList()
-                                        .apply { removeIf { uiModel -> uiModel.meeting.id == action.meetId } }
+                        is MeetingAction.MeetingDelete -> {
+                            val meetings = state.meetings.filterNot { uiModel -> uiModel.meeting.id == action.meetId }
 
-                                setUiState(copy(meetings = meetings))
-                            }
+                            reduce { state.copy(meetings = meetings) }
+                        }
 
-                            is MeetingAction.MeetingInvalidate -> {
-                                getMeetings()
-                            }
+                        is MeetingAction.MeetingInvalidate -> {
+                            getMeetings()
+                        }
+
+                        is MeetingAction.None -> {
+                            return@intent
                         }
                     }
                 }
-            }
-        }
+            }.launchIn(viewModelScope)
     }
 
-    fun onUiAction(uiAction: MeetingUiAction) {
-        when (uiAction) {
-            is MeetingUiAction.OnClickMeeting -> {
-                setUiEvent(MeetingUiEvent.NavigateToMeetingDetail(uiAction.meetingId))
-            }
+    override suspend fun Syntax<MeetingState, MeetingSideEffect>.onContainerCreate() {
+        // isLeader 판별에 필요하므로 목록보다 먼저 채운다.
+        val user = userRepository.getUser().first()
+        reduce { state.copy(user = user) }
 
-            is MeetingUiAction.OnClickMeetingWrite -> {
-                setUiEvent(MeetingUiEvent.NavigateToMeetingWrite)
-            }
+        getMeetings()
+    }
 
-            is MeetingUiAction.OnClickRefresh -> {
-                val uiState = uiState.value as? MeetingUiState ?: return
-                getMeetings(uiState.pagingInfo.nextCursor)
-            }
+    override fun onIntent(intent: Intent) {
+        if (intent !is MeetingIntent) {
+            super.onIntent(intent)
+            return
+        }
 
-            is MeetingUiAction.OnLoadNextPage -> {
-                val uiState = uiState.value as? MeetingUiState ?: return
-                getMeetings(uiState.pagingInfo.nextCursor)
+        intent {
+            when (intent) {
+                is MeetingIntent.MeetingClick -> {
+                    postSideEffect(MeetingSideEffect.NavigateToMeetingDetail(intent.meetingId))
+                }
+
+                is MeetingIntent.MeetingWriteClick -> {
+                    postSideEffect(MeetingSideEffect.NavigateToMeetingWrite)
+                }
+
+                is MeetingIntent.RefreshClick,
+                is MeetingIntent.NextPageLoad,
+                -> {
+                    getMeetings(state.pagingInfo.nextCursor)
+                }
             }
         }
     }
@@ -184,14 +145,14 @@ class MeetingViewModel @Inject constructor(
     private fun getMeetings(cursor: String? = null) {
         if (pagingJob.isActiveCheck()) return
         pagingJob =
-            viewModelScope.launch {
+            intent {
                 handlePagingData(
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         meetingRepository.getMeetings(
                             cursor = cursor ?: "",
@@ -200,78 +161,64 @@ class MeetingViewModel @Inject constructor(
                     }.getOrNull()
 
                 handlePagingData(
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
             }
     }
 
-    private fun handlePagingData(
-        pagingInfo: PaginationContainer<List<Meeting>>?,
+    private suspend fun Syntax<MeetingState, MeetingSideEffect>.handlePagingData(
+        pagingData: PaginationContainer<List<Meeting>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<MeetingUiState> {
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = this.pagingInfo,
-                    currentItems = meetings,
-                    isInitialLoad = cursor == null,
-                    transform = { meetings ->
-                        meetings.map { meeting ->
-                            MeetingUiModel(
-                                meeting = meeting,
-                                isLeader = meeting.hostId == user.userId,
-                            )
-                        }
-                    },
-                )
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = state.pagingInfo,
+                currentItems = state.meetings,
+                isInitialLoad = cursor == null,
+                transform = { meetings ->
+                    meetings.map { meeting ->
+                        MeetingUiModel(
+                            meeting = meeting,
+                            isLeader = meeting.hostId == state.user.userId,
+                        )
+                    }
+                },
+            )
 
-            setUiState(
-                copy(
-                    pagingInfo = result.pagingInfo,
-                    meetings = result.items,
-                ),
+        reduce {
+            state.copy(
+                pagingInfo = result.pagingInfo,
+                meetings = result.items,
             )
         }
     }
 
-    private fun updateLastPlanAt(
+    private suspend fun Syntax<MeetingState, MeetingSideEffect>.updateLastPlanAt(
+        meetingId: String,
+        planAt: ZonedDateTime,
+    ) {
+        val meetings =
+            state.meetings.map { uiModel ->
+                if (uiModel.meeting.id == meetingId) {
+                    uiModel.copy(meeting = mergeLastPlanAt(uiModel.meeting, planAt))
+                } else {
+                    uiModel
+                }
+            }
+
+        reduce { state.copy(meetings = meetings) }
+    }
+
+    private fun mergeLastPlanAt(
         meeting: Meeting,
         planAt: ZonedDateTime,
     ): Meeting {
-        val currentLastAt = meeting.lastPlanAt
-        val newLastAt: ZonedDateTime = planAt
-        val lastPlanAt = listOfNotNull(currentLastAt, planAt).minOrNull()
-        return meeting.copy(lastPlanAt = lastPlanAt ?: newLastAt)
+        val lastPlanAt = listOfNotNull(meeting.lastPlanAt, planAt).minOrNull()
+        return meeting.copy(lastPlanAt = lastPlanAt ?: planAt)
     }
-}
-
-data class MeetingUiState(
-    val pagingInfo: PagingUiState = PagingUiState(),
-    val user: User,
-    val meetings: List<MeetingUiModel> = emptyList(),
-) : UiState
-
-sealed interface MeetingUiAction : UiAction {
-    data class OnClickMeeting(
-        val meetingId: String,
-    ) : MeetingUiAction
-
-    data object OnClickMeetingWrite : MeetingUiAction
-
-    data object OnClickRefresh : MeetingUiAction
-
-    data object OnLoadNextPage : MeetingUiAction
-}
-
-sealed interface MeetingUiEvent : UiEvent {
-    data object NavigateToMeetingWrite : MeetingUiEvent
-
-    data class NavigateToMeetingDetail(
-        val meetingId: String,
-    ) : MeetingUiEvent
 }

@@ -14,15 +14,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.AnalyticsHelper
 import com.moim.core.analytics.LocalAnalyticsHelper
 import com.moim.core.common.consts.INTRO_ACTIVITY_NAME
 import com.moim.core.common.consts.KEY_INVITE_CODE
 import com.moim.core.common.model.Theme
 import com.moim.core.designsystem.theme.MoimTheme
+import com.moim.feature.main.model.MainIntent
 import com.moim.feature.main.screen.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
+import org.orbitmvi.orbit.compose.collectAsState
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -39,8 +40,8 @@ class MainActivity : ComponentActivity() {
             CompositionLocalProvider(
                 LocalAnalyticsHelper provides analyticsHelper,
             ) {
-                val theme by viewModel.theme.collectAsStateWithLifecycle(Theme.SYSTEM)
-                val isDarkTheme = shouldUseDarkTheme(theme)
+                val mainUiState by viewModel.collectAsState()
+                val isDarkTheme = shouldUseDarkTheme(mainUiState.theme)
 
                 LaunchedEffect(isDarkTheme) {
                     enableEdgeToEdge(
@@ -74,14 +75,14 @@ class MainActivity : ComponentActivity() {
 
     private fun joinMeeting(intent: Intent) {
         val meetCode = intent.getStringExtra(KEY_INVITE_CODE) ?: return
-        viewModel.setJoinMeeting(meetCode)
+        viewModel.onIntent(MainIntent.MeetingInviteReceive(meetCode))
     }
 
     private fun getNotifyData(notifyIntent: Intent) {
         with(notifyIntent) {
-            getStringExtra(NOTIFY_MEET_ID)?.let { viewModel.setMeetingId(it) }
-            getStringExtra(NOTIFY_PLAN_ID)?.let { viewModel.setPlanId(it) }
-            getStringExtra(NOTIFY_REVIEW_ID)?.let { viewModel.setReviewId(it) }
+            getStringExtra(NOTIFY_MEET_ID)?.let { viewModel.onIntent(MainIntent.MeetingNotifyReceive(it)) }
+            getStringExtra(NOTIFY_PLAN_ID)?.let { viewModel.onIntent(MainIntent.PlanNotifyReceive(it)) }
+            getStringExtra(NOTIFY_REVIEW_ID)?.let { viewModel.onIntent(MainIntent.ReviewNotifyReceive(it)) }
         }
     }
 

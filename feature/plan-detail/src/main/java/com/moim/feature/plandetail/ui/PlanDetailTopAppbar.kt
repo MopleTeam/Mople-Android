@@ -6,27 +6,27 @@ import androidx.compose.ui.res.stringResource
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimIconButton
 import com.moim.core.designsystem.component.MoimTopAppbar
-import com.moim.feature.plandetail.OnPlanDetailUiAction
-import com.moim.feature.plandetail.PlanDetailUiAction
+import com.moim.feature.plandetail.OnPlanDetailIntent
+import com.moim.feature.plandetail.model.PlanDetailIntent
 
 @Composable
 fun PlanDetailTopAppbar(
     modifier: Modifier = Modifier,
     isMyPlan: Boolean,
-    onUiAction: OnPlanDetailUiAction,
+    onIntent: OnPlanDetailIntent,
 ) {
     MoimTopAppbar(
         modifier = modifier,
         title = stringResource(R.string.plan_detail_title),
-        onClickNavigate = { onUiAction(PlanDetailUiAction.OnClickBack) },
+        onClickNavigate = { onIntent(PlanDetailIntent.BackClick) },
         actions = {
             MoimIconButton(
                 iconRes = R.drawable.ic_more_bold,
                 onClick = {
                     if (isMyPlan) {
-                        onUiAction(PlanDetailUiAction.OnShowPlanEditDialog(true))
+                        onIntent(PlanDetailIntent.PlanEditDialogShow(true))
                     } else {
-                        onUiAction(PlanDetailUiAction.OnShowPlanReportDialog(true))
+                        onIntent(PlanDetailIntent.PlanReportDialogShow(true))
                     }
                 },
             )

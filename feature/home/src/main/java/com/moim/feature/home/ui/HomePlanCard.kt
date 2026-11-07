@@ -35,8 +35,7 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.decimalFormatString
-import com.moim.feature.home.HomeUiAction
-import com.moim.feature.home.OnHomeUiAction
+import com.moim.feature.home.model.HomeIntent
 import java.time.ZonedDateTime
 
 @Composable
@@ -44,11 +43,11 @@ fun HomePlanCard(
     modifier: Modifier = Modifier,
     isHost: Boolean,
     plan: Plan,
-    onUiAction: OnHomeUiAction = {},
+    onIntent: (HomeIntent) -> Unit = {},
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(HomeUiAction.OnClickPlan(planId = plan.planId, isPlan = true)) },
+        onClick = { onIntent(HomeIntent.PlanClick(planId = plan.planId, isPlan = true)) },
     ) {
         Column(
             modifier =

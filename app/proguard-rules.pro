@@ -36,22 +36,7 @@
 -dontwarn org.codehaus.mojo.animal_sniffer.*
 -dontwarn okhttp3.internal.platform.ConscryptPlatform
 
-# Retrofit
--keepclassmembers,allowshrinking,allowobfuscation interface * {
-    @retrofit2.http.* <methods>;
-}
+# Ktor
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
--dontwarn kotlin.Unit
--dontwarn retrofit2.KotlinExtensions
--dontwarn retrofit2.KotlinExtensions$*
-
--if interface * { @retrofit2.http.* <methods>; }
--keep,allowobfuscation interface <1>
-
--if interface * { @retrofit2.http.* <methods>; }
--keep,allowobfuscation interface * extends <1>
+-dontwarn org.slf4j.**
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
-
--if interface * { @retrofit2.http.* public *** *(...); }
--keep,allowoptimization,allowshrinking,allowobfuscation class <3>
--keep,allowobfuscation,allowshrinking class retrofit2.Response

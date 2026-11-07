@@ -52,8 +52,8 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.decimalFormatString
-import com.moim.feature.plandetail.OnPlanDetailUiAction
-import com.moim.feature.plandetail.PlanDetailUiAction
+import com.moim.feature.plandetail.OnPlanDetailIntent
+import com.moim.feature.plandetail.model.PlanDetailIntent
 import java.time.ZonedDateTime
 
 @Composable
@@ -90,7 +90,7 @@ fun PlanDetailCommentItem(
     modifier: Modifier = Modifier,
     userId: String,
     comment: CommentUiModel,
-    onUiAction: OnPlanDetailUiAction,
+    onIntent: OnPlanDetailIntent,
 ) {
     Row(
         modifier =
@@ -106,8 +106,8 @@ fun PlanDetailCommentItem(
                     .clip(CircleShape)
                     .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
                     .onSingleClick {
-                        onUiAction(
-                            PlanDetailUiAction.OnClickUserProfileImage(
+                        onIntent(
+                            PlanDetailIntent.UserProfileImageClick(
                                 imageUrl = comment.comment.writer.imageUrl,
                                 userName = comment.comment.writer.nickname,
                             ),
@@ -126,13 +126,13 @@ fun PlanDetailCommentItem(
             CommentHeader(
                 userId = userId,
                 comment = comment.comment,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
             if (comment.texts.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
                 CommentText(
                     texts = comment.texts,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
 
@@ -140,13 +140,13 @@ fun PlanDetailCommentItem(
                 Spacer(Modifier.height(8.dp))
                 CommentOpenGraph(
                     openGraph = requireNotNull(comment.openGraph),
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
 
             CommentFooter(
                 comment = comment.comment,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         }
     }
@@ -162,7 +162,7 @@ private fun CommentHeader(
     modifier: Modifier = Modifier,
     userId: String,
     comment: Comment,
-    onUiAction: OnPlanDetailUiAction,
+    onIntent: OnPlanDetailIntent,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -188,18 +188,18 @@ private fun CommentHeader(
             onClick = {
                 val uiAction =
                     if (userId == comment.writer.userId) {
-                        PlanDetailUiAction.OnShowCommentEditDialog(
+                        PlanDetailIntent.CommentEditDialogShow(
                             isShow = true,
                             comment = comment,
                         )
                     } else {
-                        PlanDetailUiAction.OnShowCommentReportDialog(
+                        PlanDetailIntent.CommentReportDialogShow(
                             isShow = true,
                             comment = comment,
                         )
                     }
 
-                onUiAction(uiAction)
+                onIntent(uiAction)
             },
         )
     }
@@ -209,7 +209,7 @@ private fun CommentHeader(
 private fun CommentText(
     modifier: Modifier = Modifier,
     texts: List<CommentTextUiModel>,
-    onUiAction: OnPlanDetailUiAction,
+    onIntent: OnPlanDetailIntent,
 ) {
     val text = texts.joinToString("") { it.content }
     val spanStyle =
@@ -251,7 +251,7 @@ private fun CommentText(
                             clickable =
                                 LinkAnnotation.Clickable(
                                     tag = "URL",
-                                    linkInteractionListener = { onUiAction(PlanDetailUiAction.OnClickCommentWebLink(uiModel.content)) },
+                                    linkInteractionListener = { onIntent(PlanDetailIntent.CommentWebLinkClick(uiModel.content)) },
                                 ),
                             start = startIndex,
                             end = startIndex + uiModel.content.length,
@@ -271,7 +271,7 @@ private fun CommentText(
 @Composable
 private fun CommentOpenGraph(
     openGraph: OpenGraph,
-    onUiAction: OnPlanDetailUiAction,
+    onIntent: OnPlanDetailIntent,
 ) {
     Column(
         modifier =
@@ -279,7 +279,7 @@ private fun CommentOpenGraph(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(MoimTheme.colors.tertiary)
-                .onSingleClick(onClick = { onUiAction(PlanDetailUiAction.OnClickCommentWebLink(openGraph.url)) }),
+                .onSingleClick(onClick = { onIntent(PlanDetailIntent.CommentWebLinkClick(openGraph.url)) }),
     ) {
         NetworkImage(
             modifier =
@@ -316,7 +316,7 @@ private fun CommentOpenGraph(
 @Composable
 private fun CommentFooter(
     comment: Comment,
-    onUiAction: OnPlanDetailUiAction,
+    onIntent: OnPlanDetailIntent,
 ) {
     val likeColor =
         if (comment.isLike) {
@@ -343,14 +343,14 @@ private fun CommentFooter(
                 iconRes = R.drawable.ic_thumb_up,
                 iconCount = comment.likeCount,
                 iconColor = likeColor,
-                onClick = { onUiAction(PlanDetailUiAction.OnClickCommentLike(comment = comment)) },
+                onClick = { onIntent(PlanDetailIntent.CommentLikeClick(comment = comment)) },
             )
 
             CommentIcon(
                 iconRes = R.drawable.ic_chat_add,
                 iconCount = comment.replayCount,
                 iconColor = replyColor,
-                onClick = { onUiAction(PlanDetailUiAction.OnClickCommentAddReply(comment)) },
+                onClick = { onIntent(PlanDetailIntent.CommentAddReplyClick(comment)) },
             )
         }
     }
@@ -456,7 +456,7 @@ private fun PlanDetailCommentItemPreview() {
                                 description = "100여평 규모, 전실 프라이빗 단독 룸 +예약환영+ 히츠마부시/튀김/회 교대역 4번 출구, 도보 3분 / 건물 내 주차가능",
                             ),
                     ),
-                onUiAction = {},
+                onIntent = {},
             )
         }
     }

@@ -13,14 +13,14 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meetingsetting.MeetingSettingUiAction
-import com.moim.feature.meetingsetting.OnMeetingSettingUiAction
+import com.moim.feature.meetingsetting.OnMeetingSettingIntent
+import com.moim.feature.meetingsetting.model.MeetingSettingIntent
 
 @Composable
 fun MeetingSettingLeaderChange(
     modifier: Modifier = Modifier,
     meetingId: String,
-    onUiAction: OnMeetingSettingUiAction,
+    onIntent: OnMeetingSettingIntent,
 ) {
     val meetIdType = ViewIdType.MeetId(meetingId)
 
@@ -29,7 +29,7 @@ fun MeetingSettingLeaderChange(
             modifier
                 .fillMaxWidth()
                 .onSingleClick {
-                    onUiAction(MeetingSettingUiAction.OnClickMeetingLeaderChange(meetIdType))
+                    onIntent(MeetingSettingIntent.MeetingLeaderChangeClick(meetIdType))
                 }
                 .padding(vertical = 16.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,

@@ -16,15 +16,15 @@ import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
 import com.moim.core.designsystem.theme.moimTextFieldColors
-import com.moim.feature.profileupdate.OnProfileUpdateUiAction
-import com.moim.feature.profileupdate.ProfileUpdateUiAction
+import com.moim.feature.profileupdate.OnProfileUpdateIntent
+import com.moim.feature.profileupdate.model.ProfileUpdateIntent
 
 @Composable
 fun ProfileUpdateNicknameTextField(
     nickname: String = "",
     isDuplicated: Boolean? = false,
     isRegexError: Boolean = false,
-    onUiAction: OnProfileUpdateUiAction = {},
+    onIntent: OnProfileUpdateIntent = {},
 ) {
     MoimText(
         text = stringResource(R.string.profile_update_nickname),
@@ -46,7 +46,7 @@ fun ProfileUpdateNicknameTextField(
         supportText = if (isDuplicated == false) stringResource(R.string.profile_update_pass) else null,
         text = nickname,
         textMaxLength = 12,
-        onTextChanged = { onUiAction(ProfileUpdateUiAction.OnChangeNickname(it)) },
+        onTextChanged = { onIntent(ProfileUpdateIntent.NicknameChange(it)) },
         trailingIcon = {
             Box(
                 modifier = Modifier.padding(end = 16.dp),
@@ -57,7 +57,7 @@ fun ProfileUpdateNicknameTextField(
                     verticalPadding = 8.dp,
                     text = stringResource(R.string.profile_update_duplicate_check),
                     style = MoimTheme.typography.body01.semiBold,
-                    onClick = { onUiAction(ProfileUpdateUiAction.OnClickDuplicatedCheck) },
+                    onClick = { onIntent(ProfileUpdateIntent.DuplicatedCheckClick) },
                 )
             }
         },

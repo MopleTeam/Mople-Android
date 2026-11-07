@@ -19,20 +19,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimCard
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.home.HomeUiAction
-import com.moim.feature.home.OnHomeUiAction
+import com.moim.feature.home.model.HomeIntent
 
 @Composable
 fun HomeCreateCards(
     modifier: Modifier = Modifier,
-    onUiAction: OnHomeUiAction = {},
+    onIntent: (HomeIntent) -> Unit = {},
 ) {
     Row(
         modifier = modifier.padding(20.dp),
@@ -42,14 +40,14 @@ fun HomeCreateCards(
             modifier = Modifier.weight(1f),
             iconRes = R.drawable.ic_new_meeting,
             text = stringResource(R.string.home_new_meeting_created),
-            onClick = { onUiAction(HomeUiAction.OnClickMeetingWrite) },
+            onClick = { onIntent(HomeIntent.MeetingWriteClick) },
         )
 
         HomeCreateCard(
             modifier = Modifier.weight(1f),
             iconRes = R.drawable.ic_new_calendar,
             text = stringResource(R.string.home_new_plan_created),
-            onClick = { onUiAction(HomeUiAction.OnClickPlanWrite) },
+            onClick = { onIntent(HomeIntent.PlanWriteClick) },
         )
     }
 }

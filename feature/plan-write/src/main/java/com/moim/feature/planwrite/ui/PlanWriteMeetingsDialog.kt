@@ -42,8 +42,8 @@ import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.view.FadeAnimatedVisibility
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.PagingUiState
-import com.moim.feature.planwrite.OnPlanWriteUiAction
-import com.moim.feature.planwrite.PlanWriteUiAction
+import com.moim.feature.planwrite.OnPlanWriteIntent
+import com.moim.feature.planwrite.model.PlanWriteIntent
 import com.moim.feature.planwrite.model.MeetingUiModel
 import kotlinx.coroutines.launch
 
@@ -52,9 +52,9 @@ fun PlanWriteMeetingsDialog(
     modifier: Modifier = Modifier,
     meetings: List<MeetingUiModel>,
     pagingInfo: PagingUiState,
-    onUiAction: OnPlanWriteUiAction,
+    onIntent: OnPlanWriteIntent,
 ) {
-    val dismissAction = PlanWriteUiAction.OnShowMeetingsDialog(false)
+    val dismissIntent = PlanWriteIntent.MeetingsDialogShow(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -63,17 +63,17 @@ fun PlanWriteMeetingsDialog(
         onDismiss = {
             coroutineScope
                 .launch { sheetState.hide() }
-                .invokeOnCompletion { onUiAction(dismissAction) }
+                .invokeOnCompletion { onIntent(dismissIntent) }
         },
     ) {
         PlanWriteMeetingsTopAppbar(
-            onClick = { onUiAction(dismissAction) },
+            onClick = { onIntent(dismissIntent) },
         )
 
         PlanWriteMeetingsScreen(
             meetings = meetings,
             pagingInfo = pagingInfo,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 }
@@ -108,7 +108,7 @@ private fun PlanWriteMeetingsScreen(
     modifier: Modifier = Modifier,
     meetings: List<MeetingUiModel>,
     pagingInfo: PagingUiState,
-    onUiAction: OnPlanWriteUiAction,
+    onIntent: OnPlanWriteIntent,
 ) {
     val configuration = LocalConfiguration.current
     val sheetHeight = (configuration.screenHeightDp * 0.6f).dp
@@ -126,7 +126,7 @@ private fun PlanWriteMeetingsScreen(
 
         FadeAnimatedVisibility(pagingInfo.isError) {
             PagingErrorScreen(
-                onClickRetry = { onUiAction(PlanWriteUiAction.OnLoadNextMeetingsPage) },
+                onClickRetry = { onIntent(PlanWriteIntent.NextMeetingsPageLoad) },
             )
         }
 
@@ -134,7 +134,7 @@ private fun PlanWriteMeetingsScreen(
             MeetingsPagingList(
                 meetings = meetings,
                 pagingInfo = pagingInfo,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         }
     }
@@ -144,7 +144,7 @@ private fun PlanWriteMeetingsScreen(
 private fun MeetingsPagingList(
     meetings: List<MeetingUiModel>,
     pagingInfo: PagingUiState,
-    onUiAction: OnPlanWriteUiAction,
+    onIntent: OnPlanWriteIntent,
 ) {
     val listState = rememberLazyListState()
 
@@ -152,7 +152,7 @@ private fun MeetingsPagingList(
         listState = listState,
         threshold = 3,
         enabled = !pagingInfo.isLast && !pagingInfo.isErrorFooter,
-        onNext = { onUiAction(PlanWriteUiAction.OnLoadNextMeetingsPage) },
+        onNext = { onIntent(PlanWriteIntent.NextMeetingsPageLoad) },
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -169,7 +169,7 @@ private fun MeetingsPagingList(
                     modifier = Modifier.animateItem(),
                     meeting = meetingUiModel.meeting,
                     isSelected = meetingUiModel.isSelected,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
 
@@ -193,7 +193,7 @@ private fun MeetingsPagingList(
                                 .fillMaxWidth()
                                 .background(MoimTheme.colors.bg.primary)
                                 .animateItem(),
-                        onClickRetry = { onUiAction(PlanWriteUiAction.OnLoadNextMeetingsPage) },
+                        onClickRetry = { onIntent(PlanWriteIntent.NextMeetingsPageLoad) },
                     )
                 }
             }
@@ -206,7 +206,7 @@ private fun PlanWriteMeetingInfo(
     modifier: Modifier = Modifier,
     meeting: Meeting,
     isSelected: Boolean,
-    onUiAction: OnPlanWriteUiAction,
+    onIntent: OnPlanWriteIntent,
 ) {
     Row(
         modifier =
@@ -214,8 +214,8 @@ private fun PlanWriteMeetingInfo(
                 .fillMaxWidth()
                 .background(color = if (isSelected) MoimTheme.colors.bg.input else MoimTheme.colors.bg.primary)
                 .onSingleClick {
-                    onUiAction(PlanWriteUiAction.OnClickPlanMeeting(meeting))
-                    onUiAction(PlanWriteUiAction.OnShowMeetingsDialog(false))
+                    onIntent(PlanWriteIntent.PlanMeetingClick(meeting))
+                    onIntent(PlanWriteIntent.MeetingsDialogShow(false))
                 }.padding(vertical = 16.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

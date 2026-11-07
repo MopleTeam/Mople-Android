@@ -19,19 +19,19 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.meetingsetting.MeetingSettingUiAction
-import com.moim.feature.meetingsetting.OnMeetingSettingUiAction
+import com.moim.feature.meetingsetting.OnMeetingSettingIntent
+import com.moim.feature.meetingsetting.model.MeetingSettingIntent
 
 @Composable
 fun MeetingSettingParticipantsInfo(
     meeting: Meeting,
-    onUiAction: OnMeetingSettingUiAction,
+    onIntent: OnMeetingSettingIntent,
 ) {
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .onSingleClick { onUiAction(MeetingSettingUiAction.OnClickMeetingParticipants(ViewIdType.MeetId(meeting.id))) }
+                .onSingleClick { onIntent(MeetingSettingIntent.MeetingParticipantsClick(ViewIdType.MeetId(meeting.id))) }
                 .padding(vertical = 16.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

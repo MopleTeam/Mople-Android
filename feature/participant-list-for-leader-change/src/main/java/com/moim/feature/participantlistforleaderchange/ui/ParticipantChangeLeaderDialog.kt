@@ -24,25 +24,25 @@ import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.participantlistforleaderchange.ParticipantListForLeaderChangeUiAction
+import com.moim.feature.participantlistforleaderchange.model.ParticipantListForLeaderChangeIntent
 
 @Composable
 fun ParticipantChangeLeaderDialog(
     user: User,
-    onUiAction: (ParticipantListForLeaderChangeUiAction) -> Unit,
+    onIntent: (ParticipantListForLeaderChangeIntent) -> Unit,
 ) {
-    val dismissAction = ParticipantListForLeaderChangeUiAction.ShowChangeLeaderDialog(false)
+    val dismissIntent = ParticipantListForLeaderChangeIntent.ChangeLeaderDialogShow(false)
 
     MoimAlertDialog(
         title = stringResource(R.string.participant_list_for_leader_change_request),
         positiveText = stringResource(R.string.common_positive),
         negativeText = stringResource(R.string.common_negative),
         onClickPositive = {
-            onUiAction(dismissAction)
-            onUiAction(ParticipantListForLeaderChangeUiAction.OnClickLeaderChange(user.userId))
+            onIntent(dismissIntent)
+            onIntent(ParticipantListForLeaderChangeIntent.LeaderChangeClick(user.userId))
         },
-        onClickNegative = { onUiAction(dismissAction) },
-        onDismiss = { onUiAction(dismissAction) },
+        onClickNegative = { onIntent(dismissIntent) },
+        onDismiss = { onIntent(dismissIntent) },
     ) {
         Row(
             modifier =

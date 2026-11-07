@@ -22,14 +22,14 @@ import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.profileupdate.OnProfileUpdateUiAction
-import com.moim.feature.profileupdate.ProfileUpdateUiAction
+import com.moim.feature.profileupdate.OnProfileUpdateIntent
+import com.moim.feature.profileupdate.model.ProfileUpdateIntent
 
 @Composable
 fun ProfileUpdateImage(
     modifier: Modifier = Modifier,
     profileUrl: String?,
-    onUiAction: OnProfileUpdateUiAction = {},
+    onIntent: OnProfileUpdateIntent = {},
 ) {
     Column(
         modifier =
@@ -46,7 +46,7 @@ fun ProfileUpdateImage(
                         .border(BorderStroke(1.dp, MoimTheme.colors.stroke), CircleShape)
                         .size(80.dp)
                         .align(Alignment.Center)
-                        .onSingleClick { onUiAction(ProfileUpdateUiAction.OnShowProfileEditDialog(true)) },
+                        .onSingleClick { onIntent(ProfileUpdateIntent.ProfileEditDialogShow(true)) },
                 imageUrl = profileUrl,
                 errorImage = painterResource(R.drawable.ic_empty_user_logo),
             )

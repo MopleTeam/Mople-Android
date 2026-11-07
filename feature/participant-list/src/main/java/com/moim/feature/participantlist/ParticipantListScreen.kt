@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
@@ -34,11 +33,15 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.externalShareForUrl
 import com.moim.core.ui.view.FadeAnimatedVisibility
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.showToast
+import com.moim.feature.participantlist.model.ParticipantListIntent
+import com.moim.feature.participantlist.model.ParticipantListSideEffect
+import com.moim.feature.participantlist.model.ParticipantListState
 import com.moim.feature.participantlist.ui.ParticipantListItem
 import com.moim.feature.participantlist.ui.ParticipantMeetingInviteItem
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun ParticipantListRoute(
@@ -53,52 +56,50 @@ fun ParticipantListRoute(
     ) -> Unit,
 ) {
     val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val modifier =
         Modifier.containerScreen(
             backgroundColor = MoimTheme.colors.bg.primary,
             padding = padding,
         )
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is ParticipantListUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is ParticipantListSideEffect.NavigateToBack -> {
                 navigateToBack()
             }
 
-            is ParticipantListUiEvent.NavigateToImageViewer -> {
+            is ParticipantListSideEffect.NavigateToImageViewer -> {
                 navigateToImageViewer(
-                    event.userName,
-                    listOf(event.userImage),
+                    sideEffect.userName,
+                    listOf(sideEffect.userImage),
                     0,
                     R.drawable.ic_empty_user_logo,
                 )
             }
 
-            is ParticipantListUiEvent.NavigateToExternalShareUrl -> {
-                context.externalShareForUrl(event.url)
+            is ParticipantListSideEffect.NavigateToExternalShareUrl -> {
+                context.externalShareForUrl(sideEffect.url)
             }
 
-            is ParticipantListUiEvent.ShowToastMessage -> {
-                showToast(context, event.toastMessage)
+            is ParticipantListSideEffect.ShowToastMessage -> {
+                showToast(context, sideEffect.toastMessage)
             }
         }
     }
 
-    (uiState as? ParticipantListUiState)?.let { uiState ->
-        ParticipantListScreen(
-            modifier = modifier,
-            uiState = uiState,
-            onUiAction = viewModel::onUiAction,
-        )
-    }
+    ParticipantListScreen(
+        modifier = modifier,
+        uiState = uiState,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 fun ParticipantListScreen(
     modifier: Modifier = Modifier,
-    uiState: ParticipantListUiState,
-    onUiAction: (ParticipantListUiAction) -> Unit,
+    uiState: ParticipantListState,
+    onIntent: (ParticipantListIntent) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val paging = uiState.pagingInfo
@@ -112,7 +113,7 @@ fun ParticipantListScreen(
         ) {
             MoimTopAppbar(
                 title = stringResource(R.string.participant_list_title),
-                onClickNavigate = { onUiAction(ParticipantListUiAction.OnClickBack) },
+                onClickNavigate = { onIntent(ParticipantListIntent.BackClick) },
             )
             Spacer(Modifier.height(28.dp))
             Row(
@@ -138,22 +139,22 @@ fun ParticipantListScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                FadeAnimatedVisibility(paging.isLoading) {
+                FadeAnimatedVisibility(uiState.isLoading) {
                     LoadingScreen()
                 }
 
-                FadeAnimatedVisibility(paging.isError) {
+                FadeAnimatedVisibility(uiState.isError) {
                     ErrorScreen {
-                        onUiAction(ParticipantListUiAction.OnClickRefresh)
+                        onIntent(ParticipantListIntent.RefreshClick)
                     }
                 }
 
-                FadeAnimatedVisibility(paging.isSuccess) {
+                FadeAnimatedVisibility(uiState.isSuccess) {
                     PaginationEffect(
                         listState = listState,
                         threshold = 3,
                         enabled = !paging.isLast && !paging.isErrorFooter,
-                        onNext = { onUiAction(ParticipantListUiAction.OnLoadNextPage) },
+                        onNext = { onIntent(ParticipantListIntent.NextPageLoad) },
                     )
                 }
 
@@ -166,7 +167,7 @@ fun ParticipantListScreen(
                     if (uiState.isMeeting) {
                         item {
                             ParticipantMeetingInviteItem(
-                                onUiAction = onUiAction,
+                                onIntent = onIntent,
                             )
                         }
                     }
@@ -179,7 +180,7 @@ fun ParticipantListScreen(
                             modifier = Modifier.animateItem(),
                             isMeeting = uiState.isMeeting,
                             participant = user,
-                            onUiAction = onUiAction,
+                            onIntent = onIntent,
                         )
                     }
 
@@ -202,7 +203,7 @@ fun ParticipantListScreen(
                                         .fillMaxWidth()
                                         .animateItem(),
                             ) {
-                                onUiAction(ParticipantListUiAction.OnClickRefresh)
+                                onIntent(ParticipantListIntent.RefreshClick)
                             }
                         }
                     }

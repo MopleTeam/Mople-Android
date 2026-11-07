@@ -49,7 +49,7 @@ import com.moim.core.ui.util.decimalFormatString
 import com.moim.core.ui.view.FadeAnimatedVisibility
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.PagingUiState
-import com.moim.feature.meetingdetail.model.MeetingDetailUiAction
+import com.moim.feature.meetingdetail.model.MeetingDetailIntent
 import java.time.ZonedDateTime
 
 @Composable
@@ -63,7 +63,7 @@ fun MeetingDetailPlanContent(
     reviewsPagingInfo: PagingUiState,
     planTotalCount: Int,
     reviewTotalCount: Int,
-    onUiAction: (MeetingDetailUiAction) -> Unit,
+    onIntent: (MeetingDetailIntent) -> Unit,
 ) {
     val items = if (isPlanSelected) plans else reviews
     val paging = if (isPlanSelected) plansPagingInfo else reviewsPagingInfo
@@ -79,7 +79,7 @@ fun MeetingDetailPlanContent(
         FadeAnimatedVisibility(paging.isError) {
             ErrorScreen(
                 modifier = Modifier.fillMaxSize(),
-                onClickRefresh = { onUiAction(MeetingDetailUiAction.OnClickRefresh) },
+                onClickRefresh = { onIntent(MeetingDetailIntent.RefreshClick) },
             )
         }
 
@@ -95,7 +95,7 @@ fun MeetingDetailPlanContent(
                 paging = paging,
                 planTotalCount = planTotalCount,
                 reviewTotalCount = reviewTotalCount,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         }
     }
@@ -109,7 +109,7 @@ private fun MeetingDetailPagingList(
     paging: PagingUiState,
     planTotalCount: Int,
     reviewTotalCount: Int,
-    onUiAction: (MeetingDetailUiAction) -> Unit,
+    onIntent: (MeetingDetailIntent) -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -117,7 +117,7 @@ private fun MeetingDetailPagingList(
         listState = listState,
         threshold = 3,
         enabled = !paging.isLast && !paging.isErrorFooter,
-        onNext = { onUiAction(MeetingDetailUiAction.OnLoadNextPage) },
+        onNext = { onIntent(MeetingDetailIntent.NextPageLoad) },
     )
 
     LazyColumn(
@@ -162,14 +162,14 @@ private fun MeetingDetailPagingList(
                     modifier = Modifier.animateItem(),
                     userId = userId,
                     plan = item,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             } else {
                 MeetingDetailReviewItem(
                     modifier = Modifier.animateItem(),
                     userId = userId,
                     review = item,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
         }
@@ -194,7 +194,7 @@ private fun MeetingDetailPagingList(
                             .animateItem(),
                     backgroundColor = MoimTheme.colors.bg.secondary,
                 ) {
-                    onUiAction(MeetingDetailUiAction.OnLoadNextPage)
+                    onIntent(MeetingDetailIntent.NextPageLoad)
                 }
             }
         }
@@ -206,11 +206,11 @@ fun MeetingDetailPlanItem(
     modifier: Modifier = Modifier,
     userId: String,
     plan: PlanItem,
-    onUiAction: (MeetingDetailUiAction) -> Unit,
+    onIntent: (MeetingDetailIntent) -> Unit,
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(ViewIdType.PlanId(plan.postId))) },
+        onClick = { onIntent(MeetingDetailIntent.PlanDetailClick(ViewIdType.PlanId(plan.postId))) },
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -266,8 +266,8 @@ fun MeetingDetailPlanItem(
                             ),
                         text = stringResource(R.string.meeting_detail_plan_apply_done),
                         onClick = {
-                            onUiAction(
-                                MeetingDetailUiAction.OnShowPlanApplyCancelDialog(
+                            onIntent(
+                                MeetingDetailIntent.PlanApplyCancelDialogShow(
                                     isShow = true,
                                     cancelPlanItem = plan,
                                 ),
@@ -280,8 +280,8 @@ fun MeetingDetailPlanItem(
                         buttonColors = moimButtomColors(),
                         text = stringResource(R.string.meeting_detail_plan_apply),
                         onClick = {
-                            onUiAction(
-                                MeetingDetailUiAction.OnClickPlanApply(
+                            onIntent(
+                                MeetingDetailIntent.PlanApplyClick(
                                     isApply = true,
                                     planItem = plan,
                                 ),
@@ -299,11 +299,11 @@ fun MeetingDetailReviewItem(
     modifier: Modifier = Modifier,
     userId: String,
     review: PlanItem,
-    onUiAction: (MeetingDetailUiAction) -> Unit,
+    onIntent: (MeetingDetailIntent) -> Unit,
 ) {
     MoimCard(
         modifier = modifier,
-        onClick = { onUiAction(MeetingDetailUiAction.OnClickPlanDetail(ViewIdType.ReviewId(review.postId))) },
+        onClick = { onIntent(MeetingDetailIntent.PlanDetailClick(ViewIdType.ReviewId(review.postId))) },
     ) {
         Column(
             modifier = Modifier.padding(16.dp),

@@ -20,16 +20,16 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.feature.profileupdate.OnProfileUpdateUiAction
-import com.moim.feature.profileupdate.ProfileUpdateUiAction
+import com.moim.feature.profileupdate.OnProfileUpdateIntent
+import com.moim.feature.profileupdate.model.ProfileUpdateIntent
 import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileUpdateImageEditDialog(
     modifier: Modifier = Modifier,
-    onUiAction: OnProfileUpdateUiAction,
+    onIntent: OnProfileUpdateIntent,
 ) {
-    val dismissAction = ProfileUpdateUiAction.OnShowProfileEditDialog(false)
+    val dismissIntent = ProfileUpdateIntent.ProfileEditDialogShow(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -38,7 +38,7 @@ fun ProfileUpdateImageEditDialog(
         onDismiss = {
             coroutineScope
                 .launch { sheetState.hide() }
-                .invokeOnCompletion { onUiAction(dismissAction) }
+                .invokeOnCompletion { onIntent(dismissIntent) }
         },
     ) {
         Column(
@@ -62,8 +62,8 @@ fun ProfileUpdateImageEditDialog(
                 text = stringResource(R.string.common_default_select),
                 buttonColors = moimButtomColors().copy(containerColor = MoimTheme.colors.gray.gray02),
                 onClick = {
-                    onUiAction(dismissAction)
-                    onUiAction(ProfileUpdateUiAction.OnChangeProfileUrl(null))
+                    onIntent(dismissIntent)
+                    onIntent(ProfileUpdateIntent.ProfileUrlChange(null))
                 },
             )
             Spacer(Modifier.height(12.dp))
@@ -73,8 +73,8 @@ fun ProfileUpdateImageEditDialog(
                 text = stringResource(R.string.common_album_select),
                 buttonColors = moimButtomColors(),
                 onClick = {
-                    onUiAction(dismissAction)
-                    onUiAction(ProfileUpdateUiAction.OnNavigatePhotoPicker)
+                    onIntent(dismissIntent)
+                    onIntent(ProfileUpdateIntent.PhotoPickerClick)
                 },
             )
             Spacer(Modifier.height(12.dp))

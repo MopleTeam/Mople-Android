@@ -28,14 +28,14 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.profile.OnProfileUiAction
-import com.moim.feature.profile.ProfileUiAction
+import com.moim.feature.profile.OnProfileIntent
+import com.moim.feature.profile.model.ProfileIntent
 
 @Composable
 fun ProfileImage(
     modifier: Modifier = Modifier,
     user: User,
-    onUiAction: OnProfileUiAction,
+    onIntent: OnProfileIntent,
 ) {
     Column(
         modifier =
@@ -49,7 +49,7 @@ fun ProfileImage(
             modifier =
                 Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .onSingleClick { onUiAction(ProfileUiAction.OnClickProfile) },
+                    .onSingleClick { onIntent(ProfileIntent.ProfileClick) },
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -101,7 +101,7 @@ private fun ProfileImagePreview() {
                     nickname = "모플",
                     "",
                 ),
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

@@ -1,11 +1,11 @@
 package com.moim.feature.webview
 
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
-import com.moim.core.ui.view.BaseViewModel
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
+import com.moim.feature.webview.model.WebViewIntent
+import com.moim.feature.webview.model.WebViewSideEffect
+import com.moim.feature.webview.model.WebViewState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -13,32 +13,34 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @HiltViewModel(assistedFactory = WebViewViewModel.Factory::class)
 class WebViewViewModel @AssistedInject constructor(
-    @Assisted val webViewRoute: DetailRoute.WebView,
-) : BaseViewModel() {
-    private val webUrl = webViewRoute.webUrl
-
-    init {
-        setUiState(WebViewUiState(webUrl = webUrl, loadProgress = 0f))
-    }
-
-    fun onUiAction(uiAction: WebViewUiAction) {
-        when (uiAction) {
-            is WebViewUiAction.OnClickBack -> setUiEvent(WebViewUiEvent.NavigateToBack)
-            is WebViewUiAction.UpdatedProgress -> setProgress(uiAction.progress)
-            is WebViewUiAction.UpdatedWebTitle -> setWebViewTitle(uiAction.title)
+    @Assisted webViewRoute: DetailRoute.WebView,
+) : MVIViewModel<WebViewState, WebViewSideEffect>(webViewRoute.asState()) {
+    override fun onIntent(intent: Intent) {
+        if (intent !is WebViewIntent) {
+            super.onIntent(intent)
+            return
         }
-    }
 
-    private fun setProgress(progress: Float) {
-        uiState.checkState<WebViewUiState> {
-            if (loadProgress >= progress) return@checkState
-            setUiState(copy(loadProgress = progress))
-        }
-    }
+        intent {
+            when (intent) {
+                is WebViewIntent.BackClick -> {
+                    postSideEffect(WebViewSideEffect.NavigateToBack)
+                }
 
-    private fun setWebViewTitle(title: String) {
-        uiState.checkState<WebViewUiState> {
-            setUiState(copy(webTitle = title))
+                is WebViewIntent.ProgressUpdate -> {
+                    reduce {
+                        if (state.loadProgress >= intent.progress) {
+                            state
+                        } else {
+                            state.copy(loadProgress = intent.progress)
+                        }
+                    }
+                }
+
+                is WebViewIntent.WebTitleUpdate -> {
+                    reduce { state.copy(webTitle = intent.title) }
+                }
+            }
         }
     }
 
@@ -48,24 +50,4 @@ class WebViewViewModel @AssistedInject constructor(
     }
 }
 
-data class WebViewUiState(
-    val webUrl: String = "",
-    val webTitle: String = "",
-    val loadProgress: Float = 0f,
-) : UiState
-
-sealed interface WebViewUiAction : UiAction {
-    data object OnClickBack : WebViewUiAction
-
-    data class UpdatedProgress(
-        val progress: Float,
-    ) : WebViewUiAction
-
-    data class UpdatedWebTitle(
-        val title: String,
-    ) : WebViewUiAction
-}
-
-sealed interface WebViewUiEvent : UiEvent {
-    data object NavigateToBack : WebViewUiEvent
-}
+private fun DetailRoute.WebView.asState() = WebViewState(webUrl = webUrl)

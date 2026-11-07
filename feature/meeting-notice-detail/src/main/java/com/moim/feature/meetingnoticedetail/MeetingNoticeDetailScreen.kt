@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.common.model.NoticeType
+import com.moim.core.common.result.data
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.common.ErrorScreen
 import com.moim.core.designsystem.common.LoadingDialog
@@ -33,9 +34,11 @@ import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.ui.util.toValidUrl
 import com.moim.core.ui.view.FadeAnimatedVisibility
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.PaginationEffect
 import com.moim.core.ui.view.showToast
+import com.moim.feature.meetingnoticedetail.model.MeetingNoticeDetailIntent
+import com.moim.feature.meetingnoticedetail.model.MeetingNoticeDetailSideEffect
+import com.moim.feature.meetingnoticedetail.model.MeetingNoticeDetailState
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailBottomBar
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailCommentEditDialog
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailCommentHeader
@@ -43,8 +46,10 @@ import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailCommentItem
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailCommentReportDialog
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailContent
 import com.moim.feature.meetingnoticedetail.ui.MeetingNoticeDetailEditDialog
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
-internal typealias OnMeetingNoticeDetailUiAction = (MeetingNoticeDetailUiAction) -> Unit
+internal typealias OnMeetingNoticeDetailIntent = (MeetingNoticeDetailIntent) -> Unit
 
 @Composable
 fun MeetingNoticeDetailRoute(
@@ -55,59 +60,59 @@ fun MeetingNoticeDetailRoute(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
     val openBrowserErrorMessage = stringResource(R.string.common_error_open_browser)
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is MeetingNoticeDetailUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MeetingNoticeDetailSideEffect.NavigateToBack -> {
                 navigateToBack()
             }
 
-            is MeetingNoticeDetailUiEvent.NavigateToMeetingNoticeWrite -> {
-                navigateToMeetingNoticeWrite(event.meetId, event.noticeId)
+            is MeetingNoticeDetailSideEffect.NavigateToMeetingNoticeWrite -> {
+                navigateToMeetingNoticeWrite(sideEffect.meetId, sideEffect.noticeId)
             }
 
-            is MeetingNoticeDetailUiEvent.NavigateToWebBrowser -> {
+            is MeetingNoticeDetailSideEffect.NavigateToWebBrowser -> {
                 runCatching {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, event.webLink.toValidUrl()))
+                    context.startActivity(Intent(Intent.ACTION_VIEW, sideEffect.webLink.toValidUrl()))
                 }.onFailure {
                     showToast(context, openBrowserErrorMessage)
                 }
             }
 
-            is MeetingNoticeDetailUiEvent.ShowToastMessage -> {
-                showToast(context, event.message)
+            is MeetingNoticeDetailSideEffect.ShowToastMessage -> {
+                showToast(context, sideEffect.message)
             }
         }
     }
 
-    when (val state = uiState) {
-        is MeetingNoticeDetailUiState.Loading -> {
+    when {
+        uiState.isLoading -> {
             LoadingScreen(modifier)
         }
 
-        is MeetingNoticeDetailUiState.Success -> {
+        uiState.isSuccess -> {
             MeetingNoticeDetailScreen(
                 modifier = modifier,
-                uiState = state,
+                uiState = uiState,
                 isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
+                onIntent = viewModel::onIntent,
             )
         }
 
-        is MeetingNoticeDetailUiState.NotFoundError -> {
+        uiState.isNotFoundError -> {
             NotFoundErrorScreen(
                 modifier = modifier,
-                onClickBack = { viewModel.onUiAction(MeetingNoticeDetailUiAction.OnClickBack) },
+                onClickBack = { viewModel.onIntent(MeetingNoticeDetailIntent.BackClick) },
             )
         }
 
-        is MeetingNoticeDetailUiState.CommonError -> {
+        uiState.isError -> {
             ErrorScreen(
                 modifier = modifier,
-                onClickRefresh = { viewModel.onUiAction(MeetingNoticeDetailUiAction.OnClickRefresh) },
+                onClickRefresh = { viewModel.onIntent(MeetingNoticeDetailIntent.RefreshClick) },
             )
         }
     }
@@ -116,10 +121,11 @@ fun MeetingNoticeDetailRoute(
 @Composable
 private fun MeetingNoticeDetailScreen(
     modifier: Modifier = Modifier,
-    uiState: MeetingNoticeDetailUiState.Success,
+    uiState: MeetingNoticeDetailState,
     isLoading: Boolean,
-    onUiAction: OnMeetingNoticeDetailUiAction,
+    onIntent: OnMeetingNoticeDetailIntent,
 ) {
+    val notice = uiState.notice.data ?: return
     val comments = uiState.comments
     val pagingInfo = uiState.commentsPagingInfo
     val listState = rememberLazyListState()
@@ -128,7 +134,7 @@ private fun MeetingNoticeDetailScreen(
         listState = listState,
         threshold = 3,
         enabled = !pagingInfo.isLast && !pagingInfo.isErrorFooter,
-        onNext = { onUiAction(MeetingNoticeDetailUiAction.OnLoadNextCommentsPage) },
+        onNext = { onIntent(MeetingNoticeDetailIntent.NextCommentsPageLoad) },
     )
 
     MoimScaffold(
@@ -139,12 +145,12 @@ private fun MeetingNoticeDetailScreen(
         topBar = {
             MoimTopAppbar(
                 title = stringResource(R.string.meeting_notice_detail_title),
-                onClickNavigate = { onUiAction(MeetingNoticeDetailUiAction.OnClickBack) },
+                onClickNavigate = { onIntent(MeetingNoticeDetailIntent.BackClick) },
                 actions = {
-                    if (uiState.isHostUser && uiState.notice.type == NoticeType.CUSTOM) {
+                    if (uiState.isHostUser && notice.type == NoticeType.CUSTOM) {
                         MoimIconButton(
                             iconRes = R.drawable.ic_more_bold,
-                            onClick = { onUiAction(MeetingNoticeDetailUiAction.OnShowNoticeEditDialog(true)) },
+                            onClick = { onIntent(MeetingNoticeDetailIntent.NoticeEditDialogShow(true)) },
                         )
                     }
                 },
@@ -162,7 +168,7 @@ private fun MeetingNoticeDetailScreen(
                     state = listState,
                 ) {
                     item {
-                        MeetingNoticeDetailContent(notice = uiState.notice)
+                        MeetingNoticeDetailContent(notice = notice)
                     }
 
                     item {
@@ -179,7 +185,7 @@ private fun MeetingNoticeDetailScreen(
                             modifier = Modifier.animateItem(),
                             userId = uiState.user.userId,
                             comment = commentUiModel,
-                            onUiAction = onUiAction,
+                            onIntent = onIntent,
                         )
                     }
 
@@ -201,7 +207,7 @@ private fun MeetingNoticeDetailScreen(
                                     Modifier
                                         .fillMaxWidth()
                                         .background(MoimTheme.colors.bg.primary),
-                                onClickRetry = { onUiAction(MeetingNoticeDetailUiAction.OnLoadNextCommentsPage) },
+                                onClickRetry = { onIntent(MeetingNoticeDetailIntent.NextCommentsPageLoad) },
                             )
                         }
                     }
@@ -211,28 +217,28 @@ private fun MeetingNoticeDetailScreen(
         bottomBar = {
             MeetingNoticeDetailBottomBar(
                 commentState = uiState.commentState,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         },
     )
 
     if (uiState.isShowNoticeEditDialog) {
         MeetingNoticeDetailEditDialog(
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 
     if (uiState.isShowCommentEditDialog && uiState.selectedComment != null) {
         MeetingNoticeDetailCommentEditDialog(
             comment = uiState.selectedComment,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 
     if (uiState.isShowCommentReportDialog && uiState.selectedComment != null) {
         MeetingNoticeDetailCommentReportDialog(
             comment = uiState.selectedComment,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
     }
 

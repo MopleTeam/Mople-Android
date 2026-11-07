@@ -3,7 +3,6 @@ package com.moim.core.data.datasource.meeting
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.User
-import kotlinx.coroutines.flow.Flow
 
 interface MeetingRepository {
     suspend fun getMeetings(
@@ -16,9 +15,9 @@ interface MeetingRepository {
         size: Int,
     ): PaginationContainer<List<Meeting>>
 
-    fun getMeeting(meetingId: String): Flow<Meeting>
+    suspend fun getMeeting(meetingId: String): Meeting
 
-    fun getMeetingInviteCode(meetingId: String): Flow<String>
+    suspend fun getMeetingInviteCode(meetingId: String): String
 
     suspend fun getMeetingParticipants(
         meetingId: String,
@@ -33,23 +32,23 @@ interface MeetingRepository {
         size: Int,
     ): PaginationContainer<List<User>>
 
-    fun createMeeting(
+    suspend fun createMeeting(
         meetingName: String,
         meetingImageUrl: String?,
-    ): Flow<Meeting>
+    ): Meeting
 
-    fun updateMeeting(
+    suspend fun updateMeeting(
         meetingId: String,
         meetingName: String,
         meetingImageUrl: String?,
-    ): Flow<Meeting>
+    ): Meeting
 
-    fun updateMeetingLeader(
+    suspend fun updateMeetingLeader(
         meetingId: String,
         newHostId: String,
-    ): Flow<Unit>
+    )
 
-    fun joinMeeting(code: String): Flow<Meeting>
+    suspend fun joinMeeting(code: String): Meeting
 
-    fun deleteMeeting(meetingId: String): Flow<Unit>
+    suspend fun deleteMeeting(meetingId: String)
 }

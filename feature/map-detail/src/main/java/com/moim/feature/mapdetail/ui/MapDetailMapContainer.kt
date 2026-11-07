@@ -11,7 +11,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.mapdetail.MapDetailUiAction
+import com.moim.feature.mapdetail.model.MapDetailIntent
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
@@ -29,7 +29,7 @@ fun MapContainer(
     modifier: Modifier = Modifier,
     latitude: Double,
     longitude: Double,
-    onUiAction: (MapDetailUiAction) -> Unit,
+    onIntent: (MapDetailIntent) -> Unit,
 ) {
     val cameraPositionState = rememberCameraPositionState()
     val markerState = rememberUpdatedMarkerState(position = LatLng(latitude, longitude))
@@ -58,7 +58,7 @@ fun MapContainer(
                 keys = arrayOf("location"),
                 state = markerState,
                 onClick = {
-                    onUiAction(MapDetailUiAction.OnShowPlaceInfoDialog(true))
+                    onIntent(MapDetailIntent.PlaceInfoDialogShow(true))
                     true
                 },
             ) {

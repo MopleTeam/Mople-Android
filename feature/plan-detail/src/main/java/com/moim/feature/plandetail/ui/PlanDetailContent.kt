@@ -35,8 +35,8 @@ import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.feature.plandetail.OnPlanDetailUiAction
-import com.moim.feature.plandetail.PlanDetailUiAction
+import com.moim.feature.plandetail.OnPlanDetailIntent
+import com.moim.feature.plandetail.model.PlanDetailIntent
 
 @Composable
 fun PlanDetailContent(
@@ -44,7 +44,7 @@ fun PlanDetailContent(
     isMyPlan: Boolean,
     planItem: PlanItem,
     isShowApplyButton: Boolean,
-    onUiAction: OnPlanDetailUiAction = {},
+    onIntent: OnPlanDetailIntent = {},
 ) {
     Column(
         modifier =
@@ -103,7 +103,7 @@ fun PlanDetailContent(
             endIconRes = R.drawable.ic_next,
             enable = true,
             text = stringResource(R.string.unit_participants_count, planItem.participantsCount),
-            onClick = { onUiAction(PlanDetailUiAction.OnClickParticipants) },
+            onClick = { onIntent(PlanDetailIntent.ParticipantsClick) },
         )
 
         PlanInfoItem(
@@ -121,12 +121,12 @@ fun PlanDetailContent(
             PlanDetailMapContent(
                 latitude = planItem.latitude,
                 longitude = planItem.longitude,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         } else if (isMyPlan && planItem.isPlanAtBefore) {
             Spacer(Modifier.height(20.dp))
             PlanPlaceEmptyCard(
-                onClick = { onUiAction(PlanDetailUiAction.OnClickPlanUpdate) },
+                onClick = { onIntent(PlanDetailIntent.PlanUpdateClick) },
             )
         }
 
@@ -145,9 +145,9 @@ fun PlanDetailContent(
                 text = stringResource(btnTextRes),
                 onClick = {
                     if (planItem.isParticipant) {
-                        onUiAction(PlanDetailUiAction.OnShowPlanApplyCancelDialog(true))
+                        onIntent(PlanDetailIntent.PlanApplyCancelDialogShow(true))
                     } else {
-                        onUiAction(PlanDetailUiAction.OnClickPlanApply(true))
+                        onIntent(PlanDetailIntent.PlanApplyClick(true))
                     }
                 },
             )
@@ -243,7 +243,7 @@ private fun PlanDetailContentPreview() {
                     description = "대신귀\n여운알\n파카를\n드리겠\n습니다",
                 ),
             isShowApplyButton = false,
-            onUiAction = {},
+            onIntent = {},
         )
     }
 }

@@ -29,13 +29,13 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.commentdetail.CommentDetailUiAction
+import com.moim.feature.commentdetail.model.CommentDetailIntent
 
 @Composable
 fun CommentDetailMentionDialog(
     modifier: Modifier = Modifier,
     userList: List<User>,
-    onUiAction: (CommentDetailUiAction) -> Unit,
+    onIntent: (CommentDetailIntent) -> Unit,
 ) {
     Column(
         modifier =
@@ -57,7 +57,7 @@ fun CommentDetailMentionDialog(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .onSingleClick { onUiAction(CommentDetailUiAction.OnClickMentionUser(user)) }
+                            .onSingleClick { onIntent(CommentDetailIntent.MentionUserClick(user)) }
                             .padding(vertical = 8.dp, horizontal = 24.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -111,7 +111,7 @@ private fun CommentDetailMentionDialogPreview() {
         ) {
             CommentDetailMentionDialog(
                 userList = sample,
-                onUiAction = {},
+                onIntent = {},
             )
         }
     }

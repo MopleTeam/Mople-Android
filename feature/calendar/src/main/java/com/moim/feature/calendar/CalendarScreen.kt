@@ -27,7 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kizitonwose.calendar.compose.CalendarState
+import com.kizitonwose.calendar.compose.CalendarState as MonthCalendarState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
@@ -39,6 +39,8 @@ import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.common.model.ViewIdType
+import com.moim.core.common.model.item.PlanItem
+import com.moim.core.common.result.data
 import com.moim.core.common.util.default
 import com.moim.core.common.util.parseZonedDateTime
 import com.moim.core.designsystem.R
@@ -48,8 +50,10 @@ import com.moim.core.designsystem.common.LoadingScreen
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.calendar.model.CalendarIntent
+import com.moim.feature.calendar.model.CalendarSideEffect
+import com.moim.feature.calendar.model.CalendarState
 import com.moim.feature.calendar.ui.CalendarDay
 import com.moim.feature.calendar.ui.CalendarDayOfWeekHeader
 import com.moim.feature.calendar.ui.CalendarMonthCard
@@ -57,10 +61,12 @@ import com.moim.feature.calendar.ui.CalendarPlanContent
 import com.moim.feature.calendar.ui.CalendarTopAppbar
 import com.moim.feature.calendar.util.rememberFirstMostVisibleMonth
 import com.moim.feature.calendar.util.rememberFirstVisibleWeekAfterScroll
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
-internal typealias OnCalendarUiAction = (CalendarUiAction) -> Unit
+internal typealias OnCalendarIntent = (CalendarIntent) -> Unit
 
 @Composable
 fun CalendarRoute(
@@ -70,34 +76,34 @@ fun CalendarRoute(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val calendarUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val calendarUiState by viewModel.collectAsState()
     val modifier = Modifier.containerScreen(padding, MoimTheme.colors.bg.primary)
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is CalendarUiEvent.NavigateToPlanDetail -> navigateToPlanDetail(event.viewIdType)
-            is CalendarUiEvent.ShowToastMessage -> showToast(context, event.message)
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is CalendarSideEffect.NavigateToPlanDetail -> navigateToPlanDetail(sideEffect.viewIdType)
+            is CalendarSideEffect.ShowToastMessage -> showToast(context, sideEffect.message)
         }
     }
 
-    when (val uiState = calendarUiState) {
-        is CalendarUiState.Loading -> {
+    when {
+        calendarUiState.isLoading -> {
             LoadingScreen(modifier)
         }
 
-        is CalendarUiState.Success -> {
+        calendarUiState.isSuccess -> {
             CalendarScreen(
                 modifier = modifier,
-                uiState = uiState,
+                uiState = calendarUiState,
                 isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
+                onIntent = viewModel::onIntent,
             )
         }
 
-        is CalendarUiState.Error -> {
+        calendarUiState.isError -> {
             ErrorScreen(
                 modifier = modifier,
-                onClickRefresh = { viewModel.onUiAction(CalendarUiAction.OnClickRefresh) },
+                onClickRefresh = { viewModel.onIntent(CalendarIntent.RefreshClick) },
             )
         }
     }
@@ -106,10 +112,11 @@ fun CalendarRoute(
 @Composable
 fun CalendarScreen(
     modifier: Modifier = Modifier,
-    uiState: CalendarUiState.Success,
+    uiState: CalendarState,
     isLoading: Boolean,
-    onUiAction: OnCalendarUiAction,
+    onIntent: OnCalendarIntent,
 ) {
+    val plans = uiState.plans.data.orEmpty()
     val localDate = uiState.selectDayOfMonth.toLocalDate()
     val startDate = localDate.yearMonth.minusMonths(500)
     val endDate = localDate.yearMonth.plusMonths(500)
@@ -145,11 +152,11 @@ fun CalendarScreen(
                 .withDayOfMonth(1)
 
         if (uiState.selectDayOfMonth == weekDate) return@LaunchedEffect
-        onUiAction(CalendarUiAction.OnChangeDate(weekDate))
+        onIntent(CalendarIntent.DateChange(weekDate))
     }
 
     LaunchedEffect(currentDate) {
-        onUiAction(CalendarUiAction.OnChangeDate(currentDate))
+        onIntent(CalendarIntent.DateChange(currentDate))
     }
 
     TrackScreenViewEvent(screenName = "calendar")
@@ -158,16 +165,17 @@ fun CalendarScreen(
     ) {
         CalendarTopAppbar(
             currentDate = currentDate,
-            onUiAction = onUiAction,
+            onIntent = onIntent,
         )
         AnimatedVisibility(
             visible = uiState.isExpandable,
         ) {
             CalendarMonth(
                 uiState = uiState,
+                plans = plans,
                 currentDate = currentDate,
                 monthState = monthState,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         }
 
@@ -178,8 +186,9 @@ fun CalendarScreen(
         ) {
             CalendarWeek(
                 uiState = uiState,
+                plans = plans,
                 weekState = weekState,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         }
     }
@@ -190,10 +199,11 @@ fun CalendarScreen(
 @Composable
 fun CalendarMonth(
     modifier: Modifier = Modifier,
-    uiState: CalendarUiState.Success,
+    uiState: CalendarState,
+    plans: List<PlanItem>,
     currentDate: ZonedDateTime,
-    monthState: CalendarState,
-    onUiAction: OnCalendarUiAction,
+    monthState: MonthCalendarState,
+    onIntent: OnCalendarIntent,
 ) {
     Column(
         modifier =
@@ -213,7 +223,7 @@ fun CalendarMonth(
             state = monthState,
             dayContent = { day ->
                 val dayForZonedDateTime = day.date.parseZonedDateTime().default()
-                val enabled = uiState.plans.find { it.planAt.default() == dayForZonedDateTime } != null
+                val enabled = plans.find { it.planAt.default() == dayForZonedDateTime } != null
 
                 CalendarDay(
                     day = dayForZonedDateTime,
@@ -221,7 +231,7 @@ fun CalendarMonth(
                     holidays = uiState.holidays.filter { it.year == day.date.year && it.month == day.date.month },
                     isCurrentDatePosition = day.position == DayPosition.MonthDate,
                     enabled = enabled,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             },
         )
@@ -231,12 +241,13 @@ fun CalendarMonth(
 @Composable
 fun CalendarWeek(
     modifier: Modifier = Modifier,
-    uiState: CalendarUiState.Success,
+    uiState: CalendarState,
+    plans: List<PlanItem>,
     weekState: WeekCalendarState,
-    onUiAction: OnCalendarUiAction,
+    onIntent: OnCalendarIntent,
 ) {
     val selectedDatePlans =
-        uiState.plans.filter {
+        plans.filter {
             it.planAt.dayOfMonth == (uiState.selectDay ?: ZonedDateTime.now()).dayOfMonth
         }
 
@@ -251,7 +262,7 @@ fun CalendarWeek(
             state = weekState,
             dayContent = { day ->
                 val dayForZonedDateTime = day.date.parseZonedDateTime().default()
-                val enabled = uiState.plans.find { it.planAt.default() == dayForZonedDateTime } != null
+                val enabled = plans.find { it.planAt.default() == dayForZonedDateTime } != null
 
                 CalendarDay(
                     day = dayForZonedDateTime,
@@ -259,7 +270,7 @@ fun CalendarWeek(
                     holidays = uiState.holidays.filter { it.year == day.date.year && it.month == day.date.month },
                     isCurrentDatePosition = day.position == WeekDayPosition.RangeDate,
                     enabled = enabled,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             },
         )
@@ -268,7 +279,7 @@ fun CalendarWeek(
             CalendarPlanContent(
                 selectDate = uiState.selectDay ?: ZonedDateTime.now().default(),
                 plans = selectedDatePlans,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
         } else {
             Column(

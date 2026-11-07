@@ -27,13 +27,17 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.meetingwrite.model.MeetingWriteIntent
+import com.moim.feature.meetingwrite.model.MeetingWriteSideEffect
+import com.moim.feature.meetingwrite.model.MeetingWriteState
 import com.moim.feature.meetingwrite.ui.MeetingWriteImage
 import com.moim.feature.meetingwrite.ui.MeetingWriteImageEditDialog
 import com.moim.feature.meetingwrite.ui.MeetingWriteNameTextField
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
-internal typealias OnMeetingWriteUiAction = (MeetingWriteUiAction) -> Unit
+internal typealias OnMeetingWriteIntent = (MeetingWriteIntent) -> Unit
 
 @Composable
 fun MeetingWriteRoute(
@@ -43,11 +47,11 @@ fun MeetingWriteRoute(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.loading.collectAsStateWithLifecycle()
-    val meetingWriteUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsState()
     val singlePhotoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickVisualMedia(),
-            onResult = { uri -> if (uri != null) viewModel.onUiAction(MeetingWriteUiAction.OnChangeMeetingPhotoUrl(uri.toString())) },
+            onResult = { uri -> if (uri != null) viewModel.onIntent(MeetingWriteIntent.MeetingPhotoUrlChange(uri.toString())) },
         )
 
     val modifier =
@@ -56,42 +60,38 @@ fun MeetingWriteRoute(
             padding = padding,
         )
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is MeetingWriteUiEvent.NavigateToBack -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MeetingWriteSideEffect.NavigateToBack -> {
                 navigateToBack()
             }
 
-            is MeetingWriteUiEvent.NavigateToPhotoPicker -> {
+            is MeetingWriteSideEffect.NavigateToPhotoPicker -> {
                 singlePhotoPickerLauncher.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                 )
             }
 
-            is MeetingWriteUiEvent.ShowToastMessage -> {
-                showToast(context, event.message)
+            is MeetingWriteSideEffect.ShowToastMessage -> {
+                showToast(context, sideEffect.message)
             }
         }
     }
 
-    when (val uiState = meetingWriteUiState) {
-        is MeetingWriteUiState.MeetingWrite -> {
-            MeetingWriteScreen(
-                modifier = modifier,
-                uiState = uiState,
-                isLoading = isLoading,
-                onUiAction = viewModel::onUiAction,
-            )
-        }
-    }
+    MeetingWriteScreen(
+        modifier = modifier,
+        uiState = uiState,
+        isLoading = isLoading,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 fun MeetingWriteScreen(
     modifier: Modifier = Modifier,
-    uiState: MeetingWriteUiState.MeetingWrite,
+    uiState: MeetingWriteState,
     isLoading: Boolean,
-    onUiAction: OnMeetingWriteUiAction,
+    onIntent: OnMeetingWriteIntent,
 ) {
     TrackScreenViewEvent(screenName = "meet_write")
     Column(
@@ -102,7 +102,7 @@ fun MeetingWriteScreen(
                 stringResource(
                     if (uiState.meetingId.isNullOrEmpty()) R.string.meeting_write_title_for_create else R.string.meeting_write_title_for_update,
                 ),
-            onClickNavigate = { onUiAction(MeetingWriteUiAction.OnClickBack) },
+            onClickNavigate = { onIntent(MeetingWriteIntent.BackClick) },
         )
         Column(
             modifier =
@@ -115,12 +115,12 @@ fun MeetingWriteScreen(
         ) {
             MeetingWriteImage(
                 meetingImageUrl = uiState.meetingUrl,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
 
             MeetingWriteNameTextField(
                 meetingName = uiState.meetingName,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
             )
 
             Spacer(Modifier.weight(1f))
@@ -132,13 +132,13 @@ fun MeetingWriteScreen(
                         .padding(top = 28.dp),
                 enable = uiState.enableMeetingWrite,
                 text = stringResource(if (uiState.meetingId.isNullOrEmpty()) R.string.meeting_write_create else R.string.common_save),
-                onClick = { onUiAction(MeetingWriteUiAction.OnClickMeetingWrite) },
+                onClick = { onIntent(MeetingWriteIntent.MeetingWriteClick) },
             )
         }
     }
 
     if (uiState.isShowPhotoEditDialog) {
-        MeetingWriteImageEditDialog(onUiAction = onUiAction)
+        MeetingWriteImageEditDialog(onIntent = onIntent)
     }
 
     LoadingDialog(isLoading)

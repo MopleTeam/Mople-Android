@@ -19,14 +19,14 @@ import androidx.compose.ui.unit.dp
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
-import com.moim.feature.intro.screen.signup.OnSignUpUiAction
-import com.moim.feature.intro.screen.signup.SignUpUiAction
+import com.moim.feature.intro.screen.signup.OnSignUpIntent
+import com.moim.feature.intro.screen.signup.model.SignUpIntent
 
 @Composable
 fun ProfileImage(
     modifier: Modifier = Modifier,
     profileUrl: String?,
-    onUiAction: OnSignUpUiAction = {},
+    onIntent: OnSignUpIntent = {},
 ) {
     Column(
         modifier =
@@ -43,7 +43,7 @@ fun ProfileImage(
                         .size(80.dp)
                         .clip(RoundedCornerShape(100))
                         .align(Alignment.Center)
-                        .onSingleClick { onUiAction(SignUpUiAction.OnShowProfileEditDialog(true)) },
+                        .onSingleClick { onIntent(SignUpIntent.ProfileEditDialogShow(true)) },
                 imageUrl = profileUrl,
                 errorImage = painterResource(R.drawable.ic_empty_user_logo),
             )

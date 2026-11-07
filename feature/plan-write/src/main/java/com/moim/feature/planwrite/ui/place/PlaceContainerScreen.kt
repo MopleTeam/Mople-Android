@@ -27,8 +27,8 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.component.MoimTopAppbar
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.planwrite.OnPlanWriteUiAction
-import com.moim.feature.planwrite.PlanWriteUiAction
+import com.moim.feature.planwrite.OnPlanWriteIntent
+import com.moim.feature.planwrite.model.PlanWriteIntent
 
 @Composable
 fun PlaceContainerScreen(
@@ -40,7 +40,7 @@ fun PlaceContainerScreen(
     selectedPlace: Place? = null,
     isShowSearchScreen: Boolean = false,
     isShowPlaceInfoDialog: Boolean = false,
-    onUiAction: OnPlanWriteUiAction,
+    onIntent: OnPlanWriteIntent,
 ) {
     var currentX by remember { mutableDoubleStateOf(0.0) }
     var currentY by remember { mutableDoubleStateOf(0.0) }
@@ -53,10 +53,10 @@ fun PlaceContainerScreen(
     ) {
         MapTopAppbar(
             modifier = Modifier.fillMaxWidth(),
-            onClickBack = { onUiAction(PlanWriteUiAction.OnClickBack) },
+            onClickBack = { onIntent(PlanWriteIntent.BackClick) },
             onClickSearch = {
-                onUiAction(
-                    PlanWriteUiAction.OnClickPlanPlaceSearch(
+                onIntent(
+                    PlanWriteIntent.PlanPlaceSearchClick(
                         keyword = it,
                         xPoint = currentX.toString(),
                         yPoint = currentY.toString(),
@@ -71,7 +71,7 @@ fun PlaceContainerScreen(
                 latitude = currentY,
                 markerLongitude = planLongitude,
                 markerLatitude = planLatitude,
-                onUiAction = onUiAction,
+                onIntent = onIntent,
                 onLocationChange = {
                     if (currentX == 0.0 && currentY == 0.0) {
                         currentX = it.longitude
@@ -90,14 +90,14 @@ fun PlaceContainerScreen(
                     isSearchResult = searchKeyword.isNullOrEmpty().not(),
                     searchPlaces = searchPlaces,
                     selectedPlace = selectedPlace,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
 
             if (isShowPlaceInfoDialog && selectedPlace != null) {
                 PlaceInfoDialog(
                     place = selectedPlace,
-                    onUiAction = onUiAction,
+                    onIntent = onIntent,
                 )
             }
         }

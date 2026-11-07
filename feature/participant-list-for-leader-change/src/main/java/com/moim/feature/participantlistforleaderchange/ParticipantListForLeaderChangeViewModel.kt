@@ -5,100 +5,89 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.User
-import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.MeetingAction
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.cancelIfActive
 import com.moim.core.ui.util.isActiveCheck
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
-import com.moim.core.ui.view.PagingUiState
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
+import com.moim.feature.participantlistforleaderchange.model.ParticipantListForLeaderChangeIntent
+import com.moim.feature.participantlistforleaderchange.model.ParticipantListForLeaderChangeSideEffect
+import com.moim.feature.participantlistforleaderchange.model.ParticipantListForLeaderChangeState
 import com.moim.feature.participantlistforleaderchange.model.ParticipantListUiModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.syntax.Syntax
 
 @HiltViewModel(assistedFactory = ParticipantListForLeaderChangeViewModel.Factory::class)
 class ParticipantListForLeaderChangeViewModel @AssistedInject constructor(
     private val meetingRepository: MeetingRepository,
     private val eventBus: EventBus<MeetingAction>,
     @Assisted val participantListForLeaderChangeRoute: DetailRoute.ParticipantListForLeaderChange,
-) : BaseViewModel() {
+) : MVIViewModel<ParticipantListForLeaderChangeState, ParticipantListForLeaderChangeSideEffect>(
+        ParticipantListForLeaderChangeState(),
+    ) {
     private val meetId = participantListForLeaderChangeRoute.meetId
     private var pagingJob: Job? = null
 
-    val keywordFieldState = TextFieldState()
-
-    init {
-        viewModelScope.launch {
-            setUiState(ParticipantListForLeaderChangeUiState())
-            observeKeywordChanges()
-        }
+    override suspend fun Syntax<ParticipantListForLeaderChangeState, ParticipantListForLeaderChangeSideEffect>.onContainerCreate() {
+        // snapshotFlow가 현재 값을 즉시 흘려서 최초 목록 로드까지 겸한다.
+        observeKeywordChanges(state.keywordState)
     }
 
-    fun onUiAction(uiAction: ParticipantListForLeaderChangeUiAction) {
-        when (uiAction) {
-            is ParticipantListForLeaderChangeUiAction.OnClickBack -> {
-                setUiEvent(ParticipantListForLeaderChangeUiEvent.NavigateToBack)
-            }
+    override fun onIntent(intent: Intent) {
+        if (intent !is ParticipantListForLeaderChangeIntent) {
+            super.onIntent(intent)
+            return
+        }
 
-            is ParticipantListForLeaderChangeUiAction.OnLoadNextPage -> {
-                val uiState = uiState.value as? ParticipantListForLeaderChangeUiState ?: return
-                getMeetingParticipantsForSearch(
-                    keyword = keywordFieldState.text.toString(),
-                    cursor = uiState.pagingInfo.nextCursor,
-                )
-            }
+        intent {
+            when (intent) {
+                is ParticipantListForLeaderChangeIntent.BackClick -> {
+                    postSideEffect(ParticipantListForLeaderChangeSideEffect.NavigateToBack)
+                }
 
-            is ParticipantListForLeaderChangeUiAction.OnClickRefresh -> {
-                val uiState = uiState.value as? ParticipantListForLeaderChangeUiState ?: return
-                getMeetingParticipantsForSearch(
-                    keyword = keywordFieldState.text.toString(),
-                    cursor = uiState.pagingInfo.nextCursor,
-                )
-            }
+                is ParticipantListForLeaderChangeIntent.RefreshClick,
+                is ParticipantListForLeaderChangeIntent.NextPageLoad,
+                -> {
+                    getMeetingParticipantsForSearch(
+                        keyword = state.keywordState.text.toString(),
+                        cursor = state.pagingInfo.nextCursor,
+                    )
+                }
 
-            is ParticipantListForLeaderChangeUiAction.OnClickUser -> {
-                setSelectedUser(uiAction.user)
-            }
+                is ParticipantListForLeaderChangeIntent.UserClick -> {
+                    setSelectedUser(intent.user)
+                }
 
-            is ParticipantListForLeaderChangeUiAction.OnClickUserProfile -> {
-                setUiEvent(ParticipantListForLeaderChangeUiEvent.NavigateToImageViewer(uiAction.user))
-            }
+                is ParticipantListForLeaderChangeIntent.UserProfileClick -> {
+                    postSideEffect(ParticipantListForLeaderChangeSideEffect.NavigateToImageViewer(intent.user))
+                }
 
-            is ParticipantListForLeaderChangeUiAction.OnClickLeaderChange -> {
-                setLeaderChange(uiAction.userId)
-            }
+                is ParticipantListForLeaderChangeIntent.LeaderChangeClick -> {
+                    setLeaderChange(intent.userId)
+                }
 
-            is ParticipantListForLeaderChangeUiAction.ShowChangeLeaderDialog -> {
-                uiState.checkState<ParticipantListForLeaderChangeUiState> {
-                    setUiState(copy(isShowChangeUserDialog = uiAction.isShow))
+                is ParticipantListForLeaderChangeIntent.ChangeLeaderDialogShow -> {
+                    reduce { state.copy(isShowChangeUserDialog = intent.isShow) }
                 }
             }
         }
     }
 
-    private fun observeKeywordChanges() {
-        snapshotFlow {
-            keywordFieldState
-                .text
-                .toString()
-        }.filterNotNull()
+    private fun observeKeywordChanges(keywordState: TextFieldState) {
+        snapshotFlow { keywordState.text.toString() }
             .distinctUntilChanged()
             .debounce(500)
             .onEach { keyword ->
@@ -116,14 +105,14 @@ class ParticipantListForLeaderChangeViewModel @AssistedInject constructor(
     ) {
         if (pagingJob.isActiveCheck()) return
         pagingJob =
-            viewModelScope.launch {
+            intent {
                 handlePagingData(
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         meetingRepository.getMeetingParticipantsForSearch(
                             meetingId = meetId.id,
@@ -134,91 +123,82 @@ class ParticipantListForLeaderChangeViewModel @AssistedInject constructor(
                     }.getOrNull()
 
                 handlePagingData(
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
             }
     }
 
-    private fun handlePagingData(
-        pagingInfo: PaginationContainer<List<User>>?,
+    private suspend fun Syntax<ParticipantListForLeaderChangeState, ParticipantListForLeaderChangeSideEffect>.handlePagingData(
+        pagingData: PaginationContainer<List<User>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<ParticipantListForLeaderChangeUiState> {
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = this.pagingInfo,
-                    currentItems = users,
-                    isInitialLoad = cursor == null,
-                    transform = { users ->
-                        users
-                            .filter { it.userRole != "HOST" }
-                            .map {
-                                ParticipantListUiModel(
-                                    user = it,
-                                    isSelected = false,
-                                )
-                            }
-                    },
-                )
-
-            setUiState(
-                copy(
-                    pagingInfo = result.pagingInfo,
-                    users = result.items,
-                ),
-            )
-        }
-    }
-
-    private fun setSelectedUser(selectedUser: User) {
-        uiState.checkState<ParticipantListForLeaderChangeUiState> {
-            val users =
-                users.map { user ->
-                    val isSelectedUser = user.user.userId == selectedUser.userId
-                    user.copy(isSelected = isSelectedUser && !user.isSelected)
-                }
-
-            setUiState(
-                copy(
-                    users = users,
-                    selectedUser = users.find { it.isSelected }?.user,
-                ),
-            )
-        }
-    }
-
-    private fun setLeaderChange(userId: String) {
-        viewModelScope.launch {
-            uiState.checkState<ParticipantListForLeaderChangeUiState> {
-                meetingRepository
-                    .updateMeetingLeader(
-                        meetingId = meetId.id,
-                        newHostId = userId,
-                    ).asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
-
-                            is Result.Success -> {
-                                eventBus.send(MeetingAction.MeetingInvalidate())
-                                setUiEvent(ParticipantListForLeaderChangeUiEvent.ShowCompletedMessage)
-                                setUiEvent(ParticipantListForLeaderChangeUiEvent.NavigateToExit)
-                            }
-
-                            is Result.Error -> {
-                                setUiEvent(ParticipantListForLeaderChangeUiEvent.ShowErrorMessage)
-                            }
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = state.pagingInfo,
+                currentItems = state.users,
+                isInitialLoad = cursor == null,
+                transform = { users ->
+                    users
+                        .filter { it.userRole != HOST_USER_ROLE }
+                        .map {
+                            ParticipantListUiModel(
+                                user = it,
+                                isSelected = false,
+                            )
                         }
-                    }
+                },
+            )
+
+        reduce {
+            state.copy(
+                pagingInfo = result.pagingInfo,
+                users = result.items,
+            )
+        }
+    }
+
+    private suspend fun Syntax<ParticipantListForLeaderChangeState, ParticipantListForLeaderChangeSideEffect>.setSelectedUser(
+        selectedUser: User,
+    ) {
+        val users =
+            state.users.map { user ->
+                val isSelectedUser = user.user.userId == selectedUser.userId
+                user.copy(isSelected = isSelectedUser && !user.isSelected)
             }
+
+        reduce {
+            state.copy(
+                users = users,
+                selectedUser = users.find { it.isSelected }?.user,
+            )
+        }
+    }
+
+    private suspend fun Syntax<ParticipantListForLeaderChangeState, ParticipantListForLeaderChangeSideEffect>.setLeaderChange(
+        userId: String,
+    ) {
+        setLoading(true)
+
+        try {
+            meetingRepository.updateMeetingLeader(
+                meetingId = meetId.id,
+                newHostId = userId,
+            )
+
+            eventBus.send(MeetingAction.MeetingInvalidate())
+            postSideEffect(ParticipantListForLeaderChangeSideEffect.ShowCompletedMessage)
+            postSideEffect(ParticipantListForLeaderChangeSideEffect.NavigateToExit)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            postSideEffect(ParticipantListForLeaderChangeSideEffect.ShowErrorMessage)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -226,49 +206,8 @@ class ParticipantListForLeaderChangeViewModel @AssistedInject constructor(
     interface Factory {
         fun create(participantListRoute: DetailRoute.ParticipantListForLeaderChange): ParticipantListForLeaderChangeViewModel
     }
-}
 
-data class ParticipantListForLeaderChangeUiState(
-    val pagingInfo: PagingUiState = PagingUiState(),
-    val users: List<ParticipantListUiModel> = emptyList(),
-    val selectedUser: User? = null,
-    val isShowChangeUserDialog: Boolean = false,
-) : UiState
-
-sealed interface ParticipantListForLeaderChangeUiAction : UiAction {
-    data object OnClickBack : ParticipantListForLeaderChangeUiAction
-
-    data class OnClickUser(
-        val user: User,
-    ) : ParticipantListForLeaderChangeUiAction
-
-    data class OnClickUserProfile(
-        val user: User,
-    ) : ParticipantListForLeaderChangeUiAction
-
-    data class OnClickLeaderChange(
-        val userId: String,
-    ) : ParticipantListForLeaderChangeUiAction
-
-    data class ShowChangeLeaderDialog(
-        val isShow: Boolean,
-    ) : ParticipantListForLeaderChangeUiAction
-
-    data object OnLoadNextPage : ParticipantListForLeaderChangeUiAction
-
-    data object OnClickRefresh : ParticipantListForLeaderChangeUiAction
-}
-
-sealed interface ParticipantListForLeaderChangeUiEvent : UiEvent {
-    data object NavigateToBack : ParticipantListForLeaderChangeUiEvent
-
-    data class NavigateToImageViewer(
-        val user: User,
-    ) : ParticipantListForLeaderChangeUiEvent
-
-    data object NavigateToExit : ParticipantListForLeaderChangeUiEvent
-
-    data object ShowCompletedMessage : ParticipantListForLeaderChangeUiEvent
-
-    data object ShowErrorMessage : ParticipantListForLeaderChangeUiEvent
+    companion object {
+        private const val HOST_USER_ROLE = "HOST"
+    }
 }

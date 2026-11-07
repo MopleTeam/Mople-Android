@@ -1,37 +1,32 @@
 package com.moim.feature.planwrite
 
-import androidx.lifecycle.viewModelScope
-import com.moim.core.common.exception.NetworkException
 import com.moim.core.common.model.Meeting
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.Place
 import com.moim.core.common.model.item.asPlanItem
-import com.moim.core.common.result.Result
-import com.moim.core.common.result.asResult
 import com.moim.core.common.util.parseDateString
 import com.moim.core.data.datasource.meeting.MeetingRepository
 import com.moim.core.data.datasource.plan.PlanRepository
 import com.moim.core.ui.eventbus.EventBus
 import com.moim.core.ui.eventbus.PlanAction
+import com.moim.core.ui.mvi.Intent
+import com.moim.core.ui.mvi.MVIViewModel
 import com.moim.core.ui.route.DetailRoute
 import com.moim.core.ui.util.isActiveCheck
-import com.moim.core.ui.view.BaseViewModel
 import com.moim.core.ui.view.PagingHelper
-import com.moim.core.ui.view.PagingUiState
 import com.moim.core.ui.view.ToastMessage
-import com.moim.core.ui.view.UiAction
-import com.moim.core.ui.view.UiEvent
-import com.moim.core.ui.view.UiState
-import com.moim.core.ui.view.checkState
 import com.moim.feature.planwrite.model.MeetingUiModel
+import com.moim.feature.planwrite.model.PlanWriteIntent
+import com.moim.feature.planwrite.model.PlanWriteSideEffect
+import com.moim.feature.planwrite.model.PlanWriteState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import okio.IOException
+import org.orbitmvi.orbit.syntax.Syntax
+import java.io.IOException
 import java.time.ZonedDateTime
 
 @HiltViewModel(assistedFactory = PlanWriteViewModel.Factory::class)
@@ -40,199 +35,149 @@ class PlanWriteViewModel @AssistedInject constructor(
     private val meetingRepository: MeetingRepository,
     private val planEventBus: EventBus<PlanAction>,
     @Assisted val planWriteRoute: DetailRoute.PlanWrite,
-) : BaseViewModel() {
-    private val planItem = planWriteRoute.planItem
+) : MVIViewModel<PlanWriteState, PlanWriteSideEffect>(planWriteRoute.asState()) {
     private var meetingsPagingJob: Job? = null
 
-    init {
-        viewModelScope.launch {
-            planItem?.let { plan ->
-                setUiState(
-                    PlanWriteUiState.PlanWrite(
-                        planId = plan.postId,
-                        planName = plan.planName,
-                        planDate = plan.planAt,
-                        planTime = plan.planAt,
-                        planLoadAddress = plan.loadAddress,
-                        planWeatherAddress = plan.weatherAddress,
-                        planPlaceName = plan.planName,
-                        planDescription = plan.description,
-                        planLongitude = plan.longitude,
-                        planLatitude = plan.latitude,
-                        selectMeetingId = plan.meetingId,
-                        selectMeetingName = plan.meetingName,
-                        enableMeetingSelected = false,
-                        enabledSubmit = plan.postId.isNotEmpty(),
-                    ),
-                )
-            } ?: run { setUiState(PlanWriteUiState.PlanWrite()) }
+    override fun onIntent(intent: Intent) {
+        if (intent !is PlanWriteIntent) {
+            super.onIntent(intent)
+            return
         }
-    }
 
-    fun onUiAction(uiAction: PlanWriteUiAction) {
-        when (uiAction) {
-            is PlanWriteUiAction.OnClickBack -> {
-                navigateToBack()
-            }
+        intent {
+            when (intent) {
+                is PlanWriteIntent.BackClick -> {
+                    navigateToBack()
+                }
 
-            is PlanWriteUiAction.OnClickPlanMeeting -> {
-                setPlanMeeting(uiAction.meeting)
-            }
+                is PlanWriteIntent.PlanWriteClick -> {
+                    setPlan()
+                }
 
-            is PlanWriteUiAction.OnClickPlanDate -> {
-                setPlanDate(uiAction.date)
-            }
+                is PlanWriteIntent.NextMeetingsPageLoad -> {
+                    getMeetings(state.meetingsPagingInfo.nextCursor)
+                }
 
-            is PlanWriteUiAction.OnClickPlanTime -> {
-                setPlanTime(uiAction.date)
-            }
+                is PlanWriteIntent.PlanMeetingClick -> {
+                    setPlanMeeting(intent.meeting)
+                }
 
-            is PlanWriteUiAction.OnClickPlanPlaceSearch -> {
-                getSearchPlace(uiAction.keyword, uiAction.xPoint, uiAction.yPoint)
-            }
+                is PlanWriteIntent.PlanDateSelect -> {
+                    reduce { state.copy(planDate = intent.date) }
+                    setPlanCreateEnabled()
+                }
 
-            is PlanWriteUiAction.OnClickSearchPlace -> {
-                setPlaceMarker(uiAction.place)
-            }
+                is PlanWriteIntent.PlanTimeSelect -> {
+                    reduce { state.copy(planTime = intent.date) }
+                    setPlanCreateEnabled()
+                }
 
-            is PlanWriteUiAction.OnClickPlanPlace -> {
-                setPlanPlace(uiAction.place)
-            }
+                is PlanWriteIntent.PlanPlaceSearchClick -> {
+                    getSearchPlace(intent.keyword, intent.xPoint, intent.yPoint)
+                }
 
-            is PlanWriteUiAction.OnClickPlanWrite -> {
-                setPlan()
-            }
+                is PlanWriteIntent.SearchPlaceClick -> {
+                    setPlaceMarker(intent.place)
+                }
 
-            is PlanWriteUiAction.OnLoadNextMeetingsPage -> {
-                val current = uiState.value as? PlanWriteUiState.PlanWrite ?: return
-                getMeetings(current.meetingsPagingInfo.nextCursor)
-            }
+                is PlanWriteIntent.PlanPlaceClick -> {
+                    setPlanPlace(intent.place)
+                }
 
-            is PlanWriteUiAction.OnShowDatePickerDialog -> {
-                showDatePickerDialog(uiAction.isShow)
-            }
+                is PlanWriteIntent.DatePickerDialogShow -> {
+                    reduce { state.copy(isShowDatePickerDialog = intent.isShow) }
+                }
 
-            is PlanWriteUiAction.OnShowTimePickerDialog -> {
-                showTimePickerDialog(uiAction.isShow)
-            }
+                is PlanWriteIntent.TimePickerDialogShow -> {
+                    reduce { state.copy(isShowTimePickerDialog = intent.isShow) }
+                }
 
-            is PlanWriteUiAction.OnShowMeetingsDialog -> {
-                showMeetingsDialog(uiAction.isShow)
-            }
+                is PlanWriteIntent.PlaceInfoDialogShow -> {
+                    reduce { state.copy(isShowPlaceInfoDialog = intent.isShow) }
+                }
 
-            is PlanWriteUiAction.OnShowPlaceMapScreen -> {
-                showPlaceMapScreen(uiAction.isShow)
-            }
+                is PlanWriteIntent.PlaceMapScreenShow -> {
+                    showPlaceMapScreen(intent.isShow)
+                }
 
-            is PlanWriteUiAction.OnShowPlaceInfoDialog -> {
-                showPlaceInfoDialog(uiAction.isShow)
-            }
+                is PlanWriteIntent.MeetingsDialogShow -> {
+                    showMeetingsDialog(intent.isShow)
+                }
 
-            is PlanWriteUiAction.OnChangePlanName -> {
-                setPlanName(uiAction.name)
-            }
+                is PlanWriteIntent.PlanNameChange -> {
+                    reduce { state.copy(planName = intent.name) }
+                    setPlanCreateEnabled()
+                }
 
-            is PlanWriteUiAction.OnChangePlanDescription -> {
-                setPlanDescription(uiAction.description)
+                is PlanWriteIntent.PlanDescriptionChange -> {
+                    reduce { state.copy(planDescription = intent.description) }
+                    setPlanCreateEnabled()
+                }
             }
         }
     }
 
-    private fun setPlaceMarker(place: Place) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(
-                copy(
-                    selectedPlace = place,
-                    planLongitude = place.xPoint.toDouble(),
-                    planLatitude = place.yPoint.toDouble(),
-                    isShowPlaceInfoDialog = true,
-                    isShowMapSearchScreen = false,
-                ),
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.setPlaceMarker(place: Place) {
+        reduce {
+            state.copy(
+                selectedPlace = place,
+                planLongitude = place.xPoint.toDouble(),
+                planLatitude = place.yPoint.toDouble(),
+                isShowPlaceInfoDialog = true,
+                isShowMapSearchScreen = false,
             )
         }
     }
 
-    private fun setPlanPlace(place: Place) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(
-                copy(
-                    planLoadAddress = place.roadAddress,
-                    planWeatherAddress = place.address,
-                    planPlaceName = place.title,
-                    planLongitude = place.xPoint.toDouble(),
-                    planLatitude = place.yPoint.toDouble(),
-                    selectedPlace = null,
-                    isShowMapScreen = false,
-                ),
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.setPlanPlace(place: Place) {
+        reduce {
+            state.copy(
+                planLoadAddress = place.roadAddress,
+                planWeatherAddress = place.address,
+                planPlaceName = place.title,
+                planLongitude = place.xPoint.toDouble(),
+                planLatitude = place.yPoint.toDouble(),
+                selectedPlace = null,
+                isShowMapScreen = false,
             )
         }
     }
 
-    private fun setPlanName(name: String) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(copy(planName = name))
-            setPlanCreateEnabled()
-        }
-    }
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.setPlanMeeting(meeting: Meeting) {
+        val updatedMeetings = state.meetings.map { it.copy(isSelected = it.meeting.id == meeting.id) }
 
-    private fun setPlanDescription(planInfo: String) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(copy(planDescription = planInfo))
-            setPlanCreateEnabled()
-        }
-    }
-
-    private fun setPlanDate(date: ZonedDateTime) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(copy(planDate = date))
-            setPlanCreateEnabled()
-        }
-    }
-
-    private fun setPlanTime(date: ZonedDateTime) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(copy(planTime = date))
-            setPlanCreateEnabled()
-        }
-    }
-
-    private fun setPlanMeeting(meeting: Meeting) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            val updatedMeetings = meetings.map { it.copy(isSelected = it.meeting.id == meeting.id) }
-            setUiState(
-                copy(
-                    selectMeetingId = meeting.id,
-                    selectMeetingName = meeting.name,
-                    meetings = updatedMeetings,
-                ),
+        reduce {
+            state.copy(
+                selectMeetingId = meeting.id,
+                selectMeetingName = meeting.name,
+                meetings = updatedMeetings,
             )
-            setPlanCreateEnabled()
         }
+
+        setPlanCreateEnabled()
     }
 
-    private fun setPlanCreateEnabled() {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            val enable =
-                planName.isNullOrEmpty().not() &&
-                    selectMeetingId.isNullOrEmpty().not() &&
-                    planDate != null &&
-                    planTime != null
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.setPlanCreateEnabled() {
+        val enable =
+            state.planName.isNullOrEmpty().not() &&
+                state.selectMeetingId.isNullOrEmpty().not() &&
+                state.planDate != null &&
+                state.planTime != null
 
-            setUiState(copy(enabledSubmit = enable))
-        }
+        reduce { state.copy(enabledSubmit = enable) }
     }
 
     private fun getMeetings(cursor: String? = null) {
         if (meetingsPagingJob.isActiveCheck()) return
         meetingsPagingJob =
-            viewModelScope.launch {
+            intent {
                 handleMeetingsPagingData(
-                    pagingInfo = null,
+                    pagingData = null,
                     isLoading = true,
                     cursor = cursor,
                 )
 
-                val pagingInfo =
+                val pagingData =
                     runCatching {
                         meetingRepository.getMeetings(
                             cursor = cursor ?: "",
@@ -241,202 +186,168 @@ class PlanWriteViewModel @AssistedInject constructor(
                     }.getOrNull()
 
                 handleMeetingsPagingData(
-                    pagingInfo = pagingInfo,
+                    pagingData = pagingData,
                     isLoading = false,
                     cursor = cursor,
                 )
             }
     }
 
-    private fun handleMeetingsPagingData(
-        pagingInfo: PaginationContainer<List<Meeting>>?,
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.handleMeetingsPagingData(
+        pagingData: PaginationContainer<List<Meeting>>?,
         isLoading: Boolean,
         cursor: String?,
     ) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            val selectedId = selectMeetingId
-            val result =
-                PagingHelper.handlePagingResult(
-                    pagingData = pagingInfo,
-                    isLoading = isLoading,
-                    currentPagingInfo = meetingsPagingInfo,
-                    currentItems = meetings,
-                    isInitialLoad = cursor == null,
-                    transform = { items ->
-                        items.map { meeting ->
-                            MeetingUiModel(meeting = meeting, isSelected = meeting.id == selectedId)
-                        }
-                    },
-                )
+        val selectedId = state.selectMeetingId
+        val result =
+            PagingHelper.handlePagingResult(
+                pagingData = pagingData,
+                isLoading = isLoading,
+                currentPagingInfo = state.meetingsPagingInfo,
+                currentItems = state.meetings,
+                isInitialLoad = cursor == null,
+                transform = { items ->
+                    items.map { meeting ->
+                        MeetingUiModel(meeting = meeting, isSelected = meeting.id == selectedId)
+                    }
+                },
+            )
 
-            setUiState(
-                copy(
-                    meetingsPagingInfo = result.pagingInfo,
-                    meetings = result.items,
-                ),
+        reduce {
+            state.copy(
+                meetingsPagingInfo = result.pagingInfo,
+                meetings = result.items,
             )
         }
     }
 
-    private fun getSearchPlace(
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.getSearchPlace(
         keyword: String,
         x: String,
         y: String,
     ) {
-        viewModelScope.launch {
-            uiState.checkState<PlanWriteUiState.PlanWrite> {
-                val trimKeyword = keyword.trim()
+        val trimKeyword = keyword.trim()
 
-                if (trimKeyword == searchKeyword) return@launch setUiState(copy(isShowMapSearchScreen = true))
+        // 같은 키워드면 재검색 없이 검색 화면만 다시 띄운다.
+        if (trimKeyword == state.searchKeyword) {
+            reduce { state.copy(isShowMapSearchScreen = true) }
+            return
+        }
 
-                planRepository
-                    .getSearchPlace(trimKeyword, x, y)
-                    .asResult()
-                    .onEach { setLoading(it is Result.Loading) }
-                    .collect { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                return@collect
-                            }
+        setLoading(true)
 
-                            is Result.Success -> {
-                                setUiState(
-                                    copy(
-                                        searchKeyword = trimKeyword,
-                                        isShowMapSearchScreen = true,
-                                        searchPlaces = result.data.filter { it.roadAddress.isNotEmpty() }.distinctBy { it.roadAddress },
-                                    ),
-                                )
-                            }
+        try {
+            val places =
+                planRepository.getSearchPlace(
+                    keyword = trimKeyword,
+                    xPoint = x,
+                    yPoint = y,
+                )
 
-                            is Result.Error -> {
-                                when (result.exception) {
-                                    is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                    is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                                }
-                            }
-                        }
-                    }
+            reduce {
+                state.copy(
+                    searchKeyword = trimKeyword,
+                    isShowMapSearchScreen = true,
+                    searchPlaces = places.filter { it.roadAddress.isNotEmpty() }.distinctBy { it.roadAddress },
+                )
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun setPlan() {
-        viewModelScope.launch {
-            uiState.checkState<PlanWriteUiState.PlanWrite> {
-                val planTime = requireNotNull(planDate).withHour(requireNotNull(planTime).hour).withMinute(planTime.minute)
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.setPlan() {
+        val planId = state.planId
+        val selectedDate = requireNotNull(state.planDate)
+        val selectedTime = requireNotNull(state.planTime)
+        val planTime = selectedDate.withHour(selectedTime.hour).withMinute(selectedTime.minute)
 
-                if (requireNotNull(planTime).isBefore(ZonedDateTime.now())) {
-                    setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.PlanWriteTimeErrorMessage))
-                    return@launch
-                }
+        if (planTime.isBefore(ZonedDateTime.now())) {
+            postSideEffect(PlanWriteSideEffect.ShowToastMessage(ToastMessage.PlanWriteTimeErrorMessage))
+            return
+        }
 
+        setLoading(true)
+
+        try {
+            val plan =
                 if (planId.isNullOrEmpty()) {
-                    planRepository
-                        .createPlan(
-                            meetingId = requireNotNull(selectMeetingId),
-                            planName = requireNotNull(planName),
-                            planTime = planTime.parseDateString(),
-                            planAddress = planLoadAddress,
-                            planWeatherAddress = planWeatherAddress,
-                            planDescription = planDescription,
-                            title = planPlaceName ?: "",
-                            longitude = planLongitude,
-                            latitude = planLatitude,
-                        )
+                    planRepository.createPlan(
+                        meetingId = requireNotNull(state.selectMeetingId),
+                        planName = requireNotNull(state.planName),
+                        planTime = planTime.parseDateString(),
+                        planAddress = state.planLoadAddress,
+                        planWeatherAddress = state.planWeatherAddress,
+                        planDescription = state.planDescription,
+                        title = state.planPlaceName ?: "",
+                        longitude = state.planLongitude,
+                        latitude = state.planLatitude,
+                    )
                 } else {
-                    planRepository
-                        .updatePlan(
-                            planId = planId,
-                            planName = requireNotNull(planName),
-                            planTime = planTime.parseDateString(),
-                            planAddress = planLoadAddress,
-                            planWeatherAddress = planWeatherAddress,
-                            planDescription = planDescription,
-                            title = planPlaceName ?: "",
-                            longitude = planLongitude,
-                            latitude = planLatitude,
-                        )
-                }.asResult().onEach { setLoading(it is Result.Loading) }.collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            return@collect
-                        }
-
-                        is Result.Success -> {
-                            if (planId.isNullOrEmpty()) {
-                                planEventBus.send(PlanAction.PlanCreate(planItem = result.data.asPlanItem()))
-                            } else {
-                                planEventBus.send(PlanAction.PlanUpdate(planItem = result.data.asPlanItem()))
-                            }
-                            setUiEvent(PlanWriteUiEvent.NavigateToBack)
-                        }
-
-                        is Result.Error -> {
-                            when (result.exception) {
-                                is IOException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.NetworkErrorMessage))
-                                is NetworkException -> setUiEvent(PlanWriteUiEvent.ShowToastMessage(ToastMessage.ServerErrorMessage))
-                            }
-                        }
-                    }
+                    planRepository.updatePlan(
+                        planId = planId,
+                        planName = requireNotNull(state.planName),
+                        planTime = planTime.parseDateString(),
+                        planAddress = state.planLoadAddress,
+                        planWeatherAddress = state.planWeatherAddress,
+                        planDescription = state.planDescription,
+                        title = state.planPlaceName ?: "",
+                        longitude = state.planLongitude,
+                        latitude = state.planLatitude,
+                    )
                 }
+
+            if (planId.isNullOrEmpty()) {
+                planEventBus.send(PlanAction.PlanCreate(planItem = plan.asPlanItem()))
+            } else {
+                planEventBus.send(PlanAction.PlanUpdate(planItem = plan.asPlanItem()))
             }
+
+            postSideEffect(PlanWriteSideEffect.NavigateToBack)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            showErrorToast(e)
+        } finally {
+            setLoading(false)
         }
     }
 
-    private fun showDatePickerDialog(isShow: Boolean) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(copy(isShowDatePickerDialog = isShow))
-        }
-    }
-
-    private fun showTimePickerDialog(isShow: Boolean) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(copy(isShowTimePickerDialog = isShow))
-        }
-    }
-
-    private fun showPlaceInfoDialog(isShow: Boolean) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(copy(isShowPlaceInfoDialog = isShow))
-        }
-    }
-
-    private fun showPlaceMapScreen(isShow: Boolean) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(
-                copy(
-                    isShowMapScreen = isShow,
-                    isShowMapSearchScreen = isShow,
-                    searchKeyword = null,
-                    selectedPlace = null,
-                    searchPlaces = emptyList(),
-                ),
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.showPlaceMapScreen(isShow: Boolean) {
+        reduce {
+            state.copy(
+                isShowMapScreen = isShow,
+                isShowMapSearchScreen = isShow,
+                searchKeyword = null,
+                selectedPlace = null,
+                searchPlaces = emptyList(),
             )
         }
     }
 
-    private fun showMeetingsDialog(isShow: Boolean) {
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            setUiState(copy(isShowMeetingDialog = isShow))
-            if (isShow && meetings.isEmpty()) {
-                getMeetings()
-            }
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.showMeetingsDialog(isShow: Boolean) {
+        reduce { state.copy(isShowMeetingDialog = isShow) }
+
+        if (isShow && state.meetings.isEmpty()) {
+            getMeetings()
         }
     }
 
-    private fun navigateToBack() {
-        if (uiState.value !is PlanWriteUiState.PlanWrite) {
-            return setUiEvent(PlanWriteUiEvent.NavigateToBack)
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.navigateToBack() {
+        if (state.isShowMapScreen) {
+            showPlaceMapScreen(false)
+        } else {
+            postSideEffect(PlanWriteSideEffect.NavigateToBack)
         }
+    }
 
-        uiState.checkState<PlanWriteUiState.PlanWrite> {
-            if (isShowMapScreen) {
-                showPlaceMapScreen(false)
-            } else {
-                setUiEvent(PlanWriteUiEvent.NavigateToBack)
-            }
-        }
+    private suspend fun Syntax<PlanWriteState, PlanWriteSideEffect>.showErrorToast(exception: Throwable) {
+        val message = if (exception is IOException) ToastMessage.NetworkErrorMessage else ToastMessage.ServerErrorMessage
+        postSideEffect(PlanWriteSideEffect.ShowToastMessage(message))
     }
 
     @AssistedFactory
@@ -445,102 +356,22 @@ class PlanWriteViewModel @AssistedInject constructor(
     }
 }
 
-sealed interface PlanWriteUiState : UiState {
-    data class PlanWrite(
-        val planId: String? = null,
-        val planName: String? = null,
-        val planDescription: String? = null,
-        val planDate: ZonedDateTime? = null,
-        val planTime: ZonedDateTime? = null,
-        val planLoadAddress: String? = null,
-        val planWeatherAddress: String? = null,
-        val planPlaceName: String? = null,
-        val planLongitude: Double? = null,
-        val planLatitude: Double? = null,
-        val selectMeetingId: String? = null,
-        val selectMeetingName: String? = null,
-        val selectedPlace: Place? = null,
-        val meetings: List<MeetingUiModel> = emptyList(),
-        val meetingsPagingInfo: PagingUiState = PagingUiState(),
-        val searchKeyword: String? = null,
-        val searchPlaces: List<Place> = emptyList(),
-        val isShowDatePickerDialog: Boolean = false,
-        val isShowTimePickerDialog: Boolean = false,
-        val isShowMeetingDialog: Boolean = false,
-        val isShowPlaceInfoDialog: Boolean = true,
-        val isShowMapScreen: Boolean = false,
-        val isShowMapSearchScreen: Boolean = true,
-        val enableMeetingSelected: Boolean = true,
-        val enabledSubmit: Boolean = false,
-    ) : PlanWriteUiState
-}
-
-sealed interface PlanWriteUiAction : UiAction {
-    data object OnClickBack : PlanWriteUiAction
-
-    data object OnClickPlanWrite : PlanWriteUiAction
-
-    data object OnLoadNextMeetingsPage : PlanWriteUiAction
-
-    data class OnClickPlanPlaceSearch(
-        val keyword: String,
-        val xPoint: String,
-        val yPoint: String,
-    ) : PlanWriteUiAction
-
-    data class OnClickSearchPlace(
-        val place: Place,
-    ) : PlanWriteUiAction
-
-    data class OnClickPlanPlace(
-        val place: Place,
-    ) : PlanWriteUiAction
-
-    data class OnClickPlanMeeting(
-        val meeting: Meeting,
-    ) : PlanWriteUiAction
-
-    data class OnClickPlanDate(
-        val date: ZonedDateTime,
-    ) : PlanWriteUiAction
-
-    data class OnClickPlanTime(
-        val date: ZonedDateTime,
-    ) : PlanWriteUiAction
-
-    data class OnShowMeetingsDialog(
-        val isShow: Boolean,
-    ) : PlanWriteUiAction
-
-    data class OnShowDatePickerDialog(
-        val isShow: Boolean,
-    ) : PlanWriteUiAction
-
-    data class OnShowTimePickerDialog(
-        val isShow: Boolean,
-    ) : PlanWriteUiAction
-
-    data class OnShowPlaceInfoDialog(
-        val isShow: Boolean,
-    ) : PlanWriteUiAction
-
-    data class OnShowPlaceMapScreen(
-        val isShow: Boolean,
-    ) : PlanWriteUiAction
-
-    data class OnChangePlanName(
-        val name: String,
-    ) : PlanWriteUiAction
-
-    data class OnChangePlanDescription(
-        val description: String,
-    ) : PlanWriteUiAction
-}
-
-sealed interface PlanWriteUiEvent : UiEvent {
-    data object NavigateToBack : PlanWriteUiEvent
-
-    data class ShowToastMessage(
-        val message: ToastMessage,
-    ) : PlanWriteUiEvent
-}
+private fun DetailRoute.PlanWrite.asState() =
+    planItem?.let { plan ->
+        PlanWriteState(
+            planId = plan.postId,
+            planName = plan.planName,
+            planDate = plan.planAt,
+            planTime = plan.planAt,
+            planLoadAddress = plan.loadAddress,
+            planWeatherAddress = plan.weatherAddress,
+            planPlaceName = plan.planName,
+            planDescription = plan.description,
+            planLongitude = plan.longitude,
+            planLatitude = plan.latitude,
+            selectMeetingId = plan.meetingId,
+            selectMeetingName = plan.meetingName,
+            enableMeetingSelected = false,
+            enabledSubmit = plan.postId.isNotEmpty(),
+        )
+    } ?: PlanWriteState()

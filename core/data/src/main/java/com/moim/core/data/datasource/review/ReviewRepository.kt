@@ -3,7 +3,6 @@ package com.moim.core.data.datasource.review
 import com.moim.core.common.model.PaginationContainer
 import com.moim.core.common.model.Review
 import com.moim.core.common.model.User
-import kotlinx.coroutines.flow.Flow
 
 interface ReviewRepository {
     suspend fun getReviews(
@@ -12,9 +11,9 @@ interface ReviewRepository {
         size: Int,
     ): PaginationContainer<List<Review>>
 
-    fun getReview(reviewId: String): Flow<Review>
+    suspend fun getReview(reviewId: String): Review
 
-    fun getReviewForPostId(postId: String): Flow<Review>
+    suspend fun getReviewForPostId(postId: String): Review
 
     suspend fun getReviewParticipants(
         reviewId: String,
@@ -22,17 +21,17 @@ interface ReviewRepository {
         size: Int,
     ): PaginationContainer<List<User>>
 
-    fun deleteReviewImage(
+    suspend fun deleteReviewImage(
         reviewId: String,
         images: List<String>,
-    ): Flow<Unit>
+    )
 
-    fun deleteReview(reviewId: String): Flow<Unit>
+    suspend fun deleteReview(reviewId: String)
 
-    fun reportReview(reviewId: String): Flow<Unit>
+    suspend fun reportReview(reviewId: String)
 
-    fun updateReviewImages(
+    suspend fun updateReviewImages(
         reviewId: String,
         uploadImages: List<String>,
-    ): Flow<Unit>
+    )
 }

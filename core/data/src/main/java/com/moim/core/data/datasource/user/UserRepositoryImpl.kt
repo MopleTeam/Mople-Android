@@ -3,59 +3,48 @@ package com.moim.core.data.datasource.user
 import com.moim.core.common.model.Theme
 import com.moim.core.common.model.User
 import com.moim.core.common.util.JsonUtil.jsonOf
-import com.moim.core.data.util.catchFlow
 import com.moim.core.local.PreferenceStorage
 import com.moim.core.remote.datasource.image.ImageUploadRemoteDataSource
+import com.moim.core.remote.datasource.user.UserRemoteDataSource
 import com.moim.core.remote.model.asItem
-import com.moim.core.remote.service.UserApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 internal class UserRepositoryImpl @Inject constructor(
-    private val userApi: UserApi,
+    private val userRemoteDataSource: UserRemoteDataSource,
     private val imageUploadRemoteDataSource: ImageUploadRemoteDataSource,
     private val preferenceStorage: PreferenceStorage,
 ) : UserRepository {
     override fun getUser(): Flow<User> =
         preferenceStorage.user
-            .onEach { if (it == null) fetchUser().first() }
+            .onEach { if (it == null) fetchUser() }
             .filterNotNull()
 
-    override fun fetchUser(): Flow<User> =
-        catchFlow {
-            emit(userApi.getUser().asItem().also { preferenceStorage.saveUser(it) })
-        }
+    override suspend fun fetchUser(): User = userRemoteDataSource.getUser().asItem().also { preferenceStorage.saveUser(it) }
 
-    override fun updateUser(
+    override suspend fun updateUser(
         profileUrl: String?,
         nickname: String,
-    ): Flow<User> =
-        catchFlow {
-            val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(url = profileUrl, folderName = "profile")
-            emit(
-                userApi
-                    .updateUser(
-                        jsonOf(
-                            KEY_IMAGE to uploadImageUrl,
-                            KEY_NICKNAME to nickname,
-                        ),
-                    ).asItem()
-                    .also { preferenceStorage.saveUser(it) },
-            )
-        }
+    ): User {
+        val uploadImageUrl = imageUploadRemoteDataSource.uploadImage(url = profileUrl, folderName = "profile")
 
-    override fun deleteUser() =
-        catchFlow {
-            emit(userApi.deleteUser())
-        }
+        return userRemoteDataSource
+            .updateUser(
+                jsonOf(
+                    KEY_IMAGE to uploadImageUrl,
+                    KEY_NICKNAME to nickname,
+                ),
+            ).asItem()
+            .also { preferenceStorage.saveUser(it) }
+    }
 
-    override fun checkedNickname(nickname: String) =
-        catchFlow {
-            emit(userApi.checkedNickname(nickname))
-        }
+    override suspend fun deleteUser() {
+        userRemoteDataSource.deleteUser()
+    }
+
+    override suspend fun checkedNickname(nickname: String): Boolean = userRemoteDataSource.checkedNickname(nickname)
 
     override fun getTheme(): Flow<Theme> = preferenceStorage.getTheme()
 

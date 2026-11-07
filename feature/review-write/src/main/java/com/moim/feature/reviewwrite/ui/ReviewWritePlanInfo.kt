@@ -29,13 +29,13 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.reviewwrite.ReviewWriteUiAction
+import com.moim.feature.reviewwrite.model.ReviewWriteIntent
 
 @Composable
 fun ReviewWritePlanInfo(
     modifier: Modifier = Modifier,
     review: Review,
-    onUiAction: (ReviewWriteUiAction) -> Unit = {},
+    onIntent: (ReviewWriteIntent) -> Unit = {},
 ) {
     Column(
         modifier =
@@ -83,7 +83,7 @@ fun ReviewWritePlanInfo(
             endIconRes = R.drawable.ic_next,
             enable = true,
             text = stringResource(R.string.unit_participants_count, review.memberCount),
-            onClick = { onUiAction(ReviewWriteUiAction.OnClickParticipants) },
+            onClick = { onIntent(ReviewWriteIntent.ParticipantsClick) },
         )
         PlanInfoItem(
             modifier = Modifier.padding(vertical = 4.dp),

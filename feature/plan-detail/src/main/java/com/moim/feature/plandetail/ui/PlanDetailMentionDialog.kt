@@ -29,13 +29,13 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.NetworkImage
 import com.moim.core.designsystem.component.onSingleClick
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.feature.plandetail.PlanDetailUiAction
+import com.moim.feature.plandetail.model.PlanDetailIntent
 
 @Composable
 fun PlanDetailMentionDialog(
     modifier: Modifier = Modifier,
     userList: List<User>,
-    onUiAction: (PlanDetailUiAction) -> Unit = {},
+    onIntent: (PlanDetailIntent) -> Unit = {},
 ) {
     Column(
         modifier =
@@ -57,7 +57,7 @@ fun PlanDetailMentionDialog(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .onSingleClick { onUiAction(PlanDetailUiAction.OnClickMentionUser(user)) }
+                            .onSingleClick { onIntent(PlanDetailIntent.MentionUserClick(user)) }
                             .padding(vertical = 8.dp, horizontal = 24.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -111,7 +111,7 @@ private fun PlanDetailMentionDialogPreview() {
         ) {
             PlanDetailMentionDialog(
                 userList = sample,
-                onUiAction = {},
+                onIntent = {},
             )
         }
     }

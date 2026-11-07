@@ -16,18 +16,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moim.core.analytics.TrackScreenViewEvent
 import com.moim.core.designsystem.R
 import com.moim.core.designsystem.ThemePreviews
 import com.moim.core.designsystem.component.MoimAlertDialog
 import com.moim.core.designsystem.component.containerScreen
 import com.moim.core.designsystem.theme.MoimTheme
-import com.moim.core.ui.view.ObserveAsEvents
 import com.moim.core.ui.view.showToast
+import com.moim.feature.intro.screen.splash.model.SplashIntent
+import com.moim.feature.intro.screen.splash.model.SplashSideEffect
+import com.moim.feature.intro.screen.splash.model.SplashState
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun SplashRoute(
@@ -35,24 +37,24 @@ fun SplashRoute(
     navigateToSignIn: () -> Unit,
     navigateToMain: () -> Unit,
 ) {
-    val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val splashUiState by viewModel.collectAsState()
     val activity = LocalContext.current as Activity
 
-    ObserveAsEvents(viewModel.uiEvent) { event ->
-        when (event) {
-            is SplashUiEvent.NavigateToSignIn -> {
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is SplashSideEffect.NavigateToSignIn -> {
                 navigateToSignIn()
             }
 
-            is SplashUiEvent.NavigateToMain -> {
+            is SplashSideEffect.NavigateToMain -> {
                 navigateToMain()
             }
 
-            is SplashUiEvent.NavigateToExit -> {
+            is SplashSideEffect.NavigateToExit -> {
                 activity.finish()
             }
 
-            is SplashUiEvent.NavigateToPlayStore -> {
+            is SplashSideEffect.NavigateToPlayStore -> {
                 val packageName = activity.packageName.replace(".dev", "")
                 try {
                     activity.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$packageName".toUri()))
@@ -66,20 +68,16 @@ fun SplashRoute(
 
     BackHandler {}
 
-    when (val uiState = splashUiState) {
-        is SplashUiState.Splash -> {
-            SplashScreen(
-                uiState = uiState,
-                onUiAction = viewModel::onUiAction,
-            )
-        }
-    }
+    SplashScreen(
+        uiState = splashUiState,
+        onIntent = viewModel::onIntent,
+    )
 }
 
 @Composable
 private fun SplashScreen(
-    uiState: SplashUiState.Splash,
-    onUiAction: (SplashUiAction) -> Unit,
+    uiState: SplashState,
+    onIntent: (SplashIntent) -> Unit,
 ) {
     TrackScreenViewEvent(screenName = "splash")
 
@@ -111,7 +109,7 @@ private fun SplashScreen(
             isNegative = false,
             cancelable = false,
             positiveText = stringResource(R.string.common_confirm),
-            onClickPositive = { onUiAction(SplashUiAction.OnClickExit) },
+            onClickPositive = { onIntent(SplashIntent.ExitClick) },
         )
     }
 
@@ -122,7 +120,7 @@ private fun SplashScreen(
             isNegative = false,
             cancelable = false,
             positiveText = stringResource(R.string.common_confirm),
-            onClickPositive = { onUiAction(SplashUiAction.OnClickForceUpdate) },
+            onClickPositive = { onIntent(SplashIntent.ForceUpdateClick) },
         )
     }
 }
@@ -131,7 +129,7 @@ private fun SplashScreen(
 @Composable
 private fun SplashScreenPreview() {
     SplashScreen(
-        uiState = SplashUiState.Splash(isShowForceUpdateDialog = true),
-        onUiAction = {},
+        uiState = SplashState(isShowForceUpdateDialog = true),
+        onIntent = {},
     )
 }

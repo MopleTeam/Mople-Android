@@ -34,8 +34,8 @@ import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.component.MoimTextField
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimTextFieldColors
-import com.moim.feature.plandetail.OnPlanDetailUiAction
-import com.moim.feature.plandetail.PlanDetailUiAction
+import com.moim.feature.plandetail.OnPlanDetailIntent
+import com.moim.feature.plandetail.model.PlanDetailIntent
 
 @Composable
 fun PlanDetailBottomBar(
@@ -43,7 +43,7 @@ fun PlanDetailBottomBar(
     updateComment: Comment? = null,
     commentState: TextFieldState = TextFieldState(),
     selectedMentions: List<User>,
-    onUiAction: OnPlanDetailUiAction = {},
+    onIntent: OnPlanDetailIntent = {},
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -56,7 +56,7 @@ fun PlanDetailBottomBar(
 
     LaunchedEffect(commentState.text) {
         if (commentState.text.isEmpty()) {
-            onUiAction(PlanDetailUiAction.OnShowMentionDialog(null))
+            onIntent(PlanDetailIntent.MentionDialogShow(null))
             return@LaunchedEffect
         }
 
@@ -65,9 +65,9 @@ fun PlanDetailBottomBar(
 
         if (lastAtIndex != -1) {
             val mentionText = textUntilCursor.substring(lastAtIndex + 1)
-            onUiAction(PlanDetailUiAction.OnShowMentionDialog(mentionText))
+            onIntent(PlanDetailIntent.MentionDialogShow(mentionText))
         } else {
-            onUiAction(PlanDetailUiAction.OnShowMentionDialog(null))
+            onIntent(PlanDetailIntent.MentionDialogShow(null))
         }
     }
 
@@ -134,7 +134,7 @@ fun PlanDetailBottomBar(
                 onClick = {
                     keyboardController?.hide()
                     focusManager.clearFocus()
-                    onUiAction(PlanDetailUiAction.OnClickCommentUpload(updateComment))
+                    onIntent(PlanDetailIntent.CommentUploadClick(updateComment))
                 },
             )
         }

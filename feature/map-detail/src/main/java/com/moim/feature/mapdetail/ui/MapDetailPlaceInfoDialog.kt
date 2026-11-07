@@ -20,7 +20,7 @@ import com.moim.core.designsystem.component.MoimPrimaryButton
 import com.moim.core.designsystem.component.MoimText
 import com.moim.core.designsystem.theme.MoimTheme
 import com.moim.core.designsystem.theme.moimButtomColors
-import com.moim.feature.mapdetail.MapDetailUiAction
+import com.moim.feature.mapdetail.model.MapDetailIntent
 import kotlinx.coroutines.launch
 
 @Composable
@@ -28,9 +28,9 @@ fun MapDetailPlaceInfoDialog(
     modifier: Modifier = Modifier,
     placeName: String,
     address: String,
-    onUiAction: (MapDetailUiAction) -> Unit,
+    onIntent: (MapDetailIntent) -> Unit,
 ) {
-    val dismissAction = MapDetailUiAction.OnShowPlaceInfoDialog(false)
+    val dismissIntent = MapDetailIntent.PlaceInfoDialogShow(false)
     val sheetState: SheetState = rememberModalBottomSheetState(true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -39,7 +39,7 @@ fun MapDetailPlaceInfoDialog(
         onDismiss = {
             coroutineScope
                 .launch { sheetState.hide() }
-                .invokeOnCompletion { onUiAction(dismissAction) }
+                .invokeOnCompletion { onIntent(dismissIntent) }
         },
     ) {
         Column(
@@ -73,8 +73,8 @@ fun MapDetailPlaceInfoDialog(
                         contentColor = MoimTheme.colors.text.text01,
                     ),
                 onClick = {
-                    onUiAction(MapDetailUiAction.OnShowMapAppDialog(true))
-                    onUiAction(dismissAction)
+                    onIntent(MapDetailIntent.MapAppDialogShow(true))
+                    onIntent(dismissIntent)
                 },
             ) {
                 Text(
