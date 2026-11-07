@@ -24,7 +24,7 @@ androidPlayServicesLocation = "21.4.0"
 kotlin = "2.4.21"
 kotlinxCoroutines = "1.11.0"
 kotlinxSerializationJson = "1.12.0"
-ksp = "2.3.13"
+ksp = "2.3.5" # 2.3.13: Assisted @HiltViewModel 미등록 크래시
 
 # Firebase
 firebaseBom = "35.1.0"
