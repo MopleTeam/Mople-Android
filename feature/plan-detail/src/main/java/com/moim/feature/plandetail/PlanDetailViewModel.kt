@@ -153,6 +153,10 @@ class PlanDetailViewModel @AssistedInject constructor(
                     navigateToMapDetail()
                 }
 
+                is PlanDetailIntent.MapSnapshotLoaded -> {
+                    reduce { state.copy(mapSnapshot = intent.snapshot) }
+                }
+
                 is PlanDetailIntent.CommentLikeClick -> {
                     setLikeComment(intent.comment)
                 }

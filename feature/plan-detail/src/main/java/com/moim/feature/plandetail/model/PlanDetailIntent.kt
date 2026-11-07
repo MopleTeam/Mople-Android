@@ -21,6 +21,10 @@ sealed interface PlanDetailIntent : Intent {
 
     data object NextCommentsPageLoad : PlanDetailIntent
 
+    data class MapSnapshotLoaded(
+        val snapshot: PlanMapSnapshot,
+    ) : PlanDetailIntent
+
     data class PlanApplyClick(
         val isApply: Boolean,
     ) : PlanDetailIntent

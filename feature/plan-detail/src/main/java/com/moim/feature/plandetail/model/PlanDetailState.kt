@@ -2,6 +2,7 @@ package com.moim.feature.plandetail.model
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.graphics.ImageBitmap
 import com.moim.core.common.model.Comment
 import com.moim.core.common.model.User
 import com.moim.core.common.model.item.CommentUiModel
@@ -30,6 +31,7 @@ data class PlanDetailState(
     val isShowCommentEditDialog: Boolean = false,
     val isShowCommentReportDialog: Boolean = false,
     val isShowMentionDialog: Boolean = false,
+    val mapSnapshot: PlanMapSnapshot? = null,
 ) {
     val isSuccess
         get() = planItem is Result.Success
@@ -40,3 +42,10 @@ data class PlanDetailState(
     val isLoading
         get() = planItem is Result.Loading
 }
+
+// 좌표가 바뀌면 무효가 되도록 촬영 좌표와 함께 보관
+data class PlanMapSnapshot(
+    val bitmap: ImageBitmap,
+    val latitude: Double,
+    val longitude: Double,
+)

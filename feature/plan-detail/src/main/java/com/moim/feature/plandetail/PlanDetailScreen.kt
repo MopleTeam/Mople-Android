@@ -46,6 +46,7 @@ import com.moim.core.ui.view.showToast
 import com.moim.feature.plandetail.model.PlanDetailIntent
 import com.moim.feature.plandetail.model.PlanDetailSideEffect
 import com.moim.feature.plandetail.model.PlanDetailState
+import com.moim.feature.plandetail.model.PlanMapSnapshot
 import com.moim.feature.plandetail.ui.PlanDetailBottomBar
 import com.moim.feature.plandetail.ui.PlanDetailCommentEditDialog
 import com.moim.feature.plandetail.ui.PlanDetailCommentHeader
@@ -193,6 +194,10 @@ fun PlanDetailScreen(
     val comments = uiState.comments
     val pagingInfo = uiState.commentsPagingInfo
     val listState = rememberLazyListState()
+    val mapSnapshot =
+        uiState.mapSnapshot
+            ?.takeIf { it.latitude == planItem.latitude && it.longitude == planItem.longitude }
+            ?.bitmap
 
     PaginationEffect(
         listState = listState,
@@ -229,6 +234,14 @@ fun PlanDetailScreen(
                             isMyPlan = uiState.user.userId == planItem.userId,
                             planItem = planItem,
                             isShowApplyButton = uiState.isShowApplyButton,
+                            mapSnapshot = mapSnapshot,
+                            onMapSnapshot = { bitmap ->
+                                onIntent(
+                                    PlanDetailIntent.MapSnapshotLoaded(
+                                        PlanMapSnapshot(bitmap, planItem.latitude, planItem.longitude),
+                                    ),
+                                )
+                            },
                             onIntent = onIntent,
                         )
                     }

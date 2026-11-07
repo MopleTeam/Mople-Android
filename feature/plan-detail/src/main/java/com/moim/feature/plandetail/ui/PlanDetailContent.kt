@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,6 +45,8 @@ fun PlanDetailContent(
     isMyPlan: Boolean,
     planItem: PlanItem,
     isShowApplyButton: Boolean,
+    mapSnapshot: ImageBitmap? = null,
+    onMapSnapshot: (ImageBitmap) -> Unit = {},
     onIntent: OnPlanDetailIntent = {},
 ) {
     Column(
@@ -121,6 +124,8 @@ fun PlanDetailContent(
             PlanDetailMapContent(
                 latitude = planItem.latitude,
                 longitude = planItem.longitude,
+                snapshot = mapSnapshot,
+                onSnapshot = onMapSnapshot,
                 onIntent = onIntent,
             )
         } else if (isMyPlan && planItem.isPlanAtBefore) {
